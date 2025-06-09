@@ -44,6 +44,8 @@ void CheckDatabase(lv_event_t * e)
 }
 
 
+
+
 // create a directory structure per NS degree and EW degree
 // in theory 64800 files to store
 // ./N/N<digit/10>/<digit%10>/E<digit/10>/<digit%10>
@@ -55,6 +57,12 @@ void CheckDatabase(lv_event_t * e)
 void BuildDatabaseFromSD(void)
 { uint16_t timeout = 5;
   char content[128];
+
+  if(strcmp(SecretCode, "GLOBE") != 0)
+  { lv_scr_load(ui_PasswordScreen);
+    bCheckDatabase = false;
+    return;
+  }
 
   Serial.printf("CheckDatabase clicked from SetupScreen\n");
   lv_scr_load(ui_DatabaseScreen);
@@ -259,6 +267,38 @@ void CreateAllDirInPath(fs::FS &fs, char *path)
     // Serial.printf("*s = %d\n", (int)*s);
   }
 }      
+
+// handle the OLEGB buttons for secret code
+void click1(lv_event_t * e)
+{ strncpy(SecretCode, &SecretCode[1], 5); 
+  SecretCode[4] = 'O';
+  Serial.println(SecretCode);
+}
+void click2(lv_event_t * e)
+{ strncpy(SecretCode, &SecretCode[1], 5); 
+  SecretCode[4] = 'L';
+  Serial.println(SecretCode);
+}
+void click3(lv_event_t * e)
+{ strncpy(SecretCode, &SecretCode[1], 5); 
+  SecretCode[4] = 'E';
+  Serial.println(SecretCode);
+}
+void click4(lv_event_t * e)
+{ strncpy(SecretCode, &SecretCode[1], 5); 
+  SecretCode[4] = 'G';
+  Serial.println(SecretCode);
+}
+void click5(lv_event_t * e)
+{ strncpy(SecretCode, &SecretCode[1], 5); 
+  SecretCode[4] = 'B';
+  Serial.println(SecretCode);
+}
+
+void expertmode(lv_event_t * e)
+{ lv_scr_load(ui_PasswordScreen);
+}
+
 
 
 

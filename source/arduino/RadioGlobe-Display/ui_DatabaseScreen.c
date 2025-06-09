@@ -45,7 +45,7 @@ void ui_DatabaseScreen_screen_init(void)
     ui_DatabaseProgress = lv_label_create(ui_DatabaseScreen);
     lv_obj_set_width(ui_DatabaseProgress, 343);
     lv_obj_set_height(ui_DatabaseProgress, 283);
-    lv_obj_set_x(ui_DatabaseProgress, 1);
+    lv_obj_set_x(ui_DatabaseProgress, 0);
     lv_obj_set_y(ui_DatabaseProgress, -10);
     lv_obj_set_align(ui_DatabaseProgress, LV_ALIGN_CENTER);
     lv_label_set_long_mode(ui_DatabaseProgress, LV_LABEL_LONG_SCROLL);

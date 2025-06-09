@@ -17,6 +17,8 @@ lv_obj_t * ui_CalibrationButton;
 lv_obj_t * ui_CalibrationButtonText;
 lv_obj_t * ui_DatabaseButton;
 lv_obj_t * ui_DatabaseButtonText;
+lv_obj_t * ui_ExpertModeButton;
+lv_obj_t * ui_ExpertModeButtonText;
 
 // event funtions
 void ui_event_HomeButton(lv_event_t * e)
@@ -46,6 +48,15 @@ void ui_event_DatabaseButton(lv_event_t * e)
     }
 }
 
+void ui_event_ExpertModeButton(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_CLICKED) {
+        expertmode(e);
+    }
+}
+
 // build funtions
 
 void ui_SetupScreen_screen_init(void)
@@ -71,7 +82,7 @@ void ui_SetupScreen_screen_init(void)
     lv_obj_set_width(ui_CalibrationButton, 200);
     lv_obj_set_height(ui_CalibrationButton, 50);
     lv_obj_set_x(ui_CalibrationButton, 0);
-    lv_obj_set_y(ui_CalibrationButton, -118);
+    lv_obj_set_y(ui_CalibrationButton, -120);
     lv_obj_set_align(ui_CalibrationButton, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_CalibrationButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_CalibrationButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
@@ -84,7 +95,7 @@ void ui_SetupScreen_screen_init(void)
     lv_obj_set_width(ui_CalibrationButtonText, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_CalibrationButtonText, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_CalibrationButtonText, 0);
-    lv_obj_set_y(ui_CalibrationButtonText, -117);
+    lv_obj_set_y(ui_CalibrationButtonText, -120);
     lv_obj_set_align(ui_CalibrationButtonText, LV_ALIGN_CENTER);
     lv_label_set_text(ui_CalibrationButtonText, "CALIBRATION");
     lv_obj_set_style_text_color(ui_CalibrationButtonText, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -95,7 +106,7 @@ void ui_SetupScreen_screen_init(void)
     lv_obj_set_width(ui_DatabaseButton, 200);
     lv_obj_set_height(ui_DatabaseButton, 50);
     lv_obj_set_x(ui_DatabaseButton, 0);
-    lv_obj_set_y(ui_DatabaseButton, -46);
+    lv_obj_set_y(ui_DatabaseButton, -50);
     lv_obj_set_align(ui_DatabaseButton, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_DatabaseButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_DatabaseButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
@@ -107,17 +118,42 @@ void ui_SetupScreen_screen_init(void)
     ui_DatabaseButtonText = lv_label_create(ui_SetupScreen);
     lv_obj_set_width(ui_DatabaseButtonText, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_DatabaseButtonText, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_DatabaseButtonText, 2);
-    lv_obj_set_y(ui_DatabaseButtonText, -47);
+    lv_obj_set_x(ui_DatabaseButtonText, 0);
+    lv_obj_set_y(ui_DatabaseButtonText, -50);
     lv_obj_set_align(ui_DatabaseButtonText, LV_ALIGN_CENTER);
     lv_label_set_text(ui_DatabaseButtonText, "DATABASE");
     lv_obj_set_style_text_color(ui_DatabaseButtonText, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_DatabaseButtonText, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_DatabaseButtonText, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_ExpertModeButton = lv_btn_create(ui_SetupScreen);
+    lv_obj_set_width(ui_ExpertModeButton, 200);
+    lv_obj_set_height(ui_ExpertModeButton, 50);
+    lv_obj_set_x(ui_ExpertModeButton, 1);
+    lv_obj_set_y(ui_ExpertModeButton, 20);
+    lv_obj_set_align(ui_ExpertModeButton, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_ExpertModeButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_ExpertModeButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_object_set_themeable_style_property(ui_ExpertModeButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR,
+                                           _ui_theme_color_yellow);
+    ui_object_set_themeable_style_property(ui_ExpertModeButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA,
+                                           _ui_theme_alpha_yellow);
+
+    ui_ExpertModeButtonText = lv_label_create(ui_SetupScreen);
+    lv_obj_set_width(ui_ExpertModeButtonText, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_ExpertModeButtonText, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_ExpertModeButtonText, 0);
+    lv_obj_set_y(ui_ExpertModeButtonText, 20);
+    lv_obj_set_align(ui_ExpertModeButtonText, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_ExpertModeButtonText, "EXPERTMODE");
+    lv_obj_set_style_text_color(ui_ExpertModeButtonText, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_ExpertModeButtonText, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_ExpertModeButtonText, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+
     lv_obj_add_event_cb(ui_HomeButton, ui_event_HomeButton, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_CalibrationButton, ui_event_CalibrationButton, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_DatabaseButton, ui_event_DatabaseButton, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_ExpertModeButton, ui_event_ExpertModeButton, LV_EVENT_ALL, NULL);
     uic_SetupScreen = ui_SetupScreen;
     uic_HomeButton = ui_HomeButton;
     uic_CalibrationButton = ui_CalibrationButton;
@@ -144,5 +180,7 @@ void ui_SetupScreen_screen_destroy(void)
     ui_DatabaseButton = NULL;
     uic_DatabaseButtonText = NULL;
     ui_DatabaseButtonText = NULL;
+    ui_ExpertModeButton = NULL;
+    ui_ExpertModeButtonText = NULL;
 
 }

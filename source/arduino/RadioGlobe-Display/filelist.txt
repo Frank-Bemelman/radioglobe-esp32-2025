@@ -2,6 +2,7 @@ ui_Home.c
 ui_SetupScreen.c
 ui_CalibrationScreen.c
 ui_DatabaseScreen.c
+ui_PasswordScreen.c
 ui_theme_manager.c
 ui_themes.c
 ui.c

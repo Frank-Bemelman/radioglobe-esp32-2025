@@ -39,6 +39,8 @@ void readMacAddress(){
 
 bool bTimer100ms = false;
 uint32_t GlobalTicker100mS = 0;
+char SecretCode[6] = "-----";
+
 void Driver_Loop(void *parameter)
 {
   while(1)
@@ -166,6 +168,16 @@ void loop()
          if(screen == ui_CalibrationScreen)lv_label_set_text(ui_GPS_Coordinate_Cal, content);
        }
      } 
+     else if(screen == ui_PasswordScreen)
+     { if(strcmp(SecretCode, "GLOBE")!=0)
+       { lv_label_set_recolor(ui_lockstatus, true);
+         lv_label_set_text(ui_lockstatus, "#FF0000 LOCKED#");
+       }
+       else
+       { lv_label_set_recolor(ui_lockstatus, true);
+         lv_label_set_text(ui_lockstatus, "#00FF00 UNLOCKED#");
+       }
+     }
 
      if(strcmp(PrevDataFromGlobe.TimeZoneId, DataFromGlobe.TimeZoneId) != 0)
      { strcpy(PrevDataFromGlobe.TimeZoneId, DataFromGlobe.TimeZoneId);

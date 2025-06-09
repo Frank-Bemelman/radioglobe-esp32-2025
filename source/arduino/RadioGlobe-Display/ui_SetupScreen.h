@@ -22,6 +22,9 @@ extern lv_obj_t * ui_CalibrationButtonText;
 extern void ui_event_DatabaseButton(lv_event_t * e);
 extern lv_obj_t * ui_DatabaseButton;
 extern lv_obj_t * ui_DatabaseButtonText;
+extern void ui_event_ExpertModeButton(lv_event_t * e);
+extern lv_obj_t * ui_ExpertModeButton;
+extern lv_obj_t * ui_ExpertModeButtonText;
 // CUSTOM VARIABLES
 extern lv_obj_t * uic_SetupScreen;
 extern lv_obj_t * uic_HomeButton;

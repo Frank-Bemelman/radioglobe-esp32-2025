@@ -33,6 +33,7 @@ extern "C" {
 #include "screens/ui_SetupScreen.h"
 #include "screens/ui_CalibrationScreen.h"
 #include "screens/ui_DatabaseScreen.h"
+#include "screens/ui_PasswordScreen.h"
 
 ///////////////////// VARIABLES ////////////////////
 

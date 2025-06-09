@@ -11,8 +11,14 @@ extern "C" {
 #endif
 
 void CheckDatabase(lv_event_t * e);
+void expertmode(lv_event_t * e);
 void CalibrationNextButton(lv_event_t * e);
 void CalibrationSetButton(lv_event_t * e);
+void click1(lv_event_t * e);
+void click2(lv_event_t * e);
+void click3(lv_event_t * e);
+void click4(lv_event_t * e);
+void click5(lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

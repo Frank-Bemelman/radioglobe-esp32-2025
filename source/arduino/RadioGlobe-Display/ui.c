@@ -37,6 +37,7 @@ void ui_init(void)
     ui_SetupScreen_screen_init();
     ui_CalibrationScreen_screen_init();
     ui_DatabaseScreen_screen_init();
+    ui_PasswordScreen_screen_init();
     ui____initial_actions0 = lv_obj_create(NULL);
     lv_disp_load_scr(ui_Home);
 }
@@ -47,4 +48,5 @@ void ui_destroy(void)
     ui_SetupScreen_screen_destroy();
     ui_CalibrationScreen_screen_destroy();
     ui_DatabaseScreen_screen_destroy();
+    ui_PasswordScreen_screen_destroy();
 }
