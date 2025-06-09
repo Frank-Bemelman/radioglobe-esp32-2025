@@ -23,16 +23,18 @@ remapped coordinates, it sends a radiostation url. The urls are stored on a micr
 There are two directories with source files. One for the globe and one for the display. It is all based on Arduino IDE 2.3.6 
 
 Essential hardware for the globe:
-ESP32-WROOM-32 -> https://www.aliexpress.com/item/1005006456519790.html
-MP3 decoder -> https://www.aliexpress.com/item/32893187079.html
-2x absolute encoder -> https://www.aliexpress.com/item/1005007718766639.html
+ESP32-WROOM-32 -> https://www.aliexpress.com/item/1005006456519790.html\
+MP3 decoder -> https://www.aliexpress.com/item/32893187079.html\
+2x absolute encoder -> https://www.aliexpress.com/item/1005007718766639.html\
 
 Essential hardware for the display:
-ESP32S3 Waveshare 2.1 inch LCD -> https://www.aliexpress.com/item/1005008679530480.html
-Lithium battery -> https://www.aliexpress.com/item/1005008575678945.html
-2x Magnets 10mmx2mm -> https://www.aliexpress.com/item/1005008882136145.html
-Pogo 3 pin connector -> https://www.aliexpress.com/item/1005007457425590.html
-MicroSD card -> I used a 32GB one 
+ESP32S3 Waveshare 2.1 inch LCD -> https://www.aliexpress.com/item/1005008679530480.html\
+Lithium battery -> https://www.aliexpress.com/item/1005008575678945.html\
+2x Magnets 10mmx2mm -> https://www.aliexpress.com/item/1005008882136145.html\
+Pogo 3 pin connector -> https://www.aliexpress.com/item/1005007457425590.html\
+MicroSD card -> I used a 32GB one\
+
+
 
 
 
