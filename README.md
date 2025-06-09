@@ -6,7 +6,7 @@ Not a small project, will take a lot of your time and possibly quite some frustr
 The idea of a 'Radio Globe' is not mine. I was inspired by the works of Jude Pullen. His brilliant design can be found here:
 https://github.com/DesignSparkRS/RadioGlobe
 
-Since I am more of an ESP32 guy, I decided to do a complete redesign. New design of 3d printable parts, which you find in de fusion-ed folder here.
+Since I am more of an ESP32 guy, I decided to do a complete redesign. New design of 3d printable parts, which you find in de fusion-3d folder here.
 You can use Fusion to select the body you want to print on your 3d printer. Or edit them if you wish. I am not very matured in Fusion, so the Fusion timeline is a nice mess.
 
 The globe uses two ESP32 constantly talking to each other using ESPNOW. 
