@@ -1,9 +1,4 @@
-// calibrate/recalculate coordinates from encoders
-// use the calibartion table
-// snap to nearest station
-// 
-
-#include "calibrations.h"
+// calibrate encoders
 
 
 void calibrate_globe(void)
@@ -21,46 +16,4 @@ void calibrate_globe(void)
   EEPROM.put(0x0, GlobeSettings);
   EEPROM.commit();
   Serial.println("Calibration Of The Globe done.");
-  
-  // build area_xy_table
-  for(c=0;c<32;c++)
-  { // find lb
-    area_xy_table[c].area_lb_ns = 0;
-    area_xy_table[c].area_lb_ew = 0;
-    area_xy_table[c].area_rb_ns = 0;
-    area_xy_table[c].area_rb_ew = 0;
-    area_xy_table[c].area_lt_ns = 0;
-    area_xy_table[c].area_lt_ew = 0;
-    area_xy_table[c].area_rt_ns = 0;
-    area_xy_table[c].area_rt_ew = 0;
-    if(c<8)
-    { area_xy_table[c].area_lt_ns = 900;
-      area_xy_table[c].area_rt_ns = 900;
-    }
-    if(c>23)
-    { area_xy_table[c].area_lb_ns = -900;
-      area_xy_table[c].area_rb_ns = -900;
-    }
-
-
-//    for(n=0; n<32; n++)
-//    { if(c == cal_prompts[n].area_lb)
-//      { area_xy_table[c].area_lb_ns = GlobeSettings[n].Offset0;
-//        area_xy_table[c].area_lb_ew = GlobeSettings[n].Offset1;
-//      }
-//      if(c == cal_prompts[n].area_rb)
-//      { area_xy_table[c].area_rb_ns = GlobeSettings[n].Offset0;
-//        area_xy_table[c].area_rb_ew = GlobeSettings[n].Offset1;
-//      }
-//      if(c == cal_prompts[n].area_lt)
-//      { area_xy_table[c].area_lt_ns = GlobeSettings[n].Offset0;
-//        area_xy_table[c].area_lt_ew = GlobeSettings[n].Offset1;
-//      }
-//      if(c == cal_prompts[n].area_rt)
-//      { area_xy_table[c].area_rt_ns = GlobeSettings[n].Offset0;
-//        area_xy_table[c].area_rt_ew = GlobeSettings[n].Offset1;
-//     }
-//    }
-
-  }
 }

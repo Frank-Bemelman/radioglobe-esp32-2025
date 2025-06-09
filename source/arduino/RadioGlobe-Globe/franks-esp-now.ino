@@ -43,15 +43,10 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
     }
   }
 
-//  if(strcmp(PrevDataFromDisplay.RadioUrlRequest, DataFromDisplay.RadioUrlRequest) != 0)
-//  { strcpy(PrevDataFromDisplay.RadioUrlRequest, DataFromDisplay.RadioUrlRequest);
-//  }
-
   //Serial.print("Bytes received: ");
   //Serial.println(len);
   //Serial.print("Volume: ");
   //Serial.println(DataSendToRadio.volumevalue);
-
 
 }
  

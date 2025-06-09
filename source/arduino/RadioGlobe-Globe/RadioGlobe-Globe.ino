@@ -5,6 +5,7 @@
 
 
 /**
+ * CREDITS
  * @file streams-url_mp3-audiokit.ino
  * @author Phil Schatzmann
  * @brief Copy MP3 stream from url and output it on vs1053
@@ -23,7 +24,7 @@
 
  
 
-#include "frank-stations.h"
+#include "franks-stations.h"
 #define COPY_LOG_OFF
 #include "AudioTools.h"
 #include "AudioTools/AudioLibs/VS1053Stream.h"
@@ -232,11 +233,10 @@ void loop(){
       bEncoderNewPosition = true;  // force acceptance
     }
 
-    if(CalibrateZeroPos == 1234)
+    if(CalibrateZeroPos == 1234) // calibration started by display 
     { calibrate_globe();
       CalibrateZeroPos = 0;
     }
-    //loop_esp_now();
   }     
 }
 
