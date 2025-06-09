@@ -3,7 +3,7 @@ Radio Globe using ESP32 and Waveshare round touch LCD 2.1 inch
 
 Not a small project, will take a lot of your time and possibly quite some frustration along the way. Just a gentle warning.
 
-This idea of a 'Radio Globe' is not mine. I was inspired by the works of Jude Pullen. His brilliant design can be found here:
+The idea of a 'Radio Globe' is not mine. I was inspired by the works of Jude Pullen. His brilliant design can be found here:
 https://github.com/DesignSparkRS/RadioGlobe
 
 Since I am more of an ESP32 guy, I decided to do a complete redesign. New design of 3d printable parts, which you find in de fusion-ed folder here.
