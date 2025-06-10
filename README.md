@@ -1,6 +1,6 @@
 ![This is an image](images/IMG_3491.JPG)
 
-<a href="url"><img src="https://github.com/favicon.ico"](https://github.com/Frank-Bemelman/radioglobe-esp32-2025/tree/main/images/img_3491" width="200"></a>
+<a href="url"><img src="https://github.com/favicon.ico"](https://github.com/Frank-Bemelman/radioglobe-esp32-2025/tree/main/images/img_3491.jpg" width="200"></a>
 
 # radioglobe-esp32-2025
 Radio Globe using ESP32 and Waveshare round touch LCD 2.1 inch
