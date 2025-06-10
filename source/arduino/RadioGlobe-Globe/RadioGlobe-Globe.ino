@@ -153,7 +153,8 @@ void setup(){
   AudioToolsLogger.begin(Serial, AudioToolsLogLevel::Warning);  
 
   WiFi.mode(WIFI_STA);
-  WiFi.begin("WNAP10", "ALIBABA4711");
+  WiFi.begin("SSID", "PASSWORD");
+  WiFi.setSleep(false);
   Serial.print("Connecting to WiFi ..");
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print('.');
