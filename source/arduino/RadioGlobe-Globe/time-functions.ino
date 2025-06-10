@@ -92,7 +92,7 @@ void GetTimeZone(int16_t gps_ns, int16_t gps_ew)
   }
 
   
-  if(print)Serial.print("Done Google query timezone");
+  if(print)Serial.print("Done Google query timezone\n");
   
 }
 

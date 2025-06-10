@@ -39,49 +39,53 @@
 // (X)RST pin 15
 #define VS1053_RESET 12
 
-// Orientation of hardware connections ESP32-DEV module, USB pointing downwards
+// Orientation of hardware connections ESP32WROOM, USB pointing downwards
 // Left row
-//    EN 
-//    VP GPIO36 ADC RIGHTHAND/BOTTOM BUTTON ROW 1-2-3-4-5-6-7-8-9-10
-//    VN GPIO39 ADC LEFTHAND/TOP BUTTON ROW A_B-C-D-E-F-G-H-J-K
-//   D34 GPIO34 ADC CONTROL WALLBOX VOLUME UP/DN, SKIP (WALLBOX ONLY)
-//   D35 GPIO35 CANCEL BUTTON met 10K pullup naar 3V3
-//   D32 BLUE BUTTON ROCKOLA
-//   D33 ENCODER B
-//   D25 ENCODER A
-//   D26 SD_MISO
-//   D27 (GPIO27) LEDMATRIX MAX7219 CLK
-//   D14 SD_SCLK
-//   D12 (GPIO12) LEDMATRIX MAX7219 DATA
-//   D13 SD_MOSI
-//   GND
-//   VIN
-// Right row
-//   D23 (GPION23) TFT MOSI (VSPI)         (BLAUW)
-//   D22 (GPIO22)  LEDMATRIX MAX7219 CS
-//   TXO (GPIO1)
-//   RXO (GPIO3) ??? CANCEL_BUTTON
-//   D21 (GPIO21) SOLENOID
-//   D19 (GPIO19) TFT MISO (VSPI)         (WIT)
-//   D18 (GPIO18) TFT CLK (VSPI)          (PAARS) 
-//   D5  (GPIO5)  TFT CS                  (ORANJE)
-//   TX2 (GPIO17) WS2812 LED STRIP DATA
-//   RX2 (GPIO16) ENCODER BUTTON
-//   D4  (GPIO4)  TFT RESET (GEEL) 
-//   D2  (GPIO2)  TFT DC    (GROEN)
-//   D15 (GPIO15) SD CS
-//   GND
 //   3V3
+//    EN 
+//   SVP GPIO36 
+//   SVN GPIO39
+//   D34 GPIO34 
+//   D35 GPIO35 
+//   D32 BLUE BUTTON ROCKOLA
+//   D33 
+//   D25 
+//   D26 
+//   D27 
+//   D14 
+//   D12 
+//   GND
+//   D13 
+//   SD2
+//   SD3
+//   GND
+//   VIN 5V
+//
+// Right row
+//   GND
+//   D23 
+//   D22 
+//   TXO (GPIO1)
+//   RXO (GPIO3) 
+//   D21 (GPIO21)
+//   GND
+//   D19 (GPIO19)
+//   D18 (GPIO18)
+//   D5  (GPIO5) 
+//   TX2 (GPIO17)
+//   RX2 (GPIO16)
+//   D4  (GPIO4) 
+//   D2  (GPIO2) 
+//   D15 (GPIO15)
+//   SD1
+//   SD0
+//   GND
+//   CLK
 
 
-
-//URLStream url("WNAP11","Alib2161le!");  // or replace with ICYStream to get metadata
-ICYStream url("WNAP10","ALIBABA4711");  // or replace with ICYStream to get metadata
+ICYStream url("SSID","PASSWORD");  // or replace with ICYStream to get metadata
 VS1053Stream vs1053; // final output
 int16_t vs1053Volume = -1;
-
-ICYStream urlpanic("WNAP10","ALIBABA4711");  // or replace with ICYStream to get metadata
-
 
 StreamCopy copier(vs1053, url); // copy url to decoder
 
@@ -228,9 +232,12 @@ void loop(){
       DataFromGlobe.actualvolume = vs1053Volume;
     }
 
-    if(strcmp(PrevDataFromDisplay.RadioUrlRequest, DataFromDisplay.RadioUrlRequest) != 0)
+    //Serial.print("ActiveStationUrl= "); Serial.println(ActiveStationUrl);
+    //Serial.print("DataFromDisplay.RadioUrlRequest= "); Serial.println(DataFromDisplay.RadioUrlRequest);
+    if(strcmp(ActiveStationUrl, DataFromDisplay.RadioUrlRequest) != 0)
     { strcpy(PrevDataFromDisplay.RadioUrlRequest, DataFromDisplay.RadioUrlRequest);
-      bEncoderNewPosition = true;  // force acceptance
+      DataFromGlobe.FindNewStation = 0;
+      StartNewStation();
     }
 
     if(CalibrateZeroPos == 1234) // calibration started by display 
@@ -268,37 +275,20 @@ void printMetaData(MetaDataType type, const char* str, int len){
 
 
 void HandleNewGlobePosition(void)
-{ bool return_result = false;
-  if(bEncoderNewPosition)
+{ if(bEncoderNewPosition)
   { bEncoderNewPosition = false;
     vs1053.setVolume(0);
-    PrevDataFromDisplay.volumevalue = -1; // force restore volume later
+  }
+}
 
-    
-
-    // load random station from our list if no valid request from display or eeprom content
-    while((newstation = random(0,7))==oldstation);
-    oldstation = newstation;
-
-
-    Serial.print("ActiveStationUrl = "); Serial.println(ActiveStationUrl);
-    strcpy(RequestedStationUrl, DataFromDisplay.RadioUrlRequest);
-    if(strncmp(RequestedStationUrl, "http", 4) != 0)
-    { Serial.print("RequestedStationUrl from display= "); Serial.println(RequestedStationUrl);
-
-      if(strncmp(GlobeSettings.laststation, "http", 4) == 0)
-      { Serial.print("GlobeSettings.laststation = "); Serial.println(GlobeSettings.laststation);
-        strcpy(RequestedStationUrl, GlobeSettings.laststation);
-      }
-      else
-      { strcpy(RequestedStationUrl, entrys[newstation].url);
-      }
-    }
-
-    Serial.print("OK -> RequestedStationUrl = "); Serial.println(RequestedStationUrl);
-
-    if(strcmp(RequestedStationUrl, ActiveStationUrl) != 0)
-    { if(strlen(ActiveStationUrl)!=0)
+void StartNewStation(void)
+{ bool return_result = false;
+  strcpy(RequestedStationUrl, DataFromDisplay.RadioUrlRequest);
+  if(strncmp(RequestedStationUrl, "http", 4) == 0)
+  { Serial.print("RequestedStationUrl from display= "); Serial.println(RequestedStationUrl);
+    if(strcmp(RequestedStationUrl, ActiveStationUrl) != 0) // truly another station
+    { vs1053.setVolume(0);
+      if(strlen(ActiveStationUrl)!=0) // something playing?
       { Serial.print("url.end ->");
         Serial.print(ActiveStationUrl);
         url.end();
@@ -306,7 +296,6 @@ void HandleNewGlobePosition(void)
         strcpy(ActiveStationUrl, "");
         strcpy(DataFromGlobe.Name, "");
         strcpy(DataFromGlobe.Title, "");
-        strcpy(DataFromGlobe.TimeZoneId, "");
       }
       Serial.print("url.begin -> ");
       Serial.println(RequestedStationUrl);
@@ -315,12 +304,9 @@ void HandleNewGlobePosition(void)
       Serial.print(" started! with bool result: ");
       Serial.println(return_result);
       if(return_result==1)
-      { if(vs1053Volume != DataFromDisplay.volumevalue)
-        { vs1053Volume = DataFromDisplay.volumevalue;
-          if(DataFromDisplay.volumevalue==0)vs1053.setVolume(0);
-          else vs1053.setVolume(map(DataFromDisplay.volumevalue, 0, 100, 75, 100)/100.0);
-        }  
-        
+      { vs1053Volume = DataFromDisplay.volumevalue;
+        if(DataFromDisplay.volumevalue==0)vs1053.setVolume(0);
+        else vs1053.setVolume(map(DataFromDisplay.volumevalue, 0, 100, 75, 100)/100.0);
         strcpy(ActiveStationUrl, RequestedStationUrl);
         strcpy(GlobeSettings.laststation, ActiveStationUrl);
         Serial.print("Save GlobeSettings.laststation = "); Serial.println(GlobeSettings.laststation);
@@ -328,8 +314,7 @@ void HandleNewGlobePosition(void)
         EEPROM.commit();
       }
     }  
-    //GetTimeZone(NSDeg10, EWDeg10);
   }
-  //else url.begin(entrys[newstation].url,"audio/mp3");
 }
+
 

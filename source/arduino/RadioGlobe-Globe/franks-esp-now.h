@@ -15,6 +15,7 @@ typedef struct struct_message2 {
     int16_t ew;
     struct tm timeinfo;
     int16_t FindTimeZone;
+    int16_t FindNewStation;
     char Name[64];
     char Title[128];
     char TimeZoneId[32];

@@ -97,9 +97,12 @@ void ReadAS5600Encoders(void * pvParameters)
 
     if(stable)
     { if((PrevDataFromDisplay.ns_cal != DataFromDisplay.ns_cal) || (PrevDataFromDisplay.ew_cal != DataFromDisplay.ew_cal))
-      { DataFromGlobe.FindTimeZone = 1;
+      { // globe coordinates have been sent, calibrated by the display puck and returned
+        DataFromGlobe.FindTimeZone = 1;
+        DataFromGlobe.FindNewStation = 1;
       }
-    }  
+    }
+    else DataFromGlobe.FindNewStation = 0; 
 
     vTaskDelay(100 / portTICK_PERIOD_MS); // portTICK_PERIOD_MS calculates as 1 and results in 50mS delay here;-)
   }
