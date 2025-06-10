@@ -40,8 +40,6 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   memcpy(&DataFromGlobe, incomingData, sizeof(DataFromGlobe));
 
-  if(DataFromGlobe.FindTimeZone==1)FindTimeZone = 1;
-
   // todo -> recalibration of coordinates
   DataFromDisplay.ew_cal = DataFromGlobe.ew;
   DataFromDisplay.ns_cal = DataFromGlobe.ns;
@@ -56,7 +54,7 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
 void setup_esp_now() {
   
     // Set device as a Wi-Fi Station & accespoint 
-//  WiFi.begin("WNAP10", "ALIBABA4711");
+//  WiFi.begin("SSID", "PASSWORD");
   WiFi.mode(WIFI_AP_STA); // hoewel, WIFI_STA werkte ook
 
   strcpy(PrevDataFromGlobe.Name, "???");

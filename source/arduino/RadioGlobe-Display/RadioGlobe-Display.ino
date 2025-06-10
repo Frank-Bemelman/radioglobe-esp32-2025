@@ -39,7 +39,7 @@ void readMacAddress(){
 
 bool bTimer100ms = false;
 uint32_t GlobalTicker100mS = 0;
-char SecretCode[6] = "-----";
+char SecretCode[6] = "GLOBE";
 
 void Driver_Loop(void *parameter)
 {
@@ -117,7 +117,6 @@ void loop()
   static uint8_t oldhour;
   static uint8_t oldminute;
   static lv_obj_t * oldscreen;
-  static int16_t randomstation = 0;
 
   Lvgl_Loop();
 
@@ -138,22 +137,6 @@ void loop()
        PrevDataFromGlobe.ns = 99999; // force reprint
        PrevDataFromGlobe.ew = 99999; // force reprint
        Serial.println("Screen changed!");
-       switch(randomstation)
-       { case 0:
-           strcpy(DataFromDisplay.RadioUrlRequest,  "http://stream.srg-ssr.ch/m/rsj/mp3_128");
-           randomstation++;
-           break;
-         case 1:
-           strcpy(DataFromDisplay.RadioUrlRequest,  "https://icecast.omroep.nl/radio1-sb-mp3");
-           randomstation++;
-           break;           
-         case 2:
-           strcpy(DataFromDisplay.RadioUrlRequest,  "https://185.74.70.31/vocenustrale-128.mp3");
-           randomstation = 0;
-           break;
-         default:
-           break;
-       }
      }
 
      if((screen == ui_Home) || (screen == ui_CalibrationScreen)) 
@@ -226,7 +209,16 @@ void loop()
        datetime.second = DataFromGlobe.timeinfo.tm_sec;
        PCF85063_Set_All(datetime);
      }
-     
+
+     if(PrevDataFromGlobe.FindNewStation != DataFromGlobe.FindNewStation)
+     { PrevDataFromGlobe.FindNewStation = DataFromGlobe.FindNewStation;
+       if(DataFromGlobe.FindNewStation == 1)
+       { FindNewStation();
+       }  
+     }
+
+
+
 //     sprintf(content, "%c%d.%d  -  %c%d.%d", (DataFromDisplay.ns_cal<0)?'S':'N', abs(DataFromDisplay.ns_cal)/10, abs(DataFromDisplay.ns_cal)%10, 
 //                                               (DataFromDisplay.ew_cal<0)?'W':'E', abs(DataFromDisplay.ew_cal)/10, abs(DataFromDisplay.ew_cal)%10);
 //     Serial.println(content);
@@ -243,13 +235,7 @@ void loop()
         lv_label_set_text(ui_Local_Time, content);
       }
 
-     if(FindTimeZone == 1)
-     { //timetest(DataFromGlobe.ns, DataFromGlobe.ew);
-       FindTimeZone = 0;
-       
-     }
-
-     if(bCheckDatabase)BuildDatabaseFromSD();
+      if(bCheckDatabase)BuildDatabaseFromSD();
 
   }
 

@@ -15,7 +15,8 @@ typedef struct struct_message2 {
     int16_t ns;
     int16_t ew;
     struct tm timeinfo;
-    int16_t FindTimeZone;
+    int16_t FindTimeZone; // tells display that Globe is occupied finding timezone
+    int16_t FindNewStation; // tells display a new station is to be suggested for calibrated coordinates
     char Name[64];
     char Title[128];
     char TimeZoneId[32];
@@ -28,5 +29,3 @@ struct_from_display DataFromDisplay;
 // Create a struct_message to hold incoming sensor readings
 struct_from_globe DataFromGlobe;
 struct_from_globe PrevDataFromGlobe;
-
-int16_t FindTimeZone = 0;
