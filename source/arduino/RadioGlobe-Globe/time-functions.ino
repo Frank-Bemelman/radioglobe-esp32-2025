@@ -5,13 +5,14 @@
 #include "time.h" 
 
 /*
-https://maps.googleapis.com/maps/api/timezone/json?location=52.21810%2C4.54510&timestamp=1747924919&key=AIzaSyCMxt7wLf_qSib7tMZVqKqUuiiS-ohCRpg
+You have to get your own key at google cloud platform
+https://maps.googleapis.com/maps/api/timezone/json?location=52.21810%2C4.54510&timestamp=1747924919&key=YOURKEY
 */
 
 const char* ntpServer = "pool.ntp.org";
 const char gps_to_time_url[]   = "https://maps.googleapis.com/maps/api/timezone/json?location=";
 const char gps_to_time_stamp[] = "&timestamp=";
-const char gps_to_time_key[]   = "&key=AIzaSyCMxt7wLf_qSib7tMZVqKqUuiiS-ohCRpg";
+const char gps_to_time_key[]   = "YOURKEY";
 char url_timezone_google_api[250];
 
 void GetTimeZone(int16_t gps_ns, int16_t gps_ew)
