@@ -22,7 +22,6 @@
 // char PASSWORD[32] = "YOUR-WIFI-PASSWORD";
 
 
-#include "franks-stations.h"
 #define COPY_LOG_OFF
 
 //hardware vs1053 board
