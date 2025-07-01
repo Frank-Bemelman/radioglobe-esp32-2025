@@ -10,6 +10,7 @@
 #include <esp_now.h>
 #include "franks-esp-now.h"
 
+QueueOut ToGlobe; // queue with messages for display
 
 // REPLACE WITH THE MAC Address of radio esp
 // which is 94:b5:55:2b:2a:d4 (ka[pot, diode])
@@ -37,13 +38,20 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
 }
 
 // Callback when data is received
-void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
+void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) 
+{ static int16_t old_ns = -1;
+  static int16_t old_ew = -1;
+  
   memcpy(&DataFromGlobe, incomingData, sizeof(DataFromGlobe));
 
-  // todo -> recalibration of coordinates
-  DataFromDisplay.ew_cal = DataFromGlobe.ew;
-  DataFromDisplay.ns_cal = DataFromGlobe.ns;
-
+  // coordinates are received outside the queue for speed
+  // adjust these coordinates, if changed, according to calibration table
+  if(bUpAndRunning && DataFromGlobe.G_EncoderReliable)
+  { if((old_ns != DataFromGlobe.ns) || (old_ew != DataFromGlobe.ew))
+    { old_ns = DataFromGlobe.ns;
+      old_ew = DataFromGlobe.ew;
+    }
+  }
   //Serial.print("Bytes received: ");
   //Serial.println(len);
   //Serial.println(DataFromGlobe.ns);
@@ -56,11 +64,6 @@ void setup_esp_now() {
     // Set device as a Wi-Fi Station & accespoint 
 //  WiFi.begin("SSID", "PASSWORD");
   WiFi.mode(WIFI_AP_STA); // hoewel, WIFI_STA werkte ook
-
-  strcpy(PrevDataFromGlobe.Name, "???");
-  strcpy(PrevDataFromGlobe.Title, "???");
-  strcpy(PrevDataFromGlobe.TimeZoneId, "???");
-
 
   // Init ESP-NOW
   if (esp_now_init() != ESP_OK) {
@@ -85,25 +88,71 @@ void setup_esp_now() {
   // Register for a callback function that will be called when data is received
   esp_now_register_recv_cb(esp_now_recv_cb_t(OnDataRecv));
 }
- 
+
+bool Q_filling = 0;
+bool Q_sending = 0;
+
 void loop_esp_now() {
+  static uint16_t acked_qserialnumber = 0;
+  // we get called here from the main loop, every 200mS
 
+  while(Q_filling); // wait until idle
+  Q_sending = true;
+
+  // check for queued messages to send
   // Send message via ESP-NOW
-  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &DataFromDisplay, sizeof(DataFromDisplay));
-   
 
+  if(bUpAndRunning) 
+  { // first check if last prepared message was received and processed by display, we are both in sync
+    if(DataFromGlobe.D_QueueSerialNumber == DataFromDisplay.D_QueueSerialNumber)
+    { // yes we are in sync, get new message from queue to send out, if any
 
-  if (result == ESP_OK) 
-  { //Serial.println("Sent with success");
-    if(DataFromDisplay.CalibrateZeroPos == 5678)
-    { Serial.print("DataFromDisplay.CalibrateZeroPos = "); 
-      Serial.println(DataFromDisplay.CalibrateZeroPos);
-      DataFromDisplay.CalibrateZeroPos = 0;
+      if(acked_qserialnumber != DataFromGlobe.D_QueueSerialNumber)
+      { Serial.printf("Message %d acknowledged by globe.\n", DataFromGlobe.D_QueueSerialNumber);
+        acked_qserialnumber = DataFromGlobe.D_QueueSerialNumber;
+      }  
+
+//      Serial.printf("ToGlobe.QueueCnt = %d\n", ToGlobe.QueueCnt);
+      if(ToGlobe.QueueCnt>0)
+      { if(ToGlobe.QueueIndexOut>=QUEUESIZE)ToGlobe.QueueIndexOut = 0;
+        Serial.printf("Need to send if ToGlobe.QueueIndexin %d != ToGlobe.QueueIndexOut %d\n", ToGlobe.QueueIndexIn, ToGlobe.QueueIndexOut);
+        if(ToGlobe.QueueIndexOut != ToGlobe.QueueIndexIn)
+        { DataFromDisplay.D_QueueSerialNumber++;
+          strcpy(DataFromDisplay.D_QueueMessage, ToGlobe.QueueMessage[ToGlobe.QueueIndexOut]);
+          DataFromDisplay.D_QueueMessageType = ToGlobe.QueueMessageType[ToGlobe.QueueIndexOut];
+          Serial.printf("Messagetype %d-%d sent to display = >%s<\n", DataFromDisplay.D_QueueSerialNumber, DataFromDisplay.D_QueueMessageType, DataFromDisplay.D_QueueMessage);
+          ToGlobe.QueueIndexOut++;
+          ToGlobe.QueueCnt--;
+        }
+      }
     }
-  }
+ 
+    esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &DataFromDisplay, sizeof(DataFromDisplay));
+  } 
+
+
   //else {
   //  //Serial.println("Error sending the data");
   //}
+  Q_sending = false;
+}
+
+void AddToQueueForGlobe(const char* message, uint16_t queuemessagetype) // one empty slot to avoid IndexIn becomes equal to IndexOut
+{ 
+  while(Q_sending); // wait until idle
+  Q_filling = true;
   
+  if(ToGlobe.QueueCnt < QUEUESIZE-1)
+  { if(ToGlobe.QueueIndexIn>=QUEUESIZE)ToGlobe.QueueIndexIn = 0;
+    strncpy(ToGlobe.QueueMessage[ToGlobe.QueueIndexIn], message, QUEUEMESSAGELENGTH);
+    ToGlobe.QueueMessage[ToGlobe.QueueIndexIn][QUEUEMESSAGELENGTH-1] = 0; // terminate just in case of idiotic long message
+    ToGlobe.QueueMessageType[ToGlobe.QueueIndexIn] = queuemessagetype;
+    Serial.printf("Message Queued in %d  = >%s<\n", ToGlobe.QueueIndexIn, ToGlobe.QueueMessage[ToGlobe.QueueIndexIn]);
+
+    ToGlobe.QueueIndexIn++;
+    ToGlobe.QueueCnt++;
+  }
+  else Serial.println("Queue to globe is full!!!");
+  Q_filling = false;
 }
 

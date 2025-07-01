@@ -52,7 +52,7 @@ void ST7701_Init()
     .command_bits = 1,
     .address_bits = 8,
     .mode = SPI_MODE0,
-    .clock_speed_hz = 40000000,
+    .clock_speed_hz = 40000000, // original 40000000 but lowered to check if it helps with my occasional display corruption
     .spics_io_num = -1,                      
     .queue_size = 1,            // Not using queues
   };

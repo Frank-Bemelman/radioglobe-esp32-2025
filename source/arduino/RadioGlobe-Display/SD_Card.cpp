@@ -48,6 +48,7 @@ void SD_Init() {
     printf("Total space: %llu\n", totalBytes);
     printf("Used space: %llu\n", usedBytes);
     printf("Free space: %llu\n", totalBytes - usedBytes);
+    
   }
 }
 bool File_Search(const char* directory, const char* fileName)    

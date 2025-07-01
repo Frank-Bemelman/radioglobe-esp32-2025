@@ -42,7 +42,7 @@ void Lvgl_Touchpad_Read( lv_indev_drv_t * indev_drv, lv_indev_data_t * data )
     data->point.x = touch_data.x;
     data->point.y = touch_data.y;
     data->state = LV_INDEV_STATE_PR;
-    printf("LVGL : X=%u Y=%u points=%d\r\n",  touch_data.x , touch_data.y,touch_data.points);
+// FRANK disabled    printf("LVGL : X=%u Y=%u points=%d\r\n",  touch_data.x , touch_data.y,touch_data.points);
   } else {
     data->state = LV_INDEV_STATE_REL;
   }
