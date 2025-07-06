@@ -3,24 +3,25 @@
 #include <ArduinoJson.h>
 #include <ArduinoJson.hpp>
 #include <WiFi.h>
+#include <esp_wifi.h>
 #include <WiFiClient.h>
 #include <VS1053.h>               // https://github.com/baldram/ESP_VS1053_Library
 #include <ESP32_VS1053_Stream.h>  // https://github.com/CelliesProjects/ESP32_VS1053_Stream
 
 // changed in ESP32_VS1053_Stream.h around line 15-16
 // the original lower values often give connection refused for more remote locations
-// #define VS1053_CONNECT_TIMEOUT_MS 2000 // FB was 250 FB
-// #define VS1053_CONNECT_TIMEOUT_MS_SSL 2500 // FB was 750
+// #define VS1053_CONNECT_TIMEOUT_MS 10000 // FB was 250 FB
+// #define VS1053_CONNECT_TIMEOUT_MS_SSL 10000 // FB was 750
 
 
 #include "franks-esp-now.h"
 #include "mp3_sound_winxpstart.h"
+#include "mp3_sound_winxpshutdown.h"
 #include "..\secrets.h"
 
 // as defined in ..\secrets.h
 // char SSID [32] = "YOUR-SSID";
 // char PASSWORD[32] = "YOUR-WIFI-PASSWORD";
-
 
 #define COPY_LOG_OFF
 
@@ -46,9 +47,10 @@
 // yellow (was 4 first, moved to 22)
 #define  VS1053_DREQ 22
 // brown
-#define VS1053_RESET 12
+#define VS1053_RESET 15
 
 ESP32_VS1053_Stream stream;
+VS1053 chunkplayer(VS1053_CS, VS1053_DCS, VS1053_DREQ);
 
 // Orientation of hardware connections ESP32WROOM, USB pointing downwards
 // Left row
@@ -100,8 +102,6 @@ static uint32_t currentMillis;
 
 // URL_CLIENT_TIMEOUT set to 5000ms, line 330 in audiotoolsconfig.h
 
-// another player for mp3 in header file with windows sound
-// MemoryStream music(mp3_winxpstart, sizeof(mp3_winxpstart));
   
 
 
@@ -118,6 +118,9 @@ AS5600 as5600_0(&Wire);
 AS5600 as5600_1(&Wire1);
 int16_t ReadEncoderTicker100mS = 0;
 int16_t PrevTick = 0;
+bool bPowerStatus = true;
+bool bVolumeToneControlsActive = false;
+
 
 bool bUpAndRunning = false;
 bool bEncoderNewPosition;
@@ -145,12 +148,14 @@ uint16_t ee_bass; // 0-f can be changed by display puck
 uint16_t ee_treble; // 0-f can be changed by display puck
 char ssid[32];
 char password[32];
-char moredata[128];
+char google_api_key[64];
+char spare_data[64];
 };
 eepromData GlobeSettings; 
 
 uint8_t rtone[4] = {0, 3, 14, 0}; // tone control register of VS1053 responding to display controls for bass & treble, values of 0-15
 uint8_t mac[6];
+
 
 void setup()
 { char message[64];
@@ -169,7 +174,7 @@ void setup()
 
   EEPROM.begin(EEPROM_SIZE);
 
-  // calibrate_globe(); // call just once to force during construction, set globe to NS0 and EW0
+  // calibrate_globe(); // call just once to force during construction, set globe to NS0 and EW0 - can also be done through display calibration menu
 
   EEPROM.get(0x0, GlobeSettings);
   GlobeSettings.ssid[sizeof(GlobeSettings.ssid)-1]=0;
@@ -199,7 +204,6 @@ void setup()
 
   delay(500);
 
-  DataFromGlobe.G_actualvolume = -1;
   DataFromGlobe.D_QueueStationIndex = -1;
 
   bUpAndRunning = true;
@@ -248,25 +252,40 @@ void setup()
   }
   Serial.println("VS1053 up & running");
 
-  // set VS1053 tone values
-  rtone[0] = GlobeSettings.ee_treble;
-  rtone[2] = GlobeSettings.ee_bass;
+
+  // tell display what our stored values are for volume and tone control
+  sprintf(message, "%d %d %d", GlobeSettings.ee_volume, GlobeSettings.ee_bass, GlobeSettings.ee_treble);
+  AddToQueueForDisplay(message, MESSAGE_VOLUME_AND_TONE);
+
+  // set VS1053 volume and tone values from eeprom
   Serial.printf("Volume from eeprom -> %d", GlobeSettings.ee_volume);
   SetVolumeMapped(GlobeSettings.ee_volume); // eeprom can be updated by changing bass or treble
-  
+  Serial.printf("Bass value from eeprom -> %d", GlobeSettings.ee_bass);
+  rtone[2] = (GlobeSettings.ee_bass * 15)/100;
+  Serial.printf("Treble value from eeprom -> %d", GlobeSettings.ee_treble);
+  rtone[0] = (uint8_t) abs(((GlobeSettings.ee_treble-50)*15/100)); 
+  //  Serial.printf("Nibble1 %04x\n", (uint16_t) rtone[0] );                           
+  if((GlobeSettings.ee_treble-50)<0)rtone[0] |= 0x08;
+  //  Serial.printf("Nibble2 %04x\n", (uint16_t) rtone[0] );                           
+  stream.setTone(rtone); 
+
   // windows tune
-  VS1053 player(VS1053_CS, VS1053_DCS, VS1053_DREQ);
-  player.playChunk((uint8_t *)mp3_winxpstart, sizeof(mp3_winxpstart));
+  //  VS1053 player(VS1053_CS, VS1053_DCS, VS1053_DREQ);
+  if(chunkplayer.getChipVersion() == 4) 
+  { // Only perform an update if we really are using a VS1053, not. eg. VS1003
+    chunkplayer.loadDefaultVs1053Patches(); 
+  }
+  chunkplayer.playChunk((uint8_t *)mp3_winxpstart, sizeof(mp3_winxpstart));
 
   AddToQueueForDisplay("Globe Just Booted", MESSAGE_GLOBE_WANTS_CURRENT_STATION);
+  
   
 }
 
 
 static bool once = true;
 void loop()
-{ static uint16_t update_eeprom_after_100mS = 0;
-
+{ char message[QUEUEMESSAGELENGTH];
   stream.loop();
 
      // process messages from display
@@ -278,7 +297,15 @@ void loop()
     { case MESSAGE_GOOGLE_API_KEY:
         Serial.println("INCOMING MESSAGE_GOOGLE_API_KEY");
         Serial.println(DataFromDisplay.D_QueueMessage);
+        strcpy(google_api_key, DataFromDisplay.D_QueueMessage);
+        EEPROM.put(0x0, GlobeSettings);
+        EEPROM.commit();
         break;
+      case MESSAGE_CALIBRATE_ZERO:
+        if(strcmp(DataFromDisplay.D_QueueMessage, "1234")==0)
+        { calibrate_globe();
+        }
+        break;  
       case MESSAGE_START_THIS_STATION:
         strcpy(RequestedUrl, DataFromDisplay.D_QueueMessage);
 
@@ -334,15 +361,70 @@ void loop()
         break;
 
       // displays wants to know the timezone for a given location
-      case MESSAGE_GET_TIMEZONE:
-        Serial.printf("INCOMING MESSAGE_GET_TIMEZONE: >NS%f EW%f<\n", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW );  
+      case MESSAGE_GET_TIMEZONE_BY_GPS:
+        Serial.printf("INCOMING MESSAGE_GET_TIMEZONE_BYDATABASE: >NS%f EW%f<\n", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW );  
         Serial.printf("FOR STATION: %s\n", DataFromDisplay.D_QueueMessage);  
-        DataFromGlobe.FindTimeZone = 1; // makes the CallGetTimeZone task actually do it
+        // DataFromGlobe.FindTimeZone = MESSAGE_GET_TIMEZONE_BY_GPS; // moved to esp-now receive
+        break;
+
+      case MESSAGE_GET_TIMEZONE:
+        Serial.printf("INCOMING MESSAGE_GET_TIMEZONE: >NS%f EW%f<\n", DataFromDisplay.ns_cal, DataFromDisplay.ew_cal);  
+        Serial.printf("FOR STATION: %s\n", DataFromDisplay.D_QueueMessage);  
+        // DataFromGlobe.FindTimeZone = MESSAGE_GET_TIMEZONE_BY_GPS; // moved to esp-now receive
         break;
 
       case MESSAGE_NEW_LIST_LOADED:
         // reset this value because it is not related anymore to the new list of stations found by display
         DataFromGlobe.D_QueueStationIndex = -1;
+        break;
+
+      case MESSAGE_POWERDOWN:
+        bPowerStatus = false;
+        stream.stopSong();
+        DataFromGlobe.D_QueueStationIndex = -1;
+        while(stream.isRunning())stream.loop(); // empty buffer
+
+        delay(1000);
+        // play end tune at normal level
+        EEPROM.get(0x0, GlobeSettings);
+        Serial.printf("POWERDOWN - volume -> %d \n", GlobeSettings.ee_volume);
+        SetVolumeMapped(GlobeSettings.ee_volume); 
+
+        chunkplayer.playChunk((uint8_t *)mp3_winxpshutdown, sizeof(mp3_winxpshutdown));
+
+        // silence now
+        SetVolumeMapped(0); 
+        Serial.printf("POWERDOWN done\n");
+        break;
+
+      case MESSAGE_POWERUP:
+        bPowerStatus = true;
+        EEPROM.get(0x0, GlobeSettings);
+        Serial.printf("POWERUP - volume -> %d \n", GlobeSettings.ee_volume);
+         // tell display what our stored values are for volume and tone control
+        sprintf(message, "%d %d %d", GlobeSettings.ee_volume, GlobeSettings.ee_bass, GlobeSettings.ee_treble);
+        AddToQueueForDisplay(message, MESSAGE_VOLUME_AND_TONE);
+        SetVolumeMapped(GlobeSettings.ee_volume); 
+        AddToQueueForDisplay("Globe Just Booted", MESSAGE_GLOBE_WANTS_CURRENT_STATION);
+        // play windows tune 
+        chunkplayer.playChunk((uint8_t *)mp3_winxpstart, sizeof(mp3_winxpstart));
+        Serial.printf("POWERUP done\n");
+        break;
+
+      case MESSAGE_VOLUME_AND_TONE:
+        bVolumeToneControlsActive = true;
+        break;
+
+      case MESSAGE_DISPLAY_WANTS_VOLUME_AND_TONE:
+        EEPROM.get(0x0, GlobeSettings);
+        sprintf(message, "%d %d %d", GlobeSettings.ee_volume, GlobeSettings.ee_bass, GlobeSettings.ee_treble);
+        AddToQueueForDisplay(message, MESSAGE_VOLUME_AND_TONE);
+        break;
+
+      case MESSAGE_STORE_VOLUME_AND_TONE:
+        EEPROM.put(0x0, GlobeSettings);
+        EEPROM.commit();
+        Serial.println("Eeprom saved..");
         break;
 
       default:
@@ -357,49 +439,44 @@ void loop()
   }
   
   // volume and tone levels checking
-  if(PrevTick != ReadEncoderTicker100mS)
-  { PrevTick = ReadEncoderTicker100mS;
-    if(PrevDataFromDisplay.volumevalue != DataFromDisplay.volumevalue)
-    { PrevDataFromDisplay.volumevalue = DataFromDisplay.volumevalue;
-      GlobeSettings.ee_volume = DataFromDisplay.volumevalue;
-      SetVolumeMapped(DataFromDisplay.volumevalue);
-      update_eeprom_after_100mS = 36000; // 3600 - sec 
-    }
-
-    if(PrevDataFromDisplay.bassvalue != DataFromDisplay.bassvalue)
-    { PrevDataFromDisplay.bassvalue = DataFromDisplay.bassvalue;
-      // bass usuable values is rtone[3] = 14 for lower frequency limit and rtone[2] = 0-15 for level control    
-      rtone[3] = 14;
-      rtone[2] = (DataFromDisplay.bassvalue * 15)/100;
-      stream.setTone(rtone); 
-      GlobeSettings.ee_bass = rtone[2];
-      update_eeprom_after_100mS = 100; 
-//      Serial.printf("Bass=level %x cutoff %x\n", (uint16_t)rtone[2], (uint16_t)rtone[3]);
-    }
-
-    if(PrevDataFromDisplay.treblevalue != DataFromDisplay.treblevalue)
-    { PrevDataFromDisplay.treblevalue = DataFromDisplay.treblevalue;
-      // treble usuable values is rtone[1] = 3 for higher frequency limit and rtone[0] = 0-15 for level control
-      // convert from 0-100 to signed nibble f-e-d-c-b-a-9-0-1-2-3-4-5-6-7
-      rtone[1] = 3;
-      rtone[0] = (uint8_t) abs(((DataFromDisplay.treblevalue-50)*15/100)); 
-//      Serial.printf("Nibble1 %04x\n", (uint16_t) rtone[0] );                           
-      if((DataFromDisplay.treblevalue-50)<0)rtone[0] |= 0x08;
-//      Serial.printf("Nibble2 %04x\n", (uint16_t) rtone[0] );                           
-      stream.setTone(rtone); 
-      GlobeSettings.ee_treble = rtone[0];
-      update_eeprom_after_100mS = 100; 
-//      Serial.printf("Treble=level %x cutoff %x\n", (uint16_t)rtone[0], (uint16_t)rtone[1]);
-    }
-
-    if(update_eeprom_after_100mS)
-    { update_eeprom_after_100mS--;
-      if(update_eeprom_after_100mS==0) 
-      { EEPROM.put(0x0, GlobeSettings);
-        EEPROM.commit();
-        Serial.println("Eeprom saved..");
+  if(bVolumeToneControlsActive == true)
+  { if(PrevTick != ReadEncoderTicker100mS)
+    { PrevTick = ReadEncoderTicker100mS;
+      if(PrevDataFromDisplay.volumevalue != DataFromDisplay.volumevalue)
+      { PrevDataFromDisplay.volumevalue = DataFromDisplay.volumevalue;
+        SetVolumeMapped(DataFromDisplay.volumevalue);
+        if(bPowerStatus == true)
+        { GlobeSettings.ee_volume = DataFromDisplay.volumevalue;
+        }  
       }
-    }  
+
+      if(PrevDataFromDisplay.bassvalue != DataFromDisplay.bassvalue)
+      { PrevDataFromDisplay.bassvalue = DataFromDisplay.bassvalue;
+        // bass usuable values is rtone[3] = 14 for lower frequency limit and rtone[2] = 0-15 for level control    
+        rtone[3] = 14;
+        rtone[2] = (DataFromDisplay.bassvalue * 15)/100;
+        stream.setTone(rtone); 
+        GlobeSettings.ee_bass = DataFromDisplay.bassvalue;
+        GlobeSettings.ee_volume = DataFromDisplay.volumevalue;
+        // Serial.printf("Bass=level %x cutoff %x\n", (uint16_t)rtone[2], (uint16_t)rtone[3]);
+      }
+
+      if(PrevDataFromDisplay.treblevalue != DataFromDisplay.treblevalue)
+      { PrevDataFromDisplay.treblevalue = DataFromDisplay.treblevalue;
+        // treble usuable values is rtone[1] = 3 for higher frequency limit and rtone[0] = 0-15 for level control
+        // convert from 0-100 to signed nibble f-e-d-c-b-a-9-0-1-2-3-4-5-6-7
+        rtone[1] = 3;
+        rtone[0] = (uint8_t) abs(((DataFromDisplay.treblevalue-50)*15/100)); 
+        //  Serial.printf("Nibble1 %04x\n", (uint16_t) rtone[0] );                           
+        if((DataFromDisplay.treblevalue-50)<0)rtone[0] |= 0x08;
+        //  Serial.printf("Nibble2 %04x\n", (uint16_t) rtone[0] );                           
+        stream.setTone(rtone); 
+        GlobeSettings.ee_treble = DataFromDisplay.treblevalue;
+        GlobeSettings.ee_volume = DataFromDisplay.volumevalue;
+        // Serial.printf("Treble=level %x cutoff %x\n", (uint16_t)rtone[0], (uint16_t)rtone[1]);
+      }
+    }
+
 
 
     if(CalibrateZeroPos == 1234) // calibration started by display 
@@ -431,9 +508,18 @@ void StartNewStation(void)
 
   Serial.printf("stream.connecttohost ->%s\n", UnraveledUrl);
   lapMillis = millis(); 
+  
   stream.connecttohost(UnraveledUrl);  
+
+  //stream.connecttohost("http://vprclassical.streamguys.net/vprclassical128.mp3");  // just a test
+
   if(stream.isRunning()) 
   { Serial.printf("stream.connecttohost succes -> time elapsed = %ld\n", (currentMillis = millis()) - lapMillis);
+    Serial.print("Codec: ");
+    Serial.println(stream.currentCodec());
+    Serial.print("Bitrate: ");
+    Serial.print(stream.bitrate());
+    Serial.println(" kbps");
     return_result = 1;
   }
   else
@@ -446,13 +532,13 @@ void StartNewStation(void)
 
     strcpy(ActiveUrl, RequestedUrl);
     DataFromGlobe.D_QueueStationIndex = DataFromDisplay.D_QueueStationIndex;
-    AddToQueueForDisplay("ActiveUrl", MESSAGE_STATION_CONNECTED); 
+    AddToQueueForDisplay(ActiveUrl, MESSAGE_STATION_CONNECTED); 
     //EEPROM.put(0x0, GlobeSettings);
     //EEPROM.commit();
   }
   else
   { Serial.printf("FAILED: stream.connecttohost \n");
-    AddToQueueForDisplay("RequestedUrl", MESSAGE_DEAD_STATION);
+    AddToQueueForDisplay(RequestedUrl, MESSAGE_DEAD_STATION);
     DataFromGlobe.D_QueueStationIndex = -1;
     AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);
   }
@@ -468,21 +554,32 @@ void SetVolumeMapped(uint16_t volume)
 
 
 
-void audio_showstation(const char* info) {
-    Serial.printf("Station: %s\n", info);
-    AddToQueueForDisplay(info, MESSAGE_STATION_NAME);
+void audio_showstation(const char* info) 
+{ char *p;
+  Serial.printf("Station: %s\n", info);
+  // filter crap messages
+  if((p=strchr(info, '-')) !=0) *p=0; // split idotic long names that combine station & content 
+  if(strcmp(info, "no name")==0)return; // ignore meaningless names
+  if(strcmp(info, "NO NAME")==0)return; // ignore meaningless names
+  if(strcmp(info, "My Station name")==0)return; // ignore meaningless names
+  AddToQueueForDisplay(info, MESSAGE_STATION_NAME);
 }
 
 void audio_showstreamtitle(const char* info) {
     Serial.printf("Stream title: %s\n", info);
+    // filter crap messages
+    if(strcmp(info, "Now Playing info goes here")==0)return;
+    if(strcmp(info, " - ")==0)return;
     AddToQueueForDisplay(info, MESSAGE_SONG_TITLE);
 }
 
 void audio_eof_stream(const char* info) {
     Serial.printf("End of stream: %s\n", info);
-    AddToQueueForDisplay("RequestedUrl", MESSAGE_DEAD_STATION);
-    DataFromGlobe.D_QueueStationIndex = -1;
-    AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);
+    if(bPowerStatus == true)
+    { AddToQueueForDisplay(RequestedUrl, MESSAGE_AUDIO_EOF_STREAM);
+      DataFromGlobe.D_QueueStationIndex = -1;
+      AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);
+    }  
 }
 
 // EOF

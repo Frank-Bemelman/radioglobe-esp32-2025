@@ -32,7 +32,9 @@ void GetTimeZone(float StationGpsNS, float StationGpsEW)
   Serial.println("MFree Heap at Start  GetTimeZone()" + String(ESP.getFreeHeap()));   
 
   print = 0;
-  if(print)Serial.printf("GetTimeZone using Display NS-CAL = %f, EW-CAL = %f\n", StationGpsNS, StationGpsEW);
+  
+  //if(print)
+  Serial.printf("GetTimeZone Requested By Display -> Position NS = %f, EW = %f\n", StationGpsNS, StationGpsEW);
 
   time(&now); // UTC epoch time
   sprintf(url_timezone_google_api, "%s%.6f%%2C%.6f&timestamp=%lld&key=%s", gps_to_time_url, StationGpsNS, StationGpsEW, now, google_api_key);

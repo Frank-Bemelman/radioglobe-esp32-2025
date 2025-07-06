@@ -12,8 +12,12 @@
 QueueOut ToDisplay; // queue with messages for display
 
 // REPLACE WITH THE MAC Address of display puck
-// which is b4:3a:45:a5:03:10
-uint8_t broadcastAddress[] = {0xB4, 0x3A, 0x45, 0xA5, 0x03, 0x10};
+// which is b4:3a:45:a5:03:10 (PUCK1)
+//uint8_t broadcastAddress[] = {0xB4, 0x3A, 0x45, 0xA5, 0x03, 0x10};
+
+// which is a0:85:e3:e1:53:28 (PUCK2)
+uint8_t broadcastAddress[] = {0xA0, 0x85, 0xE3, 0xE1, 0x53, 0x28};
+
 
 esp_now_peer_info_t peerInfo;
 
@@ -25,10 +29,32 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
 }
 
 
+
+int16_t ns_cal_received;
+int16_t ew_cal_received;
+float D_StationGpsNS;
+float D_StationGpsEW;
+
 // Callback when data is received
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   memcpy(&DataFromDisplay, incomingData, sizeof(DataFromDisplay));
   
+  // quickly store gps location for timezone request before they become altered
+  if(PrevDataFromDisplay.D_QueueMessageType != DataFromDisplay.D_QueueMessageType)
+  { PrevDataFromDisplay.D_QueueMessageType != DataFromDisplay.D_QueueMessageType;
+    if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_TIMEZONE_BY_GPS)
+    { D_StationGpsNS = DataFromDisplay.D_StationGpsNS;
+      D_StationGpsEW = DataFromDisplay.D_StationGpsEW;
+      DataFromGlobe.FindTimeZone = MESSAGE_GET_TIMEZONE_BY_GPS; // makes the CallGetTimeZone task actually do it
+    }  
+
+    if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_TIMEZONE)
+    { ns_cal_received = DataFromDisplay.ns_cal;
+      ew_cal_received = DataFromDisplay.ew_cal;
+      DataFromGlobe.FindTimeZone = MESSAGE_GET_TIMEZONE; // makes the CallGetTimeZone task actually do it
+    }  
+  }  
+
   //Serial.print("Bytes received: ");
   //Serial.println(len);
 
