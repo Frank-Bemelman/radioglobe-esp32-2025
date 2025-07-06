@@ -65,14 +65,16 @@ void RebuildDatabase(lv_event_t * e)
 void BuildDatabaseNow(void)
 { uint16_t timeout = 5;
   char content[128];
+  char filename[32];
 
   Serial.printf("BuildDatabaseNow()\n");
 
+  lv_obj_clear_flag(uic_RebuildDatabase, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_clear_flag(uic_RebuildDatabaseButtonText, LV_OBJ_FLAG_HIDDEN);
   lv_obj_add_state(uic_RebuildDatabase, LV_STATE_DISABLED);
   lv_obj_add_flag(uic_HomeButton3, LV_OBJ_FLAG_HIDDEN);
-  
+  lv_label_set_text(ui_MapBanner, "All\nThose\nBeautiful\nInternet\nRadio\nStations\nAround\nThe\nWorld\n");
 
-  SD_MMC.end();
   if (!SD_MMC.begin("/sdcard", true, false))
   { lv_label_set_text(ui_DatabaseProgress1, "No SD Card Found!");
     Lvgl_Loop();
@@ -91,26 +93,37 @@ void BuildDatabaseNow(void)
   else
   { lv_label_set_text(ui_DatabaseProgress1, "SD Card Found!");
     Lvgl_Loop();
-    delay(1000);
   
-    //ReadDatabase("/stations.json"); // don't fortget the forward slash
-    //ReadDatabase("/stations1K.json"); // don't fortget the forward slash
+    //strcpy(filename, "/stations.json"); // don't fortget the forward slash
+    //strcpy(filename, "/stations1K.json"); // don't fortget the forward slash
+    //strcpy(filename, "/stations20K.json"); // don't fortget the forward slash
+    strcpy(filename, "/stations150K.json"); // don't fortget the forward slash
 
-    //ReadDatabase("/stations20K.json"); // don't fortget the forward slash
-  
-    ReadDatabase("/stations150K.json"); // don't fortget the forward slash
+    ReadDatabase(SD_MMC, filename); // don't fortget the forward slash
+    
     //listDir(SD_MMC, "/", 10);
+    
+    // some test stuff
+    // prepare filename for making a bitmap image file for this particular database
+    //char *p;
+    //if((p=strchr(filename, '.')) != NULL)
+    //{ *p=0;
+    //  strcat(filename, ".bmp");
+    //}
+    //WriteStationsBitmapFile(SD_MMC, filename);
+    WriteStationsBitmapFile(SD_MMC, "/stationsmap.bmp");
+
 
     Serial.println("Einde verhaal database maken 2");
 
   }
-  Serial.println("Einde verhaal database maken 3");
   SD_MMC.end();
+  Serial.println("Einde verhaal database maken 3");
   bCheckDatabase = false;
 
 }
 
-void ReadDatabase(char *filename)
+void ReadDatabase(fs::FS &fs, char *filename)
 { char sometext[128];
   char oneline[128];
   char outputfilename[64];
@@ -130,178 +143,143 @@ void ReadDatabase(char *filename)
   int16_t ew=0;
   File urls;
 
-  File root = SD_MMC.open(filename, FILE_READ);
-  if (!root) 
-  { sprintf(sometext, "Failed To Open %s", filename);
+  if(1)
+  { File root = fs.open(filename, FILE_READ);
+    if (!root) 
+    { sprintf(sometext, "Failed To Open %s", filename);
+      lv_label_set_text(ui_DatabaseProgress1, sometext);
+      Lvgl_Loop();
+      Serial.println(sometext);
+      delay(2000); 
+      return;
+    }
+    sprintf(sometext, "Succes opening %s", filename);
     lv_label_set_text(ui_DatabaseProgress1, sometext);
     Lvgl_Loop();
-    Serial.println(sometext);
     delay(2000); 
-    return;
-  }
-  sprintf(sometext, "Succes opening %s", filename);
-  lv_label_set_text(ui_DatabaseProgress1, sometext);
-  Lvgl_Loop();
-  delay(2000); 
   
-  filesize = root.size();
-  Serial.printf("filesize of %s is %ld\n", filename, filesize);
+    filesize = root.size();
+    Serial.printf("filesize of %s is %ld\n", filename, filesize);
 
-  bool readcoords = false;
-  uint16_t citycount = 0;
+    bool readcoords = false;
+    uint16_t citycount = 0;
 
-  lv_obj_set_pos(uic_MapCursor, ew, -ns);
-  // Start the animation on the map
-  lv_obj_clear_state(uic_MapBanner, LV_STATE_DISABLED);
-  lv_obj_clear_state(uic_MapCursor, LV_STATE_DISABLED);
+    lv_obj_set_pos(uic_MapCursor, ew, -ns);
+    // Start the animation on the map
+    lv_obj_clear_state(uic_MapBanner, LV_STATE_DISABLED);
+    lv_obj_clear_state(uic_MapCursor, LV_STATE_DISABLED);
 
 
 
-  while(root.available())//  && urlcount < 500)
-  { currentMillis = millis();
-    if (currentMillis - startMillis >= 100)  // every 5S screen update
-    { startMillis = currentMillis;
-      fileposition = root.position();
-      percentagedone = fileposition * 100 / filesize;
-      sprintf(sometext, "Done %d%% urls=%ld", percentagedone, urlcount);
-      lv_label_set_text(ui_DatabaseProgress, sometext);
-      Lvgl_Loop();
-    }
+    while(root.available())//  && urlcount < 500)
+    { currentMillis = millis();
+      if (currentMillis - startMillis >= 100)  // every 5S screen update
+      { startMillis = currentMillis;
+        fileposition = root.position();
+        percentagedone = fileposition * 100 / filesize;
+        sprintf(sometext, "Done %d%% urls=%ld", percentagedone, urlcount);
+        lv_label_set_text(ui_DatabaseProgress, sometext);
+        Lvgl_Loop();
+      }
 
-    bytesread = root.readBytesUntil(0x0a, oneline, sizeof(oneline)-1);
-    oneline[bytesread]=0;
-    //Serial.printf("bytesread= %d lineread = %s\n", bytesread, oneline);
-    switch(parsefase)
-    { case 0:
-        if((p = strstr(oneline, "\": {")) != NULL) // city,country
-        { // example
-          //    "Winston-Salem,US-NC": {
-          // results in: Winston-Salem_US-NC.txt  
-          if((p=strchr(oneline, '\"'))!=NULL)
-          { strcpy(outputfilename, p+1);
-            if((p=strchr(outputfilename, '\"')) != NULL)*p=0;
-            if((p=strchr(outputfilename, ',')) != NULL)*p='_';
-            strcat(outputfilename, ".txt");
-            Serial.println(outputfilename);
+      bytesread = root.readBytesUntil(0x0a, oneline, sizeof(oneline)-1);
+      oneline[bytesread]=0;
+      //Serial.printf("bytesread= %d lineread = %s\n", bytesread, oneline);
+      switch(parsefase)
+      { case 0:
+          if((p = strstr(oneline, "\": {")) != NULL) // city,country
+          { // example
+            //    "Winston-Salem,US-NC": {
+            // results in: Winston-Salem_US-NC.txt  
+            if((p=strchr(oneline, '\"'))!=NULL)
+            { strcpy(outputfilename, p+1);
+              if((p=strchr(outputfilename, '\"')) != NULL)*p=0;
+              if((p=strchr(outputfilename, ',')) != NULL)*p='_';
+              strcat(outputfilename, ".txt");
+              Serial.println(outputfilename);
+            }
+            else strcpy(outputfilename, "noname.txt");
+            parsefase = 1;
           }
-          else strcpy(outputfilename, "noname.txt");
-          parsefase = 1;
-        }
-        break;
-      case 1:
-        if((p = strstr(oneline, "\"n\": ")) != NULL)
-        { //Serial.println(p);
-          sscanf(&p[5], "%f", &floatn);
-          if(floatn>0)floatn+=0.5;
-          else floatn-=0.5;
-          ns = (int)floatn;
-          parsefase = 2;
-        }        
-        break;
-      case 2:
-        if((p = strstr(oneline, "\"e\": ")) != NULL)
-        { //Serial.println(p);
-          sscanf(&p[5], "%f", &floate);
-          if(floate>0)floate+=0.5;
-          else floate-=0.5;
-          ew = (int)floate;
-          sprintf(dirpath, "/%c/%d/%d/%c/%d/%d", (ns<0)?'S':'N', abs(ns)/10, abs(ns)%10, (ew<0)?'W':'E', abs(ew)/10, abs(ew)%10);
-          Serial.println(dirpath);
-          CreateAllDirInPath(SD_MMC, dirpath);
-          SetPixelInMap(ns, ew);
-          lv_obj_set_pos(uic_MapCursor, ew, -ns);
-          parsefase = 3;
-        }
-        break;
-      case 3:  
-        if((p = strstr(oneline, "\"urls\": [")) != NULL) // start of list
-        { sprintf(sometext, "%s/%s", dirpath, outputfilename);
-          lv_label_set_text(ui_DatabaseProgress1, sometext);
-          SD_MMC.remove(sometext); // delete old file
-          urls = SD_MMC.open(sometext, FILE_WRITE);
+          break;
+        case 1:
+          if((p = strstr(oneline, "\"n\": ")) != NULL)
+          { //Serial.println(p);
+            sscanf(&p[5], "%f", &floatn);
+            ns = (int)floatn + 0.5;
+            parsefase = 2;
+          }        
+          break;
+        case 2:
+          if((p = strstr(oneline, "\"e\": ")) != NULL)
+          { //Serial.println(p);
+            sscanf(&p[5], "%f", &floate);
+             //          if(floate>0)floate+=0.5;
+             //          else floate-=0.5;
+            ew = (int)floate + 0.5;
+            sprintf(dirpath, "/%c/%d/%d/%c/%d/%d", (ns<0)?'S':'N', abs(ns)/10, abs(ns)%10, (ew<0)?'W':'E', abs(ew)/10, abs(ew)%10);
+            Serial.println(dirpath);
+            CreateAllDirInPath(fs, dirpath);
+            SetPixelInMap(ns, ew);
+            lv_obj_set_pos(uic_MapCursor, ew, -ns);
+            parsefase = 3;
+          }
+          break;
+        case 3:  
+          if((p = strstr(oneline, "\"urls\": [")) != NULL) // start of list
+          { sprintf(sometext, "%s/%s", dirpath, outputfilename);
+            lv_label_set_text(ui_DatabaseProgress1, sometext);
+            SD_MMC.remove(sometext); // delete old file
+            urls = SD_MMC.open(sometext, FILE_WRITE);
+            parsefase = 4;
+          }
+          break;
+        case 4:  
+          if((p = strstr(oneline, "\"name\": ")) != NULL) // name found
+          { //Serial.println(p);
+            urls.println(p);  // write name to file 
+            parsefase = 5;
+          }
+          if((p = strstr(oneline, "]")) != NULL) // end of file reached
+          { //Serial.println(p);
+            urls.close();
+            parsefase = 0;
+          }
+          break;
+        case 5:  
+          if((p = strstr(oneline, "\"url\": ")) != NULL) // url found
+          { //Serial.println(p);
+            urls.println(p);  // write to file 
+            parsefase = 6;
+          }
+          break;
+        case 6:  
+          sprintf(sometext, "\"gps\": \"%f,%f\"", floatn, floate); // write gps to file
+          urls.println(sometext);  
+          urlcount++;
           parsefase = 4;
-        }
-        break;
-      case 4:  
-        if((p = strstr(oneline, "\"name\": ")) != NULL) // name found
-        { //Serial.println(p);
-          urls.println(p);  // write name to file 
-          parsefase = 5;
-        }
-        if((p = strstr(oneline, "]")) != NULL) // end of file reached
-        { //Serial.println(p);
-          urls.close();
-          parsefase = 0;
-        }
-        break;
-      case 5:  
-        if((p = strstr(oneline, "\"url\": ")) != NULL) // url found
-        { //Serial.println(p);
-          urls.println(p);  // write to file 
-          parsefase = 6;
-        }
-        break;
-      case 6:  
-        sprintf(sometext, "\"gps\": \"%f,%f\"", floatn, floate); // write gps to file
-        urls.println(sometext);  
-        urlcount++;
-        parsefase = 4;
-        break;
+          break;
 
-      default:
-        break;  
-    }
-  }  
+        default:
+          break;  
+      }
+    }  
 
-  lv_obj_add_state(uic_MapBanner, LV_STATE_DISABLED); 
-  lv_obj_add_state(uic_MapCursor, LV_STATE_DISABLED); 
+    urls.close();
+    root.close();
+    lv_obj_add_state(uic_MapBanner, LV_STATE_DISABLED); 
+    lv_obj_add_state(uic_MapCursor, LV_STATE_DISABLED); 
 
-  root.close();
-  
-  // long filename test, and yes it works
-  //urls = SD_MMC.open("/wateenleukefile.txt", FILE_WRITE);
-  //urls.close();
+    percentagedone = 100;
+    sprintf(sometext, "Done %d%% urls=%ld", percentagedone, urlcount);
+    lv_label_set_text(ui_DatabaseProgress, sometext);
+    sprintf(sometext, "- %d Files Created -", urlcount);
+    lv_label_set_text(ui_DatabaseProgress1, sometext);
+    Lvgl_Loop();
 
-  percentagedone = 100;
-  sprintf(sometext, "Done %d%% urls=%ld", percentagedone, urlcount);
-  lv_label_set_text(ui_DatabaseProgress, sometext);
-  sprintf(sometext, "- %d Files Created -", urlcount);
-  lv_label_set_text(ui_DatabaseProgress1, sometext);
-  Lvgl_Loop();
-
-  if((p=strchr(filename, '.')) != NULL)
-  { *p=0;
-    strcat(filename, ".bmp");
   }
 
-  File bitmap = SD_MMC.open("/stationsmap.bmp", FILE_WRITE);
-  if(bitmap) 
-  { char *p = (char*) &StationsMap;
-    p+=2; // skip filler in structure
-    Serial.printf("StationsMap-2 size = %ld\n", sizeof(StationsMap)-2);
-    Serial.printf("StationsMap.bmpheader size = %ld\n", sizeof(StationsMap.bmpheader));
-    Serial.printf("StationsMap.bmpct size     = %ld\n", sizeof(StationsMap.bmpct));
-    Serial.printf("StationsMap.pixeldata size = %ld\n", sizeof(StationsMap.pixeldata));
-
-    int n = 54+8;
-    // write header
-    while(n)
-    { bitmap.write(*p++);
-      n--;
-    }
-
-   // write file, bottom up
-   int w;
-   for(n=179;n>=0;n--)
-   { p = (char*)&StationsMap.pixeldata[(n*48)];
-     for(w=0;w<48;w++)
-     { bitmap.write(*p++);
-     }
-   }
-    bitmap.close();
-  }       
-
-  //tellme();
+   //tellme();
 
   lv_obj_clear_state(uic_RebuildDatabase, LV_STATE_DISABLED);
   lv_obj_clear_flag(uic_HomeButton3, LV_OBJ_FLAG_HIDDEN);
@@ -347,8 +325,73 @@ void CreateAllDirInPath(fs::FS &fs, char *path)
   }
 }      
 
+bool SnapToNearestStation(int16_t for_ns, int16_t for_ew, int16_t *to_ns, int16_t *to_ew)
+{ // convert/round to whole degrees to be used for finding a position with an existing directory path and station file
+  int16_t ns;
+  int16_t ew;
+  int16_t expand;
+  int16_t try_ns;
+  int16_t try_ew;
+  int16_t try_ltx;
+  int16_t try_lty;
+  int16_t try_rbx;
+  int16_t try_rby;
+
+  
+  ns = for_ns;
+  ew = for_ew;
+  
+  Serial.printf("[Database.ino ~ 346] SnapToNearestStation NS = %d  EW = %d\n", ns, ew);
 
 
+  // start at the exact position
+  // expand as needed by 1 degree
+  try_ns = ns;
+  try_ew = ew;
+  expand = 0;
+
+  while(expand < 45)
+  { // define the square to scan
+    try_lty = ns - expand;
+    try_ltx = ew - expand;
+    try_rby = ns + expand;
+    try_rbx = ew + expand;
+
+    if(TestPixelInMap(try_ns, try_ew))break;
+    else // loop around
+    { try_ns = try_lty; 
+      try_ew = try_ltx; 
+      while(try_ew<try_rbx) // go right 
+      { try_ew++;
+        if(TestPixelInMap(try_ns, try_ew))break;
+      }
+      while(try_ns<try_rby) // go down 
+      { try_ns++;
+        if(TestPixelInMap(try_ns, try_ew))break;
+      }
+      while(try_ew>try_ltx) // go left 
+      { try_ew--;
+        if(TestPixelInMap(try_ns, try_ew))break;
+      }
+      while(try_ns>try_lty) // go up 
+      { try_ns--;
+        if(TestPixelInMap(try_ns, try_ew))break;
+      }
+      expand++;
+    }
+  }
+
+  if(expand >= 45)
+  { Serial.printf("No station with 45 degrees of expand %d -> NS -> %d WE -> %d\n", expand, try_ns, try_ew);
+    return false; 
+  }
+  Serial.printf("Nearest station within expand %d -> NS -> %d WE -> %d\n", expand, try_ns, try_ew);
+  *to_ns = try_ns;
+  *to_ew = try_ew;
+  return true;
+}
+
+// find a new station at current calibrated position
 void FindNewStation(void)
 { bool dirscan = true;
   bool dirfound = false;
@@ -360,11 +403,17 @@ void FindNewStation(void)
   char oneline[128];
   size_t bytesread;
   char *p;
+
+  // results from SnapToNearestStation()
+  bool mapfind = false;
+  int16_t mapfind_ns;
+  int16_t mapfind_ew;
+  
   
   char dirpath[64];
   File root;
   File file;
-  char sometext[64];
+  char content[64];
 
   lv_label_set_text(ui_Station_Name, "Tuning...");
   lv_label_set_text(ui_Station_Title, "");
@@ -373,12 +422,14 @@ void FindNewStation(void)
   // convert to whole degrees to be used for finding directory path to url file
   ns = DataFromDisplay.ns_cal;
   ew = DataFromDisplay.ew_cal;
-  if(ns>0)ns+=5;
-  else ns-=5;
-  if(ew>0)ew+=5;
-  else ew-=5;
+  ns+= 5;
+  ew+= 5;
   ns/=10;
   ew/=10;
+  
+  mapfind = SnapToNearestStation(ns, ew, &mapfind_ns, &mapfind_ew);
+   
+  
 
   // search for url file around center [1]
   //           10 11 12  
@@ -397,6 +448,12 @@ void FindNewStation(void)
       { case 1:
           dir_ns = ns;
           dir_ew = ew;
+          if(mapfind) // get out of this search
+          { dir_ns = mapfind_ns;
+            dir_ew = mapfind_ew;
+            dirscan = false;
+            dirfound = true;
+          }
           break;
         case 2:
           dir_ns = ns+1;
@@ -430,12 +487,11 @@ void FindNewStation(void)
           dir_ns = ns+1;
           dir_ew = ew-1;
           break;
-  //           10 11 12  
-  //        21  9  2  3 13 
-  //        20  8  1  4 14
-  //        19  7  6  5 15
-  //           18 17 16 
-
+        //           10 11 12  
+        //        21  9  2  3 13 
+        //        20  8  1  4 14
+        //        19  7  6  5 15
+        //           18 17 16 
         case 10:
           dir_ns = ns+2;
           dir_ew = ew-1;
@@ -460,11 +516,11 @@ void FindNewStation(void)
           dir_ns = ns-1;
           dir_ew = ew+2;
           break;
-  //           10 11 12  
-  //        21  9  2  3 13 
-  //        20  8  1  4 14
-  //        19  7  6  5 15
-  //           18 17 16 
+        //           10 11 12  
+        //        21  9  2  3 13 
+        //        20  8  1  4 14
+        //        19  7  6  5 15
+        //           18 17 16 
         case 16: dir_ns = ns-2; dir_ew = ew+1; break;
         case 17: dir_ns = ns-2; dir_ew = ew;   break;
         case 18: dir_ns = ns-2; dir_ew = ew-1; break;
@@ -487,69 +543,76 @@ void FindNewStation(void)
       lv_label_set_text(ui_Station_Title, dirpath);
       Lvgl_Loop();
 
-      root = SD_MMC.open(dirpath);
-      if (!root) 
-      { Serial.println("Failed to open directory");
-        center++;
-      }
-      else
-      { dirscan = false;
-        dirfound = true;
-      }  
+      // only try for white pixels in the map
+      if(TestPixelInMap(dir_ns, dir_ew)) // worth trying
+      { root = SD_MMC.open(dirpath);
+        if (!root) 
+        { Serial.println("Failed to open directory");
+          // if(TestPixelInMap(dir_ns, dir_ew)) Serial.println("Strange, pixel found");
+          // else Serial.println("Correct, no pixel found");
+          center++;
+        }
+        else
+        { dirscan = false;
+          dirfound = true;
+          Serial.println("Succes to open directory");
+          // if(TestPixelInMap(dir_ns, dir_ew)) Serial.println("Indeed pixel found");
+          // else Serial.println("Strange, no pixel found");
+        }
+      } 
+      else  center++;
     }
+  }  
 
-    if(dirfound)
-    { file = root.openNextFile();
-      while (file && Stations.count<149) 
-      { if(!file.isDirectory()) 
-        { Serial.print("  FILE: ");
-          Serial.print(file.name());
-          Serial.print("  SIZE: ");
-          Serial.println(file.size());
-          lv_label_set_text(ui_Station_Title, file.name());
-          Lvgl_Loop();
+  if(dirfound)
+  //if(1)
+  { file = root.openNextFile();
+    while (file && Stations.count<149) 
+    { if(!file.isDirectory()) 
+      { Serial.print("STATIONS FILE: ");
+        Serial.print(file.name());
+        Serial.print("FILE SIZE: ");
+        Serial.println(file.size());
+        lv_label_set_text(ui_Station_Title, file.name());
+        Lvgl_Loop();
 
-          while(file.available() && Stations.count<MAX_STATIONS)//  && urlcount < 500)
-          {  bytesread = file.readBytesUntil(0x0a, oneline, sizeof(oneline)-1);
-             oneline[bytesread]=0;
-             if((p = strrchr(oneline, '\"')) != NULL)*p=0; // get rid of the last "
-             Serial.println(oneline);
-             if((p = strstr(oneline, "\"name\": \"")) != NULL)
-             { // example:  "name": "Dr P4 Syd"
-               // Serial.println(p+9);
-               p+=9; // jump forward to start of name
-               strcpy(Stations.StationNUG[Stations.count].name, p);
-             }  
-             else if((p = strstr(oneline, "\"url\": \"")) != NULL)
-             { // example:  "url": "https://stream.radio-fratz.de/stream_high.mp3"
-               // Serial.println(p+8);
-               p+=8; // jump forward to start of url
-               strcpy(Stations.StationNUG[Stations.count].url, p);
-             }  
-             else if((p = strstr(oneline, "\"gps\": \"")) != NULL)
-             { // example:  "url": "https://stream.radio-fratz.de/stream_high.mp3"
-               Serial.println(p+8);
-               p+=8; // jump forward to start of url
-               sscanf(p, "%f,%f", &Stations.StationNUG[Stations.count].gps_ns, &Stations.StationNUG[Stations.count].gps_ew);
+        while(file.available() && Stations.count<MAX_STATIONS)//  && urlcount < 500)
+        { bytesread = file.readBytesUntil(0x0a, oneline, sizeof(oneline)-1);
+          oneline[bytesread]=0;
+          if((p = strrchr(oneline, '\"')) != NULL)*p=0; // get rid of the last "
+          // Serial.println(oneline);
+          if((p = strstr(oneline, "\"name\": \"")) != NULL)
+          { // example:  "name": "Dr P4 Syd"
+            // Serial.println(p+9);
+            p+=9; // jump forward to start of name
+            strcpy(Stations.StationNUG[Stations.count].name, p);
+          }  
+          else if((p = strstr(oneline, "\"url\": \"")) != NULL)
+          { // example:  "url": "https://stream.radio-fratz.de/stream_high.mp3"
+            // Serial.println(p+8);
+            p+=8; // jump forward to start of url
+            strcpy(Stations.StationNUG[Stations.count].url, p);
+          }  
+          else if((p = strstr(oneline, "\"gps\": \"")) != NULL)
+          { // example:  "url": "https://stream.radio-fratz.de/stream_high.mp3"
+            // Serial.println(p+8);
+            p+=8; // jump forward to start of url
+            sscanf(p, "%f,%f", &Stations.StationNUG[Stations.count].gps_ns, &Stations.StationNUG[Stations.count].gps_ew);
 
-               //if((p = strstr(StationArray[stationsfound].url, ".m3u")) == NULL) // no links to m3u file
-               //{ if((p = strstr(StationArray[stationsfound].url, ".pls")) == NULL) // no links in pls file
-               //  { if((p = strstr(oneline, "mp3")) != NULL)stationsfound++; 
-               //    else if((p = strstr(oneline, "MP3")) != NULL)stationsfound++;
-               //  }  
-               //}
-               //else if((p = strstr(oneline, "aac")) != NULL)
+            //if((p = strstr(StationArray[stationsfound].url, ".m3u")) == NULL) // no links to m3u file
+            //{ if((p = strstr(StationArray[stationsfound].url, ".pls")) == NULL) // no links in pls file
+            //  { if((p = strstr(oneline, "mp3")) != NULL)stationsfound++; 
+            //    else if((p = strstr(oneline, "MP3")) != NULL)stationsfound++;
+            //  }  
+            //}
+            //else if((p = strstr(oneline, "aac")) != NULL)
 
-               Stations.count++;
-             }  
+             Stations.count++;
           }
         }
         file = root.openNextFile();
       }
-      sprintf(sometext, "%d Stations Found", Stations.count);
-      lv_label_set_text(ui_Station_Name, sometext);
-    }
-
+    } 
     SD_MMC.end();  
   }
   else
@@ -564,8 +627,12 @@ void FindNewStation(void)
   if(Stations.count)
   { 
     AddToQueueForGlobe("Reset Your DataFromGlobe.D_QueueStationIndex to -1", MESSAGE_NEW_LIST_LOADED);
+    
+    // pick a random station from the list
+    uint16_t random_station; 
+    random_station = random(0,Stations.count);
+    AddStationToQueueForGlobe(random_station);
 
-    AddStationToQueueForGlobe(0);
     // turn of preset leds
     SetLed(1, 0);
     SetLed(2, 0);
@@ -577,6 +644,7 @@ void FindNewStation(void)
   //for(int n = 0; n<Stations.count; n++)
   //{ Serial.printf("[%d] N=%s\nU=%s\n", n, Stations.StationNUG[n].name, Stations.StationNUG[n].url);
   //}
+  
 }
 
 void SetPixelInMap(int16_t ns, int16_t ew)
@@ -584,9 +652,23 @@ void SetPixelInMap(int16_t ns, int16_t ew)
   // -180 to be stored in [359]
   ew += 180;  // convert -180 to 179 range to 0-359
   ns += 90;   // convert -90 to 90 range to 0-180
-  if(ns>180)ns=180;
+  if(ns>179)ns=179;
+  if(ew>359)ew-=360;
   StationsMap.pixeldata[((180-ns)*48)+(ew/8)] |= 0x80>>(ew%8); //48 bytes, rounded up from 45 to get a 4-byte multiple
 }
+
+bool TestPixelInMap(int16_t ns, int16_t ew)
+{ // ew varies between -180 and 180
+  // -180 to be stored in [359]
+  ew += 180;  // convert -180 to 179 range to 0-359
+  ns += 90;   // convert -90 to 90 range to 0-180
+  if(ns>179)ns=179;
+  if(ew>359)ew-=360;
+  //Serial.printf("Pixeltest ns=%d ew=%d %02X vs %02X\n", ns, ew, (uint16_t)StationsMap.pixeldata[((180-ns)*48)+(ew/8)], (uint16_t)(0x80>>(ew%8)));
+  if(StationsMap.pixeldata[((180-ns)*48)+(ew/8)] & (0x80>>(ew%8)))return true;
+  return false;
+}
+
 
 
 void tellme(void)
@@ -633,8 +715,7 @@ void RadioGlobeClick(lv_event_t * e)
 }
 
 void ReloadScroll(void)
-{ //char rolldata[1024];
-  uint16_t len;
+{ uint16_t len;
   uint16_t space;
   uint16_t n;
   char *p;
@@ -664,8 +745,14 @@ void ReloadScroll(void)
   }
   // Serial.println(rolldata);
   // Serial.println(n);
-  // lv_roller_set_options(uic_StationRoller, rolldata, LV_ROLLER_MODE_INFINITE); (loop around mode but seems to crash too often)
   lv_roller_set_options(uic_StationRoller, rolldata, LV_ROLLER_MODE_NORMAL);
+  if((Stations.requested >=0) && Stations.requested<MAX_STATIONS)
+  { char content[32];
+    sprintf(content, "%d-%d", Stations.requested+1, Stations.count); // top label 1-150 in stations roller
+    lv_label_set_text(ui_StationRollerSelected, content);
+    Serial.printf("lv_roller_set_selected -> %d\n", Stations.requested);
+    lv_roller_set_selected(uic_StationRoller, Stations.requested, LV_ANIM_ON);
+  }
   startMillis = millis(); 
   Serial.printf("Reload Scroll (%d stations) done.\n", n);
 }
@@ -685,7 +772,7 @@ void StationScroll(lv_event_t * e)
   // another short click gives PRESSED+CHANGED+CLICKED
 
   index = lv_roller_get_selected(uic_StationRoller);
-  sprintf(content, "%d-%d", index, Stations.count);
+  sprintf(content, "%d-%d", index+1, Stations.count);
   lv_label_set_text(ui_StationRollerSelected, content); 
   
     if(event_code == LV_EVENT_CLICKED) 
@@ -759,7 +846,7 @@ void AddStationToQueueForGlobe(uint16_t station)
   if(station<MAX_STATIONS)
   { DataFromDisplay.D_StationGpsNS = Stations.StationNUG[station].gps_ns;
     DataFromDisplay.D_StationGpsEW = Stations.StationNUG[station].gps_ew;
-    AddToQueueForGlobe(Stations.StationNUG[station].name, MESSAGE_GET_TIMEZONE);
+    AddToQueueForGlobe(Stations.StationNUG[station].name, MESSAGE_GET_TIMEZONE_BY_GPS);
     AddToQueueForGlobe(Stations.StationNUG[station].url, MESSAGE_START_THIS_STATION);
     lv_label_set_text(ui_Station_Name, Stations.StationNUG[station].name);
     lv_label_set_text(ui_Station_Title, "");
@@ -767,11 +854,93 @@ void AddStationToQueueForGlobe(uint16_t station)
   else 
   { DataFromDisplay.D_StationGpsNS = Favorites[station-MAX_STATIONS].gps_ns;
     DataFromDisplay.D_StationGpsEW = Favorites[station-MAX_STATIONS].gps_ew;
-    AddToQueueForGlobe(Favorites[station-MAX_STATIONS].name, MESSAGE_GET_TIMEZONE);
+    AddToQueueForGlobe(Favorites[station-MAX_STATIONS].name, MESSAGE_GET_TIMEZONE_BY_GPS);
     AddToQueueForGlobe(Favorites[station-MAX_STATIONS].url, MESSAGE_START_THIS_STATION);
     lv_label_set_text(ui_Station_Name, Favorites[station-MAX_STATIONS].name);
     lv_label_set_text(ui_Station_Title, "");
   }
+}
+
+
+void WriteStationsBitmapFile(fs::FS &fs, char* filename)
+{ Serial.printf("WriteStationsBitmapFile -> %s\n", filename);
+  File bitmap = fs.open(filename, FILE_WRITE);
+  if(bitmap) 
+  { Serial.printf("WriteStationsBitmapFile opened -> %s\n", filename);
+    char *p = (char*) &StationsMap;
+    p+=2; // skip filler in structure
+    Serial.printf("StationsMap-2 size = %ld\n", sizeof(StationsMap)-2);
+    Serial.printf("StationsMap.bmpheader size = %ld\n", sizeof(StationsMap.bmpheader));
+    Serial.printf("StationsMap.bmpct size     = %ld\n", sizeof(StationsMap.bmpct));
+    Serial.printf("StationsMap.pixeldata size = %ld\n", sizeof(StationsMap.pixeldata));
+
+    int n = 54+8;
+    // write header
+    while(n)
+    { bitmap.write(*p++);
+      n--;
+    }
+
+    // write file, bottom up
+    int w;
+    for(n=179;n>=0;n--) // 180 latitudal lines
+    { p = (char*)&StationsMap.pixeldata[(n*48)];
+      for(w=0;w<48;w++)
+      { bitmap.write(*p++);
+      }
+    }
+  }
+  bitmap.close();
+  Serial.printf("WriteStationsBitmapFile closed -> %s\n", filename);
+}
+
+
+void ReadStationsBitmapFile(fs::FS &fs, char* filename)
+{ File bitmap = fs.open(filename, FILE_READ);
+  char *p = (char*) &StationsMap;
+  p+=2; // skip filler in structure
+  if(!bitmap)
+  { Serial.printf("No File %s found\n", filename);
+    return;
+  }
+  Serial.printf("File %s opened\n", filename);
+  while(bitmap.available())
+  { int n = 54+8;
+    while(n)
+    { char c = bitmap.read();
+      *p++ = c;
+      n--;
+    }
+
+    int w;
+    for(n=179;n>=0;n--) // 180 latitudal lines
+    { p = (char*)&StationsMap.pixeldata[(n*48)];
+      for(w=0;w<48;w++)
+      { char c = bitmap.read();
+        *p++ = c;
+      }
+    }
+  }
+  bitmap.close();
+  WriteStationsBitmapFile(fs, "/stationsmap-copy.bmp");
+}
+
+
+void AppendBadStationToFile(fs::FS &fs, char* filename, char *url)
+{ File badfile = fs.open(filename, FILE_APPEND);
+
+  if(!badfile)
+  { Serial.printf("Could not open Bad Station File %s for append\n", filename);
+    badfile.close();
+    badfile = fs.open(filename, FILE_WRITE);
+    badfile.println("append");  
+    badfile.close();
+    return;
+  }
+  Serial.printf("Bad Station File %s opened for append, writeln %s\n", filename, url);
+//  badfile.seek(EOF);
+  badfile.println(url);  
+  badfile.close();
 }
 
 /*

@@ -24,6 +24,10 @@ extern void ui_event_HomeButton7(lv_event_t * e);
 extern lv_obj_t * ui_HomeButton7;
 extern lv_obj_t * ui_Text_Bass;
 extern lv_obj_t * ui_Text_Treble;
+extern void ui_event_SaveToneVol(lv_event_t * e);
+extern lv_obj_t * ui_SaveToneVol;
+extern lv_obj_t * ui_ToneControlInstruction;
+extern lv_obj_t * ui_SaveToneVolText;
 // CUSTOM VARIABLES
 extern lv_obj_t * uic_ToneControlScreen;
 extern lv_obj_t * uic_BassArc;
@@ -32,6 +36,9 @@ extern lv_obj_t * uic_TrebleArc;
 extern lv_obj_t * uic_TrebleValue;
 extern lv_obj_t * uic_Text_Bass;
 extern lv_obj_t * uic_Text_Treble;
+extern lv_obj_t * uic_SaveToneVol;
+extern lv_obj_t * uic_ToneControlInstruction;
+extern lv_obj_t * uic_SaveToneVolText;
 
 #ifdef __cplusplus
 } /*extern "C"*/

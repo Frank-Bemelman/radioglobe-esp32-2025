@@ -25,7 +25,7 @@ typedef struct {
 #define MESSAGE_SSID_FOR_GLOBE 13
 #define MESSAGE_PASSWORD_FOR_GLOBE 14
 #define MESSAGE_WIFI_STATUS 15
-#define MESSAGE_CALIBRATED 16
+#define MESSAGE_CALIBRATE_ZERO 16
 #define MESSAGE_FINDNEWSTATION 17
 #define MESSAGE_GLOBE_MAC 18
 #define MESSAGE_GLOBE_IP 19
@@ -41,12 +41,21 @@ typedef struct {
 #define MESSAGE_GLOBE_WANTS_CURRENT_STATION 26 // when globe reboots
 
 // request from display to get a certain timezone
-#define MESSAGE_GET_TIMEZONE 27
+#define MESSAGE_GET_TIMEZONE_BY_GPS 27
 
 #define MESSAGE_STREAMING_IDLE_MS 28
 
 #define MESSAGE_NEW_LIST_LOADED 29 // after a succesful search
 
+#define MESSAGE_GET_TIMEZONE 30
+
+#define MESSAGE_POWERDOWN 31
+#define MESSAGE_POWERUP 32
+
+#define MESSAGE_VOLUME_AND_TONE 33
+#define MESSAGE_DISPLAY_WANTS_VOLUME_AND_TONE 34
+#define MESSAGE_STORE_VOLUME_AND_TONE 35
+#define MESSAGE_AUDIO_EOF_STREAM 36
 
 
 #define MESSAGE_URL_HTTP_400_BAD_REQUEST 400
@@ -80,7 +89,6 @@ typedef struct struct_message2 {
     int16_t  FindTimeZone; // tells display that Globe is occupied finding timezone
     int16_t  Unraveling; // tells display that Globe is occupied unraveling .m3u or .pls url to get the actual streaming url
     int16_t  UnravelingResult; // tells display that Globe is occupied unraveling .m3u or .pls url to get the actual streaming url
-    uint16_t G_actualvolume;
     uint16_t G_QueueSerialNumber;
     uint16_t G_QueueMessageType;
     uint16_t D_QueueStationIndex; // station connected -1 if idle
@@ -97,8 +105,9 @@ typedef struct struct_message2 {
 
 
 
-// Declare a structurs named DataFromDisplay to hold various variables
+// Declare a two structures storing/comparing outgoing variables from display
 struct_from_display DataFromDisplay;
+struct_from_display PrevDataFromDisplay;
 
 // Declare two structures for storing/comparing incoming variables from globe
 struct_from_globe DataFromGlobe;

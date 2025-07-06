@@ -38,6 +38,7 @@ extern "C" {
 #include "ui_Favorites.h"
 #include "ui_ToneControlScreen.h"
 #include "ui_CalibrationScreenAdvanced.h"
+#include "ui_Power.h"
 
 ///////////////////// VARIABLES ////////////////////
 
@@ -51,13 +52,14 @@ LV_IMG_DECLARE(ui_img_cog_png);    // assets/cog.png
 LV_IMG_DECLARE(ui_img_batterylow_png);    // assets/batterylow.png
 LV_IMG_DECLARE(ui_img_batterymedium_png);    // assets/batterymedium.png
 LV_IMG_DECLARE(ui_img_batteryhigh_png);    // assets/batteryhigh.png
-LV_IMG_DECLARE(ui_img_volumeoff_png);    // assets/volumeoff.png
-LV_IMG_DECLARE(ui_img_406973197);    // assets/arrow-left-bold-32x32.png
-LV_IMG_DECLARE(ui_img_1975865912);    // assets/arrow-right-bold-32x32.png
+LV_IMG_DECLARE(ui_img_power75x75_png);    // assets/power75x75.png
+LV_IMG_DECLARE(ui_img_arrow_left_bold_32x32_png);    // assets/arrow_left_bold_32x32.png
+LV_IMG_DECLARE(ui_img_arrow_right_bold_32x32_png);    // assets/arrow_right_bold_32x32.png
 LV_IMG_DECLARE(ui_img_home_png);    // assets/home.png
 LV_IMG_DECLARE(ui_img_stationsmap150k_png);    // assets/stationsmap150K.png
 LV_IMG_DECLARE(ui_img_circle16x16_png);    // assets/circle16x16.png
-LV_IMG_DECLARE(ui_img_1292386101);    // assets/triangle-down-16x16.png
+LV_IMG_DECLARE(ui_img_triangle_down_16x16_png);    // assets/triangle_down_16x16.png
+LV_IMG_DECLARE(ui_img_power256x256_png);    // assets/power256x256.png
 
 // FONTS
 LV_FONT_DECLARE(ui_font_font1);

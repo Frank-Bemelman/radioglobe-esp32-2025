@@ -99,3 +99,105 @@ void click5(lv_event_t * e)
   Serial.println(SecretCode);
 }
 
+void PowerCycle(lv_event_t * e)
+{ if(isLongPressed(e)==5)
+  { beepforMs(1000);
+    Serial.printf("Power button long pressed\n");
+    if(bPowerStatus == true)
+    { // Power off
+      bPowerStatus = false;
+      ui_object_set_themeable_style_property(uic_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_red);
+      ui_object_set_themeable_style_property(uic_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_red);
+      lv_obj_invalidate(uic_Power_Off_Icon);
+      ui_object_set_themeable_style_property(uic_Big_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_red);
+      ui_object_set_themeable_style_property(uic_Big_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_red);
+      lv_obj_invalidate(uic_Big_Power_Off_Icon);
+      lv_refr_now(NULL);
+      Lvgl_Loop();  
+
+      
+      AddToQueueForGlobe("OFF", MESSAGE_POWERDOWN);
+      while(backlightvalue)
+      { Set_Backlight(--backlightvalue);    
+        delay(15);
+      }
+      delay(100);
+      lv_scr_load(ui_Power);
+    }
+    else
+    { // Power om
+      bPowerStatus = true;
+      ui_object_set_themeable_style_property(uic_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_green);
+      ui_object_set_themeable_style_property(uic_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_green);
+      lv_obj_invalidate(uic_Power_Off_Icon);
+      ui_object_set_themeable_style_property(uic_Big_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_green);
+      ui_object_set_themeable_style_property(uic_Big_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_green);
+      lv_obj_invalidate(uic_Big_Power_Off_Icon);
+      lv_refr_now(NULL);
+      Lvgl_Loop();  
+
+      AddToQueueForGlobe("ON", MESSAGE_POWERUP);
+      delay(1000);
+      lv_scr_load(ui_Home);
+    }
+  }
+
+//    lv_label_set_text(ui_DatabaseProgress, "");
+//    lv_label_set_text(ui_DatabaseProgress1, "Long Press Button To Start");
+//    lv_obj_add_state(uic_MapBanner, LV_STATE_DISABLED); 
+//    lv_obj_add_state(uic_MapCursor, LV_STATE_DISABLED); 
+    
+//    lv_scr_load(ui_Power);
+    Lvgl_Loop();  
+//    bCheckDatabase = true; // starts automatically 
+}
+
+void SaveVolTone(lv_event_t * e)
+{ if(isLongPressed(e)==5)
+  { // tell globe to save
+    AddToQueueForGlobe("SAVE VOLUME AND TONE CONTROLS", MESSAGE_STORE_VOLUME_AND_TONE);
+    beepforMs(1000);
+  }
+}
+
+// on Home screen, 'now playing' pressed
+void StationInfo(lv_event_t * e)
+{ char content[256];
+  if(isLongPressed(e)==5)
+  { // use database screen to show where station is located on worldmap with gps coordinates
+    beepforMs(1000);
+
+  }
+  else
+  { beepforMs(100);
+    if(Stations.playing>=0)
+    { Serial.printf("Station Info clicked from Home screen\n");
+      lv_obj_clear_state(uic_MapBanner, LV_STATE_DISABLED); 
+      lv_obj_add_flag(uic_RebuildDatabase, LV_OBJ_FLAG_HIDDEN);
+      lv_obj_add_flag(uic_RebuildDatabaseButtonText, LV_OBJ_FLAG_HIDDEN);
+
+
+      if(Stations.playing<MAX_STATIONS)
+      { sprintf(content, "GPS NS %2.6f - EW %3.6f", Stations.StationNUG[Stations.playing].gps_ns, Stations.StationNUG[Stations.playing].gps_ew);
+        lv_label_set_text(ui_DatabaseProgress, Stations.StationNUG[Stations.playing].name);  
+        lv_obj_set_pos(uic_MapCursor, (int)Stations.StationNUG[Stations.playing].gps_ew, -(int)Stations.StationNUG[Stations.playing].gps_ns);
+        sprintf(content,"The URL Of This Station Is\n%s\n", Stations.StationNUG[Stations.playing].url);
+        lv_label_set_text(ui_MapBanner, content);
+
+      }
+      else
+      { sprintf(content, "GPS NS %2.6f - EW %3.6f", Favorites[Stations.playing-MAX_STATIONS].gps_ns, Favorites[Stations.playing-MAX_STATIONS].gps_ew);
+        lv_label_set_text(ui_DatabaseProgress, Favorites[Stations.playing-MAX_STATIONS].name);  
+        lv_obj_set_pos(uic_MapCursor, (int)Favorites[Stations.playing-MAX_STATIONS].gps_ew, -(int)Favorites[Stations.playing-MAX_STATIONS].gps_ns);
+        sprintf(content,"The URL Of This Preset Station Is\n%s\n", Stations.StationNUG[Stations.playing-MAX_STATIONS].url);
+        lv_label_set_text(ui_MapBanner, content);
+      }
+      lv_label_set_text(ui_DatabaseProgress1, content);
+
+
+      lv_scr_load(ui_DatabaseScreen);
+    }
+  }
+}
+
+

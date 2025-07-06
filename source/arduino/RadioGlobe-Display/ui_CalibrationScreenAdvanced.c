@@ -182,7 +182,7 @@ void ui_CalibrationScreenAdvanced_screen_init(void)
     lv_obj_set_style_text_font(ui_RollerNS, &lv_font_montserrat_32, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_TriangleFrom = lv_img_create(ui_CalibrationScreenAdvanced);
-    lv_img_set_src(ui_TriangleFrom, &ui_img_1292386101);
+    lv_img_set_src(ui_TriangleFrom, &ui_img_triangle_down_16x16_png);
     lv_obj_set_width(ui_TriangleFrom, 16);
     lv_obj_set_height(ui_TriangleFrom, 16);
     lv_obj_set_x(ui_TriangleFrom, 0);
@@ -196,7 +196,7 @@ void ui_CalibrationScreenAdvanced_screen_init(void)
                                            _ui_theme_alpha_turquoise);
 
     ui_TriangleTo = lv_img_create(ui_CalibrationScreenAdvanced);
-    lv_img_set_src(ui_TriangleTo, &ui_img_1292386101);
+    lv_img_set_src(ui_TriangleTo, &ui_img_triangle_down_16x16_png);
     lv_obj_set_width(ui_TriangleTo, 16);
     lv_obj_set_height(ui_TriangleTo, 16);
     lv_obj_set_x(ui_TriangleTo, 0);

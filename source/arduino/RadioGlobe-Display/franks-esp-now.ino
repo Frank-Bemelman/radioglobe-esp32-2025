@@ -59,10 +59,9 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len)
   //Serial.println(DataFromGlobe.Title);
 }
  
-void setup_esp_now() {
-  
-    // Set device as a Wi-Fi Station & accespoint 
-//  WiFi.begin("SSID", "PASSWORD");
+void setup_esp_now(void) 
+{ // Set device as a Wi-Fi Station & accespoint 
+  //  WiFi.begin("SSID", "PASSWORD");
   WiFi.mode(WIFI_AP_STA); // hoewel, WIFI_STA werkte ook
 
   // Init ESP-NOW
@@ -108,19 +107,19 @@ void loop_esp_now() {
     { // yes we are in sync, get new message from queue to send out, if any
 
       if(acked_qserialnumber != DataFromGlobe.D_QueueSerialNumber)
-      { Serial.printf("Message %d acknowledged by globe.\n", DataFromGlobe.D_QueueSerialNumber);
+      { // Serial.printf("Message %d acknowledged by globe.\n", DataFromGlobe.D_QueueSerialNumber);
         acked_qserialnumber = DataFromGlobe.D_QueueSerialNumber;
       }  
 
-//      Serial.printf("ToGlobe.QueueCnt = %d\n", ToGlobe.QueueCnt);
+      // Serial.printf("ToGlobe.QueueCnt = %d\n", ToGlobe.QueueCnt);
       if(ToGlobe.QueueCnt>0)
       { if(ToGlobe.QueueIndexOut>=QUEUESIZE)ToGlobe.QueueIndexOut = 0;
-        Serial.printf("Need to send if ToGlobe.QueueIndexin %d != ToGlobe.QueueIndexOut %d\n", ToGlobe.QueueIndexIn, ToGlobe.QueueIndexOut);
+        //Serial.printf("Need to send if ToGlobe.QueueIndexin %d != ToGlobe.QueueIndexOut %d\n", ToGlobe.QueueIndexIn, ToGlobe.QueueIndexOut);
         if(ToGlobe.QueueIndexOut != ToGlobe.QueueIndexIn)
         { DataFromDisplay.D_QueueSerialNumber++;
           strcpy(DataFromDisplay.D_QueueMessage, ToGlobe.QueueMessage[ToGlobe.QueueIndexOut]);
           DataFromDisplay.D_QueueMessageType = ToGlobe.QueueMessageType[ToGlobe.QueueIndexOut];
-          Serial.printf("Messagetype %d-%d sent to display = >%s<\n", DataFromDisplay.D_QueueSerialNumber, DataFromDisplay.D_QueueMessageType, DataFromDisplay.D_QueueMessage);
+          Serial.printf("Messagetype %d sent to display = >%s<\n", DataFromDisplay.D_QueueMessageType, DataFromDisplay.D_QueueMessage);
           ToGlobe.QueueIndexOut++;
           ToGlobe.QueueCnt--;
         }
@@ -147,7 +146,7 @@ void AddToQueueForGlobe(const char* message, uint16_t queuemessagetype) // one e
     strncpy(ToGlobe.QueueMessage[ToGlobe.QueueIndexIn], message, QUEUEMESSAGELENGTH);
     ToGlobe.QueueMessage[ToGlobe.QueueIndexIn][QUEUEMESSAGELENGTH-1] = 0; // terminate just in case of idiotic long message
     ToGlobe.QueueMessageType[ToGlobe.QueueIndexIn] = queuemessagetype;
-    Serial.printf("Message Queued in %d  = >%s<\n", ToGlobe.QueueIndexIn, ToGlobe.QueueMessage[ToGlobe.QueueIndexIn]);
+    //Serial.printf("Message type %d Queued in %d  = >%s<\n", queuemessagetype, ToGlobe.QueueIndexIn, ToGlobe.QueueMessage[ToGlobe.QueueIndexIn]);
 
     ToGlobe.QueueIndexIn++;
     ToGlobe.QueueCnt++;

@@ -7,7 +7,7 @@
 
 lv_obj_t * uic_arrowright;
 lv_obj_t * uic_arrowleft;
-lv_obj_t * uic_Volume_Off_Icon;
+lv_obj_t * uic_Power_Off_Icon;
 lv_obj_t * uic_Station_Name;
 lv_obj_t * uic_Time_Zone;
 lv_obj_t * uic_BatteryVoltage;
@@ -37,7 +37,7 @@ lv_obj_t * ui_Battery_Icon_High = NULL;
 lv_obj_t * ui_BatteryVoltage = NULL;
 lv_obj_t * ui_Time_Zone = NULL;
 lv_obj_t * ui_Station_Name = NULL;
-lv_obj_t * ui_Volume_Off_Icon = NULL;
+lv_obj_t * ui_Power_Off_Icon = NULL;
 lv_obj_t * ui_arrowleft = NULL;
 lv_obj_t * ui_arrowright = NULL;
 // event funtions
@@ -61,6 +61,18 @@ void ui_event_Text_Radio_Globe(lv_event_t * e)
     }
 }
 
+void ui_event_Text_Now_Playing(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_CLICKED) {
+        StationInfo(e);
+    }
+    if(event_code == LV_EVENT_LONG_PRESSED_REPEAT) {
+        StationInfo(e);
+    }
+}
+
 void ui_event_SettingButton(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
@@ -68,6 +80,18 @@ void ui_event_SettingButton(lv_event_t * e)
     if(event_code == LV_EVENT_CLICKED) {
         beep(e);
         SetupEnter(e);
+    }
+}
+
+void ui_event_Power_Off_Icon(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_CLICKED) {
+        PowerCycle(e);
+    }
+    if(event_code == LV_EVENT_LONG_PRESSED_REPEAT) {
+        PowerCycle(e);
     }
 }
 
@@ -105,7 +129,7 @@ void ui_Home_screen_init(void)
     lv_obj_set_x(ui_VolumeArc, 0);
     lv_obj_set_y(ui_VolumeArc, 114);
     lv_obj_set_align(ui_VolumeArc, LV_ALIGN_CENTER);
-    lv_arc_set_value(ui_VolumeArc, 50);
+    lv_arc_set_value(ui_VolumeArc, 0);
 
     lv_obj_set_style_arc_color(ui_VolumeArc, lv_color_hex(0xFBFF40), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_arc_opa(ui_VolumeArc, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
@@ -130,7 +154,7 @@ void ui_Home_screen_init(void)
     lv_obj_set_x(ui_VolumeValue, 0);
     lv_obj_set_y(ui_VolumeValue, 108);
     lv_obj_set_align(ui_VolumeValue, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_VolumeValue, "50");
+    lv_label_set_text(ui_VolumeValue, "0");
     lv_obj_set_style_text_color(ui_VolumeValue, lv_color_hex(0xCCCCCC), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_VolumeValue, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_VolumeValue, &lv_font_montserrat_48, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -157,6 +181,7 @@ void ui_Home_screen_init(void)
     lv_obj_set_y(ui_Text_Now_Playing, -50);
     lv_obj_set_align(ui_Text_Now_Playing, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Text_Now_Playing, "NOW PLAYING");
+    lv_obj_add_flag(ui_Text_Now_Playing, LV_OBJ_FLAG_CLICKABLE);     /// Flags
     lv_obj_set_style_text_color(ui_Text_Now_Playing, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Text_Now_Playing, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui_Text_Now_Playing, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -184,7 +209,7 @@ void ui_Home_screen_init(void)
     lv_obj_set_y(ui_Station_Title, -28);
     lv_obj_set_align(ui_Station_Title, LV_ALIGN_CENTER);
     lv_label_set_long_mode(ui_Station_Title, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_label_set_text(ui_Station_Title, "SILLY TEST KDYBYCH VĚDĚL MÁ PANäéë");
+    lv_label_set_text(ui_Station_Title, "");
     lv_obj_clear_flag(ui_Station_Title, LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
                       LV_OBJ_FLAG_SCROLL_CHAIN);    /// Flags
     lv_obj_set_style_text_color(ui_Station_Title, lv_color_hex(0xCCCCCC), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -295,33 +320,34 @@ void ui_Home_screen_init(void)
     lv_obj_set_style_text_font(ui_Time_Zone, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Station_Name = lv_label_create(ui_Home);
-    lv_obj_set_width(ui_Station_Name, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_width(ui_Station_Name, 360);
     lv_obj_set_height(ui_Station_Name, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_Station_Name, 0);
     lv_obj_set_y(ui_Station_Name, -75);
     lv_obj_set_align(ui_Station_Name, LV_ALIGN_CENTER);
+    lv_label_set_long_mode(ui_Station_Name, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_label_set_text(ui_Station_Name, "STATION NAME");
     lv_obj_set_style_text_color(ui_Station_Name, lv_color_hex(0xCCCCCC), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Station_Name, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui_Station_Name, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_Station_Name, &ui_font_font1, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Volume_Off_Icon = lv_img_create(ui_Home);
-    lv_img_set_src(ui_Volume_Off_Icon, &ui_img_volumeoff_png);
-    lv_obj_set_width(ui_Volume_Off_Icon, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Volume_Off_Icon, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Volume_Off_Icon, 0);
-    lv_obj_set_y(ui_Volume_Off_Icon, 108);
-    lv_obj_set_align(ui_Volume_Off_Icon, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_Volume_Off_Icon, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
-    lv_obj_clear_flag(ui_Volume_Off_Icon, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    ui_object_set_themeable_style_property(ui_Volume_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
-                                           _ui_theme_color_turquoise);
-    ui_object_set_themeable_style_property(ui_Volume_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
-                                           _ui_theme_alpha_turquoise);
+    ui_Power_Off_Icon = lv_img_create(ui_Home);
+    lv_img_set_src(ui_Power_Off_Icon, &ui_img_power75x75_png);
+    lv_obj_set_width(ui_Power_Off_Icon, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Power_Off_Icon, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Power_Off_Icon, 0);
+    lv_obj_set_y(ui_Power_Off_Icon, 108);
+    lv_obj_set_align(ui_Power_Off_Icon, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_Power_Off_Icon, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_clear_flag(ui_Power_Off_Icon, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_object_set_themeable_style_property(ui_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
+                                           _ui_theme_color_green);
+    ui_object_set_themeable_style_property(ui_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
+                                           _ui_theme_alpha_green);
 
     ui_arrowleft = lv_img_create(ui_Home);
-    lv_img_set_src(ui_arrowleft, &ui_img_406973197);
+    lv_img_set_src(ui_arrowleft, &ui_img_arrow_left_bold_32x32_png);
     lv_obj_set_width(ui_arrowleft, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_arrowleft, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_arrowleft, -220);
@@ -335,7 +361,7 @@ void ui_Home_screen_init(void)
                                            _ui_theme_alpha_turquoise);
 
     ui_arrowright = lv_img_create(ui_Home);
-    lv_img_set_src(ui_arrowright, &ui_img_1975865912);
+    lv_img_set_src(ui_arrowright, &ui_img_arrow_right_bold_32x32_png);
     lv_obj_set_width(ui_arrowright, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_arrowright, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_arrowright, 210);
@@ -350,7 +376,9 @@ void ui_Home_screen_init(void)
 
     lv_obj_add_event_cb(ui_VolumeArc, ui_event_VolumeArc, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_Text_Radio_Globe, ui_event_Text_Radio_Globe, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_Text_Now_Playing, ui_event_Text_Now_Playing, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_SettingButton, ui_event_SettingButton, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_Power_Off_Icon, ui_event_Power_Off_Icon, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_arrowleft, ui_event_arrowleft, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_arrowright, ui_event_arrowright, LV_EVENT_ALL, NULL);
     uic_Home = ui_Home;
@@ -366,7 +394,7 @@ void ui_Home_screen_init(void)
     uic_BatteryVoltage = ui_BatteryVoltage;
     uic_Time_Zone = ui_Time_Zone;
     uic_Station_Name = ui_Station_Name;
-    uic_Volume_Off_Icon = ui_Volume_Off_Icon;
+    uic_Power_Off_Icon = ui_Power_Off_Icon;
     uic_arrowleft = ui_arrowleft;
     uic_arrowright = ui_arrowright;
 
@@ -406,8 +434,8 @@ void ui_Home_screen_destroy(void)
     ui_Time_Zone = NULL;
     uic_Station_Name = NULL;
     ui_Station_Name = NULL;
-    uic_Volume_Off_Icon = NULL;
-    ui_Volume_Off_Icon = NULL;
+    uic_Power_Off_Icon = NULL;
+    ui_Power_Off_Icon = NULL;
     uic_arrowleft = NULL;
     ui_arrowleft = NULL;
     uic_arrowright = NULL;

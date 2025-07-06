@@ -42,10 +42,11 @@ typedef struct BMPColorTable
 typedef struct bmpfile{                // Total: 54 + 8 + 8100 bytes
   BMPHeader bmpheader;          // 54 bytes
   BMPColorTable bmpct;          // 8 bytes
-  uint8_t  pixeldata[8640];     // 180 ns entries of 360/8=45 ew bytes, 8100 bytes of pixeldata
+  uint8_t  pixeldata[8640];     // 180 ns entries of 360/8=45 ew bytes, round up to multiple of 4 bytes -> 48 -> 180x48 -> 8460 bytes of pixeldata
 }; 
 
 #define MAX_STATIONS 150
+#define FAVORITE_STATIONS 4
 
 typedef struct station_name_url_gps
 { char name[64];
@@ -55,7 +56,7 @@ typedef struct station_name_url_gps
 };
 
 typedef struct stations_arraybin
-{ station_name_url_gps StationNUG[MAX_STATIONS];
+{ station_name_url_gps StationNUG[MAX_STATIONS+FAVORITE_STATIONS];
   uint16_t count;
   int16_t  requested;
   int16_t  playing;

@@ -5,6 +5,9 @@
 
 #include "ui.h"
 
+lv_obj_t * uic_SaveToneVolText;
+lv_obj_t * uic_ToneControlInstruction;
+lv_obj_t * uic_SaveToneVol;
 lv_obj_t * uic_Text_Treble;
 lv_obj_t * uic_Text_Bass;
 lv_obj_t * uic_TrebleValue;
@@ -20,6 +23,9 @@ lv_obj_t * ui_TrebleValue = NULL;
 lv_obj_t * ui_HomeButton7 = NULL;
 lv_obj_t * ui_Text_Bass = NULL;
 lv_obj_t * ui_Text_Treble = NULL;
+lv_obj_t * ui_SaveToneVol = NULL;
+lv_obj_t * ui_ToneControlInstruction = NULL;
+lv_obj_t * ui_SaveToneVolText = NULL;
 // event funtions
 void ui_event_BassArc(lv_event_t * e)
 {
@@ -51,6 +57,18 @@ void ui_event_HomeButton7(lv_event_t * e)
     }
 }
 
+void ui_event_SaveToneVol(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_LONG_PRESSED_REPEAT) {
+        SaveVolTone(e);
+    }
+    if(event_code == LV_EVENT_CLICKED) {
+        SaveVolTone(e);
+    }
+}
+
 // build funtions
 
 void ui_ToneControlScreen_screen_init(void)
@@ -61,8 +79,8 @@ void ui_ToneControlScreen_screen_init(void)
     ui_BassArc = lv_arc_create(ui_ToneControlScreen);
     lv_obj_set_width(ui_BassArc, 200);
     lv_obj_set_height(ui_BassArc, 200);
-    lv_obj_set_x(ui_BassArc, -125);
-    lv_obj_set_y(ui_BassArc, 0);
+    lv_obj_set_x(ui_BassArc, -120);
+    lv_obj_set_y(ui_BassArc, 30);
     lv_obj_set_align(ui_BassArc, LV_ALIGN_CENTER);
     lv_arc_set_value(ui_BassArc, 50);
 
@@ -75,8 +93,8 @@ void ui_ToneControlScreen_screen_init(void)
     ui_BassValue = lv_label_create(ui_ToneControlScreen);
     lv_obj_set_width(ui_BassValue, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_BassValue, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_BassValue, -125);
-    lv_obj_set_y(ui_BassValue, 0);
+    lv_obj_set_x(ui_BassValue, -120);
+    lv_obj_set_y(ui_BassValue, 30);
     lv_obj_set_align(ui_BassValue, LV_ALIGN_CENTER);
     lv_label_set_text(ui_BassValue, "50");
     lv_obj_set_style_text_color(ui_BassValue, lv_color_hex(0xCCCCCC), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -87,8 +105,8 @@ void ui_ToneControlScreen_screen_init(void)
     ui_TrebleArc = lv_arc_create(ui_ToneControlScreen);
     lv_obj_set_width(ui_TrebleArc, 200);
     lv_obj_set_height(ui_TrebleArc, 200);
-    lv_obj_set_x(ui_TrebleArc, 125);
-    lv_obj_set_y(ui_TrebleArc, 0);
+    lv_obj_set_x(ui_TrebleArc, 120);
+    lv_obj_set_y(ui_TrebleArc, 30);
     lv_obj_set_align(ui_TrebleArc, LV_ALIGN_CENTER);
     lv_arc_set_value(ui_TrebleArc, 50);
 
@@ -101,8 +119,8 @@ void ui_ToneControlScreen_screen_init(void)
     ui_TrebleValue = lv_label_create(ui_ToneControlScreen);
     lv_obj_set_width(ui_TrebleValue, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_TrebleValue, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_TrebleValue, 127);
-    lv_obj_set_y(ui_TrebleValue, -2);
+    lv_obj_set_x(ui_TrebleValue, 120);
+    lv_obj_set_y(ui_TrebleValue, 30);
     lv_obj_set_align(ui_TrebleValue, LV_ALIGN_CENTER);
     lv_label_set_text(ui_TrebleValue, "50");
     lv_obj_set_style_text_color(ui_TrebleValue, lv_color_hex(0xCCCCCC), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -127,8 +145,8 @@ void ui_ToneControlScreen_screen_init(void)
     ui_Text_Bass = lv_label_create(ui_ToneControlScreen);
     lv_obj_set_width(ui_Text_Bass, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Text_Bass, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Text_Bass, -125);
-    lv_obj_set_y(ui_Text_Bass, 70);
+    lv_obj_set_x(ui_Text_Bass, -120);
+    lv_obj_set_y(ui_Text_Bass, 100);
     lv_obj_set_align(ui_Text_Bass, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Text_Bass, "BASS");
     lv_obj_set_style_text_color(ui_Text_Bass, lv_color_hex(0xCCCCCC), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -138,17 +156,52 @@ void ui_ToneControlScreen_screen_init(void)
     ui_Text_Treble = lv_label_create(ui_ToneControlScreen);
     lv_obj_set_width(ui_Text_Treble, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Text_Treble, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Text_Treble, 125);
-    lv_obj_set_y(ui_Text_Treble, 70);
+    lv_obj_set_x(ui_Text_Treble, 120);
+    lv_obj_set_y(ui_Text_Treble, 100);
     lv_obj_set_align(ui_Text_Treble, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Text_Treble, "TREBLE");
     lv_obj_set_style_text_color(ui_Text_Treble, lv_color_hex(0xCCCCCC), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Text_Treble, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_Text_Treble, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_SaveToneVol = lv_btn_create(ui_ToneControlScreen);
+    lv_obj_set_width(ui_SaveToneVol, 200);
+    lv_obj_set_height(ui_SaveToneVol, 50);
+    lv_obj_set_x(ui_SaveToneVol, 0);
+    lv_obj_set_y(ui_SaveToneVol, -160);
+    lv_obj_set_align(ui_SaveToneVol, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_SaveToneVol, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_SaveToneVol, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_object_set_themeable_style_property(ui_SaveToneVol, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR,
+                                           _ui_theme_color_turquoise);
+    ui_object_set_themeable_style_property(ui_SaveToneVol, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA,
+                                           _ui_theme_alpha_turquoise);
+
+    ui_ToneControlInstruction = lv_label_create(ui_ToneControlScreen);
+    lv_obj_set_width(ui_ToneControlInstruction, LV_SIZE_CONTENT);   /// 327
+    lv_obj_set_height(ui_ToneControlInstruction, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_ToneControlInstruction, 0);
+    lv_obj_set_y(ui_ToneControlInstruction, -110);
+    lv_obj_set_align(ui_ToneControlInstruction, LV_ALIGN_CENTER);
+    lv_label_set_long_mode(ui_ToneControlInstruction, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_label_set_text(ui_ToneControlInstruction, "Long Press Button To Save");
+    lv_obj_set_style_text_font(ui_ToneControlInstruction, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_SaveToneVolText = lv_label_create(ui_ToneControlScreen);
+    lv_obj_set_width(ui_SaveToneVolText, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_SaveToneVolText, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_SaveToneVolText, 0);
+    lv_obj_set_y(ui_SaveToneVolText, -160);
+    lv_obj_set_align(ui_SaveToneVolText, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_SaveToneVolText, "SAVE THIS");
+    lv_obj_set_style_text_color(ui_SaveToneVolText, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_SaveToneVolText, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_SaveToneVolText, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+
     lv_obj_add_event_cb(ui_BassArc, ui_event_BassArc, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_TrebleArc, ui_event_TrebleArc, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_HomeButton7, ui_event_HomeButton7, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_SaveToneVol, ui_event_SaveToneVol, LV_EVENT_ALL, NULL);
     uic_ToneControlScreen = ui_ToneControlScreen;
     uic_BassArc = ui_BassArc;
     uic_BassValue = ui_BassValue;
@@ -156,6 +209,9 @@ void ui_ToneControlScreen_screen_init(void)
     uic_TrebleValue = ui_TrebleValue;
     uic_Text_Bass = ui_Text_Bass;
     uic_Text_Treble = ui_Text_Treble;
+    uic_SaveToneVol = ui_SaveToneVol;
+    uic_ToneControlInstruction = ui_ToneControlInstruction;
+    uic_SaveToneVolText = ui_SaveToneVolText;
 
 }
 
@@ -179,5 +235,11 @@ void ui_ToneControlScreen_screen_destroy(void)
     ui_Text_Bass = NULL;
     uic_Text_Treble = NULL;
     ui_Text_Treble = NULL;
+    uic_SaveToneVol = NULL;
+    ui_SaveToneVol = NULL;
+    uic_ToneControlInstruction = NULL;
+    ui_ToneControlInstruction = NULL;
+    uic_SaveToneVolText = NULL;
+    ui_SaveToneVolText = NULL;
 
 }

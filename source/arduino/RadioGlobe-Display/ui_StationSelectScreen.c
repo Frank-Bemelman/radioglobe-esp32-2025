@@ -48,7 +48,7 @@ void ui_StationSelectScreen_screen_init(void)
     lv_obj_clear_flag(ui_StationSelectScreen, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
     ui_StationRoller = lv_roller_create(ui_StationSelectScreen);
-    lv_roller_set_options(ui_StationRoller, "NO STATIONS", LV_ROLLER_MODE_INFINITE);
+    lv_roller_set_options(ui_StationRoller, "NO STATIONS", LV_ROLLER_MODE_NORMAL);
     lv_roller_set_selected(ui_StationRoller, 1, LV_ANIM_OFF);
     lv_obj_set_width(ui_StationRoller, 480);
     lv_obj_set_height(ui_StationRoller, 240);

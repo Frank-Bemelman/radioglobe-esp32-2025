@@ -12,12 +12,14 @@ extern "C" {
 
 void RadioGlobeClick(lv_event_t * e);
 void beep(lv_event_t * e);
+void StationInfo(lv_event_t * e);
 void SetupEnter(lv_event_t * e);
+void PowerCycle(lv_event_t * e);
 void CalibrationEnter(lv_event_t * e);
 void DatabaseEnter(lv_event_t * e);
 void ResetAllEnter(lv_event_t * e);
 void CalibrationSetAsZero(lv_event_t * e);
-void CalibrationLattitudes(lv_event_t * e);
+void CalibrationLatitudes(lv_event_t * e);
 void CalibrationLongitudes(lv_event_t * e);
 void CalibrationAdvanced(lv_event_t * e);
 void RebuildDatabase(lv_event_t * e);
@@ -33,6 +35,7 @@ void station1(lv_event_t * e);
 void station2(lv_event_t * e);
 void station3(lv_event_t * e);
 void station4(lv_event_t * e);
+void SaveVolTone(lv_event_t * e);
 void CalibratePoint(lv_event_t * e);
 void RollerNSorEWChanged(lv_event_t * e);
 

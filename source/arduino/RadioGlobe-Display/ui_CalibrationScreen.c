@@ -8,8 +8,8 @@
 lv_obj_t * uic_CalibrationAdvancedText;
 lv_obj_t * uic_CalibrationAdvanced;
 lv_obj_t * uic_CalibrationLongitudes;
-lv_obj_t * uic_LattitudesText;
-lv_obj_t * uic_CalibrationLattitudes;
+lv_obj_t * uic_LatitudesText;
+lv_obj_t * uic_CalibrationLatitudes;
 lv_obj_t * uic_CalibrationSetAsZeroText;
 lv_obj_t * uic_CalibrationSetAsZero;
 lv_obj_t * uic_CalibrationInstruction;
@@ -23,8 +23,8 @@ lv_obj_t * ui_CalibrationRawCoord = NULL;
 lv_obj_t * ui_CalibrationInstruction = NULL;
 lv_obj_t * ui_CalibrationSetAsZero = NULL;
 lv_obj_t * ui_CalibrationSetAsZeroText = NULL;
-lv_obj_t * ui_CalibrationLattitudes = NULL;
-lv_obj_t * ui_LattitudesText = NULL;
+lv_obj_t * ui_CalibrationLatitudes = NULL;
+lv_obj_t * ui_LatitudesText = NULL;
 lv_obj_t * ui_CalibrationLongitudes = NULL;
 lv_obj_t * ui_LongitudesText = NULL;
 lv_obj_t * ui_CalibrationAdvanced = NULL;
@@ -52,15 +52,15 @@ void ui_event_CalibrationSetAsZero(lv_event_t * e)
     }
 }
 
-void ui_event_CalibrationLattitudes(lv_event_t * e)
+void ui_event_CalibrationLatitudes(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
 
     if(event_code == LV_EVENT_LONG_PRESSED_REPEAT) {
-        CalibrationLattitudes(e);
+        CalibrationLatitudes(e);
     }
     if(event_code == LV_EVENT_CLICKED) {
-        CalibrationLattitudes(e);
+        CalibrationLatitudes(e);
     }
 }
 
@@ -167,30 +167,30 @@ void ui_CalibrationScreen_screen_init(void)
     lv_obj_set_style_text_align(ui_CalibrationSetAsZeroText, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_CalibrationSetAsZeroText, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_CalibrationLattitudes = lv_btn_create(ui_CalibrationScreen);
-    lv_obj_set_width(ui_CalibrationLattitudes, 200);
-    lv_obj_set_height(ui_CalibrationLattitudes, 50);
-    lv_obj_set_x(ui_CalibrationLattitudes, 0);
-    lv_obj_set_y(ui_CalibrationLattitudes, -30);
-    lv_obj_set_align(ui_CalibrationLattitudes, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_CalibrationLattitudes, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
-    lv_obj_clear_flag(ui_CalibrationLattitudes, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    ui_object_set_themeable_style_property(ui_CalibrationLattitudes, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR,
+    ui_CalibrationLatitudes = lv_btn_create(ui_CalibrationScreen);
+    lv_obj_set_width(ui_CalibrationLatitudes, 200);
+    lv_obj_set_height(ui_CalibrationLatitudes, 50);
+    lv_obj_set_x(ui_CalibrationLatitudes, 0);
+    lv_obj_set_y(ui_CalibrationLatitudes, -30);
+    lv_obj_set_align(ui_CalibrationLatitudes, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_CalibrationLatitudes, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_CalibrationLatitudes, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_object_set_themeable_style_property(ui_CalibrationLatitudes, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR,
                                            _ui_theme_color_turquoise);
-    ui_object_set_themeable_style_property(ui_CalibrationLattitudes, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA,
+    ui_object_set_themeable_style_property(ui_CalibrationLatitudes, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA,
                                            _ui_theme_alpha_turquoise);
 
-    ui_LattitudesText = lv_label_create(ui_CalibrationScreen);
-    lv_obj_set_width(ui_LattitudesText, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_LattitudesText, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_LattitudesText, 0);
-    lv_obj_set_y(ui_LattitudesText, -30);
-    lv_obj_set_align(ui_LattitudesText, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_LattitudesText, "LATTITUDES");
-    lv_obj_set_style_text_color(ui_LattitudesText, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_LattitudesText, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_align(ui_LattitudesText, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_LattitudesText, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_LatitudesText = lv_label_create(ui_CalibrationScreen);
+    lv_obj_set_width(ui_LatitudesText, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_LatitudesText, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_LatitudesText, 0);
+    lv_obj_set_y(ui_LatitudesText, -30);
+    lv_obj_set_align(ui_LatitudesText, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_LatitudesText, "LATTITUDES");
+    lv_obj_set_style_text_color(ui_LatitudesText, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_LatitudesText, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_LatitudesText, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_LatitudesText, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_CalibrationLongitudes = lv_btn_create(ui_CalibrationScreen);
     lv_obj_set_width(ui_CalibrationLongitudes, 200);
@@ -244,7 +244,7 @@ void ui_CalibrationScreen_screen_init(void)
 
     lv_obj_add_event_cb(ui_HomeButton2, ui_event_HomeButton2, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_CalibrationSetAsZero, ui_event_CalibrationSetAsZero, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_CalibrationLattitudes, ui_event_CalibrationLattitudes, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_CalibrationLatitudes, ui_event_CalibrationLatitudes, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_CalibrationLongitudes, ui_event_CalibrationLongitudes, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_CalibrationAdvanced, ui_event_CalibrationAdvanced, LV_EVENT_ALL, NULL);
     uic_CalibrationScreen = ui_CalibrationScreen;
@@ -253,8 +253,8 @@ void ui_CalibrationScreen_screen_init(void)
     uic_CalibrationInstruction = ui_CalibrationInstruction;
     uic_CalibrationSetAsZero = ui_CalibrationSetAsZero;
     uic_CalibrationSetAsZeroText = ui_CalibrationSetAsZeroText;
-    uic_CalibrationLattitudes = ui_CalibrationLattitudes;
-    uic_LattitudesText = ui_LattitudesText;
+    uic_CalibrationLatitudes = ui_CalibrationLatitudes;
+    uic_LatitudesText = ui_LatitudesText;
     uic_CalibrationLongitudes = ui_CalibrationLongitudes;
     uic_CalibrationAdvanced = ui_CalibrationAdvanced;
     uic_CalibrationAdvancedText = ui_CalibrationAdvancedText;
@@ -279,10 +279,10 @@ void ui_CalibrationScreen_screen_destroy(void)
     ui_CalibrationSetAsZero = NULL;
     uic_CalibrationSetAsZeroText = NULL;
     ui_CalibrationSetAsZeroText = NULL;
-    uic_CalibrationLattitudes = NULL;
-    ui_CalibrationLattitudes = NULL;
-    uic_LattitudesText = NULL;
-    ui_LattitudesText = NULL;
+    uic_CalibrationLatitudes = NULL;
+    ui_CalibrationLatitudes = NULL;
+    uic_LatitudesText = NULL;
+    ui_LatitudesText = NULL;
     uic_CalibrationLongitudes = NULL;
     ui_CalibrationLongitudes = NULL;
     ui_LongitudesText = NULL;

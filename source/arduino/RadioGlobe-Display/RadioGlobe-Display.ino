@@ -24,7 +24,6 @@
 #include "database.h"
 #include "favorites.h"
 
-
 extern stations_arraybin Stations;
 
 void readMacAddress(){
@@ -56,7 +55,7 @@ typedef struct ns_ew_intersection
   int16_t ew; // in tenths of degree
 };
 
-// this bin holds the NS/EW coordinates that belong to intersection points of longitudes and lattitued around the globe.
+// this bin holds the NS/EW coordinates that belong to intersection points of longitudes and latitudes around the globe.
 // initially filled with data for a perfect globe.
 // as we calibrate, the arry gets more sophisticated and holds the coordinates as the encoders see them on the actual not-so-accurately-printed globe.
 // we have two rows for n/s at equator as the upper half and lower haf of the globe may not be aligned very well, as was certainly the case with my globe.
@@ -68,6 +67,11 @@ calibrations_arraybin ns_ew_calibrations;
 calibrations_arraybin def_cal;
 uint16_t CalToIndexNS;
 uint16_t CalToIndexEW;
+bool bPowerStatus = true;
+#define AUTOPOWERDOWNAFTER 3600;
+uint32_t AutoSleepTimer = AUTOPOWERDOWNAFTER;
+static int backlightvalue = 50;
+static int defaultbacklightvalue = 75;
 
 
 
@@ -134,7 +138,7 @@ void setup()
   // lv_demo_stress();   
 
   ui_init();
-  lv_obj_add_flag(ui_Volume_Off_Icon, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_add_flag(ui_Power_Off_Icon, LV_OBJ_FLAG_HIDDEN);
   
   
   // load preset stations from favorites.txt file
@@ -145,12 +149,20 @@ void setup()
   // load stored values from setup file, calibrations.txt, from SD card
   LoadCalibrations(); 
 
+  if(SD_MMC.begin("/sdcard", true, false))
+  { ReadStationsBitmapFile(SD_MMC, "/stationsmap.bmp"); // read the bmp with the worldmap
+    SD_MMC.end();
+  }  
+
  
   bUpAndRunning = true;
+
+  AddToQueueForGlobe("VOL-BASS-TREBLE PLEASE", MESSAGE_DISPLAY_WANTS_VOLUME_AND_TONE);
+
 }
 
 bool bCheckDatabase = false;
-bool bUpdateCoordinates = false;
+bool bNoTimeZone = true;
 
 
 
@@ -166,13 +178,6 @@ void loop()
   static uint8_t oldhour;
   static uint8_t oldminute;
   static lv_obj_t * oldscreen;
-  static int backlightvalue = 50;
-  static int defaultbacklightvalue = 75;
-
-  static int16_t  old_ns;
-  static int16_t  old_ew;
-  static int16_t  old_ns_cal;
-  static int16_t  old_ew_cal;
   static time_t now;
 
   Lvgl_Loop();
@@ -183,15 +188,19 @@ void loop()
 
      lv_obj_t * screen = lv_scr_act(); //get active screen
 
-     if(oldscreen != screen || bUpdateCoordinates) // screen changed
+     if(oldscreen != screen) // screen changed
      { oldscreen = screen;
-       bUpdateCoordinates = false;
-       old_ns = -1; // force update
-       old_ew = -1; // force update
-       old_ns_cal = -1; // force update
-       old_ew_cal = -1; // force update
-       backlightvalue = defaultbacklightvalue;
-       Set_Backlight(backlightvalue); 
+       if(bPowerStatus==true)
+       { if(screen == ui_CalibrationScreen) // force refresh raw coordinate
+         { PrevDataFromGlobe.ns = -1;  
+         }
+         if(screen == ui_CalibrationScreenAdvanced) // force refresh
+         { PrevDataFromGlobe.ns = -1;   
+           PrevDataFromDisplay.ns_cal = -1;
+         }
+         backlightvalue = defaultbacklightvalue;
+         Set_Backlight(backlightvalue); 
+       }  
        Serial.println("Screen changed!");
        if(screen == ui_Home)CalibrationModeLatLong = (CALMODE_NS | CALMODE_EW); // also effects the display of calibrated coordinates, 
      }
@@ -249,17 +258,19 @@ void loop()
            break;
          case MESSAGE_WIFI_STATUS:
            break;
-         case MESSAGE_CALIBRATED:  
+         case MESSAGE_CALIBRATE_ZERO:  
            break;
          case MESSAGE_FINDNEWSTATION:
            Serial.printf("MESSAGE_FINDNEWSTATION: >%s<\n", DataFromGlobe.G_QueueMessage);  
-           if((screen != ui_CalibrationScreen) && (screen != ui_CalibrationScreenAdvanced) && (screen != ui_DatabaseScreen))
-           { // if in tone controle screen or preset screen, jump back to home screen
-             lv_scr_load(ui_Home);
-             backlightvalue = defaultbacklightvalue;
-             Set_Backlight(backlightvalue); 
-             FindNewStation();
-             ReloadScroll();
+           if(bPowerStatus == true)
+           { if((screen != ui_CalibrationScreen) && (screen != ui_CalibrationScreenAdvanced) && (screen != ui_DatabaseScreen))
+             { // if in tone controle screen or preset screen, jump back to home screen
+               lv_scr_load(ui_Home);
+               backlightvalue = defaultbacklightvalue;
+               Set_Backlight(backlightvalue); 
+               FindNewStation();
+               ReloadScroll();
+             }
            }  
            break;
          case MESSAGE_GLOBE_MAC:  
@@ -269,11 +280,23 @@ void loop()
            Serial.printf("MESSAGE_GLOBE_IP: >%s<\n", DataFromGlobe.G_QueueMessage);  
            break;
          case MESSAGE_DEAD_STATION:
+         case MESSAGE_AUDIO_EOF_STREAM:
            lv_label_set_text(ui_StationRollerComment, "");
            DataFromDisplay.D_QueueStationIndex = -1;
            Stations.playing = -1;
            sprintf(content, "%s - Not Responding", lv_label_get_text(ui_Station_Name));
            lv_label_set_text(ui_Station_Name, content); 
+           Lvgl_Loop(); // update screen
+           delay(300); // so we can actually notice the text change on the screen
+
+           SD_MMC.end(); //??
+           if(SD_MMC.begin("/sdcard", true, false))
+           { if(DataFromGlobe.G_QueueMessageType == MESSAGE_DEAD_STATION)AppendBadStationToFile(SD_MMC, "/badstations.txt", DataFromGlobe.G_QueueMessage);
+             if(DataFromGlobe.G_QueueMessageType == MESSAGE_AUDIO_EOF_STREAM)AppendBadStationToFile(SD_MMC, "/audio-eof-stream.txt", DataFromGlobe.G_QueueMessage);
+             SD_MMC.end();
+           }  
+           
+
            break;
          case MESSAGE_WANT_NEXT_STATION: // request from globe since it couldn't use the last url
            if(Stations.requested > MAX_STATIONS) // a problematic preset was ordered
@@ -282,12 +305,18 @@ void loop()
            }
            else
            { sprintf(content, "%s - Skipped", Stations.StationNUG[Stations.requested].name);
+             lv_label_set_text(ui_Station_Name, content); 
              lv_label_set_text(ui_StationRollerComment, content); 
+             Lvgl_Loop(); // update screen
+             delay(300); // so we can actually notice the text change on the screen
              Stations.requested++;
              Serial.printf("Stations.count =%d\n", Stations.count);  
              if(Stations.requested < Stations.count) // until the end of the list, or else we are done
              { Serial.printf("Stations.requested =%d: >%s<\n", Stations.requested, Stations.StationNUG[Stations.requested].name);  
                lv_roller_set_selected(uic_StationRoller, Stations.requested, LV_ANIM_ON);
+               sprintf(content, "%d-%d", Stations.requested+1, Stations.count); // top label 1-150 in stations roller
+               lv_label_set_text(ui_StationRollerSelected, content);
+               lv_label_set_text(ui_StationRollerComment, Stations.StationNUG[Stations.requested].name); 
                AddStationToQueueForGlobe(Stations.requested);
              }
            }  
@@ -296,6 +325,8 @@ void loop()
          case MESSAGE_STATION_CONNECTED: // 25
            // MESSAGE FROM GLOBE: 25 >https://stream06.dotpoint.nl:8004/stream<
            // update text for station scroller 
+           Serial.printf("MESSAGE_STATION_CONNECTED: = %d\n", Stations.requested);
+
            if(Stations.requested<MAX_STATIONS)
            { sprintf(content, "%s - Playing", Stations.StationNUG[Stations.requested].name);
              Stations.playing = Stations.requested;
@@ -306,6 +337,7 @@ void loop()
            else
            { // favorite station connected
              Stations.playing = Stations.requested;
+             Serial.printf("MESSAGE_STATION_CONNECTED: Preset Playing %s\n", Favorites[Stations.requested-MAX_STATIONS].name);
              SetLed(Stations.requested-MAX_STATIONS, UI_THEME_COLOR_GREEN);
            }
            break;
@@ -313,6 +345,28 @@ void loop()
          case MESSAGE_GLOBE_WANTS_CURRENT_STATION: // 26
             if(Stations.playing>=0)
             { AddStationToQueueForGlobe(Stations.playing);
+            }
+            break;
+
+         case MESSAGE_VOLUME_AND_TONE:
+            { int32_t volume;
+              int32_t bass;
+              int32_t treble;
+              Serial.printf("MESSAGE_VOLUME_AND_TONE: %s\n", DataFromGlobe.G_QueueMessage);  
+              sscanf(DataFromGlobe.G_QueueMessage, "%ld %ld %ld", &volume, &bass, &treble);
+              // sync controls to that
+              lv_arc_set_value(uic_VolumeArc, volume);
+              lv_arc_set_value(uic_BassArc, bass);
+              lv_arc_set_value(uic_TrebleArc, treble);
+
+              sprintf(content, "%ld", volume);
+              lv_label_set_text(uic_VolumeValue, content); 
+              sprintf(content, "%ld", bass);
+              lv_label_set_text(uic_BassValue, content); 
+              sprintf(content, "%ld", treble);
+              lv_label_set_text(uic_TrebleValue, content); 
+              AddToQueueForGlobe("VOLUME AND TONE SET AS REQUESTED", MESSAGE_VOLUME_AND_TONE);
+              bPowerStatus = true;
             }
             break;
 
@@ -331,12 +385,12 @@ void loop()
        backlightvalue = defaultbacklightvalue;
        Set_Backlight(backlightvalue); 
        if(newvolumevalue)
-       { lv_obj_add_flag(ui_Volume_Off_Icon, LV_OBJ_FLAG_HIDDEN);
+       { lv_obj_add_flag(ui_Power_Off_Icon, LV_OBJ_FLAG_HIDDEN);
          lv_obj_clear_state(ui_VolumeValue, LV_STATE_DISABLED);
        }
        else
        { lv_obj_add_state(uic_VolumeValue, LV_STATE_DISABLED); 
-         lv_obj_clear_flag(ui_Volume_Off_Icon, LV_OBJ_FLAG_HIDDEN);
+         lv_obj_clear_flag(ui_Power_Off_Icon, LV_OBJ_FLAG_HIDDEN);
        }
      }
 
@@ -361,31 +415,36 @@ void loop()
      if((GlobalTicker100mS % 1)==0)loop_esp_now(); // send volume & other stuff to globe
      
 
-     if((old_ns_cal !=  DataFromDisplay.ns_cal) || (old_ew_cal !=  DataFromDisplay.ew_cal))
+     if((PrevDataFromDisplay.ns_cal !=  DataFromDisplay.ns_cal) || (PrevDataFromDisplay.ew_cal !=  DataFromDisplay.ew_cal))
      { //Serial.println("Update coordinates on lcd!");
-       old_ns_cal = DataFromDisplay.ns_cal;
-       old_ew_cal = DataFromDisplay.ew_cal;
-       GetFormattedLocation(content, "D", CalibrationModeLatLong);
        if(screen == ui_CalibrationScreenAdvanced)
-       { lv_label_set_text(ui_CalibrationAdvGps, content);
+       {  GetFormattedLocation(content, "D", CalibrationModeLatLong);
+          lv_label_set_text(ui_CalibrationAdvGps, content);
        }
-       else if(screen == ui_Home) lv_label_set_text(ui_HomeGps, content);
+       else if(screen == ui_Home) 
+       {  GetFormattedLocation(content, "D", CalibrationModeLatLong);
+          lv_label_set_text(ui_HomeGps, content);
+       }
+       PrevDataFromDisplay.ns_cal = DataFromDisplay.ns_cal;
+       PrevDataFromDisplay.ew_cal = DataFromDisplay.ew_cal;
      }
 
-     // uncalibrated encoder coordinates
-     if(((old_ns !=  DataFromGlobe.ns) || (old_ew !=  DataFromGlobe.ew)) && DataFromGlobe.G_EncoderReliable)
+     // new uncalibrated encoder position arrived, remap to calibrated
+     if(((PrevDataFromGlobe.ns !=  DataFromGlobe.ns) || (PrevDataFromGlobe.ew !=  DataFromGlobe.ew)) && DataFromGlobe.G_EncoderReliable)
      { //Serial.println("Update coordinates on lcd!");
-       old_ns = DataFromGlobe.ns;
-       old_ew = DataFromGlobe.ew;
-       remap_ns_ew();
-       Lvgl_Loop();
-       GetFormattedLocation(content, "G", CalibrationModeLatLong);
+       remap_ns_ew(DataFromGlobe.ns, DataFromGlobe.ew); // if PrevDataFromGlobe.ns == -1, just refresh the display
        if(screen == ui_CalibrationScreenAdvanced)
-       { lv_label_set_text(ui_CalFromRaw, content);
+       { GetFormattedLocation(content, "G", CalibrationModeLatLong);
+         lv_label_set_text(ui_CalFromRaw, content);
        }
-       else if(screen == ui_CalibrationScreen) lv_label_set_text(ui_CalibrationRawCoord, content);
+       else  if(screen == ui_CalibrationScreen) 
+       { GetFormattedLocation(content, "G", CalibrationModeLatLong);
+          lv_label_set_text(ui_CalibrationRawCoord, content);
+       }
+       else AddToQueueForGlobe("", MESSAGE_GET_TIMEZONE);
+       PrevDataFromGlobe.ns = DataFromGlobe.ns;
+       PrevDataFromGlobe.ew = DataFromGlobe.ew;
      }
-
 
 
 
@@ -423,43 +482,53 @@ void loop()
          lv_obj_add_flag(ui_Battery_Icon_Medium, LV_OBJ_FLAG_HIDDEN);
          lv_obj_add_flag(ui_Battery_Icon_High, LV_OBJ_FLAG_HIDDEN);
        } 
-       
      }
 
-      if((GlobalTicker100mS % 5)==0)
-      { oldminute = datetime.minute;
-        oldhour = datetime.hour;
-        // Serial.print("Seconds oldsecond: "); Serial.println(oldsecond);
-        // sprintf(content, "%02d:%02d:%02d", datetime.hour, datetime.minute, datetime.second);
-        sprintf(content, "%02d%c%02d", datetime.hour, ((GlobalTicker100mS % 10)==0)?':':' ', datetime.minute);
-        lv_label_set_text(ui_Local_Time, content);
-        // brightness test  
-        // brightness of 5 is about the lowest value that makes sense, is very dim
-        // brightness of 50 is very reasonable brightness
-        // brightness of 100 is pretty bright and perhaps not that useful
-        // if((Ticker100mS % 10)==0)Set_Backlight(newvolumevalue);                                 
-        // else Set_Backlight(0x0);    
+     if((GlobalTicker100mS % 5)==0)
+     { oldminute = datetime.minute;
+       oldhour = datetime.hour;
+       // Serial.print("Seconds oldsecond: "); Serial.println(oldsecond);
+       // sprintf(content, "%02d:%02d:%02d", datetime.hour, datetime.minute, datetime.second);
+       sprintf(content, "%02d%c%02d", datetime.hour, ((GlobalTicker100mS % 10)==0)?':':' ', datetime.minute);
+       lv_label_set_text(ui_Local_Time, content);
+       // brightness test  
+       // brightness of 5 is about the lowest value that makes sense, is very dim
+       // brightness of 50 is very reasonable brightness
+       // brightness of 100 is pretty bright and perhaps not that useful
+       // if((Ticker100mS % 10)==0)Set_Backlight(newvolumevalue);                                 
+       // else Set_Backlight(0x0);    
 
-        // gyro test 
-        if((GlobalTicker100mS % 10)==0)
-        { static uint16_t freeze;
-          getGyroscope();
-          uint16_t motion = abs((int)Gyro.x) + abs((int)Gyro.y) + abs((int)Gyro.z); 
-          //Serial.printf("x%f - y%f - z%f\n", Gyro.x, Gyro.y, Gyro.z);
-          //Serial.printf("motion is %d\n", motion);
-          if(freeze)freeze--;
-          if(motion>30)
-          { backlightvalue = defaultbacklightvalue;
-            freeze = 200; // give our beloved user 20 seconds of full brightness before it starts fading again
-          }
-          else
-          { if(backlightvalue>10)backlightvalue--;
-          }
-          Set_Backlight(backlightvalue);    
-        }
-      }
+       // auto dim backlight and gyro test 
+       if((GlobalTicker100mS % 10)==0)
+       { static uint16_t freeze = 120;
+         getGyroscope();
+         uint16_t motion = abs((int)Gyro.x) + abs((int)Gyro.y) + abs((int)Gyro.z); 
+         //Serial.printf("x%f - y%f - z%f\n", Gyro.x, Gyro.y, Gyro.z);
+         //Serial.printf("motion is %d\n", motion);
+         //Serial.printf("motion %d freeze %d backlightvalue %d\n", motion, freeze, backlightvalue);
+         if(freeze)freeze--;
 
-      if(bCheckDatabase)BuildDatabaseNow();
+         if(bPowerStatus)
+         { if(freeze==0)
+           { if(backlightvalue>10)Set_Backlight(backlightvalue--);    
+           }
+           if(motion>30)
+           { backlightvalue = defaultbacklightvalue;
+             Set_Backlight(backlightvalue);
+             freeze = 120; // give our beloved user 120 seconds of full brightness before it starts fading again
+           }
+         }
+         else
+         { if(motion>30)
+           { backlightvalue = defaultbacklightvalue;
+             Set_Backlight(backlightvalue);
+           }
+           else if(backlightvalue/5)Set_Backlight(backlightvalue-=5);
+         }
+       }
+     }
+
+     if(bCheckDatabase)BuildDatabaseNow();
 
   }
   delay(5);
@@ -483,7 +552,7 @@ void GetFormattedLocation(char *dest, char *src, int16_t ModeLatLong)
     ew = ns_ew_calibrations.calibrations[CalToIndexNS][CalToIndexEW].ew;
   }
 
-  Serial.printf("GetFormattedLocation(content, \"%c\", %d) : CalToIndexNS = %d CalToIndexEW = %d\n", *src, ModeLatLong, CalToIndexNS, CalToIndexEW);
+  //Serial.printf("GetFormattedLocation(content, \"%c\", %d) : CalToIndexNS = %d CalToIndexEW = %d\n", *src, ModeLatLong, CalToIndexNS, CalToIndexEW);
  
   if(ModeLatLong == CALMODE_NS)
   {  sprintf(dest, "%c%d.%d", (ns<0)?'S':'N', abs(ns)/10, abs(ns)%10);
