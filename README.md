@@ -3,8 +3,8 @@
 # radioglobe-esp32-2025
 Radio Globe using ESP32 and Waveshare round touch LCD 2.1 inch
 
-[TLTR] 1-JULY-2025 It actually works! Performance is perhaps not perfect but certainly acceptable.
-[/TLTR]
+UPDATE 6-JULY-2025 It actually works! Performance is improved, few bugs, some extras. 
+UPDATE 1-JULY-2025 It actually works! Performance is perhaps not perfect but certainly acceptable.
 
 Not a small project, will take a lot of your time and possibly quite some frustration along the way. Just a gentle warning.
 
