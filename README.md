@@ -39,6 +39,13 @@ Lithium battery -> https://www.aliexpress.com/item/1005008575678945.html<br/>
 Pogo 3 pin connector -> https://www.aliexpress.com/item/1005007457425590.html<br/> 
 MicroSD card -> I used a 32GB one<br/>
 
+1) Install Fusion 360 and load the designs provided here. Print all the individual bodies and assemble the lot.
+2) Prepare the SD card and fill it with the files provided in SDCARD. This is for the database with 150K stations and two folders with images for the flags of all countries in the world. Insert the card in the Waveshare display. Once you have loaded the software into the Waveshare, you can create a presorted database arrangement in a folder structure on the SD card. This takes perhaps 45 minutes, but then you're good to go.
+3) Prepare the ESP32 module with the software for the globe itself. Compile in Arduino IDE, don't forget to fill the secrets.h file with your wifi SSID and password.
+
+
+
+
 
 
 
