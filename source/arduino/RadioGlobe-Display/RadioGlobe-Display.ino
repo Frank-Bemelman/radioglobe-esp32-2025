@@ -159,10 +159,14 @@ void setup()
 
   AddToQueueForGlobe("VOL-BASS-TREBLE PLEASE", MESSAGE_DISPLAY_WANTS_VOLUME_AND_TONE);
 
+  // SD card driver for LVGL
+  lv_port_fs_init();
+
 }
 
 bool bCheckDatabase = false;
 bool bNoTimeZone = true;
+bool bInfoScreen = false;
 
 
 
@@ -202,7 +206,10 @@ void loop()
          Set_Backlight(backlightvalue); 
        }  
        Serial.println("Screen changed!");
-       if(screen == ui_Home)CalibrationModeLatLong = (CALMODE_NS | CALMODE_EW); // also effects the display of calibrated coordinates, 
+       if(screen == ui_Home)
+       { CalibrationModeLatLong = (CALMODE_NS | CALMODE_EW); // also effects the display of calibrated coordinates, 
+         bInfoScreen = false;
+       }
      }
 
      // process messages from globe
@@ -263,13 +270,15 @@ void loop()
          case MESSAGE_FINDNEWSTATION:
            Serial.printf("MESSAGE_FINDNEWSTATION: >%s<\n", DataFromGlobe.G_QueueMessage);  
            if(bPowerStatus == true)
-           { if((screen != ui_CalibrationScreen) && (screen != ui_CalibrationScreenAdvanced) && (screen != ui_DatabaseScreen))
+           { if((screen != ui_CalibrationScreen) && (screen != ui_CalibrationScreenAdvanced))
              { // if in tone controle screen or preset screen, jump back to home screen
-               lv_scr_load(ui_Home);
-               backlightvalue = defaultbacklightvalue;
-               Set_Backlight(backlightvalue); 
-               FindNewStation();
-               ReloadScroll();
+               if((screen != ui_DatabaseScreen) || (bInfoScreen==true))
+               { lv_scr_load(ui_Home);
+                 backlightvalue = defaultbacklightvalue;
+                 Set_Backlight(backlightvalue); 
+                 FindNewStation();
+                 ReloadScroll();
+               }  
              }
            }  
            break;
@@ -299,7 +308,7 @@ void loop()
 
            break;
          case MESSAGE_WANT_NEXT_STATION: // request from globe since it couldn't use the last url
-           if(Stations.requested > MAX_STATIONS) // a problematic preset was ordered
+           if(Stations.requested >= MAX_STATIONS) // a problematic preset was ordered
            { // now what, what is a next station in this context?
              SetLed(Stations.requested-MAX_STATIONS,0); // just turn off the led
            }
@@ -309,17 +318,20 @@ void loop()
              lv_label_set_text(ui_StationRollerComment, content); 
              Lvgl_Loop(); // update screen
              delay(300); // so we can actually notice the text change on the screen
-             Stations.requested++;
-             Serial.printf("Stations.count =%d\n", Stations.count);  
-             if(Stations.requested < Stations.count) // until the end of the list, or else we are done
-             { Serial.printf("Stations.requested =%d: >%s<\n", Stations.requested, Stations.StationNUG[Stations.requested].name);  
-               lv_roller_set_selected(uic_StationRoller, Stations.requested, LV_ANIM_ON);
-               sprintf(content, "%d-%d", Stations.requested+1, Stations.count); // top label 1-150 in stations roller
-               lv_label_set_text(ui_StationRollerSelected, content);
-               lv_label_set_text(ui_StationRollerComment, Stations.StationNUG[Stations.requested].name); 
-               AddStationToQueueForGlobe(Stations.requested);
-             }
-           }  
+             if(Stations.connect_attempts<MAX_STATIONS)
+             { Stations.requested++;
+               Stations.requested %= MAX_STATIONS;
+               Serial.printf("Stations.count =%d\n", Stations.count);  
+               if(Stations.requested < Stations.count) // until the end of the list, or else we are done
+               { Serial.printf("Stations.requested =%d: >%s<\n", Stations.requested, Stations.StationNUG[Stations.requested].name);  
+                 lv_roller_set_selected(uic_StationRoller, Stations.requested, LV_ANIM_ON);
+                 sprintf(content, "%d-%d", Stations.requested+1, Stations.count); // top label 1-150 in stations roller
+                 lv_label_set_text(ui_StationRollerSelected, content);
+                 lv_label_set_text(ui_StationRollerComment, Stations.StationNUG[Stations.requested].name); 
+                 AddStationToQueueForGlobe(Stations.requested);
+               }
+             }  
+           }
            break;
 
          case MESSAGE_STATION_CONNECTED: // 25
@@ -424,6 +436,9 @@ void loop()
        else if(screen == ui_Home) 
        {  GetFormattedLocation(content, "D", CalibrationModeLatLong);
           lv_label_set_text(ui_HomeGps, content);
+       }
+       else  if(screen == ui_DatabaseScreen) 
+       { lv_obj_set_pos(uic_MapCursor, DataFromDisplay.ew_cal/10, -DataFromDisplay.ns_cal/10); 
        }
        PrevDataFromDisplay.ns_cal = DataFromDisplay.ns_cal;
        PrevDataFromDisplay.ew_cal = DataFromDisplay.ew_cal;

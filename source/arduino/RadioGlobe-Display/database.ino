@@ -4,6 +4,8 @@
 #include "FS.h"
 #include "SD_MMC.h"
 #include "database.h"
+#include "countrycodes.h"
+
 
 bmpfile StationsMap;  // to maintain a quick lookup map of available directories     
 bmpfile NauticMap;    // to have a map of water vs land that have actual timezones according to google
@@ -50,6 +52,7 @@ void RebuildDatabase(lv_event_t * e)
 { if(isLongPressed(e)==5)
   { beepforMs(1000);
     Serial.printf("REBUILD DATABASE BUTTON\n");
+    lv_label_set_text(ui_Database_Output_File, "");
     bCheckDatabase = true;
   }
 }
@@ -76,22 +79,22 @@ void BuildDatabaseNow(void)
   lv_label_set_text(ui_MapBanner, "All\nThose\nBeautiful\nInternet\nRadio\nStations\nAround\nThe\nWorld\n");
 
   if (!SD_MMC.begin("/sdcard", true, false))
-  { lv_label_set_text(ui_DatabaseProgress1, "No SD Card Found!");
+  { lv_label_set_text(ui_Database_Dir_Path, "No SD Card Found!");
     Lvgl_Loop();
     delay(1000);
     while(timeout)
     {  delay(1000);
        sprintf(content, "leaving in %d seconds", timeout);
-       lv_label_set_text(ui_DatabaseProgress1 , content);
+       lv_label_set_text(ui_Database_Dir_Path, content);
        Lvgl_Loop();
        timeout --;
     }
     delay(1000);
     lv_scr_load(ui_Home); 
-    lv_label_set_text(ui_DatabaseProgress1, "");
+    lv_label_set_text(ui_Database_Dir_Path, "");
   }
   else
-  { lv_label_set_text(ui_DatabaseProgress1, "SD Card Found!");
+  { lv_label_set_text(ui_Database_Dir_Path, "SD Card Found!");
     Lvgl_Loop();
   
     //strcpy(filename, "/stations.json"); // don't fortget the forward slash
@@ -147,19 +150,19 @@ void ReadDatabase(fs::FS &fs, char *filename)
   { File root = fs.open(filename, FILE_READ);
     if (!root) 
     { sprintf(sometext, "Failed To Open %s", filename);
-      lv_label_set_text(ui_DatabaseProgress1, sometext);
+      lv_label_set_text(ui_Database_Dir_Path, sometext);
       Lvgl_Loop();
       Serial.println(sometext);
       delay(2000); 
       return;
     }
     sprintf(sometext, "Succes opening %s", filename);
-    lv_label_set_text(ui_DatabaseProgress1, sometext);
+    lv_label_set_text(ui_Database_Dir_Path, sometext);
     Lvgl_Loop();
     delay(2000); 
   
     filesize = root.size();
-    Serial.printf("filesize of %s is %ld\n", filename, filesize);
+    // Serial.printf("filesize of %s is %ld\n", filename, filesize);
 
     bool readcoords = false;
     uint16_t citycount = 0;
@@ -178,7 +181,7 @@ void ReadDatabase(fs::FS &fs, char *filename)
         fileposition = root.position();
         percentagedone = fileposition * 100 / filesize;
         sprintf(sometext, "Done %d%% urls=%ld", percentagedone, urlcount);
-        lv_label_set_text(ui_DatabaseProgress, sometext);
+        lv_label_set_text(ui_Database_Progress, sometext);
         Lvgl_Loop();
       }
 
@@ -206,7 +209,8 @@ void ReadDatabase(fs::FS &fs, char *filename)
           if((p = strstr(oneline, "\"n\": ")) != NULL)
           { //Serial.println(p);
             sscanf(&p[5], "%f", &floatn);
-            ns = (int)floatn + 0.5;
+            if(floatn>0)ns=(int)(floatn+0.5);
+            else ns=(int)(floatn-0.5);
             parsefase = 2;
           }        
           break;
@@ -214,9 +218,8 @@ void ReadDatabase(fs::FS &fs, char *filename)
           if((p = strstr(oneline, "\"e\": ")) != NULL)
           { //Serial.println(p);
             sscanf(&p[5], "%f", &floate);
-             //          if(floate>0)floate+=0.5;
-             //          else floate-=0.5;
-            ew = (int)floate + 0.5;
+            if(floate>0)ew=(int)(floate+0.5);
+            else ew=(int)(floate-0.5);
             sprintf(dirpath, "/%c/%d/%d/%c/%d/%d", (ns<0)?'S':'N', abs(ns)/10, abs(ns)%10, (ew<0)?'W':'E', abs(ew)/10, abs(ew)%10);
             Serial.println(dirpath);
             CreateAllDirInPath(fs, dirpath);
@@ -227,8 +230,10 @@ void ReadDatabase(fs::FS &fs, char *filename)
           break;
         case 3:  
           if((p = strstr(oneline, "\"urls\": [")) != NULL) // start of list
-          { sprintf(sometext, "%s/%s", dirpath, outputfilename);
-            lv_label_set_text(ui_DatabaseProgress1, sometext);
+          { sprintf(sometext, "Folder %s", dirpath);
+            lv_label_set_text(ui_Database_Dir_Path, sometext);
+            lv_label_set_text(ui_Database_Output_File, outputfilename);
+            sprintf(sometext, "/%s/%s", dirpath, outputfilename);
             SD_MMC.remove(sometext); // delete old file
             urls = SD_MMC.open(sometext, FILE_WRITE);
             parsefase = 4;
@@ -272,9 +277,9 @@ void ReadDatabase(fs::FS &fs, char *filename)
 
     percentagedone = 100;
     sprintf(sometext, "Done %d%% urls=%ld", percentagedone, urlcount);
-    lv_label_set_text(ui_DatabaseProgress, sometext);
+    lv_label_set_text(ui_Database_Progress, sometext);
     sprintf(sometext, "- %d Files Created -", urlcount);
-    lv_label_set_text(ui_DatabaseProgress1, sometext);
+    lv_label_set_text(ui_Database_Dir_Path, sometext);
     Lvgl_Loop();
 
   }
@@ -574,6 +579,27 @@ void FindNewStation(void)
         Serial.print("FILE SIZE: ");
         Serial.println(file.size());
         lv_label_set_text(ui_Station_Title, file.name());
+        char town[32] = "";
+        char countrycode[3] = "";
+        char countryname[50] = "";
+        strcpy(town, file.name());
+        if((p=strchr(town, '_')) != NULL)
+        { *p++ = 0;
+          //Serial.printf("sizeof(Countrylist) = %ld\n", sizeof(CountryList) / sizeof(country_info));
+          strncpy(countrycode, p, 2);
+          countrycode[2]=0;
+          uint16_t n=0;
+          while(n<(sizeof(CountryList) / sizeof(country_info)))
+          { //Serial.printf("CountryList[%d].name = %s countrycode<%s> *p=%s\n", n, CountryList[n].name, CountryList[n].code, p );
+            if(strncmp(p, CountryList[n].code, 2)==NULL)
+            { strncpy(countryname, CountryList[n].name, 49);
+              countryname[49]=0;
+              break;
+            }
+            n++;
+          }
+        }
+
         Lvgl_Loop();
 
         while(file.available() && Stations.count<MAX_STATIONS)//  && urlcount < 500)
@@ -585,6 +611,7 @@ void FindNewStation(void)
           { // example:  "name": "Dr P4 Syd"
             // Serial.println(p+9);
             p+=9; // jump forward to start of name
+            *(p+31)=0; 
             strcpy(Stations.StationNUG[Stations.count].name, p);
           }  
           else if((p = strstr(oneline, "\"url\": \"")) != NULL)
@@ -606,8 +633,10 @@ void FindNewStation(void)
             //  }  
             //}
             //else if((p = strstr(oneline, "aac")) != NULL)
-
-             Stations.count++;
+            strcpy(Stations.StationNUG[Stations.count].town, town);
+            strcpy(Stations.StationNUG[Stations.count].countrycode, countrycode);
+            strcpy(Stations.StationNUG[Stations.count].countryname, countryname);
+            Stations.count++;
           }
         }
         file = root.openNextFile();
@@ -626,11 +655,13 @@ void FindNewStation(void)
 
   if(Stations.count)
   { 
+  
     AddToQueueForGlobe("Reset Your DataFromGlobe.D_QueueStationIndex to -1", MESSAGE_NEW_LIST_LOADED);
     
     // pick a random station from the list
     uint16_t random_station; 
     random_station = random(0,Stations.count);
+    Stations.connect_attempts = 0;
     AddStationToQueueForGlobe(random_station);
 
     // turn of preset leds
@@ -640,6 +671,7 @@ void FindNewStation(void)
     SetLed(4, 0);
   }  
 
+  
   // dump to serial port
   //for(int n = 0; n<Stations.count; n++)
   //{ Serial.printf("[%d] N=%s\nU=%s\n", n, Stations.StationNUG[n].name, Stations.StationNUG[n].url);
@@ -789,6 +821,7 @@ void StationScroll(lv_event_t * e)
             Stations.requested = index; 
             sprintf(content, "%s - Tuning", Stations.StationNUG[Stations.requested].name);
             lv_label_set_text(ui_StationRollerComment, content); 
+            Stations.connect_attempts = 0;
             AddStationToQueueForGlobe(Stations.requested);
           }
           Set_EXIO(EXIO_PIN8,High);
@@ -844,7 +877,8 @@ void AddStationToQueueForGlobe(uint16_t station)
   Stations.playing = -1;
 
   if(station<MAX_STATIONS)
-  { DataFromDisplay.D_StationGpsNS = Stations.StationNUG[station].gps_ns;
+  { Stations.connect_attempts++;
+    DataFromDisplay.D_StationGpsNS = Stations.StationNUG[station].gps_ns;
     DataFromDisplay.D_StationGpsEW = Stations.StationNUG[station].gps_ew;
     AddToQueueForGlobe(Stations.StationNUG[station].name, MESSAGE_GET_TIMEZONE_BY_GPS);
     AddToQueueForGlobe(Stations.StationNUG[station].url, MESSAGE_START_THIS_STATION);

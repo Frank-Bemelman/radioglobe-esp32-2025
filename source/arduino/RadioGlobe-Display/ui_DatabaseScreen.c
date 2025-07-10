@@ -5,35 +5,33 @@
 
 #include "ui.h"
 
+lv_obj_t * uic_Database_Flag;
+lv_obj_t * uic_HomeButton3;
+lv_obj_t * uic_Database_Output_File;
+lv_obj_t * uic_Database_GPS_Position;
+lv_obj_t * uic_Database_Dir_Path;
 lv_obj_t * uic_MapCursor;
 lv_obj_t * uic_MapBanner;
+lv_obj_t * uic_WorldMap;
+lv_obj_t * uic_Database_Progress;
+lv_obj_t * uic_Database_Town_Name;
 lv_obj_t * uic_RebuildDatabaseButtonText;
 lv_obj_t * uic_RebuildDatabase;
-lv_obj_t * uic_WorldMap;
-lv_obj_t * uic_DatabaseProgress1;
-lv_obj_t * uic_DatabaseProgress;
-lv_obj_t * uic_HomeButton3;
 lv_obj_t * uic_DatabaseScreen;
 lv_obj_t * ui_DatabaseScreen = NULL;
-lv_obj_t * ui_HomeButton3 = NULL;
-lv_obj_t * ui_DatabaseProgress = NULL;
-lv_obj_t * ui_DatabaseProgress1 = NULL;
-lv_obj_t * ui_WorldMap = NULL;
 lv_obj_t * ui_RebuildDatabase = NULL;
 lv_obj_t * ui_RebuildDatabaseButtonText = NULL;
+lv_obj_t * ui_Database_Town_Name = NULL;
+lv_obj_t * ui_Database_Progress = NULL;
+lv_obj_t * ui_WorldMap = NULL;
 lv_obj_t * ui_MapBanner = NULL;
 lv_obj_t * ui_MapCursor = NULL;
+lv_obj_t * ui_Database_Dir_Path = NULL;
+lv_obj_t * ui_Database_GPS_Position = NULL;
+lv_obj_t * ui_Database_Output_File = NULL;
+lv_obj_t * ui_HomeButton3 = NULL;
+lv_obj_t * ui_Database_Flag = NULL;
 // event funtions
-void ui_event_HomeButton3(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-    if(event_code == LV_EVENT_CLICKED) {
-        _ui_screen_change(&ui_Home, LV_SCR_LOAD_ANIM_NONE, 500, 0, &ui_Home_screen_init);
-        beep(e);
-    }
-}
-
 void ui_event_RebuildDatabase(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
@@ -46,61 +44,22 @@ void ui_event_RebuildDatabase(lv_event_t * e)
     }
 }
 
+void ui_event_HomeButton3(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_CLICKED) {
+        _ui_screen_change(&ui_Home, LV_SCR_LOAD_ANIM_NONE, 500, 0, &ui_Home_screen_init);
+        beep(e);
+    }
+}
+
 // build funtions
 
 void ui_DatabaseScreen_screen_init(void)
 {
     ui_DatabaseScreen = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_DatabaseScreen, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-
-    ui_HomeButton3 = lv_img_create(ui_DatabaseScreen);
-    lv_img_set_src(ui_HomeButton3, &ui_img_home_png);
-    lv_obj_set_width(ui_HomeButton3, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_HomeButton3, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_HomeButton3, 0);
-    lv_obj_set_y(ui_HomeButton3, 195);
-    lv_obj_set_align(ui_HomeButton3, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_HomeButton3, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
-    lv_obj_clear_flag(ui_HomeButton3, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    ui_object_set_themeable_style_property(ui_HomeButton3, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
-                                           _ui_theme_color_turquoise);
-    ui_object_set_themeable_style_property(ui_HomeButton3, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
-                                           _ui_theme_alpha_turquoise);
-
-    ui_DatabaseProgress = lv_label_create(ui_DatabaseScreen);
-    lv_obj_set_width(ui_DatabaseProgress, 343);
-    lv_obj_set_height(ui_DatabaseProgress, 25);
-    lv_obj_set_x(ui_DatabaseProgress, 1);
-    lv_obj_set_y(ui_DatabaseProgress, -120);
-    lv_obj_set_align(ui_DatabaseProgress, LV_ALIGN_CENTER);
-    lv_label_set_long_mode(ui_DatabaseProgress, LV_LABEL_LONG_SCROLL);
-    lv_label_set_text(ui_DatabaseProgress, "PROGRESS");
-    lv_obj_set_style_text_align(ui_DatabaseProgress, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_DatabaseProgress, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    ui_DatabaseProgress1 = lv_label_create(ui_DatabaseScreen);
-    lv_obj_set_width(ui_DatabaseProgress1, 343);
-    lv_obj_set_height(ui_DatabaseProgress1, 25);
-    lv_obj_set_x(ui_DatabaseProgress1, 0);
-    lv_obj_set_y(ui_DatabaseProgress1, 116);
-    lv_obj_set_align(ui_DatabaseProgress1, LV_ALIGN_CENTER);
-    lv_label_set_long_mode(ui_DatabaseProgress1, LV_LABEL_LONG_SCROLL);
-    lv_label_set_text(ui_DatabaseProgress1, "FILE PROGRESS");
-    lv_obj_set_style_text_align(ui_DatabaseProgress1, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_DatabaseProgress1, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    ui_WorldMap = lv_img_create(ui_DatabaseScreen);
-    lv_img_set_src(ui_WorldMap, &ui_img_stationsmap150k_png);
-    lv_obj_set_width(ui_WorldMap, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_WorldMap, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_WorldMap, 1);
-    lv_obj_set_y(ui_WorldMap, 0);
-    lv_obj_set_align(ui_WorldMap, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_WorldMap, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
-    lv_obj_clear_flag(ui_WorldMap, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_border_color(ui_WorldMap, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_opa(ui_WorldMap, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(ui_WorldMap, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_RebuildDatabase = lv_btn_create(ui_DatabaseScreen);
     lv_obj_set_width(ui_RebuildDatabase, 235);
@@ -121,18 +80,53 @@ void ui_DatabaseScreen_screen_init(void)
     lv_obj_set_x(ui_RebuildDatabaseButtonText, 0);
     lv_obj_set_y(ui_RebuildDatabaseButtonText, -170);
     lv_obj_set_align(ui_RebuildDatabaseButtonText, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_RebuildDatabaseButtonText, "REBUILD DATABASE");
+    lv_label_set_text(ui_RebuildDatabaseButtonText, "UPDATE DATABASE");
     lv_obj_set_style_text_color(ui_RebuildDatabaseButtonText, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_RebuildDatabaseButtonText, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui_RebuildDatabaseButtonText, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_RebuildDatabaseButtonText, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_Database_Town_Name = lv_label_create(ui_DatabaseScreen);
+    lv_obj_set_width(ui_Database_Town_Name, 343);
+    lv_obj_set_height(ui_Database_Town_Name, 25);
+    lv_obj_set_x(ui_Database_Town_Name, 0);
+    lv_obj_set_y(ui_Database_Town_Name, -140);
+    lv_obj_set_align(ui_Database_Town_Name, LV_ALIGN_CENTER);
+    lv_label_set_long_mode(ui_Database_Town_Name, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_label_set_text(ui_Database_Town_Name, "PROGRESS");
+    lv_obj_set_style_text_align(ui_Database_Town_Name, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Database_Town_Name, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Database_Progress = lv_label_create(ui_DatabaseScreen);
+    lv_obj_set_width(ui_Database_Progress, 343);
+    lv_obj_set_height(ui_Database_Progress, 25);
+    lv_obj_set_x(ui_Database_Progress, 1);
+    lv_obj_set_y(ui_Database_Progress, -115);
+    lv_obj_set_align(ui_Database_Progress, LV_ALIGN_CENTER);
+    lv_label_set_long_mode(ui_Database_Progress, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_label_set_text(ui_Database_Progress, "PROGRESS");
+    lv_obj_set_style_text_align(ui_Database_Progress, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Database_Progress, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_WorldMap = lv_img_create(ui_DatabaseScreen);
+    lv_img_set_src(ui_WorldMap, &ui_img_worldmap_bw_360x180_png);
+    lv_obj_set_width(ui_WorldMap, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_WorldMap, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_WorldMap, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_WorldMap, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_clear_flag(ui_WorldMap, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_border_color(ui_WorldMap, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(ui_WorldMap, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_WorldMap, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+
     ui_MapBanner = lv_label_create(ui_DatabaseScreen);
-    lv_obj_set_width(ui_MapBanner, 240);
+    lv_obj_set_width(ui_MapBanner, 328);
     lv_obj_set_height(ui_MapBanner, 146);
     lv_obj_set_align(ui_MapBanner, LV_ALIGN_CENTER);
     lv_label_set_long_mode(ui_MapBanner, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_label_set_text(ui_MapBanner, "All\nThose\nBeautiful\nInternet\nRadio\nStations\nAround\nThe\nWorld\n");
+    lv_obj_clear_flag(ui_MapBanner, LV_OBJ_FLAG_SCROLL_ELASTIC);      /// Flags
+    lv_obj_set_scrollbar_mode(ui_MapBanner, LV_SCROLLBAR_MODE_ON);
     ui_object_set_themeable_style_property(ui_MapBanner, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_COLOR,
                                            _ui_theme_color_lightblue);
     ui_object_set_themeable_style_property(ui_MapBanner, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_OPA,
@@ -151,22 +145,91 @@ void ui_DatabaseScreen_screen_init(void)
     lv_obj_set_align(ui_MapCursor, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_MapCursor, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
     lv_obj_clear_flag(ui_MapCursor, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_img_recolor(ui_MapCursor, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor(ui_MapCursor, lv_color_hex(0x00FF00), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_img_recolor_opa(ui_MapCursor, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_blend_mode(ui_MapCursor, LV_BLEND_MODE_NORMAL, LV_PART_MAIN | LV_STATE_DISABLED);
     lv_obj_set_style_opa(ui_MapCursor, 0, LV_PART_MAIN | LV_STATE_DISABLED);
 
-    lv_obj_add_event_cb(ui_HomeButton3, ui_event_HomeButton3, LV_EVENT_ALL, NULL);
+    ui_Database_Dir_Path = lv_label_create(ui_DatabaseScreen);
+    lv_obj_set_width(ui_Database_Dir_Path, 355);
+    lv_obj_set_height(ui_Database_Dir_Path, 25);
+    lv_obj_set_x(ui_Database_Dir_Path, 0);
+    lv_obj_set_y(ui_Database_Dir_Path, 115);
+    lv_obj_set_align(ui_Database_Dir_Path, LV_ALIGN_CENTER);
+    lv_label_set_long_mode(ui_Database_Dir_Path, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_label_set_text(ui_Database_Dir_Path, "/N/1/2/E/3/4");
+    lv_obj_set_style_text_align(ui_Database_Dir_Path, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Database_Dir_Path, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Database_GPS_Position = lv_label_create(ui_DatabaseScreen);
+    lv_obj_set_width(ui_Database_GPS_Position, 355);
+    lv_obj_set_height(ui_Database_GPS_Position, 25);
+    lv_obj_set_x(ui_Database_GPS_Position, 0);
+    lv_obj_set_y(ui_Database_GPS_Position, 115);
+    lv_obj_set_align(ui_Database_GPS_Position, LV_ALIGN_CENTER);
+    lv_label_set_long_mode(ui_Database_GPS_Position, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_label_set_text(ui_Database_GPS_Position, "");
+    ui_object_set_themeable_style_property(ui_Database_GPS_Position, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_COLOR,
+                                           _ui_theme_color_red);
+    ui_object_set_themeable_style_property(ui_Database_GPS_Position, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_OPA,
+                                           _ui_theme_alpha_red);
+    lv_obj_set_style_text_align(ui_Database_GPS_Position, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Database_GPS_Position, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Database_Output_File = lv_label_create(ui_DatabaseScreen);
+    lv_obj_set_width(ui_Database_Output_File, 355);
+    lv_obj_set_height(ui_Database_Output_File, 25);
+    lv_obj_set_x(ui_Database_Output_File, 0);
+    lv_obj_set_y(ui_Database_Output_File, 140);
+    lv_obj_set_align(ui_Database_Output_File, LV_ALIGN_CENTER);
+    lv_label_set_long_mode(ui_Database_Output_File, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_label_set_text(ui_Database_Output_File, "");
+    lv_obj_set_style_text_align(ui_Database_Output_File, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Database_Output_File, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_HomeButton3 = lv_img_create(ui_DatabaseScreen);
+    lv_img_set_src(ui_HomeButton3, &ui_img_home_png);
+    lv_obj_set_width(ui_HomeButton3, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_HomeButton3, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_HomeButton3, 0);
+    lv_obj_set_y(ui_HomeButton3, 195);
+    lv_obj_set_align(ui_HomeButton3, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_HomeButton3, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_clear_flag(ui_HomeButton3, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_object_set_themeable_style_property(ui_HomeButton3, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
+                                           _ui_theme_color_turquoise);
+    ui_object_set_themeable_style_property(ui_HomeButton3, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
+                                           _ui_theme_alpha_turquoise);
+
+    ui_Database_Flag = lv_img_create(ui_DatabaseScreen);
+    lv_img_set_src(ui_Database_Flag, &ui_img_ad_png);
+    lv_obj_set_height(ui_Database_Flag, 72);
+    lv_obj_set_width(ui_Database_Flag, LV_SIZE_CONTENT);   /// 96
+    lv_obj_set_x(ui_Database_Flag, 0);
+    lv_obj_set_y(ui_Database_Flag, -190);
+    lv_obj_set_align(ui_Database_Flag, LV_ALIGN_CENTER);
+    lv_obj_clear_flag(ui_Database_Flag, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
+                      LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
+                      LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
+    lv_obj_set_scrollbar_mode(ui_Database_Flag, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scroll_snap_x(ui_Database_Flag, LV_SCROLL_SNAP_CENTER);
+    lv_obj_set_scroll_snap_y(ui_Database_Flag, LV_SCROLL_SNAP_CENTER);
+
     lv_obj_add_event_cb(ui_RebuildDatabase, ui_event_RebuildDatabase, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_HomeButton3, ui_event_HomeButton3, LV_EVENT_ALL, NULL);
     uic_DatabaseScreen = ui_DatabaseScreen;
-    uic_HomeButton3 = ui_HomeButton3;
-    uic_DatabaseProgress = ui_DatabaseProgress;
-    uic_DatabaseProgress1 = ui_DatabaseProgress1;
-    uic_WorldMap = ui_WorldMap;
     uic_RebuildDatabase = ui_RebuildDatabase;
     uic_RebuildDatabaseButtonText = ui_RebuildDatabaseButtonText;
+    uic_Database_Town_Name = ui_Database_Town_Name;
+    uic_Database_Progress = ui_Database_Progress;
+    uic_WorldMap = ui_WorldMap;
     uic_MapBanner = ui_MapBanner;
     uic_MapCursor = ui_MapCursor;
+    uic_Database_Dir_Path = ui_Database_Dir_Path;
+    uic_Database_GPS_Position = ui_Database_GPS_Position;
+    uic_Database_Output_File = ui_Database_Output_File;
+    uic_HomeButton3 = ui_HomeButton3;
+    uic_Database_Flag = ui_Database_Flag;
 
 }
 
@@ -177,21 +240,29 @@ void ui_DatabaseScreen_screen_destroy(void)
     // NULL screen variables
     uic_DatabaseScreen = NULL;
     ui_DatabaseScreen = NULL;
-    uic_HomeButton3 = NULL;
-    ui_HomeButton3 = NULL;
-    uic_DatabaseProgress = NULL;
-    ui_DatabaseProgress = NULL;
-    uic_DatabaseProgress1 = NULL;
-    ui_DatabaseProgress1 = NULL;
-    uic_WorldMap = NULL;
-    ui_WorldMap = NULL;
     uic_RebuildDatabase = NULL;
     ui_RebuildDatabase = NULL;
     uic_RebuildDatabaseButtonText = NULL;
     ui_RebuildDatabaseButtonText = NULL;
+    uic_Database_Town_Name = NULL;
+    ui_Database_Town_Name = NULL;
+    uic_Database_Progress = NULL;
+    ui_Database_Progress = NULL;
+    uic_WorldMap = NULL;
+    ui_WorldMap = NULL;
     uic_MapBanner = NULL;
     ui_MapBanner = NULL;
     uic_MapCursor = NULL;
     ui_MapCursor = NULL;
+    uic_Database_Dir_Path = NULL;
+    ui_Database_Dir_Path = NULL;
+    uic_Database_GPS_Position = NULL;
+    ui_Database_GPS_Position = NULL;
+    uic_Database_Output_File = NULL;
+    ui_Database_Output_File = NULL;
+    uic_HomeButton3 = NULL;
+    ui_HomeButton3 = NULL;
+    uic_Database_Flag = NULL;
+    ui_Database_Flag = NULL;
 
 }

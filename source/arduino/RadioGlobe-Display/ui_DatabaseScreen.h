@@ -14,26 +14,34 @@ extern "C" {
 extern void ui_DatabaseScreen_screen_init(void);
 extern void ui_DatabaseScreen_screen_destroy(void);
 extern lv_obj_t * ui_DatabaseScreen;
-extern void ui_event_HomeButton3(lv_event_t * e);
-extern lv_obj_t * ui_HomeButton3;
-extern lv_obj_t * ui_DatabaseProgress;
-extern lv_obj_t * ui_DatabaseProgress1;
-extern lv_obj_t * ui_WorldMap;
 extern void ui_event_RebuildDatabase(lv_event_t * e);
 extern lv_obj_t * ui_RebuildDatabase;
 extern lv_obj_t * ui_RebuildDatabaseButtonText;
+extern lv_obj_t * ui_Database_Town_Name;
+extern lv_obj_t * ui_Database_Progress;
+extern lv_obj_t * ui_WorldMap;
 extern lv_obj_t * ui_MapBanner;
 extern lv_obj_t * ui_MapCursor;
+extern lv_obj_t * ui_Database_Dir_Path;
+extern lv_obj_t * ui_Database_GPS_Position;
+extern lv_obj_t * ui_Database_Output_File;
+extern void ui_event_HomeButton3(lv_event_t * e);
+extern lv_obj_t * ui_HomeButton3;
+extern lv_obj_t * ui_Database_Flag;
 // CUSTOM VARIABLES
 extern lv_obj_t * uic_DatabaseScreen;
-extern lv_obj_t * uic_HomeButton3;
-extern lv_obj_t * uic_DatabaseProgress;
-extern lv_obj_t * uic_DatabaseProgress1;
-extern lv_obj_t * uic_WorldMap;
 extern lv_obj_t * uic_RebuildDatabase;
 extern lv_obj_t * uic_RebuildDatabaseButtonText;
+extern lv_obj_t * uic_Database_Town_Name;
+extern lv_obj_t * uic_Database_Progress;
+extern lv_obj_t * uic_WorldMap;
 extern lv_obj_t * uic_MapBanner;
 extern lv_obj_t * uic_MapCursor;
+extern lv_obj_t * uic_Database_Dir_Path;
+extern lv_obj_t * uic_Database_GPS_Position;
+extern lv_obj_t * uic_Database_Output_File;
+extern lv_obj_t * uic_HomeButton3;
+extern lv_obj_t * uic_Database_Flag;
 
 #ifdef __cplusplus
 } /*extern "C"*/

@@ -21,30 +21,45 @@ void station1234(lv_event_t * e, uint16_t station)
         strcpy(Favorites[station].url, Stations.StationNUG[Stations.playing].url);
         Favorites[station].gps_ns = Stations.StationNUG[Stations.playing].gps_ns;
         Favorites[station].gps_ew = Stations.StationNUG[Stations.playing].gps_ew;
+        strcpy(Favorites[station].town, Stations.StationNUG[Stations.playing].town);
+        strcpy(Favorites[station].countrycode, Stations.StationNUG[Stations.playing].countrycode);
+        strcpy(Favorites[station].countryname, Stations.StationNUG[Stations.playing].countryname);
 
+        // all in one array
+        strcpy(Stations.StationNUG[station+MAX_STATIONS].name, Stations.StationNUG[Stations.playing].name);
+        strcpy(Stations.StationNUG[station+MAX_STATIONS].url, Stations.StationNUG[Stations.playing].url);
+        Stations.StationNUG[station+MAX_STATIONS].gps_ns = Stations.StationNUG[Stations.playing].gps_ns;
+        Stations.StationNUG[station+MAX_STATIONS].gps_ew = Stations.StationNUG[Stations.playing].gps_ew;
+        strcpy(Stations.StationNUG[station+MAX_STATIONS].town, Stations.StationNUG[Stations.playing].town);
+        strcpy(Stations.StationNUG[station+MAX_STATIONS].countrycode, Stations.StationNUG[Stations.playing].countrycode);
+        strcpy(Stations.StationNUG[station+MAX_STATIONS].countryname, Stations.StationNUG[Stations.playing].countryname);
+
+
+
+        
         if(station==0)
-        { lv_label_set_text(ui_StationPresetName1, Favorites[0].name); 
+        { lv_label_set_text(ui_StationPresetName1, Stations.StationNUG[station+MAX_STATIONS].name); 
           SetLed(station, UI_THEME_COLOR_GREEN);
         }  
 
         if(station==1)
-        { lv_label_set_text(ui_StationPresetName2, Favorites[1].name); 
+        { lv_label_set_text(ui_StationPresetName2, Stations.StationNUG[station+MAX_STATIONS].name); 
           SetLed(station, UI_THEME_COLOR_GREEN);
         }  
 
         if(station==2)
-        { lv_label_set_text(ui_StationPresetName3, Favorites[2].name); 
+        { lv_label_set_text(ui_StationPresetName3, Stations.StationNUG[station+MAX_STATIONS].name); 
           SetLed(station, UI_THEME_COLOR_GREEN);
         }  
         if(station==3)
-        { lv_label_set_text(ui_StationPresetName4, Favorites[3].name); 
+        { lv_label_set_text(ui_StationPresetName4, Stations.StationNUG[station+MAX_STATIONS].name); 
           SetLed(station, UI_THEME_COLOR_GREEN);
         }  
 
         for(int16_t n=0; n<4; n++)
         { if(n!=station)SetLed(n, 0);
         }          
-        Serial.printf("Favorites STORE station %s under Preset %d\n", Favorites[station].name, station);
+        Serial.printf("Favorites STORE station %s under Preset %d\n", Stations.StationNUG[station+MAX_STATIONS].name, station);
         SaveFavorites();
         beepforMs(1000);
       }
@@ -122,6 +137,13 @@ void SaveFavorites(void)
       favfile.println(sometext);  
       sprintf(sometext, "\"gps\": \"%f,%f\"", Favorites[n].gps_ns, Favorites[n].gps_ew); // write gps to file
       favfile.println(sometext);  
+      sprintf(sometext, "\"town\": \"%s\"", Favorites[n].town);
+      favfile.println(sometext);  
+      sprintf(sometext, "\"countrycode\": \"%s\"", Favorites[n].countrycode);
+      favfile.println(sometext);  
+      sprintf(sometext, "\"countryname\": \"%s\"", Favorites[n].countryname);
+      favfile.println(sometext);  
+
     }  
   }
   favfile.close();
@@ -139,27 +161,44 @@ void LoadFavorites(void)
 
   favfile = SD_MMC.open(favfilename, FILE_READ);
   if(favfile)
-  { while(favfile.available()) 
-    { for(favcount = 0; favcount<4; favcount++) // 4 favorites 
-      { for(int16_t line = 0; line<3; line++) // 3 lines of data per favorite
-        { String data = favfile.readStringUntil('\n');
-          strcpy(text, data.c_str());
-          if((p=strchr(text, '\n'))!=NULL)*p=0;
-          if((p=strchr(text, '\r'))!=NULL)*p=0;
-          //Serial.printf("Line % d text = <%s>\n", lines, text);
-          if((p = strrchr(text, '\"')) != NULL)*p=0; // get rid of the last "
-          if((p = strstr(text, "\"name\": ")) != NULL) 
-          { p+=9; // jump forward to start of name
-            strcpy(Favorites[favcount].name, p);
-          }
-          if((p = strstr(text, "\"url\": ")) != NULL) 
-          { p+=8; // jump forward to start of name
-            strcpy(Favorites[favcount].url, p);
-          }
-          if((p = strstr(text, "\"gps\": ")) != NULL) 
-          { p+=8; // jump forward to start of name
-            sscanf(p, "%f,%f", &Favorites[favcount].gps_ns, &Favorites[favcount].gps_ew);
-          }
+  { favcount = -1;
+    while(favfile.available()) 
+    { String data = favfile.readStringUntil('\n');
+      strcpy(text, data.c_str());
+      if((p=strchr(text, '\n'))!=NULL)*p=0;
+      if((p=strchr(text, '\r'))!=NULL)*p=0;
+      if((p = strrchr(text, '\"')) != NULL)*p=0; // get rid of the last "
+      if((p = strstr(text, "\"name\": ")) != NULL) 
+      { favcount++;
+        p+=9; // jump forward to start of name
+        strcpy(Favorites[favcount].name, p);
+      }
+
+      Serial.printf("Preset % d text = <%s>\n", favcount, text);
+      
+      if(favcount>=0 && favcount<4) // max 4 presets
+      {
+        if((p = strstr(text, "\"url\": ")) != NULL) 
+        { p+=8; // jump forward to start of name
+          strcpy(Favorites[favcount].url, p);
+        }
+        if((p = strstr(text, "\"gps\": ")) != NULL) 
+        { p+=8; // jump forward to start of name
+          sscanf(p, "%f,%f", &Favorites[favcount].gps_ns, &Favorites[favcount].gps_ew);
+        }
+        if((p = strstr(text, "\"town\": ")) != NULL) 
+        { p+=9; // jump forward to start of name
+          strcpy(Favorites[favcount].town, p);
+        }
+        if((p = strstr(text, "\"countrycode\": ")) != NULL) 
+        { p+=16; // jump forward to start of name
+          strncpy(Favorites[favcount].countrycode, p, 2);
+          Favorites[favcount].countrycode[3]=0;
+        }
+        if((p = strstr(text, "\"countryname\": ")) != NULL) 
+        { p+=16; // jump forward to start of name
+          strncpy(Favorites[favcount].countryname, p, 49);
+          Favorites[favcount].countryname[49]=0;
         }
       }
     }

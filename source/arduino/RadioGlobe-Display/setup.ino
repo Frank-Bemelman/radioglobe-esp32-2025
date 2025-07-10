@@ -27,8 +27,18 @@ void DatabaseEnter(lv_event_t * e)
 { if(isLongPressed(e)==5)
   { beepforMs(1000);
     Serial.printf("CheckDatabase clicked from SetupScreen with SecretCode=%s\n", SecretCode);
-    lv_label_set_text(ui_DatabaseProgress, "");
-    lv_label_set_text(ui_DatabaseProgress1, "Long Press Button To Start");
+    lv_obj_clear_flag(uic_RebuildDatabase, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_clear_flag(uic_RebuildDatabaseButtonText, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(uic_Database_Flag, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(uic_Database_Town_Name, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_clear_flag(uic_MapBanner, LV_OBJ_FLAG_HIDDEN); 
+    lv_obj_clear_flag(uic_Database_Dir_Path, LV_OBJ_FLAG_HIDDEN); 
+    lv_obj_add_flag(uic_Database_GPS_Position, LV_OBJ_FLAG_HIDDEN); 
+
+
+    lv_label_set_text(ui_Database_Progress, "");
+    lv_label_set_text(ui_Database_Dir_Path, "");
+    lv_label_set_text(ui_Database_Output_File, "Long Press Button To Start");
     lv_obj_add_state(uic_MapBanner, LV_STATE_DISABLED); 
     lv_obj_add_state(uic_MapCursor, LV_STATE_DISABLED); 
     
@@ -160,6 +170,8 @@ void SaveVolTone(lv_event_t * e)
   }
 }
 
+
+
 // on Home screen, 'now playing' pressed
 void StationInfo(lv_event_t * e)
 { char content[256];
@@ -170,34 +182,109 @@ void StationInfo(lv_event_t * e)
   }
   else
   { beepforMs(100);
-    if(Stations.playing>=0)
-    { Serial.printf("Station Info clicked from Home screen\n");
-      lv_obj_clear_state(uic_MapBanner, LV_STATE_DISABLED); 
+//    if(Stations.playing>=0)
+    { Serial.printf("Station %d Info clicked from Home screen\n", Stations.playing);
       lv_obj_add_flag(uic_RebuildDatabase, LV_OBJ_FLAG_HIDDEN);
       lv_obj_add_flag(uic_RebuildDatabaseButtonText, LV_OBJ_FLAG_HIDDEN);
+      lv_obj_add_flag(uic_MapBanner, LV_OBJ_FLAG_HIDDEN); 
+      lv_obj_add_flag(uic_Database_Dir_Path, LV_OBJ_FLAG_HIDDEN); 
+      lv_obj_clear_flag(uic_Database_Town_Name, LV_OBJ_FLAG_HIDDEN);
+      lv_obj_clear_state(uic_MapCursor, LV_STATE_DISABLED); 
+      lv_obj_clear_flag(uic_Database_Flag, LV_OBJ_FLAG_HIDDEN);
+      lv_scr_load(ui_DatabaseScreen);
+
+
+// size of squareline flag is 20736 (hex 5100), 3 bytes per pixel for a size of 96x72
+// that is  20740 bytes, plus 4 for header
+// LV_IMG_PX_SIZE_ALPHA_BYTE -> one pixel uses 3 bytes
+
 
 
       if(Stations.playing<MAX_STATIONS)
-      { sprintf(content, "GPS NS %2.6f - EW %3.6f", Stations.StationNUG[Stations.playing].gps_ns, Stations.StationNUG[Stations.playing].gps_ew);
-        lv_label_set_text(ui_DatabaseProgress, Stations.StationNUG[Stations.playing].name);  
+      { Serial.printf("Countrycode = %s\n", Stations.StationNUG[Stations.playing].countrycode);
+        ShowFlag(Stations.StationNUG[Stations.playing].countrycode);
+        sprintf(content,"Greetings From  %s", Stations.StationNUG[Stations.playing].countryname);
+        lv_label_set_text(ui_Database_Town_Name, content);
+        lv_label_set_text(ui_Database_Progress, Stations.StationNUG[Stations.playing].name);  
         lv_obj_set_pos(uic_MapCursor, (int)Stations.StationNUG[Stations.playing].gps_ew, -(int)Stations.StationNUG[Stations.playing].gps_ns);
-        sprintf(content,"The URL Of This Station Is\n%s\n", Stations.StationNUG[Stations.playing].url);
-        lv_label_set_text(ui_MapBanner, content);
-
+        sprintf(content, "GPS NS %2.6f - EW %3.6f", Stations.StationNUG[Stations.playing].gps_ns, Stations.StationNUG[Stations.playing].gps_ew);
+        lv_label_set_text(ui_Database_GPS_Position, content);
+        sprintf(content,"You Are In  %s", Stations.StationNUG[Stations.playing].town);
+        lv_label_set_text(ui_Database_Output_File, content);
+        ShowTheStations();
       }
       else
-      { sprintf(content, "GPS NS %2.6f - EW %3.6f", Favorites[Stations.playing-MAX_STATIONS].gps_ns, Favorites[Stations.playing-MAX_STATIONS].gps_ew);
-        lv_label_set_text(ui_DatabaseProgress, Favorites[Stations.playing-MAX_STATIONS].name);  
+      { Serial.printf("Countrycode = %s\n", Favorites[Stations.playing-MAX_STATIONS].countrycode);
+        ShowFlag(Favorites[Stations.playing-MAX_STATIONS].countrycode);
+
+        sprintf(content,"Greetings From  %s", Favorites[Stations.playing-MAX_STATIONS].countryname);
+        lv_label_set_text(ui_Database_Town_Name, content);
+        lv_label_set_text(ui_Database_Progress, Favorites[Stations.playing-MAX_STATIONS].name);  
         lv_obj_set_pos(uic_MapCursor, (int)Favorites[Stations.playing-MAX_STATIONS].gps_ew, -(int)Favorites[Stations.playing-MAX_STATIONS].gps_ns);
-        sprintf(content,"The URL Of This Preset Station Is\n%s\n", Stations.StationNUG[Stations.playing-MAX_STATIONS].url);
-        lv_label_set_text(ui_MapBanner, content);
+        sprintf(content, "GPS NS %2.6f - EW %3.6f", Favorites[Stations.playing-MAX_STATIONS].gps_ns, Favorites[Stations.playing-MAX_STATIONS].gps_ew);
+        lv_label_set_text(ui_Database_GPS_Position, content);
+        sprintf(content,"You Are In: %s", Favorites[Stations.playing-MAX_STATIONS].town);
+        lv_label_set_text(ui_Database_Output_File, content);
+        ShowTheStations();
       }
-      lv_label_set_text(ui_DatabaseProgress1, content);
 
 
       lv_scr_load(ui_DatabaseScreen);
+      bInfoScreen = true;
     }
   }
 }
 
 
+// immage descriptor and data 
+lv_img_dsc_t my_global_img;
+uint8_t my_global_img_data[96*72*3]; // 20736 bytes
+
+void ShowFlag(char *countrycode)
+{ char lowercasecode[8];
+  char path[32];
+  strcpy(lowercasecode, countrycode);
+  for(int i = 0; lowercasecode[i]; i++)
+  { lowercasecode[i] = tolower(lowercasecode[i]);
+  }
+  
+  sprintf(path, "/flags-bin/%s.bin", lowercasecode );
+
+  my_global_img.header.always_zero = 0;
+  my_global_img.header.w = 96;
+  my_global_img.header.h = 72;
+  my_global_img.header.cf = LV_IMG_CF_TRUE_COLOR_ALPHA;
+  my_global_img.data = my_global_img_data;
+
+  SD_MMC.begin("/sdcard", true, false);
+  File fp = SD_MMC.open(path, FILE_READ);
+  fp.read((uint8_t *)my_global_img_data, 4); // header, basically skipping it, header is already filled above
+  fp.read((uint8_t *)my_global_img_data, sizeof(my_global_img_data)); // header
+  fp.close();
+  SD_MMC.end();
+
+  lv_img_set_src(uic_Database_Flag, &my_global_img);
+
+}
+
+
+static lv_img_dsc_t StationMap_img_dsc;
+
+void ShowTheStations(void)
+{ // this took me a whole day
+  StationMap_img_dsc.header.always_zero = 0;
+  StationMap_img_dsc.header.w = 384;
+  StationMap_img_dsc.header.h = 180;
+  StationMap_img_dsc.header.cf = LV_IMG_CF_ALPHA_1BIT; 
+  StationMap_img_dsc.data = StationsMap.pixeldata;
+  // lv_img_set_src(uic_WorldMap, &StationMap_img_dsc);
+  // lv_obj_t * canvas = lv_canvas_create(lv_scr_act());
+  lv_obj_t * canvas = lv_canvas_create(ui_WorldMap);
+  static lv_style_t style;
+  lv_style_init(&style);
+  lv_style_set_img_recolor(&style, lv_color_hex(0xff0000));
+  lv_style_set_img_recolor_opa(&style, LV_OPA_100); 
+  lv_obj_add_style(canvas, &style, LV_PART_MAIN | LV_STATE_DEFAULT); 
+  lv_canvas_set_buffer(canvas, StationsMap.pixeldata, 384, 180, LV_IMG_CF_ALPHA_1BIT);
+  // wow
+}

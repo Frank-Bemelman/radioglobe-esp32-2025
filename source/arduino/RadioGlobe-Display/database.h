@@ -49,17 +49,21 @@ typedef struct bmpfile{                // Total: 54 + 8 + 8100 bytes
 #define FAVORITE_STATIONS 4
 
 typedef struct station_name_url_gps
-{ char name[64];
+{ char name[32];
   char url[128];
+  char town[32]; // derived from town_cc.txt filename
+  char countrycode[3]; // derived from town_cc.txt filename
+  char countryname[50]; // derived from town_cc.txt filename
   float gps_ns; // gps position to use for timezone retrieval
   float gps_ew; // gps position to use for timezone retrieval
 };
 
 typedef struct stations_arraybin
 { station_name_url_gps StationNUG[MAX_STATIONS+FAVORITE_STATIONS];
-  uint16_t count;
-  int16_t  requested;
-  int16_t  playing;
+  uint16_t count; // number of found stations in this list
+  int16_t  requested; // number of station requested by display to globe
+  int16_t  playing; // number of station that globe connected to
+  uint16_t connect_attempts; // number of times globe was asked to connect to a station from this list
 };
 
 
