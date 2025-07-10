@@ -41,7 +41,7 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   
   // quickly store gps location for timezone request before they become altered
   if(PrevDataFromDisplay.D_QueueMessageType != DataFromDisplay.D_QueueMessageType)
-  { PrevDataFromDisplay.D_QueueMessageType != DataFromDisplay.D_QueueMessageType;
+  { PrevDataFromDisplay.D_QueueMessageType = DataFromDisplay.D_QueueMessageType;
     if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_TIMEZONE_BY_GPS)
     { D_StationGpsNS = DataFromDisplay.D_StationGpsNS;
       D_StationGpsEW = DataFromDisplay.D_StationGpsEW;

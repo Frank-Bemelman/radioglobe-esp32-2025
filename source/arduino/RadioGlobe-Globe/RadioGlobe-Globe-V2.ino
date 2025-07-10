@@ -560,8 +560,10 @@ void audio_showstation(const char* info)
   // filter crap messages
   if((p=strchr(info, '-')) !=0) *p=0; // split idotic long names that combine station & content 
   if(strcmp(info, "no name")==0)return; // ignore meaningless names
+  if(strcmp(info, "No Name")==0)return; // ignore meaningless names
   if(strcmp(info, "NO NAME")==0)return; // ignore meaningless names
   if(strcmp(info, "My Station name")==0)return; // ignore meaningless names
+  if(strcmp(info, "This is my server name")==0)return; // ignore meaningless names
   AddToQueueForDisplay(info, MESSAGE_STATION_NAME);
 }
 
