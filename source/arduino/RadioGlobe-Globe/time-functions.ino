@@ -5,6 +5,7 @@
 
 /*
 https://maps.googleapis.com/maps/api/timezone/json?location=52.21810%2C4.54510&timestamp=1747924919&key=YOUR-API-KEY-FROM-GOOGLE
+https://maps.googleapis.com/maps/api/geocode/json?latlng=53,5&key=YOUR-API-KEY-FROM-GOOGLE
 */
 
 
@@ -12,11 +13,12 @@ const char* ntpServer = "pool.ntp.org";
 //const char* ntpServer = "time.google.com";
 
 const char gps_to_time_url[] = "https://maps.googleapis.com/maps/api/timezone/json?location=";
+const char gps_to_geocoding[] = "https://maps.googleapis.com/maps/api/geocode/json?latlng=";
 
 // as defined in ..\secrets.h
 // const char google_api_key[] = "YOUR-GOOGLE-API-KEY";
 
-char url_timezone_google_api[250];
+char url_google_api[250];
 
 void GetTimeZone(float StationGpsNS, float StationGpsEW)
 { WiFiClientSecure client;
@@ -29,7 +31,7 @@ void GetTimeZone(float StationGpsNS, float StationGpsEW)
   struct tm timeinfo;
   bool print;
   
-  Serial.println("MFree Heap at Start  GetTimeZone()" + String(ESP.getFreeHeap()));   
+  //Serial.println("MFree Heap at Start  GetTimeZone()" + String(ESP.getFreeHeap()));   
 
   print = 0;
   
@@ -37,14 +39,14 @@ void GetTimeZone(float StationGpsNS, float StationGpsEW)
   Serial.printf("GetTimeZone Requested By Display -> Position NS = %f, EW = %f\n", StationGpsNS, StationGpsEW);
 
   time(&now); // UTC epoch time
-  sprintf(url_timezone_google_api, "%s%.6f%%2C%.6f&timestamp=%lld&key=%s", gps_to_time_url, StationGpsNS, StationGpsEW, now, google_api_key);
+  sprintf(url_google_api, "%s%.6f%%2C%.6f&timestamp=%lld&key=%s", gps_to_time_url, StationGpsNS, StationGpsEW, now, google_api_key);
   
-  if(print)Serial.println(url_timezone_google_api);
+  if(print)Serial.println(url_google_api);
   client.setInsecure();
 
   HTTPClient https;
   //if(print)Serial.println("HTTP Client starten");
-  https.begin(client, url_timezone_google_api);
+  https.begin(client, url_google_api);
   //if(print)Serial.println("HTTP Client gestart");
   int httpResponseCode = https.GET();
   if (httpResponseCode>0) 
@@ -94,11 +96,61 @@ void GetTimeZone(float StationGpsNS, float StationGpsEW)
 
   
   if(print)Serial.print("Done Google query timezone\n");
-  Serial.println("MFree Heap at End GetTimeZone()" + String(ESP.getFreeHeap()));   
+  // Serial.println("MFree Heap at End GetTimeZone()" + String(ESP.getFreeHeap()));   
   
 }
 
+void GetGeolocationData(float StationGpsNS, float StationGpsEW)
+{ WiFiClientSecure client;
+  char   payload[256]; 
+  char   countrycode[3]=""; 
+  
+  bool print;
+  
+  //Serial.println("MFree Heap at Start  GetTimeZone()" + String(ESP.getFreeHeap()));   
 
+  print = 0;
+  
+  if(print)Serial.printf("GetGeoLocationData Requested By Display -> Position NS = %f, EW = %f\n", StationGpsNS, StationGpsEW);
+
+  sprintf(url_google_api, "%s%.6f%%2C%.6f&key=%s", gps_to_geocoding, StationGpsNS, StationGpsEW, google_api_key);
+  
+  if(print)Serial.println(url_google_api);
+  client.setInsecure();
+
+  HTTPClient https;
+  //if(print)Serial.println("HTTP Client starten");
+  https.begin(client, url_google_api);
+  //if(print)Serial.println("HTTP Client gestart");
+  int httpResponseCode = https.GET();
+  if (httpResponseCode>0) 
+  { client.setTimeout(100);
+    char *p;
+    while(client.available())
+    { uint16_t cnt = client.readBytesUntil('\n', payload, sizeof(payload)); // or until client.setTimeout(100)
+      payload[cnt]=0;
+      //Serial.printf("cnt=%d ->%s\n", cnt, payload);
+      if((p = strrchr(payload, '\"')) != NULL)*p=0; // get rid of the last "
+      if((p = strstr(payload, "\"short_name\" : \"")) != NULL)
+      { p+=16;
+        //Serial.println(p);
+        if(strlen(p)==2)strcpy(countrycode, p);
+      }
+      if((p = strstr(payload, "\"country")) != NULL)break;
+    }
+  }  
+  else 
+  {
+    if(print)Serial.printf("Error code: %d\n", httpResponseCode);
+  }
+  if(print)Serial.printf("GetGeolocationData (%s)done.", countrycode);
+  https.end();
+  client.stop(); // stop insecure client
+
+  if (httpResponseCode>0)
+  { AddToQueueForDisplay(countrycode, MESSAGE_GET_GEOLOCATION_BY_GPS);
+  }
+}
 
 void printLocalTime(){
   struct tm timeinfo;

@@ -7,21 +7,20 @@
 #include <WiFiClient.h>
 #include <VS1053.h>               // https://github.com/baldram/ESP_VS1053_Library
 #include <ESP32_VS1053_Stream.h>  // https://github.com/CelliesProjects/ESP32_VS1053_Stream
-
 // changed in ESP32_VS1053_Stream.h around line 15-16
 // the original lower values often give connection refused for more remote locations
 // #define VS1053_CONNECT_TIMEOUT_MS 10000 // FB was 250 FB
 // #define VS1053_CONNECT_TIMEOUT_MS_SSL 10000 // FB was 750
-
-
 #include "franks-esp-now.h"
 #include "mp3_sound_winxpstart.h"
 #include "mp3_sound_winxpshutdown.h"
 #include "..\secrets.h"
-
 // as defined in ..\secrets.h
 // char SSID [32] = "YOUR-SSID";
 // char PASSWORD[32] = "YOUR-WIFI-PASSWORD";
+// char google_api_key[] = "YOUR-API-KEY"; // free, get your own at google developer platform, used for timezone retrieval
+#include "AS5600.h"
+#include "Wire.h"
 
 #define COPY_LOG_OFF
 
@@ -34,93 +33,72 @@
 // DREQ pin 22
 // (X)RST pin 15
 
-#define SPI_CLK_PIN 18
-#define SPI_MISO_PIN 19
-#define SPI_MOSI_PIN 23
+// VS1053 sound module esp32-wroom-32 pin arrangement
+#define SPI_MOSI_PIN 23 // white
+#define SPI_CLK_PIN 18  // green
+#define SPI_MISO_PIN 19 // orange
+
+#define  VS1053_CS 5 // grey
+#define  VS1053_DREQ 22 // yellow 
+#define  VS1053_DCS 21 // blue
+#define VS1053_RESET 15 // brown
+
+// VS1053 sound module esp32-S3-N16R8 pin arrangement
+//#define SPI_MOSI_PIN 35 // white
+//#define SPI_CLK_PIN 36  // green
+//#define SPI_MISO_PIN 37 // orange
+
+//#define  VS1053_CS 1 // grey
+//#define  VS1053_DREQ 2 // yellow 
+//#define  VS1053_DCS 42 // blue
+//#define VS1053_RESET 41 // brown
+
+// VS1053 sound module esp32-wrover-8 pin arrangement
+//#define SPI_MOSI_PIN 23 // white
+//#define SPI_CLK_PIN 18  // green
+//#define SPI_MISO_PIN 19 // orange
+
+//#define  VS1053_CS 13 // grey
+//#define  VS1053_DREQ 4 // yellow 
+//#define  VS1053_DCS 21 // blue
+//#define VS1053_RESET 22 // brown
 
 
-
-// grey
-#define  VS1053_CS 5
-// orange
-#define  VS1053_DCS 21
-// yellow (was 4 first, moved to 22)
-#define  VS1053_DREQ 22
-// brown
-#define VS1053_RESET 15
 
 ESP32_VS1053_Stream stream;
 VS1053 chunkplayer(VS1053_CS, VS1053_DCS, VS1053_DREQ);
 
-// Orientation of hardware connections ESP32WROOM, USB pointing downwards
-// Left row
-//   3V3
-//    EN 
-//   SVP GPIO36 
-//   SVN GPIO39
-//   D34 GPIO34 
-//   D35 GPIO35 
-//   D32 
-//   D33 
-//   D25 
-//   D26 
-//   D27 
-//   D14 
-//   D12 
-//   GND
-//   D13 
-//   SD2
-//   SD3
-//   GND
-//   VIN 5V
-//
-// Right row
-//   GND
-//   D23 
-//   D22 
-//   TXO (GPIO1)
-//   RXO (GPIO3) 
-//   D21 (GPIO21)
-//   GND
-//   D19 (GPIO19)
-//   D18 (GPIO18)
-//   D5  (GPIO5) 
-//   TX2 (GPIO17)
-//   RX2 (GPIO16)
-//   D4  (GPIO4) 
-//   D2  (GPIO2) 
-//   D15 (GPIO15)
-//   SD1
-//   SD0
-//   GND
-//   CLK
+// AS5600 encoders esp32-wroom-32 pin arrangement
+const int SCL_1 = 33; // &wire as5600_0 grey
+const int SDA_1 = 32; // &wire as5600_0 brown
+const int SCL_2 = 26; // &wire as5600_1 grey
+const int SDA_2 = 25; // &wire as5600_1 brown
+
+// AS5600 encoders esp32-S3-N16R8 pin arrangement
+//const int SCL_1 = 4; // &wire as5600_0 grey
+//const int SDA_1 = 5; // &wire as5600_0 brown
+//const int SCL_2 = 6; // &wire as5600_1 grey
+//const int SDA_2 = 7; // &wire as5600_1 brown
+
+// AS5600 encoders esp32-wrover-8 pin arrangement
+//const int SCL_1 = 32; // &wire as5600_0 grey
+//const int SDA_1 = 33; // &wire as5600_0 brown
+//const int SCL_2 = 25; // &wire as5600_1 grey
+//const int SDA_2 = 26; // &wire as5600_1 brown
+
+
+AS5600 as5600_1(&Wire);
+AS5600 as5600_2(&Wire1);
 
 static uint32_t startMillis;
 static uint32_t lapMillis;
 static uint32_t currentMillis;
 
-
-// URL_CLIENT_TIMEOUT set to 5000ms, line 330 in audiotoolsconfig.h
-
-  
-
-
-#include "AS5600.h"
-#include "Wire.h"
-
-// AS5600 encoders
-const int SCL_1 = 14; 
-const int SDA_1 = 27;
-const int SCL_2 = 26;
-const int SDA_2 = 25; 
-
-AS5600 as5600_0(&Wire);
-AS5600 as5600_1(&Wire1);
 int16_t ReadEncoderTicker100mS = 0;
 int16_t PrevTick = 0;
 bool bPowerStatus = true;
 bool bVolumeToneControlsActive = false;
-
+int16_t stream_connecttohost_result; // received from callback 
 
 bool bUpAndRunning = false;
 bool bEncoderNewPosition;
@@ -134,15 +112,16 @@ int16_t gEWCal10; // calibrated EW degrees times 10
 
 char RequestedUrl[QUEUEMESSAGELENGTH]; // holds the url requested by display
 char ActiveUrl[QUEUEMESSAGELENGTH]; // holds the url requested by display
-char UnraveledUrl[2560] = ""; // checked for redirects 
+char UnraveledUrl[2048] = ""; // checked for redirects 
+char ConnectedUrl[2048] = ""; // actual url that connected with succes
 
 bool Tuning = false;
 
 #include <EEPROM.h>
 #define EEPROM_SIZE 256
 struct eepromData {
-int16_t Offset0;
 int16_t Offset1;
+int16_t Offset2;
 uint16_t ee_volume; // 0-100 can be changed by display puck
 uint16_t ee_bass; // 0-f can be changed by display puck
 uint16_t ee_treble; // 0-f can be changed by display puck
@@ -162,10 +141,10 @@ void setup()
   startMillis = millis();
   Serial.begin(115200);
 
-  pinMode(VS1053_RESET, OUTPUT);
-  digitalWrite(VS1053_RESET, LOW);  // sets the digital pin 12 off
+  //pinMode(VS1053_RESET, OUTPUT);
+  //digitalWrite(VS1053_RESET, LOW);  // sets the digital pin 12 off
   delay(100);            // waits for a second
-  digitalWrite(VS1053_RESET, HIGH); // sets the digital pin 12 on
+  //digitalWrite(VS1053_RESET, HIGH); // sets the digital pin 12 on
   delay(100);            // waits for a second
 
   // Initialise as5600_0 Connection
@@ -182,25 +161,25 @@ void setup()
   GlobeSettings.password[sizeof(GlobeSettings.password)-1]=0;
   Serial.printf("Eeprom password: %s\n", GlobeSettings.password);
 
-  Serial.printf("Eeprom stored 0: %d\n", GlobeSettings.Offset0);
   Serial.printf("Eeprom stored 1: %d\n", GlobeSettings.Offset1);
+  Serial.printf("Eeprom stored 2: %d\n", GlobeSettings.Offset2);
 
-  as5600_0.begin(33);  //  set direction pin.
-  as5600_0.setDirection(AS5600_COUNTERCLOCK_WISE);
-  as5600_0.setOffset(GlobeSettings.Offset0 * AS5600_RAW_TO_DEGREES);
+  as5600_1.begin();  //  set direction pin.
+  as5600_1.setDirection(AS5600_CLOCK_WISE);
+  as5600_1.setOffset(GlobeSettings.Offset1 * AS5600_RAW_TO_DEGREES);
   Serial.print("Connect device 0: ");
-  Serial.println(as5600_0.isConnected() ? "true" : "false");
-
-  as5600_1.begin(32);  //  set direction pin.
-  as5600_1.setDirection(AS5600_COUNTERCLOCK_WISE);
-  as5600_1.setOffset(GlobeSettings.Offset1 * AS5600_RAW_TO_DEGREES);  
-  Serial.print("Connect device 1: ");
   Serial.println(as5600_1.isConnected() ? "true" : "false");
 
-  Serial.print("readangle NS = "); Serial.println(as5600_0.readAngle() * AS5600_RAW_TO_DEGREES);
-  Serial.print("readangle EW = "); Serial.println(as5600_1.readAngle() * AS5600_RAW_TO_DEGREES);
-  Serial.print("ReadAGC NS = "); Serial.println(as5600_0.readAGC());
-  Serial.print("ReadAGC EW = "); Serial.println(as5600_1.readAGC());
+  as5600_2.begin();  //  set direction pin.
+  as5600_2.setDirection(AS5600_CLOCK_WISE);
+  as5600_2.setOffset(GlobeSettings.Offset2 * AS5600_RAW_TO_DEGREES);  
+  Serial.print("Connect device 1: ");
+  Serial.println(as5600_2.isConnected() ? "true" : "false");
+
+  Serial.print("readangle NS = "); Serial.println(as5600_1.readAngle() * AS5600_RAW_TO_DEGREES);
+  Serial.print("readangle EW = "); Serial.println(as5600_2.readAngle() * AS5600_RAW_TO_DEGREES);
+  Serial.print("ReadAGC NS = "); Serial.println(as5600_1.readAGC());
+  Serial.print("ReadAGC EW = "); Serial.println(as5600_2.readAGC());
 
   delay(500);
 
@@ -212,7 +191,7 @@ void setup()
     
   WiFi.mode(WIFI_STA);
   WiFi.begin(SSID, PASSWORD);
-  WiFi.setSleep(false);
+  //WiFi.setSleep(false);
   
   uint16_t timeout = 100; // 10 seconds max
   Serial.print("Connecting to WiFi ..");
@@ -240,7 +219,7 @@ void setup()
   setup_esp_now();
   setup_tasks(); // see task-and-interrupts.ino, will also indirectly start to use espnow
 
-  // Start SPI bus
+  //Start SPI bus
   SPI.setHwCs(true);
   SPI.begin(SPI_CLK_PIN, SPI_MISO_PIN, SPI_MOSI_PIN);
   Serial.println("spi bus started.");
@@ -258,11 +237,11 @@ void setup()
   AddToQueueForDisplay(message, MESSAGE_VOLUME_AND_TONE);
 
   // set VS1053 volume and tone values from eeprom
-  Serial.printf("Volume from eeprom -> %d", GlobeSettings.ee_volume);
+  Serial.printf("Volume from eeprom -> %d\n", GlobeSettings.ee_volume);
   SetVolumeMapped(GlobeSettings.ee_volume); // eeprom can be updated by changing bass or treble
-  Serial.printf("Bass value from eeprom -> %d", GlobeSettings.ee_bass);
+  Serial.printf("Bass value from eeprom -> %d\n", GlobeSettings.ee_bass);
   rtone[2] = (GlobeSettings.ee_bass * 15)/100;
-  Serial.printf("Treble value from eeprom -> %d", GlobeSettings.ee_treble);
+  Serial.printf("Treble value from eeprom -> %d\n", GlobeSettings.ee_treble);
   rtone[0] = (uint8_t) abs(((GlobeSettings.ee_treble-50)*15/100)); 
   //  Serial.printf("Nibble1 %04x\n", (uint16_t) rtone[0] );                           
   if((GlobeSettings.ee_treble-50)<0)rtone[0] |= 0x08;
@@ -286,16 +265,21 @@ void setup()
 static bool once = true;
 void loop()
 { char message[QUEUEMESSAGELENGTH];
+  float GpsNS;
+  float GpsEW;
+
   stream.loop();
 
      // process messages from display
   if(DataFromGlobe.D_QueueSerialNumber != DataFromDisplay.D_QueueSerialNumber) // not yet acknowlegded and processed
   {  // quick acknowledge message from displayglobe as received
      DataFromGlobe.D_QueueSerialNumber = DataFromDisplay.D_QueueSerialNumber;
+     if((DataFromDisplay.D_QueueMessageType>=0) && (DataFromDisplay.D_QueueMessageType<sizeof(messagetexts)))
+     { Serial.printf("DISPLAY SAYS: %s >%s<\n", messagetexts[DataFromDisplay.D_QueueMessageType], DataFromDisplay.D_QueueMessage);  
+     }
      // and now take care of it
     switch(DataFromDisplay.D_QueueMessageType)
     { case MESSAGE_GOOGLE_API_KEY:
-        Serial.println("INCOMING MESSAGE_GOOGLE_API_KEY");
         Serial.println(DataFromDisplay.D_QueueMessage);
         strcpy(google_api_key, DataFromDisplay.D_QueueMessage);
         EEPROM.put(0x0, GlobeSettings);
@@ -312,7 +296,6 @@ void loop()
         // will be unraveled later, redirected, derived from pls or m3u file
         strcpy(UnraveledUrl, RequestedUrl);
 
-        Serial.printf("INCOMING MESSAGE_START_THIS_STATION: >%s<\n", DataFromDisplay.D_QueueMessage);  
         if(DataFromGlobe.D_QueueStationIndex == DataFromDisplay.D_QueueStationIndex)
         { // already conmected
           Serial.printf("ALREADY CONNECTED TO STATIONINDEX %d\n", DataFromGlobe.D_QueueStationIndex);  
@@ -321,7 +304,27 @@ void loop()
         }
         
         Tuning = true;
-        StartNewStation();
+
+        // quick & dirty, but too dirty, as not all https urls are http appraocheable (HTTP error 400)
+        // or catch the 400 for a retry on https
+        // if(UnraveledUrl[4]=='s')strcpy(&UnraveledUrl[4], &UnraveledUrl[5]);  
+        
+        if(StartNewStation()==1) // succes
+        { // restore volume setting
+          SetVolumeMapped(DataFromDisplay.volumevalue);
+          strcpy(ActiveUrl, RequestedUrl);
+          DataFromGlobe.D_QueueStationIndex = DataFromDisplay.D_QueueStationIndex;
+          AddToQueueForDisplay(ActiveUrl, MESSAGE_STATION_CONNECTED); 
+        }
+        else
+        {  DataFromGlobe.D_QueueStationIndex = -1;
+           Serial.printf("FAILED: stream.connecttohost \n");
+           sprintf(message, "%d", stream_connecttohost_result);
+           AddToQueueForDisplay(message, MESSAGE_CONNECTTOHOST_FAILURE);
+//           AddToQueueForDisplay(RequestedUrl, MESSAGE_DEAD_STATION);
+           AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);
+        }
+
 /*
         lapMillis = millis(); 
         DataFromGlobe.Unraveling = 1;
@@ -360,17 +363,17 @@ void loop()
         }  
         break;
 
-      // displays wants to know the timezone for a given location
+      // displays wants to know the timezone for a given GPS location as linked to a particular station from the database
+      // actual handling moved to esp-now receive, this here is just to inform
       case MESSAGE_GET_TIMEZONE_BY_GPS:
-        Serial.printf("INCOMING MESSAGE_GET_TIMEZONE_BYDATABASE: >NS%f EW%f<\n", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW );  
-        Serial.printf("FOR STATION: %s\n", DataFromDisplay.D_QueueMessage);  
-        // DataFromGlobe.FindTimeZone = MESSAGE_GET_TIMEZONE_BY_GPS; // moved to esp-now receive
+        sscanf(DataFromDisplay.D_QueueMessage, "%f-%f", &GpsNS, &GpsEW);
+        //Serial.printf("  (DISPLAY SAYS): NS%f EW%f\n", GpsNS, GpsEW );  
         break;
 
+      // displays wants to know the timezone for a given GPS location from the calibrated globe coordinates
+      // actual handling moved to esp-now receive, this here is just to inform
       case MESSAGE_GET_TIMEZONE:
-        Serial.printf("INCOMING MESSAGE_GET_TIMEZONE: >NS%f EW%f<\n", DataFromDisplay.ns_cal, DataFromDisplay.ew_cal);  
-        Serial.printf("FOR STATION: %s\n", DataFromDisplay.D_QueueMessage);  
-        // DataFromGlobe.FindTimeZone = MESSAGE_GET_TIMEZONE_BY_GPS; // moved to esp-now receive
+        //Serial.printf("  (DISPLAY SAYS): %s\n", DataFromDisplay.D_QueueMessage);  
         break;
 
       case MESSAGE_NEW_LIST_LOADED:
@@ -425,6 +428,11 @@ void loop()
         EEPROM.put(0x0, GlobeSettings);
         EEPROM.commit();
         Serial.println("Eeprom saved..");
+        break;
+
+      case MESSAGE_GET_GEOLOCATION_BY_GPS:
+        sscanf(DataFromDisplay.D_QueueMessage, "%f-%f", &GpsNS, &GpsEW);
+        Serial.printf("INCOMING MESSAGE_GET_GEOLOCATION_BY_GPS: NS%f EW%f\n", GpsNS, GpsEW);  
         break;
 
       default:
@@ -493,57 +501,68 @@ void loop()
 
 
 
-void StartNewStation(void)
+bool StartNewStation(void)
 { bool return_result = false;
+  char message[QUEUEMESSAGELENGTH];
 
   Tuning = true;
-  Serial.printf("StartNewStation with >%s<\n", RequestedUrl);
+  Serial.printf("StartNewStation with %s\n", RequestedUrl);
   stream.setVolume(0);
-  Serial.printf("stream.connecttohost %s stopped\n", ActiveUrl);
+  Serial.printf("First stop this one: %s\n", ConnectedUrl);
   stream.stopSong();
   DataFromGlobe.D_QueueStationIndex = -1;
   strcpy(ActiveUrl, "");
   //AddToQueueForDisplay("", MESSAGE_NAME); // already filled in by display station search, perhaps to be updated by actual station connecting
-   AddToQueueForDisplay("", MESSAGE_SONG_TITLE); // remove 'now playing title'
+  AddToQueueForDisplay("", MESSAGE_SONG_TITLE); // remove 'now playing title'
 
-  Serial.printf("stream.connecttohost ->%s\n", UnraveledUrl);
   lapMillis = millis(); 
-  
+
+//  interesting - these url play fine in chrome browser, but not here, unless you change https to http
+//  strcpy(UnraveledUrl, "https://cosmo.shoutca.st/proxy/jubileefm/stream"); 
+//  strcpy(UnraveledUrl, "https://stream.zeno.fm/89fkq77gb4duv");
+//  strcpy(UnraveledUrl, "https://stream.zeno.fm/7ns6amt68qruv");
+//  strcpy(UnraveledUrl, "https://stream.zeno.fm/yerp85sughwtv");
+//  strcpy(UnraveledUrl, "https://stream.zeno.fm/bux0vqx79zquv");
+//  strcpy(UnraveledUrl, "https://www.radioking.com/play/radio-paysan-fm-san/652837");
+//  strcpy(UnraveledUrl, "https://betelgeuse.dribbcast.com/proxy/diaremefm?mp=/stream");
+//  strcpy(UnraveledUrl, "https://webradio.tda.dz/ElBahdja_64K.mp3");
+//  strcpy(UnraveledUrl, "https://webradio.tda.dz/Illizi_64K.mp3");
+//  strcpy(UnraveledUrl, "https://webradio.tda.dz/Ouargla_64K.mp3");
+//  strcpy(UnraveledUrl, "https://stream.zeno.fm/hfbgmx6rwrhvv");
+//  strcpy(UnraveledUrl, "https://webradio.tda.dz/Chaine3_64K.mp3");
+//  strcpy(UnraveledUrl, "https://webradio.tda.dz/Jeunesse_64K.mp3");
+//  strcpy(UnraveledUrl, "https://radio-dzair.net/proxy/chaabia/chaabia");
+//  strcpy(UnraveledUrl, "https://webradio.tda.dz/ElBahdja_64K.mp3");
+//  strcpy(UnraveledUrl, "https://webradio.tda.dz/Coran_64K.mp3");
+//  strcpy(UnraveledUrl, "https://stream.zeno.fm/1dkectoxpqgvv");
+//  strcpy(UnraveledUrl, "https://betelgeuse.dribbcast.com/proxy/mamediarra?mp=/stream");
+//  strcpy(UnraveledUrl, "https://playerservices.streamtheworld.com/api/livestream-redirect/SP_R2982692.aac");
+//  strcpy(UnraveledUrl, "https://live.paineldj.com.br/proxy/radio1ago?mp=/stream");
+//  strcpy(UnraveledUrl, "https://sc1.xdevel.com/ribeirabrava");
+//  strcpy(UnraveledUrl, "https://stream.zeno.fm/85whutype7duv");
+//  strcpy(UnraveledUrl, "https://stream.zeno.fm/e59pwkvm3reuv");
+//  strcpy(UnraveledUrl, "https://stream.zeno.fm/2ee8m52mb"); 
+//  strcpy(UnraveledUrl, "https://stream.zeno.fm/8pbaase2w2quv");
+
+  Serial.printf("Now connect: %s\n", UnraveledUrl);
   stream.connecttohost(UnraveledUrl);  
 
-  //stream.connecttohost("http://vprclassical.streamguys.net/vprclassical128.mp3");  // just a test
-
   if(stream.isRunning()) 
-  { Serial.printf("stream.connecttohost succes -> time elapsed = %ld\n", (currentMillis = millis()) - lapMillis);
+  { Serial.printf("Succesfully connected: %s -> time elapsed = %ld\n", UnraveledUrl, (currentMillis = millis()) - lapMillis);
     Serial.print("Codec: ");
     Serial.println(stream.currentCodec());
     Serial.print("Bitrate: ");
     Serial.print(stream.bitrate());
     Serial.println(" kbps");
     return_result = 1;
+    strcpy(ConnectedUrl, UnraveledUrl);
   }
   else
-  { Serial.printf("stream.connecttohost failed -> time elapsed = %ld\n", (currentMillis = millis()) - lapMillis);
+  { Serial.printf("Could not connect: %s -> time elapsed = %ld\n", UnraveledUrl, (currentMillis = millis()) - lapMillis);
   }  
-
-  if(return_result==1)
-  { // restore volume setting
-    SetVolumeMapped(DataFromDisplay.volumevalue);
-
-    strcpy(ActiveUrl, RequestedUrl);
-    DataFromGlobe.D_QueueStationIndex = DataFromDisplay.D_QueueStationIndex;
-    AddToQueueForDisplay(ActiveUrl, MESSAGE_STATION_CONNECTED); 
-    //EEPROM.put(0x0, GlobeSettings);
-    //EEPROM.commit();
-  }
-  else
-  { Serial.printf("FAILED: stream.connecttohost \n");
-    AddToQueueForDisplay(RequestedUrl, MESSAGE_DEAD_STATION);
-    DataFromGlobe.D_QueueStationIndex = -1;
-    AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);
-  }
-  
+ 
   Tuning = false;
+  return return_result;
 }
 
 void SetVolumeMapped(uint16_t volume)
@@ -556,7 +575,7 @@ void SetVolumeMapped(uint16_t volume)
 
 void audio_showstation(const char* info) 
 { char *p;
-  Serial.printf("Station: %s\n", info);
+  // Serial.printf("Station: %s\n", info);
   // filter crap messages
   if((p=strchr(info, '-')) !=0) *p=0; // split idotic long names that combine station & content 
   if(strcmp(info, "no name")==0)return; // ignore meaningless names
@@ -564,25 +583,78 @@ void audio_showstation(const char* info)
   if(strcmp(info, "NO NAME")==0)return; // ignore meaningless names
   if(strcmp(info, "My Station name")==0)return; // ignore meaningless names
   if(strcmp(info, "This is my server name")==0)return; // ignore meaningless names
+  if(strcmp(info, "Untitled")==0)return; // ignore meaningless names
+  if(strlen(info)<2)return; // ignore meaningless names
   AddToQueueForDisplay(info, MESSAGE_STATION_NAME);
 }
 
 void audio_showstreamtitle(const char* info) {
-    Serial.printf("Stream title: %s\n", info);
+    // Serial.printf("Stream title: %s\n", info);
     // filter crap messages
     if(strcmp(info, "Now Playing info goes here")==0)return;
     if(strcmp(info, " - ")==0)return;
     AddToQueueForDisplay(info, MESSAGE_SONG_TITLE);
 }
 
-void audio_eof_stream(const char* info) {
-    Serial.printf("End of stream: %s\n", info);
-    if(bPowerStatus == true)
-    { AddToQueueForDisplay(RequestedUrl, MESSAGE_AUDIO_EOF_STREAM);
-      DataFromGlobe.D_QueueStationIndex = -1;
-      AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);
-    }  
+
+// results/problems as text
+const char * fail_texts[] = {
+   { "FAIL_INVALID_URL"},
+   { "FAIL_HTTP_CLIENT"},
+   { "FAIL_CONNECTING"},
+   { "FAIL_PLAYLIST_CANT_REDIRECT"},
+   { "FAIL_NO_STREAM_HANDLE"},
+   { "FAIL_PLAYLIST_NO_DATA"},
+   { "FAIL_PLAYLIST_NO_URL"},
+   { "FAIL_UNSUPPORTED_MIME"},
+   { "FAIL_CANT_REDIRECT"},
+   { "FAIL_LOOP_NO_HTTP_CLIENT"},
+   { "FAIL_LOOP_HTTP_DISCONNECT"},
+   { "FAIL_LOOP_CONNECTION_LOST"},
+   { "FAIL_LOOP_STREAM_TIMEOUT"},
+   { "FAIL_LOOP_EOF_NO_REMAINING_BYTES"},
+   { "FAIL_LOOP_EOF_NO_REMAINING_BYTES_HTTPS"},
+};
+
+void audio_connect_result(const int16_t result) {
+  stream_connecttohost_result = result;
+  if(result>=FAIL_ENUM_START)
+  { Serial.printf("ESP32_VS1053_Stream (Failure) %s : %d\n", fail_texts[result-FAIL_ENUM_START], result);
+  }
+  else
+  { Serial.printf("ESP32_VS1053_Stream (HTTP Return Code) : %d\n", result);
+  }
 }
 
-// EOF
+void audio_eof_stream(const char* info) 
+{ char message[QUEUEMESSAGELENGTH];
+  Serial.printf("End of stream: %s\n", info);
+  if(bPowerStatus == true)
+  { DataFromGlobe.D_QueueStationIndex = -1;
+    sprintf(message, "%d", stream_connecttohost_result); // could  be http return code or failure enum
+    AddToQueueForDisplay(message, MESSAGE_CONNECTTOHOST_FAILURE); // let display store this number for log report
+    AddToQueueForDisplay(RequestedUrl, MESSAGE_AUDIO_EOF_STREAM); // let display store this url in text file
 
+    if(stream_connecttohost_result == FAIL_LOOP_EOF_NO_REMAINING_BYTES_HTTPS)
+    { // try again, with http, remove 's' from url
+      if(UnraveledUrl[4]=='s')
+      { strcpy(&UnraveledUrl[4], &UnraveledUrl[5]);  
+        Serial.printf("Try again with: %s\n", UnraveledUrl);
+        if(StartNewStation()==1) // succes
+        { // restore volume setting
+          SetVolumeMapped(DataFromDisplay.volumevalue);
+          DataFromGlobe.D_QueueStationIndex = DataFromDisplay.D_QueueStationIndex;
+          AddToQueueForDisplay(ActiveUrl, MESSAGE_STATION_CONNECTED); 
+          return;
+        }
+      }
+    }  
+
+//    AddToQueueForDisplay(RequestedUrl, MESSAGE_DEAD_STATION);
+    AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);
+  }    
+}
+
+
+
+// EOF

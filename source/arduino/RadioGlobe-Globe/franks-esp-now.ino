@@ -29,12 +29,6 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
 }
 
 
-
-int16_t ns_cal_received;
-int16_t ew_cal_received;
-float D_StationGpsNS;
-float D_StationGpsEW;
-
 // Callback when data is received
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   memcpy(&DataFromDisplay, incomingData, sizeof(DataFromDisplay));
@@ -53,6 +47,13 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
       ew_cal_received = DataFromDisplay.ew_cal;
       DataFromGlobe.FindTimeZone = MESSAGE_GET_TIMEZONE; // makes the CallGetTimeZone task actually do it
     }  
+
+    if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_GEOLOCATION_BY_GPS)
+    { D_GeoLocationGpsNS = DataFromDisplay.D_StationGpsNS;
+      D_GeoLocationGpsEW = DataFromDisplay.D_StationGpsEW;
+      DataFromGlobe.FindGeoLocationData = MESSAGE_GET_GEOLOCATION_BY_GPS; // makes the CallGetTimeZone task actually do it
+    }  
+
   }  
 
   //Serial.print("Bytes received: ");
@@ -110,7 +111,7 @@ void loop_esp_now() {
     { // yes we are in sync, get new message from queue to send out, if any
 
       if(acked_qserialnumber != DataFromDisplay.G_QueueSerialNumber)
-      { Serial.printf("Message %d acknowledged by display.\n", DataFromDisplay.G_QueueSerialNumber);
+      { // Serial.printf("Message %d acknowledged by display.\n", DataFromDisplay.G_QueueSerialNumber);
         acked_qserialnumber = DataFromDisplay.G_QueueSerialNumber;
       }  
       if(ToDisplay.QueueCnt>0)
@@ -119,7 +120,7 @@ void loop_esp_now() {
         { DataFromGlobe.G_QueueSerialNumber++;
           strcpy(DataFromGlobe.G_QueueMessage, ToDisplay.QueueMessage[ToDisplay.QueueIndexOut]);   
           DataFromGlobe.G_QueueMessageType = ToDisplay.QueueMessageType[ToDisplay.QueueIndexOut];
-          Serial.printf("Message %d-%d sent to display = >%s<\n", DataFromGlobe.G_QueueSerialNumber, DataFromGlobe.G_QueueMessageType, DataFromGlobe.G_QueueMessage);
+          //Serial.printf("Message %d-%d sent to display = >%s<\n", DataFromGlobe.G_QueueSerialNumber, DataFromGlobe.G_QueueMessageType, DataFromGlobe.G_QueueMessage);
           ToDisplay.QueueIndexOut++;
           ToDisplay.QueueCnt--;
         }
@@ -147,7 +148,7 @@ void AddToQueueForDisplay(const char* message, uint16_t queuemessagetype)
     strncpy(ToDisplay.QueueMessage[ToDisplay.QueueIndexIn], message, QUEUEMESSAGELENGTH);
     ToDisplay.QueueMessage[ToDisplay.QueueIndexIn][QUEUEMESSAGELENGTH] = 0; // terminate just in case of idiotic long message
     ToDisplay.QueueMessageType[ToDisplay.QueueIndexIn] = queuemessagetype;
-    Serial.printf("Outgoing Message Queued in %d type = %d content >%s<\n", ToDisplay.QueueIndexIn, ToDisplay.QueueMessageType[ToDisplay.QueueIndexIn], ToDisplay.QueueMessage[ToDisplay.QueueIndexIn]);
+    Serial.printf("Outgoing Message %s Queued type = %d content >%s<\n", messagetexts[ToDisplay.QueueMessageType[ToDisplay.QueueIndexIn]], ToDisplay.QueueMessageType[ToDisplay.QueueIndexIn], ToDisplay.QueueMessage[ToDisplay.QueueIndexIn]);
 
     ToDisplay.QueueIndexIn++;
     ToDisplay.QueueCnt++;

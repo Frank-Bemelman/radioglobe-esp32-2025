@@ -34,9 +34,15 @@ void CallGetTimeZone(void * pvParameters)
 { while(1)
   { if(DataFromGlobe.FindTimeZone == MESSAGE_GET_TIMEZONE)
     { GetTimeZone(ns_cal_received/10, ew_cal_received/10); 
+      DataFromGlobe.FindTimeZone = 0;
     }
     else if(DataFromGlobe.FindTimeZone == MESSAGE_GET_TIMEZONE_BY_GPS)
-    { GetTimeZone(D_StationGpsNS, D_StationGpsEW); 
+    { GetTimeZone(D_StationGpsNS, D_StationGpsEW);
+      DataFromGlobe.FindTimeZone = 0;
+    }
+    else if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_GEOLOCATION_BY_GPS)
+    { GetGeolocationData(D_GeoLocationGpsNS, D_GeoLocationGpsEW);
+      DataFromGlobe.FindGeoLocationData = 0;
     }
     DataFromGlobe.FindTimeZone = 0;
     vTaskDelay(100 / portTICK_PERIOD_MS); // lowered to 100, was 200
@@ -70,8 +76,8 @@ void ReadAS5600Encoders(void * pvParameters)
       }
     }
     AverageIdx %= 4;
-    CurrentNS4096 = as5600_0.readAngle();
-    CurrentEW4096 = as5600_1.readAngle();
+    CurrentNS4096 = as5600_1.readAngle();
+    CurrentEW4096 = as5600_2.readAngle();
     AverageNS[AverageIdx] = CurrentNS4096 - 2048;
     AverageEW[AverageIdx] = CurrentEW4096 - 2048;
     AverageIdx++;
