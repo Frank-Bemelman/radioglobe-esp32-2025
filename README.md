@@ -3,6 +3,7 @@
 # radioglobe-esp32-2025
 Radio Globe using ESP32 and Waveshare round touch LCD 2.1 inch
 
+UPDATE 15-JULY-2025 Lots of improvements made. Most stations now play without issues. Happy with the result. 
 UPDATE 6-JULY-2025 It actually works! Performance is improved, few bugs, some extras. <br>
 UPDATE 1-JULY-2025 It actually works! Performance is perhaps not perfect but certainly acceptable.
 
@@ -42,6 +43,14 @@ MicroSD card -> I used a 32GB one<br/>
 1) Install Fusion 360 and load the designs provided here. Print all the individual bodies and assemble the lot.
 2) Prepare the SD card and fill it with the files provided in SDCARD. This is for the database with 150K stations and two folders with images for the flags of all countries in the world. Insert the card in the Waveshare display. Once you have loaded the software into the Waveshare, you can create a presorted database arrangement in a folder structure on the SD card. This takes perhaps 45 minutes, but then you're good to go.
 3) Prepare the ESP32 module with the software for the globe itself. Compile in Arduino IDE, don't forget to fill the secrets.h file with your wifi SSID and password.
+4) Get an API key at Google Developer platform, for the TimeZone API and Geo Geocoding API, both use the same API key. It is used to find the right timezone for the clock, and also to get the right two-letter country code to be able to display the right country flag. It is a bit of hassle, but very worthwhile. And it is free.
+
+I don't plan to give a step-by-step instruction here. That is too much effort and I don't know if there is a lot of interrest in this project. But if you start with it, just ask. In which case I my elaborate a bit more.
+
+Cheers,
+Frank
+
+
 
 
 
