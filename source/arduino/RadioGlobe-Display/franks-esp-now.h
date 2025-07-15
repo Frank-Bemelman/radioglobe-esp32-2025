@@ -10,6 +10,52 @@ typedef struct {
   uint16_t QueueCnt;
 } QueueOut;
 
+
+const char * messagetexts[] = {
+   { "UNSUPPORTED MESSAGE"},
+   { "SONG_TITLE 1"},
+   { "ARTIST 2"},
+   { "ALBUM 3"},
+   { "GENRE 4"},
+   { "STATION_NAME 5"},
+   { "DESCRIPTION 6"},
+   { "GET_GOOGLE_API_KEY 7"},
+   { "GOOGLE_API_KEY 8"},
+   { "TIMEZONE_ID 9"},
+   { "TIMEZONE_NAME 10"},
+   { "GET_WIFI_CREDENTIALS 11"},
+   { "---------- 12"},
+   { "SSID_FOR_GLOBE 13"},
+   { "PASSWORD_FOR_GLOBE 14"},
+   { "WIFI_STATUS 15"},
+   { "CALIBRATE_ZERO 16"},
+   { "FINDNEWSTATION 17"},
+   { "GLOBE_MAC 18"},
+   { "GLOBE_IP 19"},
+   { "DEAD_STATION 20"},
+   { "START_THIS_STATION 21"},
+   { "PAUSE_RADIO 22"},
+   { "RESUME_RADIO 23"},
+   { "WANT_NEXT_STATION 24"},
+   { "STATION_CONNECTED 25"},
+   { "GLOBE_WANTS_CURRENT_STATION 26"}, // when globe reboots
+   { "GET_TIMEZONE_BY_GPS 27"},
+   { "STREAMING_IDLE_MS 28"},
+   { "NEW_LIST_LOADED 29"}, // after a succesful search
+   { "GET_TIMEZONE 30"},
+   { "POWERDOWN 31"},
+   { "POWERUP 32"},
+   { "VOLUME_AND_TONE 33"},
+   { "DISPLAY_WANTS_VOLUME_AND_TONE 34"},
+   { "STORE_VOLUME_AND_TONE 35"},
+   { "AUDIO_EOF_STREAM 36"},
+   { "---------- 37"},
+   { "---------- 38"},
+   { "---------- 39"},
+   { "GET_GEOLOCATION_BY_GPS 40"},
+   { "CONNECTTOHOST_FAILURE 41"}
+ };
+
 #define MESSAGE_SONG_TITLE 1
 #define MESSAGE_ARTIST 2
 #define MESSAGE_ALBUM 3
@@ -57,11 +103,8 @@ typedef struct {
 #define MESSAGE_STORE_VOLUME_AND_TONE 35
 #define MESSAGE_AUDIO_EOF_STREAM 36
 
-
-#define MESSAGE_URL_HTTP_400_BAD_REQUEST 400
-#define MESSAGE_URL_HTTP_403_REFUSED 403
-#define MESSAGE_URL_HTTP_404_NOTFOUND 404
-
+#define MESSAGE_GET_GEOLOCATION_BY_GPS 40
+#define MESSAGE_CONNECTTOHOST_FAILURE 41
 
 
 
@@ -87,6 +130,7 @@ typedef struct struct_message2 {
     int16_t  ew;
     struct   tm timeinfo;
     int16_t  FindTimeZone; // tells display that Globe is occupied finding timezone
+    int16_t  FindGeoLocationData; // tells display that Globe is occupied finding geolocation data
     int16_t  Unraveling; // tells display that Globe is occupied unraveling .m3u or .pls url to get the actual streaming url
     int16_t  UnravelingResult; // tells display that Globe is occupied unraveling .m3u or .pls url to get the actual streaming url
     uint16_t G_QueueSerialNumber;

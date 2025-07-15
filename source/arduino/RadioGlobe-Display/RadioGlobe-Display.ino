@@ -183,6 +183,8 @@ void loop()
   static uint8_t oldminute;
   static lv_obj_t * oldscreen;
   static time_t now;
+  int16_t stream_connecttohost_result; // received from callback in globe 
+  char logfile[32];
 
   Lvgl_Loop();
 
@@ -216,7 +218,7 @@ void loop()
      if(DataFromDisplay.G_QueueSerialNumber != DataFromGlobe.G_QueueSerialNumber) // not yet acknowlegded and processed
      { // acknowledge message from globe as received and processed
        DataFromDisplay.G_QueueSerialNumber = DataFromGlobe.G_QueueSerialNumber; 
-       Serial.printf("MESSAGE FROM GLOBE: %d >%s<\n", DataFromGlobe.G_QueueMessageType, DataFromGlobe.G_QueueMessage);  
+       if((DataFromGlobe.G_QueueMessageType>=0) && (DataFromGlobe.G_QueueMessageType<(sizeof(messagetexts)/8)))Serial.printf("GLOBE SAYS: %s >%s<\n", messagetexts[DataFromGlobe.G_QueueMessageType], DataFromGlobe.G_QueueMessage);  
        switch(DataFromGlobe.G_QueueMessageType)
        { case MESSAGE_SONG_TITLE: // 1
            lv_label_set_text(ui_Station_Title, DataFromGlobe.G_QueueMessage);
@@ -228,7 +230,6 @@ void loop()
          case MESSAGE_GENRE:
            break;
          case MESSAGE_STATION_NAME:
-           Serial.printf("MESSAGE_NAME received from globe\n");
            lv_label_set_text(ui_Station_Name, DataFromGlobe.G_QueueMessage);
            // rename in scroller if it makes sense
            if(strlen(DataFromGlobe.G_QueueMessage)>63)break;
@@ -268,7 +269,6 @@ void loop()
          case MESSAGE_CALIBRATE_ZERO:  
            break;
          case MESSAGE_FINDNEWSTATION:
-           Serial.printf("MESSAGE_FINDNEWSTATION: >%s<\n", DataFromGlobe.G_QueueMessage);  
            if(bPowerStatus == true)
            { if((screen != ui_CalibrationScreen) && (screen != ui_CalibrationScreenAdvanced))
              { // if in tone controle screen or preset screen, jump back to home screen
@@ -283,11 +283,15 @@ void loop()
            }  
            break;
          case MESSAGE_GLOBE_MAC:  
-           Serial.printf("MESSAGE_GLOBE_MAC: >%s<\n", DataFromGlobe.G_QueueMessage);  
            break;
          case MESSAGE_GLOBE_IP:  
-           Serial.printf("MESSAGE_GLOBE_IP: >%s<\n", DataFromGlobe.G_QueueMessage);  
            break;
+
+         case MESSAGE_CONNECTTOHOST_FAILURE:
+           sscanf(DataFromGlobe.G_QueueMessage, "%d", &stream_connecttohost_result);
+           break; 
+
+
          case MESSAGE_DEAD_STATION:
          case MESSAGE_AUDIO_EOF_STREAM:
            lv_label_set_text(ui_StationRollerComment, "");
@@ -300,7 +304,10 @@ void loop()
 
            SD_MMC.end(); //??
            if(SD_MMC.begin("/sdcard", true, false))
-           { if(DataFromGlobe.G_QueueMessageType == MESSAGE_DEAD_STATION)AppendBadStationToFile(SD_MMC, "/badstations.txt", DataFromGlobe.G_QueueMessage);
+           { if(DataFromGlobe.G_QueueMessageType == MESSAGE_DEAD_STATION)
+             { sprintf(logfile, "/badstations-%d.txt", stream_connecttohost_result);
+               AppendBadStationToFile(SD_MMC, logfile, DataFromGlobe.G_QueueMessage);
+             }
              if(DataFromGlobe.G_QueueMessageType == MESSAGE_AUDIO_EOF_STREAM)AppendBadStationToFile(SD_MMC, "/audio-eof-stream.txt", DataFromGlobe.G_QueueMessage);
              SD_MMC.end();
            }  
@@ -337,21 +344,21 @@ void loop()
          case MESSAGE_STATION_CONNECTED: // 25
            // MESSAGE FROM GLOBE: 25 >https://stream06.dotpoint.nl:8004/stream<
            // update text for station scroller 
-           Serial.printf("MESSAGE_STATION_CONNECTED: = %d\n", Stations.requested);
-
-           if(Stations.requested<MAX_STATIONS)
+           // update leds on preset screen
+           if(Stations.requested<MAX_STATIONS+MAX_FAVORITES)
            { sprintf(content, "%s - Playing", Stations.StationNUG[Stations.requested].name);
              Stations.playing = Stations.requested;
              lv_label_set_text(ui_StationRollerComment, content); 
-            // lv_roller_set_selected(uic_StationRoller, Stations.requested, LV_ANIM_ON);
-             SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
+             // lv_roller_set_selected(uic_StationRoller, Stations.requested, LV_ANIM_ON);
+             if(Stations.requested<MAX_STATIONS)
+             { Serial.printf("(GLOBE SAYS): Station Playing %s\n", Stations.StationNUG[Stations.requested].name);
+               SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
+             }
+             else
+             { Serial.printf("(GLOBE SAYS): Preset Playing %s\n", Stations.StationNUG[Stations.requested].name);
+               SetLed(Stations.requested-MAX_STATIONS, UI_THEME_COLOR_GREEN);
+             }
            }  
-           else
-           { // favorite station connected
-             Stations.playing = Stations.requested;
-             Serial.printf("MESSAGE_STATION_CONNECTED: Preset Playing %s\n", Favorites[Stations.requested-MAX_STATIONS].name);
-             SetLed(Stations.requested-MAX_STATIONS, UI_THEME_COLOR_GREEN);
-           }
            break;
 
          case MESSAGE_GLOBE_WANTS_CURRENT_STATION: // 26
@@ -364,7 +371,6 @@ void loop()
             { int32_t volume;
               int32_t bass;
               int32_t treble;
-              Serial.printf("MESSAGE_VOLUME_AND_TONE: %s\n", DataFromGlobe.G_QueueMessage);  
               sscanf(DataFromGlobe.G_QueueMessage, "%ld %ld %ld", &volume, &bass, &treble);
               // sync controls to that
               lv_arc_set_value(uic_VolumeArc, volume);
@@ -381,7 +387,17 @@ void loop()
               bPowerStatus = true;
             }
             break;
-
+          case MESSAGE_GET_GEOLOCATION_BY_GPS:
+            if(Stations.requested<MAX_STATIONS+MAX_FAVORITES)
+            { if(strcmp(Stations.StationNUG[Stations.requested].countrycode, DataFromGlobe.G_QueueMessage)!=NULL)
+              { Serial.printf("Error in Database - countrycode %s should be %s\n", Stations.StationNUG[Stations.requested].countrycode, DataFromGlobe.G_QueueMessage);
+                Serial.printf("                  - gps_ns = %f gps_ew = %f\n", Stations.StationNUG[Stations.requested].gps_ns, Stations.StationNUG[Stations.requested].gps_ew);
+                Serial.printf("                  - url = %s\n", Stations.StationNUG[Stations.requested].url);
+                Serial.printf("                  - town = %s\n", Stations.StationNUG[Stations.requested].town);
+              }
+              strcpy(Stations.StationNUG[Stations.requested].countrycode, DataFromGlobe.G_QueueMessage);
+            }
+            break;
          default:
            Serial.printf("Unsupported message type %d from globe: >%s<\n", DataFromGlobe.G_QueueMessageType, DataFromGlobe.G_QueueMessage);  
            break;
@@ -456,7 +472,6 @@ void loop()
        { GetFormattedLocation(content, "G", CalibrationModeLatLong);
           lv_label_set_text(ui_CalibrationRawCoord, content);
        }
-       else AddToQueueForGlobe("", MESSAGE_GET_TIMEZONE);
        PrevDataFromGlobe.ns = DataFromGlobe.ns;
        PrevDataFromGlobe.ew = DataFromGlobe.ew;
      }

@@ -1,3 +1,9 @@
+// todo - check what country code belongs to lat/lon pair
+// https://gist.github.com/inside-code-yt/7064d1d1553a2ee117e60217cfd1d099
+// https://github.com/rapideditor/country-coder/blob/main/src/data/borders.json?short_path=7afbd5e
+// or perhaps https://developers.google.com/maps/documentation/geocoding/places-geocoding
+
+
 typedef struct country_info {
         char* code;
         char* name;
@@ -254,5 +260,5 @@ country_info CountryList[] =
  { "YE", "Yemen" },
  { "ZM", "Zambia" },
  { "ZW", "Zimbabwe" },
- { "XK", "Kosovo" }
+ { "XX", "UNKNOWN" }
 };

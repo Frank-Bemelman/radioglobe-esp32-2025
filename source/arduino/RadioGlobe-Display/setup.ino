@@ -188,6 +188,7 @@ void StationInfo(lv_event_t * e)
       lv_obj_add_flag(uic_RebuildDatabaseButtonText, LV_OBJ_FLAG_HIDDEN);
       lv_obj_add_flag(uic_MapBanner, LV_OBJ_FLAG_HIDDEN); 
       lv_obj_add_flag(uic_Database_Dir_Path, LV_OBJ_FLAG_HIDDEN); 
+      lv_obj_clear_flag(uic_Database_GPS_Position, LV_OBJ_FLAG_HIDDEN);
       lv_obj_clear_flag(uic_Database_Town_Name, LV_OBJ_FLAG_HIDDEN);
       lv_obj_clear_state(uic_MapCursor, LV_STATE_DISABLED); 
       lv_obj_clear_flag(uic_Database_Flag, LV_OBJ_FLAG_HIDDEN);
@@ -200,9 +201,11 @@ void StationInfo(lv_event_t * e)
 
 
 
-      if(Stations.playing<MAX_STATIONS)
+      if(Stations.playing<(MAX_STATIONS+MAX_FAVORITES))
       { Serial.printf("Countrycode = %s\n", Stations.StationNUG[Stations.playing].countrycode);
         ShowFlag(Stations.StationNUG[Stations.playing].countrycode);
+        // names found by FindNewStation is often incorrect because database has many wrong country codes
+        FindCountryNameByCode(Stations.StationNUG[Stations.playing].countryname, Stations.StationNUG[Stations.playing].countrycode);
         sprintf(content,"Greetings From  %s", Stations.StationNUG[Stations.playing].countryname);
         lv_label_set_text(ui_Database_Town_Name, content);
         lv_label_set_text(ui_Database_Progress, Stations.StationNUG[Stations.playing].name);  
@@ -213,22 +216,6 @@ void StationInfo(lv_event_t * e)
         lv_label_set_text(ui_Database_Output_File, content);
         ShowTheStations();
       }
-      else
-      { Serial.printf("Countrycode = %s\n", Favorites[Stations.playing-MAX_STATIONS].countrycode);
-        ShowFlag(Favorites[Stations.playing-MAX_STATIONS].countrycode);
-
-        sprintf(content,"Greetings From  %s", Favorites[Stations.playing-MAX_STATIONS].countryname);
-        lv_label_set_text(ui_Database_Town_Name, content);
-        lv_label_set_text(ui_Database_Progress, Favorites[Stations.playing-MAX_STATIONS].name);  
-        lv_obj_set_pos(uic_MapCursor, (int)Favorites[Stations.playing-MAX_STATIONS].gps_ew, -(int)Favorites[Stations.playing-MAX_STATIONS].gps_ns);
-        sprintf(content, "GPS NS %2.6f - EW %3.6f", Favorites[Stations.playing-MAX_STATIONS].gps_ns, Favorites[Stations.playing-MAX_STATIONS].gps_ew);
-        lv_label_set_text(ui_Database_GPS_Position, content);
-        sprintf(content,"You Are In: %s", Favorites[Stations.playing-MAX_STATIONS].town);
-        lv_label_set_text(ui_Database_Output_File, content);
-        ShowTheStations();
-      }
-
-
       lv_scr_load(ui_DatabaseScreen);
       bInfoScreen = true;
     }

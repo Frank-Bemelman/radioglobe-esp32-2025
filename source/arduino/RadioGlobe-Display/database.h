@@ -46,7 +46,7 @@ typedef struct bmpfile{                // Total: 54 + 8 + 8100 bytes
 }; 
 
 #define MAX_STATIONS 150
-#define FAVORITE_STATIONS 4
+#define MAX_FAVORITES 4
 
 typedef struct station_name_url_gps
 { char name[32];
@@ -59,7 +59,7 @@ typedef struct station_name_url_gps
 };
 
 typedef struct stations_arraybin
-{ station_name_url_gps StationNUG[MAX_STATIONS+FAVORITE_STATIONS];
+{ station_name_url_gps StationNUG[MAX_STATIONS+MAX_FAVORITES];
   uint16_t count; // number of found stations in this list
   int16_t  requested; // number of station requested by display to globe
   int16_t  playing; // number of station that globe connected to

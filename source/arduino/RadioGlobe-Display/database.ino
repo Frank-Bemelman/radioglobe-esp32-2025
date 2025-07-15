@@ -214,27 +214,27 @@ void ReadDatabase(fs::FS &fs, char *filename)
             parsefase = 2;
           }        
           break;
-        case 2:
+        case 2: // create directory
           if((p = strstr(oneline, "\"e\": ")) != NULL)
           { //Serial.println(p);
             sscanf(&p[5], "%f", &floate);
             if(floate>0)ew=(int)(floate+0.5);
             else ew=(int)(floate-0.5);
             sprintf(dirpath, "/%c/%d/%d/%c/%d/%d", (ns<0)?'S':'N', abs(ns)/10, abs(ns)%10, (ew<0)?'W':'E', abs(ew)/10, abs(ew)%10);
-            Serial.println(dirpath);
+            //Serial.println(dirpath);
             CreateAllDirInPath(fs, dirpath);
             SetPixelInMap(ns, ew);
             lv_obj_set_pos(uic_MapCursor, ew, -ns);
             parsefase = 3;
           }
           break;
-        case 3:  
+        case 3:  // create file
           if((p = strstr(oneline, "\"urls\": [")) != NULL) // start of list
           { sprintf(sometext, "Folder %s", dirpath);
             lv_label_set_text(ui_Database_Dir_Path, sometext);
             lv_label_set_text(ui_Database_Output_File, outputfilename);
             sprintf(sometext, "/%s/%s", dirpath, outputfilename);
-            SD_MMC.remove(sometext); // delete old file
+//            SD_MMC.remove(sometext); // delete old file
             urls = SD_MMC.open(sometext, FILE_WRITE);
             parsefase = 4;
           }
@@ -319,11 +319,11 @@ void CreateAllDirInPath(fs::FS &fs, char *path)
     //Serial.printf("Try to open directory %s!\n", pathcopy);
     root = fs.open(pathcopy);
     if(!root) 
-    { Serial.printf("Failed to open directory %s so make it!\n", pathcopy);
+    { //Serial.printf("Failed to open directory %s so make it!\n", pathcopy);
       if(SD_MMC.mkdir(pathcopy))
-      { Serial.printf("%s created\n", pathcopy);
+      { //Serial.printf("%s created\n", pathcopy);
       }
-      else Serial.printf("%s creation error\n", pathcopy);
+      //else Serial.printf("%s creation error\n", pathcopy);
     }
     *d = *s; // *s is '/' in case more directories todo
     // Serial.printf("*s = %d\n", (int)*s);
@@ -598,6 +598,11 @@ void FindNewStation(void)
             }
             n++;
           }
+          if(n==(sizeof(CountryList) / sizeof(country_info))) // non existing country code
+          { Serial.printf("Not a valid countrycode %d !!!!!!!!!!!!!!!\n", countrycode);
+            sprintf(countryname, "Unknown Code %s", countrycode);
+            strcpy(countrycode,"XX");
+          }
         }
 
         Lvgl_Loop();
@@ -670,6 +675,12 @@ void FindNewStation(void)
     SetLed(3, 0);
     SetLed(4, 0);
   }  
+  else
+  { // normally, timezone is requested for the station that is requested
+    // if no stations are found, set the timezone according to the coordinates from the globe
+    sprintf(content, "%d-%d", DataFromDisplay.ns_cal, DataFromDisplay.ew_cal);
+    AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE);
+  }
 
   
   // dump to serial port
@@ -875,22 +886,17 @@ void AddStationToQueueForGlobe(uint16_t station)
   DataFromDisplay.D_QueueStationIndex = station;
   Stations.requested = station; 
   Stations.playing = -1;
+  char message[QUEUEMESSAGELENGTH];
 
-  if(station<MAX_STATIONS)
+  if(station<MAX_STATIONS+MAX_FAVORITES)
   { Stations.connect_attempts++;
     DataFromDisplay.D_StationGpsNS = Stations.StationNUG[station].gps_ns;
     DataFromDisplay.D_StationGpsEW = Stations.StationNUG[station].gps_ew;
-    AddToQueueForGlobe(Stations.StationNUG[station].name, MESSAGE_GET_TIMEZONE_BY_GPS);
+    sprintf(message, "%f-%f", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
+    AddToQueueForGlobe(message, MESSAGE_GET_TIMEZONE_BY_GPS);
+    AddToQueueForGlobe(message, MESSAGE_GET_GEOLOCATION_BY_GPS);
     AddToQueueForGlobe(Stations.StationNUG[station].url, MESSAGE_START_THIS_STATION);
     lv_label_set_text(ui_Station_Name, Stations.StationNUG[station].name);
-    lv_label_set_text(ui_Station_Title, "");
-  }
-  else 
-  { DataFromDisplay.D_StationGpsNS = Favorites[station-MAX_STATIONS].gps_ns;
-    DataFromDisplay.D_StationGpsEW = Favorites[station-MAX_STATIONS].gps_ew;
-    AddToQueueForGlobe(Favorites[station-MAX_STATIONS].name, MESSAGE_GET_TIMEZONE_BY_GPS);
-    AddToQueueForGlobe(Favorites[station-MAX_STATIONS].url, MESSAGE_START_THIS_STATION);
-    lv_label_set_text(ui_Station_Name, Favorites[station-MAX_STATIONS].name);
     lv_label_set_text(ui_Station_Title, "");
   }
 }
@@ -956,7 +962,7 @@ void ReadStationsBitmapFile(fs::FS &fs, char* filename)
     }
   }
   bitmap.close();
-  WriteStationsBitmapFile(fs, "/stationsmap-copy.bmp");
+  // WriteStationsBitmapFile(fs, "/stationsmap-copy.bmp"); // test, make a copy
 }
 
 
@@ -975,6 +981,20 @@ void AppendBadStationToFile(fs::FS &fs, char* filename, char *url)
 //  badfile.seek(EOF);
   badfile.println(url);  
   badfile.close();
+}
+
+bool FindCountryNameByCode(char *countryname, char*code)
+{ uint16_t n=0;
+  while(n<(sizeof(CountryList) / sizeof(country_info)))
+  { //Serial.printf("CountryList[%d].name = %s countrycode<%s> *p=%s\n", n, CountryList[n].name, CountryList[n].code, p );
+    if(strncmp(code, CountryList[n].code, 2)==NULL)
+    { strncpy(countryname, CountryList[n].name, 49);
+      countryname[49]=0;
+      return true;
+    }
+    n++;
+  }
+  return false;
 }
 
 /*

@@ -17,15 +17,7 @@ void station1234(lv_event_t * e, uint16_t station)
     longpressed++;
     if(longpressed == 5)
     { if(Stations.playing >=0)
-      { strcpy(Favorites[station].name, Stations.StationNUG[Stations.playing].name);
-        strcpy(Favorites[station].url, Stations.StationNUG[Stations.playing].url);
-        Favorites[station].gps_ns = Stations.StationNUG[Stations.playing].gps_ns;
-        Favorites[station].gps_ew = Stations.StationNUG[Stations.playing].gps_ew;
-        strcpy(Favorites[station].town, Stations.StationNUG[Stations.playing].town);
-        strcpy(Favorites[station].countrycode, Stations.StationNUG[Stations.playing].countrycode);
-        strcpy(Favorites[station].countryname, Stations.StationNUG[Stations.playing].countryname);
-
-        // all in one array
+      { // all in one array
         strcpy(Stations.StationNUG[station+MAX_STATIONS].name, Stations.StationNUG[Stations.playing].name);
         strcpy(Stations.StationNUG[station+MAX_STATIONS].url, Stations.StationNUG[Stations.playing].url);
         Stations.StationNUG[station+MAX_STATIONS].gps_ns = Stations.StationNUG[Stations.playing].gps_ns;
@@ -33,20 +25,15 @@ void station1234(lv_event_t * e, uint16_t station)
         strcpy(Stations.StationNUG[station+MAX_STATIONS].town, Stations.StationNUG[Stations.playing].town);
         strcpy(Stations.StationNUG[station+MAX_STATIONS].countrycode, Stations.StationNUG[Stations.playing].countrycode);
         strcpy(Stations.StationNUG[station+MAX_STATIONS].countryname, Stations.StationNUG[Stations.playing].countryname);
-
-
-
         
         if(station==0)
         { lv_label_set_text(ui_StationPresetName1, Stations.StationNUG[station+MAX_STATIONS].name); 
           SetLed(station, UI_THEME_COLOR_GREEN);
         }  
-
         if(station==1)
         { lv_label_set_text(ui_StationPresetName2, Stations.StationNUG[station+MAX_STATIONS].name); 
           SetLed(station, UI_THEME_COLOR_GREEN);
         }  
-
         if(station==2)
         { lv_label_set_text(ui_StationPresetName3, Stations.StationNUG[station+MAX_STATIONS].name); 
           SetLed(station, UI_THEME_COLOR_GREEN);
@@ -68,27 +55,27 @@ void station1234(lv_event_t * e, uint16_t station)
 
   if(event_code == LV_EVENT_CLICKED) 
   { if(longpressed==0)
-    { if(strlen(Favorites[station].url)>0) // only respond to loaded buttons
-      { Serial.printf("Favorites Select station %s under Preset %d\n", Favorites[station].name, station);
-        AddStationToQueueForGlobe(MAX_STATIONS + station); // presets come just after the regular list of stations
-        lv_label_set_text(ui_Station_Name, Favorites[station].name);
+    { if(strlen(Stations.StationNUG[station+MAX_STATIONS].url)>0) // only respond to loaded buttons
+      { Serial.printf("Favorites Select station %s under Preset %d\n", Stations.StationNUG[station+MAX_STATIONS].name, station);
+        AddStationToQueueForGlobe(station+MAX_STATIONS); // presets come just after the regular list of stations
+        lv_label_set_text(ui_Station_Name, Stations.StationNUG[station+MAX_STATIONS].name);
         if(station==0)
-        { lv_label_set_text(ui_StationPresetName1, Favorites[0].name); 
+        { lv_label_set_text(ui_StationPresetName1, Stations.StationNUG[0+MAX_STATIONS].name); 
           SetLed(station, UI_THEME_COLOR_RED);
         }
         if(station==1)
-        { lv_label_set_text(ui_StationPresetName2, Favorites[1].name); 
+        { lv_label_set_text(ui_StationPresetName2, Stations.StationNUG[1+MAX_STATIONS].name); 
           SetLed(station, UI_THEME_COLOR_RED);
         }
         if(station==2)
-        { lv_label_set_text(ui_StationPresetName3, Favorites[2].name); 
+        { lv_label_set_text(ui_StationPresetName3, Stations.StationNUG[2+MAX_STATIONS].name); 
           SetLed(station, UI_THEME_COLOR_RED);
         }
         if(station==3)
-        { lv_label_set_text(ui_StationPresetName4, Favorites[3].name); 
+        { lv_label_set_text(ui_StationPresetName4, Stations.StationNUG[3+MAX_STATIONS].name); 
           SetLed(station, UI_THEME_COLOR_RED);
         }
-        for(int16_t n=0; n<4; n++)
+        for(int16_t n=0; n<MAX_FAVORITES; n++)
         { if(n!=station)SetLed(n, 0);
         }          
         beep(e);
@@ -126,24 +113,23 @@ void SaveFavorites(void)
   SD_MMC.remove(favfilename); // delete old file
   favfile = SD_MMC.open(favfilename, FILE_WRITE);
   if(favfile)
-  { for(int16_t n = 0; n<4; n++)
-    { if((p=strchr(Favorites[n].name, '\n'))!=NULL)*p=0;
-      if((p=strchr(Favorites[n].url, '\n'))!=NULL)*p=0;
-      if((p=strchr(Favorites[n].name, '\r'))!=NULL)*p=0;
-      if((p=strchr(Favorites[n].url, '\r'))!=NULL)*p=0;
-      sprintf(sometext, "\"name\": \"%s\"", Favorites[n].name);
+  { for(int16_t n = 0; n<MAX_FAVORITES; n++)
+    { if((p=strchr(Stations.StationNUG[n+MAX_STATIONS].name, '\n'))!=NULL)*p=0;
+      if((p=strchr(Stations.StationNUG[n+MAX_STATIONS].url, '\n'))!=NULL)*p=0;
+      if((p=strchr(Stations.StationNUG[n+MAX_STATIONS].name, '\r'))!=NULL)*p=0;
+      if((p=strchr(Stations.StationNUG[n+MAX_STATIONS].url, '\r'))!=NULL)*p=0;
+      sprintf(sometext, "\"name\": \"%s\"", Stations.StationNUG[n+MAX_STATIONS].name);
       favfile.println(sometext);  
-      sprintf(sometext, "\"url\": \"%s\"", Favorites[n].url);
+      sprintf(sometext, "\"url\": \"%s\"", Stations.StationNUG[n+MAX_STATIONS].url);
       favfile.println(sometext);  
-      sprintf(sometext, "\"gps\": \"%f,%f\"", Favorites[n].gps_ns, Favorites[n].gps_ew); // write gps to file
+      sprintf(sometext, "\"gps\": \"%f,%f\"", Stations.StationNUG[n+MAX_STATIONS].gps_ns, Stations.StationNUG[n+MAX_STATIONS].gps_ew); // write gps to file
       favfile.println(sometext);  
-      sprintf(sometext, "\"town\": \"%s\"", Favorites[n].town);
+      sprintf(sometext, "\"town\": \"%s\"", Stations.StationNUG[n+MAX_STATIONS].town);
       favfile.println(sometext);  
-      sprintf(sometext, "\"countrycode\": \"%s\"", Favorites[n].countrycode);
+      sprintf(sometext, "\"countrycode\": \"%s\"", Stations.StationNUG[n+MAX_STATIONS].countrycode);
       favfile.println(sometext);  
-      sprintf(sometext, "\"countryname\": \"%s\"", Favorites[n].countryname);
+      sprintf(sometext, "\"countryname\": \"%s\"", Stations.StationNUG[n+MAX_STATIONS].countryname);
       favfile.println(sometext);  
-
     }  
   }
   favfile.close();
@@ -171,43 +157,44 @@ void LoadFavorites(void)
       if((p = strstr(text, "\"name\": ")) != NULL) 
       { favcount++;
         p+=9; // jump forward to start of name
-        strcpy(Favorites[favcount].name, p);
+        strncpy(Stations.StationNUG[favcount+MAX_STATIONS].name, p, sizeof(Stations.StationNUG[0].name));
+        Stations.StationNUG[favcount+MAX_STATIONS].name[sizeof(Stations.StationNUG[0].name)-1]=0;
       }
 
-      Serial.printf("Preset % d text = <%s>\n", favcount, text);
+      //Serial.printf("Preset % d text = <%s>\n", favcount, text);
       
-      if(favcount>=0 && favcount<4) // max 4 presets
+      if(favcount>=0 && favcount<MAX_FAVORITES) // max 4 presets
       {
         if((p = strstr(text, "\"url\": ")) != NULL) 
         { p+=8; // jump forward to start of name
-          strcpy(Favorites[favcount].url, p);
+          strcpy(Stations.StationNUG[favcount+MAX_STATIONS].url, p);
         }
         if((p = strstr(text, "\"gps\": ")) != NULL) 
         { p+=8; // jump forward to start of name
-          sscanf(p, "%f,%f", &Favorites[favcount].gps_ns, &Favorites[favcount].gps_ew);
+          sscanf(p, "%f,%f", &Stations.StationNUG[favcount+MAX_STATIONS].gps_ns, &Stations.StationNUG[favcount+MAX_STATIONS].gps_ew);
         }
         if((p = strstr(text, "\"town\": ")) != NULL) 
         { p+=9; // jump forward to start of name
-          strcpy(Favorites[favcount].town, p);
+          strcpy(Stations.StationNUG[favcount+MAX_STATIONS].town, p);
         }
         if((p = strstr(text, "\"countrycode\": ")) != NULL) 
         { p+=16; // jump forward to start of name
-          strncpy(Favorites[favcount].countrycode, p, 2);
-          Favorites[favcount].countrycode[3]=0;
+          strncpy(Stations.StationNUG[favcount+MAX_STATIONS].countrycode, p, 2);
+          Stations.StationNUG[favcount+MAX_STATIONS].countrycode[3]=0;
         }
         if((p = strstr(text, "\"countryname\": ")) != NULL) 
         { p+=16; // jump forward to start of name
-          strncpy(Favorites[favcount].countryname, p, 49);
-          Favorites[favcount].countryname[49]=0;
+          strncpy(Stations.StationNUG[favcount+MAX_STATIONS].countryname, p, 49);
+          Stations.StationNUG[favcount+MAX_STATIONS].countryname[49]=0;
         }
       }
     }
-    for(int16_t station = 0; station<4; station++)
-    { Serial.printf("Loaded Station %d = %s\n", station, Favorites[station].name);
-      if(station==0)lv_label_set_text(ui_StationPresetName1, Favorites[0].name); 
-      if(station==1)lv_label_set_text(ui_StationPresetName2, Favorites[1].name); 
-      if(station==2)lv_label_set_text(ui_StationPresetName3, Favorites[2].name); 
-      if(station==3)lv_label_set_text(ui_StationPresetName4, Favorites[3].name); 
+    for(int16_t station = 0; station<MAX_FAVORITES; station++)
+    { //Serial.printf("Loaded Station %d = %s\n", station, Stations.StationNUG[station+MAX_STATIONS].name);
+      if(station==0)lv_label_set_text(ui_StationPresetName1, Stations.StationNUG[0+MAX_STATIONS].name); 
+      if(station==1)lv_label_set_text(ui_StationPresetName2, Stations.StationNUG[1+MAX_STATIONS].name); 
+      if(station==2)lv_label_set_text(ui_StationPresetName3, Stations.StationNUG[2+MAX_STATIONS].name); 
+      if(station==3)lv_label_set_text(ui_StationPresetName4, Stations.StationNUG[3+MAX_STATIONS].name); 
     }  
   }
   // turn of preset leds
@@ -218,7 +205,7 @@ void LoadFavorites(void)
   Lvgl_Loop();
   favfile.close();
   SD_MMC.end();
-  Serial.println("Finished loading favorites from SD");
+  Serial.println("Finished loading favorites/presets from SD");
 }
 
 
@@ -226,7 +213,7 @@ void LoadFavorites(void)
 void SetLed(int16_t preset, int16_t themecolor)
 { lv_obj_t *led;
   
-  Serial.printf("preset = %d themecolor = %d\n", preset, themecolor);
+  //Serial.printf("preset = %d themecolor = %d\n", preset, themecolor);
   if(preset == 0)led = uic_led1; 
   else if(preset == 1)led = uic_led2; 
   else if(preset == 2)led = uic_led3; 
@@ -241,7 +228,7 @@ void SetLed(int16_t preset, int16_t themecolor)
   lv_obj_clear_flag(led, LV_OBJ_FLAG_HIDDEN);
   
 
-  Serial.printf("do preset = %d themecolor = %d\n", preset, themecolor);
+  //Serial.printf("do preset = %d themecolor = %d\n", preset, themecolor);
   
   if(themecolor == UI_THEME_COLOR_RED)
   { ui_object_set_themeable_style_property(led, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_red);

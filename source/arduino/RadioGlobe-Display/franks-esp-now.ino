@@ -16,8 +16,9 @@ QueueOut ToGlobe; // queue with messages for display
 // which is 94:b5:55:2b:2a:d4 (ka[pot, diode])
 //uint8_t broadcastAddress[] = {0x94, 0xB5, 0x55, 0x2B, 0x2A, 0xD4};
 // 0c:b8:15:c3:e4:10 // kapot
-// e0:5a:1b:e2:f0:68 wroom zonder dubbele antenne
-uint8_t broadcastAddress[] = {0xE0, 0x5A, 0x1B, 0xE2, 0xF0, 0x68};
+// e0:5a:1b:e2:f0:68 wroom zonder dubbele antenne = {0xE0, 0x5A, 0x1B, 0xE2, 0xF0, 0x68};
+// 30:ed:a0:b8:c6:4c esp32-s3-N16R8 = {0xED, 0xA0, 0xB8, 0xC6, 0x4C};
+uint8_t broadcastAddress[] = {0xED, 0xA0, 0xB8, 0xC6, 0x4C};
 
 // Variable to store if sending data was successful
 char success[128];
@@ -119,7 +120,7 @@ void loop_esp_now() {
         { DataFromDisplay.D_QueueSerialNumber++;
           strcpy(DataFromDisplay.D_QueueMessage, ToGlobe.QueueMessage[ToGlobe.QueueIndexOut]);
           DataFromDisplay.D_QueueMessageType = ToGlobe.QueueMessageType[ToGlobe.QueueIndexOut];
-          Serial.printf("Messagetype %d sent to display = >%s<\n", DataFromDisplay.D_QueueMessageType, DataFromDisplay.D_QueueMessage);
+          Serial.printf("MESSAGE SENT FROM DISPLAY: %d -> >%s<\n", DataFromDisplay.D_QueueMessageType, DataFromDisplay.D_QueueMessage);
           ToGlobe.QueueIndexOut++;
           ToGlobe.QueueCnt--;
         }

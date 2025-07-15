@@ -29,6 +29,15 @@
 #define Dutyfactor      500     // PWM Dutyfactor      
 #define Backlight_MAX   100      
 
+// FB Seen elsewhere: https://www.openpilot.cc/archives/4466
+//    #define ESP_PANEL_LCD_RGB_CLK_HZ            (16 * 1000 * 1000) same
+//    #define ESP_PANEL_LCD_RGB_HPW               (4) // 4 vs 8 here
+//    #define ESP_PANEL_LCD_RGB_HBP               (8) // 8 vs 10  here
+//    #define ESP_PANEL_LCD_RGB_HFP               (8)  // 8 vs 50  here
+//    #define ESP_PANEL_LCD_RGB_VPW               (4) // 4 vs 3  here
+//    #define ESP_PANEL_LCD_RGB_VBP               (16) // 16 vs 8  here
+//    #define ESP_PANEL_LCD_RGB_VFP               (16) 16 vs 8  here
+
 #define ESP_PANEL_LCD_WIDTH                       (480)
 #define ESP_PANEL_LCD_HEIGHT                      (480)
 #define ESP_PANEL_LCD_COLOR_BITS                  (16)
