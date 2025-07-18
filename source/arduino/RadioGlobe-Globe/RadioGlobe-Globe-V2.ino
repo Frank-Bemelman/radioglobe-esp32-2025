@@ -141,10 +141,10 @@ void setup()
   startMillis = millis();
   Serial.begin(115200);
 
-  //pinMode(VS1053_RESET, OUTPUT);
-  //digitalWrite(VS1053_RESET, LOW);  // sets the digital pin 12 off
+  pinMode(VS1053_RESET, OUTPUT);
+  digitalWrite(VS1053_RESET, LOW);  // sets the digital pin 12 off
   delay(100);            // waits for a second
-  //digitalWrite(VS1053_RESET, HIGH); // sets the digital pin 12 on
+  digitalWrite(VS1053_RESET, HIGH); // sets the digital pin 12 on
   delay(100);            // waits for a second
 
   // Initialise as5600_0 Connection
@@ -249,7 +249,6 @@ void setup()
   stream.setTone(rtone); 
 
   // windows tune
-  //  VS1053 player(VS1053_CS, VS1053_DCS, VS1053_DREQ);
   if(chunkplayer.getChipVersion() == 4) 
   { // Only perform an update if we really are using a VS1053, not. eg. VS1003
     chunkplayer.loadDefaultVs1053Patches(); 
@@ -257,8 +256,7 @@ void setup()
   chunkplayer.playChunk((uint8_t *)mp3_winxpstart, sizeof(mp3_winxpstart));
 
   AddToQueueForDisplay("Globe Just Booted", MESSAGE_GLOBE_WANTS_CURRENT_STATION);
-  
-  
+  // end of setup
 }
 
 
@@ -274,8 +272,8 @@ void loop()
   if(DataFromGlobe.D_QueueSerialNumber != DataFromDisplay.D_QueueSerialNumber) // not yet acknowlegded and processed
   {  // quick acknowledge message from displayglobe as received
      DataFromGlobe.D_QueueSerialNumber = DataFromDisplay.D_QueueSerialNumber;
-     if((DataFromDisplay.D_QueueMessageType>=0) && (DataFromDisplay.D_QueueMessageType<sizeof(messagetexts)))
-     { Serial.printf("DISPLAY SAYS: %s >%s<\n", messagetexts[DataFromDisplay.D_QueueMessageType], DataFromDisplay.D_QueueMessage);  
+     if((DataFromDisplay.D_QueueMessageType>=0))// && (DataFromDisplay.D_QueueMessageType<(sizeof(messagetexts)/8)))
+     { Serial.printf("DISPLAY SAYS: %s -> %s\n", messagetexts[DataFromDisplay.D_QueueMessageType], DataFromDisplay.D_QueueMessage);  
      }
      // and now take care of it
     switch(DataFromDisplay.D_QueueMessageType)
@@ -296,8 +294,8 @@ void loop()
         // will be unraveled later, redirected, derived from pls or m3u file
         strcpy(UnraveledUrl, RequestedUrl);
 
-        if(DataFromGlobe.D_QueueStationIndex == DataFromDisplay.D_QueueStationIndex)
-        { // already conmected
+        if((DataFromGlobe.D_QueueStationIndex == DataFromDisplay.D_QueueStationIndex) && (stream.isRunning()) )
+        { // already conmected PLAYING
           Serial.printf("ALREADY CONNECTED TO STATIONINDEX %d\n", DataFromGlobe.D_QueueStationIndex);  
           AddToQueueForDisplay(RequestedUrl, MESSAGE_STATION_CONNECTED);
           break;
@@ -305,9 +303,10 @@ void loop()
         
         Tuning = true;
 
-        // quick & dirty, but too dirty, as not all https urls are http appraocheable (HTTP error 400)
-        // or catch the 400 for a retry on https
-        // if(UnraveledUrl[4]=='s')strcpy(&UnraveledUrl[4], &UnraveledUrl[5]);  
+        // quick & dirty, but maybe too dirty, as not all https urls are http appraocheable (HTTP error 400)
+        // but we also catch the 400 and do a retry on https in that case 
+        // so, always try http first, remove the 's' from https
+        if(UnraveledUrl[4]=='s')strcpy(&UnraveledUrl[4], &UnraveledUrl[5]);  
         
         if(StartNewStation()==1) // succes
         { // restore volume setting
@@ -318,11 +317,12 @@ void loop()
         }
         else
         {  DataFromGlobe.D_QueueStationIndex = -1;
-           Serial.printf("FAILED: stream.connecttohost \n");
-           sprintf(message, "%d", stream_connecttohost_result);
-           AddToQueueForDisplay(message, MESSAGE_CONNECTTOHOST_FAILURE);
-//           AddToQueueForDisplay(RequestedUrl, MESSAGE_DEAD_STATION);
-           AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);
+           Serial.printf("FAILED: stream.connecttohost HTTP code %d\n", stream_connecttohost_result);
+           audio_eof_stream("Retry from main message loop for HTTP errors < 0");
+//           sprintf(message, "%d", stream_connecttohost_result);
+//           AddToQueueForDisplay(message, MESSAGE_CONNECTTOHOST_FAILURE);
+//           AddToQueueForDisplay(RequestedUrl, MESSAGE_DEAD_STATION); // let display store this url in text file
+//           AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);
         }
 
 /*
@@ -506,7 +506,7 @@ bool StartNewStation(void)
   char message[QUEUEMESSAGELENGTH];
 
   Tuning = true;
-  Serial.printf("StartNewStation with %s\n", RequestedUrl);
+  Serial.printf("StartNewStation with %s\n", UnraveledUrl);
   stream.setVolume(0);
   Serial.printf("First stop this one: %s\n", ConnectedUrl);
   stream.stopSong();
@@ -543,6 +543,8 @@ bool StartNewStation(void)
 //  strcpy(UnraveledUrl, "https://stream.zeno.fm/e59pwkvm3reuv");
 //  strcpy(UnraveledUrl, "https://stream.zeno.fm/2ee8m52mb"); 
 //  strcpy(UnraveledUrl, "https://stream.zeno.fm/8pbaase2w2quv");
+//  strcpy(UnraveledUrl, "http://178.19.58.119:1818/;"); // mime ="" ???? but plays when just assume MP3
+
 
   Serial.printf("Now connect: %s\n", UnraveledUrl);
   stream.connecttohost(UnraveledUrl);  
@@ -635,11 +637,12 @@ void audio_eof_stream(const char* info)
     AddToQueueForDisplay(message, MESSAGE_CONNECTTOHOST_FAILURE); // let display store this number for log report
     AddToQueueForDisplay(RequestedUrl, MESSAGE_AUDIO_EOF_STREAM); // let display store this url in text file
 
+    // https url was called, with no luck
     if(stream_connecttohost_result == FAIL_LOOP_EOF_NO_REMAINING_BYTES_HTTPS)
     { // try again, with http, remove 's' from url
       if(UnraveledUrl[4]=='s')
       { strcpy(&UnraveledUrl[4], &UnraveledUrl[5]);  
-        Serial.printf("Try again with: %s\n", UnraveledUrl);
+        Serial.printf("Try again with http: %s\n", UnraveledUrl);
         if(StartNewStation()==1) // succes
         { // restore volume setting
           SetVolumeMapped(DataFromDisplay.volumevalue);
@@ -648,7 +651,35 @@ void audio_eof_stream(const char* info)
           return;
         }
       }
-    }  
+    }
+
+    // 400 error, possibly if http call was made for https destination
+    // may not for RequestedUrl being http (just a thought)
+    if((stream_connecttohost_result == 400) || (stream_connecttohost_result == -5))  // -5 means could not connect
+    { // try again, with https, insert 's' to url
+      if(UnraveledUrl[4]==':')
+      { int16_t len = strlen(UnraveledUrl);
+        while(len>3)
+        { UnraveledUrl[len+1]=UnraveledUrl[len];
+          len--;
+        }
+        UnraveledUrl[4]='s';
+
+        Serial.printf("Try again with https: %s\n", UnraveledUrl);
+        if(StartNewStation()==1) // succes
+        { // restore volume setting
+          SetVolumeMapped(DataFromDisplay.volumevalue);
+          DataFromGlobe.D_QueueStationIndex = DataFromDisplay.D_QueueStationIndex;
+          AddToQueueForDisplay(ActiveUrl, MESSAGE_STATION_CONNECTED); 
+          return;
+        }
+      }
+
+    }
+
+
+
+
 
 //    AddToQueueForDisplay(RequestedUrl, MESSAGE_DEAD_STATION);
     AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);

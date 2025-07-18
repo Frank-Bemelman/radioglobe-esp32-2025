@@ -148,7 +148,7 @@ void AddToQueueForDisplay(const char* message, uint16_t queuemessagetype)
     strncpy(ToDisplay.QueueMessage[ToDisplay.QueueIndexIn], message, QUEUEMESSAGELENGTH);
     ToDisplay.QueueMessage[ToDisplay.QueueIndexIn][QUEUEMESSAGELENGTH] = 0; // terminate just in case of idiotic long message
     ToDisplay.QueueMessageType[ToDisplay.QueueIndexIn] = queuemessagetype;
-    Serial.printf("Outgoing Message %s Queued type = %d content >%s<\n", messagetexts[ToDisplay.QueueMessageType[ToDisplay.QueueIndexIn]], ToDisplay.QueueMessageType[ToDisplay.QueueIndexIn], ToDisplay.QueueMessage[ToDisplay.QueueIndexIn]);
+    Serial.printf("TELL DISPLAY: %s -> %s\n", messagetexts[ToDisplay.QueueMessageType[ToDisplay.QueueIndexIn]], ToDisplay.QueueMessage[ToDisplay.QueueIndexIn]);
 
     ToDisplay.QueueIndexIn++;
     ToDisplay.QueueCnt++;

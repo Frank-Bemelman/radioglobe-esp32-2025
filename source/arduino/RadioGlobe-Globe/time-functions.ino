@@ -111,9 +111,9 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW)
 
   print = 0;
   
-  if(print)Serial.printf("GetGeoLocationData Requested By Display -> Position NS = %f, EW = %f\n", StationGpsNS, StationGpsEW);
+  if(print)Serial.printf("GetGeoLocationData Requested By Display -> Position NS = %f, EW = %f\n", D_GeoLocationGpsNS, D_GeoLocationGpsEW);
 
-  sprintf(url_google_api, "%s%.6f%%2C%.6f&key=%s", gps_to_geocoding, StationGpsNS, StationGpsEW, google_api_key);
+  sprintf(url_google_api, "%s%.6f%%2C%.6f&key=%s", gps_to_geocoding, D_GeoLocationGpsNS, D_GeoLocationGpsEW, google_api_key);
   
   if(print)Serial.println(url_google_api);
   client.setInsecure();
