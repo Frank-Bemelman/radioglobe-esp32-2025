@@ -48,6 +48,7 @@ extern "C" {
 extern lv_obj_t * ui____initial_actions0;
 
 // IMAGES AND IMAGE SETS
+LV_IMG_DECLARE(ui_img_xx_png);    // assets/xx.png
 LV_IMG_DECLARE(ui_img_arrow_left_bold_32x32_png);    // assets/arrow_left_bold_32x32.png
 LV_IMG_DECLARE(ui_img_arrow_right_bold_32x32_png);    // assets/arrow_right_bold_32x32.png
 LV_IMG_DECLARE(ui_img_cog_png);    // assets/cog.png
@@ -58,7 +59,6 @@ LV_IMG_DECLARE(ui_img_power75x75_png);    // assets/power75x75.png
 LV_IMG_DECLARE(ui_img_home_png);    // assets/home.png
 LV_IMG_DECLARE(ui_img_worldmap_bw_360x180_png);    // assets/worldmap_bw_360x180.png
 LV_IMG_DECLARE(ui_img_circle16x16_png);    // assets/circle16x16.png
-LV_IMG_DECLARE(ui_img_ad_png);    // assets/ad.png
 LV_IMG_DECLARE(ui_img_triangle_down_16x16_png);    // assets/triangle_down_16x16.png
 LV_IMG_DECLARE(ui_img_power256x256_png);    // assets/power256x256.png
 

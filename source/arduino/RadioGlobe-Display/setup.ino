@@ -127,8 +127,9 @@ void PowerCycle(lv_event_t * e)
 
       
       AddToQueueForGlobe("OFF", MESSAGE_POWERDOWN);
-      while(backlightvalue)
-      { Set_Backlight(--backlightvalue);    
+      // power down, backlight down
+      while(BacklightValue)
+      { Set_Backlight(--BacklightValue);    
         delay(15);
       }
       delay(100);
@@ -143,6 +144,7 @@ void PowerCycle(lv_event_t * e)
       ui_object_set_themeable_style_property(uic_Big_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_green);
       ui_object_set_themeable_style_property(uic_Big_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_green);
       lv_obj_invalidate(uic_Big_Power_Off_Icon);
+      lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN);
       lv_refr_now(NULL);
       Lvgl_Loop();  
 
@@ -202,10 +204,8 @@ void StationInfo(lv_event_t * e)
 
 
       if(Stations.playing<(MAX_STATIONS+MAX_FAVORITES))
-      { Serial.printf("Countrycode = %s\n", Stations.StationNUG[Stations.playing].countrycode);
-        ShowFlag(Stations.StationNUG[Stations.playing].countrycode);
-        // names found by FindNewStation is often incorrect because database has many wrong country codes
-        FindCountryNameByCode(Stations.StationNUG[Stations.playing].countryname, Stations.StationNUG[Stations.playing].countrycode);
+      { //Serial.printf("Countrycode = %s\n", Stations.StationNUG[Stations.playing].countrycode);
+        //FindCountryNameByCode(Stations.StationNUG[Stations.playing].countryname, Stations.StationNUG[Stations.playing].countrycode);
         sprintf(content,"Greetings From  %s", Stations.StationNUG[Stations.playing].countryname);
         lv_label_set_text(ui_Database_Town_Name, content);
         lv_label_set_text(ui_Database_Progress, Stations.StationNUG[Stations.playing].name);  
@@ -251,6 +251,7 @@ void ShowFlag(char *countrycode)
   SD_MMC.end();
 
   lv_img_set_src(uic_Database_Flag, &my_global_img);
+  lv_img_set_src(uic_Home_Flag, &my_global_img);
 
 }
 

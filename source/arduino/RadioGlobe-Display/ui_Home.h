@@ -23,6 +23,7 @@ extern lv_obj_t * ui_Station_Name;
 extern void ui_event_Text_Now_Playing(lv_event_t * e);
 extern lv_obj_t * ui_Text_Now_Playing;
 extern lv_obj_t * ui_Station_Title;
+extern lv_obj_t * ui_Home_Flag;
 extern lv_obj_t * ui_VolumeValue;
 extern void ui_event_arrowleft(lv_event_t * e);
 extern lv_obj_t * ui_arrowleft;
@@ -39,6 +40,8 @@ extern lv_obj_t * ui_BatteryVoltage;
 extern void ui_event_Power_Off_Icon(lv_event_t * e);
 extern lv_obj_t * ui_Power_Off_Icon;
 extern lv_obj_t * ui_Text_Volume;
+extern lv_obj_t * ui_Home_Country;
+extern lv_obj_t * ui_Home_City;
 // CUSTOM VARIABLES
 extern lv_obj_t * uic_Home;
 extern lv_obj_t * uic_HomeGps;
@@ -46,6 +49,7 @@ extern lv_obj_t * uic_Local_Time;
 extern lv_obj_t * uic_Time_Zone;
 extern lv_obj_t * uic_Station_Name;
 extern lv_obj_t * uic_Station_Title;
+extern lv_obj_t * uic_Home_Flag;
 extern lv_obj_t * uic_VolumeValue;
 extern lv_obj_t * uic_arrowleft;
 extern lv_obj_t * uic_VolumeArc;
@@ -56,6 +60,8 @@ extern lv_obj_t * uic_Battery_Icon_Medium;
 extern lv_obj_t * uic_Battery_Icon_High;
 extern lv_obj_t * uic_BatteryVoltage;
 extern lv_obj_t * uic_Power_Off_Icon;
+extern lv_obj_t * uic_Home_Country;
+extern lv_obj_t * uic_Home_City;
 
 #ifdef __cplusplus
 } /*extern "C"*/

@@ -70,8 +70,14 @@ uint16_t CalToIndexEW;
 bool bPowerStatus = true;
 #define AUTOPOWERDOWNAFTER 3600;
 uint32_t AutoSleepTimer = AUTOPOWERDOWNAFTER;
-static int backlightvalue = 50;
-static int defaultbacklightvalue = 75;
+
+#define DEFAULT_BACKLIGHT 75
+int16_t BacklightValue = DEFAULT_BACKLIGHT;
+int16_t PrevBacklightValue = -1;
+#define DEFAULT_HOLD_BACKLIGHT 60 // seconds
+int16_t HoldBacklight = 0;
+#define DEFAULT_SHOW_VOLUME_TIMER 5 // seconds
+int16_t ShowVolumeTimer = 0;
 
 
 
@@ -86,6 +92,48 @@ void Driver_Loop(void *parameter)
   // in driver 
 //          delay(50);
 //          Set_EXIO(EXIO_PIN8,Low);
+
+    // auto dim backlight and gyro test 
+    if((GlobalTicker100mS % 10)==0)
+    { getGyroscope();
+      uint16_t motion = abs((int)Gyro.x) + abs((int)Gyro.y) + abs((int)Gyro.z); 
+      //Serial.printf("x%f - y%f - z%f\n", Gyro.x, Gyro.y, Gyro.z);
+      //Serial.printf("motion is %d\n", motion);
+      //Serial.printf("motion %d freeze %d backlightvalue %d\n", motion, freeze, backlightvalue);
+      if(motion>30)
+      { BacklightValue = DEFAULT_BACKLIGHT;
+        if(bPowerStatus)
+        { HoldBacklight = DEFAULT_HOLD_BACKLIGHT; // give our beloved user 60 seconds of full brightness before it starts fading again
+        }
+      }    
+       
+      if(HoldBacklight>0)
+      { HoldBacklight--;
+      }
+      else if(BacklightValue>10)
+      { BacklightValue--;
+      }
+
+      if(ShowVolumeTimer>0)
+      { ShowVolumeTimer--; // once timed out, flag will be shown again
+        if((ShowVolumeTimer==0) && (DataFromDisplay.volumevalue>0))
+        { lv_obj_add_state(uic_VolumeValue, LV_STATE_DISABLED); // away with volume lever
+          lv_obj_clear_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // show country flag again
+          lv_obj_clear_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // show city name again
+          lv_obj_clear_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // show country name again
+        }  
+      }
+    }
+
+
+    if(!bPowerStatus) // power off or gyro shake
+    { if(BacklightValue)BacklightValue--;    
+    }
+
+    if(PrevBacklightValue != BacklightValue)
+    { PrevBacklightValue = BacklightValue;
+      Set_Backlight(BacklightValue);    
+    }
 
     vTaskDelay(pdMS_TO_TICKS(100));
   }
@@ -139,7 +187,13 @@ void setup()
 
   ui_init();
   lv_obj_add_flag(ui_Power_Off_Icon, LV_OBJ_FLAG_HIDDEN);
-  
+  lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide country flag until new country code is received
+  lv_obj_add_flag(uic_Database_Flag, LV_OBJ_FLAG_HIDDEN); // hide country flag until new country code is received
+  lv_obj_add_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // hide city name until new country code is received
+  lv_obj_add_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide country name until new country code is received
+  lv_label_set_text(ui_Home_City, "");
+  lv_label_set_text(ui_Home_Country, "");
+
   
   // load preset stations from favorites.txt file
   LoadFavorites();
@@ -158,6 +212,7 @@ void setup()
   bUpAndRunning = true;
 
   AddToQueueForGlobe("VOL-BASS-TREBLE PLEASE", MESSAGE_DISPLAY_WANTS_VOLUME_AND_TONE);
+  Stations.playing = -1;
 
   // SD card driver for LVGL
   lv_port_fs_init();
@@ -204,10 +259,9 @@ void loop()
          { PrevDataFromGlobe.ns = -1;   
            PrevDataFromDisplay.ns_cal = -1;
          }
-         backlightvalue = defaultbacklightvalue;
-         Set_Backlight(backlightvalue); 
+         BacklightValue = DEFAULT_BACKLIGHT;
        }  
-       Serial.println("Screen changed!");
+       //Serial.println("Screen changed!");
        if(screen == ui_Home)
        { CalibrationModeLatLong = (CALMODE_NS | CALMODE_EW); // also effects the display of calibrated coordinates, 
          bInfoScreen = false;
@@ -218,9 +272,13 @@ void loop()
      if(DataFromDisplay.G_QueueSerialNumber != DataFromGlobe.G_QueueSerialNumber) // not yet acknowlegded and processed
      { // acknowledge message from globe as received and processed
        DataFromDisplay.G_QueueSerialNumber = DataFromGlobe.G_QueueSerialNumber; 
-       if((DataFromGlobe.G_QueueMessageType>=0) && (DataFromGlobe.G_QueueMessageType<(sizeof(messagetexts)/8)))Serial.printf("GLOBE SAYS: %s >%s<\n", messagetexts[DataFromGlobe.G_QueueMessageType], DataFromGlobe.G_QueueMessage);  
+//       if((DataFromGlobe.G_QueueMessageType>=0) && (DataFromGlobe.G_QueueMessageType<(sizeof(messagetexts)/8)))Serial.printf("GLOBE SAYS: %s >%s<\n", messagetexts[DataFromGlobe.G_QueueMessageType], DataFromGlobe.G_QueueMessage);  
+       if((DataFromGlobe.G_QueueMessageType>=0)) // && (DataFromGlobe.G_QueueMessageType<(sizeof(messagetexts)/8)))
+       { Serial.printf("GLOBE SAYS: %s >%s<\n", messagetexts[DataFromGlobe.G_QueueMessageType], DataFromGlobe.G_QueueMessage);  
+       }
        switch(DataFromGlobe.G_QueueMessageType)
        { case MESSAGE_SONG_TITLE: // 1
+
            lv_label_set_text(ui_Station_Title, DataFromGlobe.G_QueueMessage);
            break;
          case MESSAGE_ARTIST: // 2
@@ -274,8 +332,6 @@ void loop()
              { // if in tone controle screen or preset screen, jump back to home screen
                if((screen != ui_DatabaseScreen) || (bInfoScreen==true))
                { lv_scr_load(ui_Home);
-                 backlightvalue = defaultbacklightvalue;
-                 Set_Backlight(backlightvalue); 
                  FindNewStation();
                  ReloadScroll();
                }  
@@ -327,7 +383,7 @@ void loop()
              delay(300); // so we can actually notice the text change on the screen
              if(Stations.connect_attempts<MAX_STATIONS)
              { Stations.requested++;
-               Stations.requested %= MAX_STATIONS;
+               Stations.requested %= Stations.count;
                Serial.printf("Stations.count =%d\n", Stations.count);  
                if(Stations.requested < Stations.count) // until the end of the list, or else we are done
                { Serial.printf("Stations.requested =%d: >%s<\n", Stations.requested, Stations.StationNUG[Stations.requested].name);  
@@ -338,6 +394,10 @@ void loop()
                  AddStationToQueueForGlobe(Stations.requested);
                }
              }  
+             // no 'next' station
+             lv_label_set_text(ui_Station_Name, ""); 
+             lv_label_set_text(ui_StationRollerComment, content); 
+             lv_label_set_text(ui_Station_Name, "");
            }
            break;
 
@@ -346,12 +406,14 @@ void loop()
            // update text for station scroller 
            // update leds on preset screen
            if(Stations.requested<MAX_STATIONS+MAX_FAVORITES)
-           { sprintf(content, "%s - Playing", Stations.StationNUG[Stations.requested].name);
+           { 
+             sprintf(content, "%s - Playing", Stations.StationNUG[Stations.requested].name);
              Stations.playing = Stations.requested;
              lv_label_set_text(ui_StationRollerComment, content); 
              // lv_roller_set_selected(uic_StationRoller, Stations.requested, LV_ANIM_ON);
              if(Stations.requested<MAX_STATIONS)
-             { Serial.printf("(GLOBE SAYS): Station Playing %s\n", Stations.StationNUG[Stations.requested].name);
+             { if(Stations.connect_attempts>0)Stations.connect_attempts--;
+               Serial.printf("(GLOBE SAYS): Station Playing %s\n", Stations.StationNUG[Stations.requested].name);
                SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
              }
              else
@@ -396,6 +458,22 @@ void loop()
                 Serial.printf("                  - town = %s\n", Stations.StationNUG[Stations.requested].town);
               }
               strcpy(Stations.StationNUG[Stations.requested].countrycode, DataFromGlobe.G_QueueMessage);
+              ShowFlag(Stations.StationNUG[Stations.requested].countrycode);
+              lv_label_set_text(ui_Home_City, Stations.StationNUG[Stations.requested].town);
+              if(FindCountryNameByCode(Stations.StationNUG[Stations.requested].countryname, Stations.StationNUG[Stations.requested].countrycode))
+              { lv_label_set_text(ui_Home_Country, Stations.StationNUG[Stations.requested].countryname);
+              }
+              else
+              { sprintf(content, "Countrycode %s Not In List", DataFromGlobe.G_QueueMessage);
+                lv_label_set_text(ui_Home_Country, content);
+              }
+              lv_obj_clear_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // show country flag again
+              lv_obj_clear_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // show country flag again
+              lv_obj_clear_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // show country flag again
+              lv_obj_add_state(uic_VolumeValue, LV_STATE_DISABLED); // away with volume level
+              lv_event_send(ui_Home_City, LV_EVENT_REFRESH, NULL);
+              lv_event_send(ui_Home_Flag, LV_EVENT_REFRESH, NULL);
+              lv_event_send(ui_Home_Country, LV_EVENT_REFRESH, NULL);              
             }
             break;
          default:
@@ -410,8 +488,11 @@ void loop()
      sscanf(content, "%d", &newvolumevalue);
      if(DataFromDisplay.volumevalue != newvolumevalue)
      { DataFromDisplay.volumevalue = newvolumevalue;
-       backlightvalue = defaultbacklightvalue;
-       Set_Backlight(backlightvalue); 
+       BacklightValue = DEFAULT_BACKLIGHT;
+       ShowVolumeTimer = DEFAULT_SHOW_VOLUME_TIMER;
+       lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN);
+       lv_obj_add_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN);
+       lv_obj_add_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN);
        if(newvolumevalue)
        { lv_obj_add_flag(ui_Power_Off_Icon, LV_OBJ_FLAG_HIDDEN);
          lv_obj_clear_state(ui_VolumeValue, LV_STATE_DISABLED);
@@ -427,8 +508,7 @@ void loop()
      sscanf(content, "%d", &newbassvalue);
      if(DataFromDisplay.bassvalue != newbassvalue)
      { DataFromDisplay.bassvalue = newbassvalue;
-       backlightvalue = defaultbacklightvalue;
-       Set_Backlight(backlightvalue); 
+       BacklightValue = DEFAULT_BACKLIGHT;
      }
 
      text = lv_label_get_text(ui_TrebleValue);
@@ -436,8 +516,7 @@ void loop()
      sscanf(content, "%d", &newtreblevalue);
      if(DataFromDisplay.treblevalue != newtreblevalue)
      { DataFromDisplay.treblevalue = newtreblevalue;
-       backlightvalue = defaultbacklightvalue;
-       Set_Backlight(backlightvalue); 
+       BacklightValue = DEFAULT_BACKLIGHT;
      }
      
      if((GlobalTicker100mS % 1)==0)loop_esp_now(); // send volume & other stuff to globe
@@ -463,6 +542,7 @@ void loop()
      // new uncalibrated encoder position arrived, remap to calibrated
      if(((PrevDataFromGlobe.ns !=  DataFromGlobe.ns) || (PrevDataFromGlobe.ew !=  DataFromGlobe.ew)) && DataFromGlobe.G_EncoderReliable)
      { //Serial.println("Update coordinates on lcd!");
+       BacklightValue = DEFAULT_BACKLIGHT;
        remap_ns_ew(DataFromGlobe.ns, DataFromGlobe.ew); // if PrevDataFromGlobe.ns == -1, just refresh the display
        if(screen == ui_CalibrationScreenAdvanced)
        { GetFormattedLocation(content, "G", CalibrationModeLatLong);
@@ -528,34 +608,6 @@ void loop()
        // if((Ticker100mS % 10)==0)Set_Backlight(newvolumevalue);                                 
        // else Set_Backlight(0x0);    
 
-       // auto dim backlight and gyro test 
-       if((GlobalTicker100mS % 10)==0)
-       { static uint16_t freeze = 120;
-         getGyroscope();
-         uint16_t motion = abs((int)Gyro.x) + abs((int)Gyro.y) + abs((int)Gyro.z); 
-         //Serial.printf("x%f - y%f - z%f\n", Gyro.x, Gyro.y, Gyro.z);
-         //Serial.printf("motion is %d\n", motion);
-         //Serial.printf("motion %d freeze %d backlightvalue %d\n", motion, freeze, backlightvalue);
-         if(freeze)freeze--;
-
-         if(bPowerStatus)
-         { if(freeze==0)
-           { if(backlightvalue>10)Set_Backlight(backlightvalue--);    
-           }
-           if(motion>30)
-           { backlightvalue = defaultbacklightvalue;
-             Set_Backlight(backlightvalue);
-             freeze = 120; // give our beloved user 120 seconds of full brightness before it starts fading again
-           }
-         }
-         else
-         { if(motion>30)
-           { backlightvalue = defaultbacklightvalue;
-             Set_Backlight(backlightvalue);
-           }
-           else if(backlightvalue/5)Set_Backlight(backlightvalue-=5);
-         }
-       }
      }
 
      if(bCheckDatabase)BuildDatabaseNow();
@@ -597,3 +649,5 @@ void GetFormattedLocation(char *dest, char *src, int16_t ModeLatLong)
   { sprintf(dest, "%c%d.%d", (ew<0)?'W':'E', abs(ew)/10, abs(ew)%10);
   }  
 }
+
+

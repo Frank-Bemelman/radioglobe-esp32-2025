@@ -120,7 +120,7 @@ void loop_esp_now() {
         { DataFromDisplay.D_QueueSerialNumber++;
           strcpy(DataFromDisplay.D_QueueMessage, ToGlobe.QueueMessage[ToGlobe.QueueIndexOut]);
           DataFromDisplay.D_QueueMessageType = ToGlobe.QueueMessageType[ToGlobe.QueueIndexOut];
-          Serial.printf("MESSAGE SENT FROM DISPLAY: %d -> >%s<\n", DataFromDisplay.D_QueueMessageType, DataFromDisplay.D_QueueMessage);
+          //Serial.printf("Message %d-%d sent to globe = >%s<\n", DataFromDisplay.D_QueueSerialNumber, DataFromDisplay.D_QueueMessageType, DataFromDisplay.D_QueueMessage);
           ToGlobe.QueueIndexOut++;
           ToGlobe.QueueCnt--;
         }
@@ -147,7 +147,7 @@ void AddToQueueForGlobe(const char* message, uint16_t queuemessagetype) // one e
     strncpy(ToGlobe.QueueMessage[ToGlobe.QueueIndexIn], message, QUEUEMESSAGELENGTH);
     ToGlobe.QueueMessage[ToGlobe.QueueIndexIn][QUEUEMESSAGELENGTH-1] = 0; // terminate just in case of idiotic long message
     ToGlobe.QueueMessageType[ToGlobe.QueueIndexIn] = queuemessagetype;
-    //Serial.printf("Message type %d Queued in %d  = >%s<\n", queuemessagetype, ToGlobe.QueueIndexIn, ToGlobe.QueueMessage[ToGlobe.QueueIndexIn]);
+    Serial.printf("TELL GLOBE: %s -> %s\n", messagetexts[ToGlobe.QueueMessageType[ToGlobe.QueueIndexIn]], ToGlobe.QueueMessage[ToGlobe.QueueIndexIn]);
 
     ToGlobe.QueueIndexIn++;
     ToGlobe.QueueCnt++;

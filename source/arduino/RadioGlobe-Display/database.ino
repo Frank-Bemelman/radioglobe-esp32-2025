@@ -588,20 +588,9 @@ void FindNewStation(void)
           //Serial.printf("sizeof(Countrylist) = %ld\n", sizeof(CountryList) / sizeof(country_info));
           strncpy(countrycode, p, 2);
           countrycode[2]=0;
-          uint16_t n=0;
-          while(n<(sizeof(CountryList) / sizeof(country_info)))
-          { //Serial.printf("CountryList[%d].name = %s countrycode<%s> *p=%s\n", n, CountryList[n].name, CountryList[n].code, p );
-            if(strncmp(p, CountryList[n].code, 2)==NULL)
-            { strncpy(countryname, CountryList[n].name, 49);
-              countryname[49]=0;
-              break;
-            }
-            n++;
-          }
-          if(n==(sizeof(CountryList) / sizeof(country_info))) // non existing country code
-          { Serial.printf("Not a valid countrycode %d !!!!!!!!!!!!!!!\n", countrycode);
-            sprintf(countryname, "Unknown Code %s", countrycode);
-            strcpy(countrycode,"XX");
+
+          if(!FindCountryNameByCode(countryname, countrycode))
+          { Serial.printf("Not a valid countrycode %s !!!!!!!!!!!!!!!\n", countrycode);
           }
         }
 
@@ -687,6 +676,8 @@ void FindNewStation(void)
   //for(int n = 0; n<Stations.count; n++)
   //{ Serial.printf("[%d] N=%s\nU=%s\n", n, Stations.StationNUG[n].name, Stations.StationNUG[n].url);
   //}
+
+  Stations.connect_attempts = 0;
   
 }
 
@@ -701,12 +692,16 @@ void SetPixelInMap(int16_t ns, int16_t ew)
 }
 
 bool TestPixelInMap(int16_t ns, int16_t ew)
-{ // ew varies between -180 and 180
+{ // ew varies between -180 and 179
+  // ew varies between 90 and -89
   // -180 to be stored in [359]
   ew += 180;  // convert -180 to 179 range to 0-359
   ns += 90;   // convert -90 to 90 range to 0-180
   if(ns>179)ns=179;
   if(ew>359)ew-=360;
+  if(ns<1)return false;
+  if(ew<1)return false;
+  
   //Serial.printf("Pixeltest ns=%d ew=%d %02X vs %02X\n", ns, ew, (uint16_t)StationsMap.pixeldata[((180-ns)*48)+(ew/8)], (uint16_t)(0x80>>(ew%8)));
   if(StationsMap.pixeldata[((180-ns)*48)+(ew/8)] & (0x80>>(ew%8)))return true;
   return false;
@@ -889,15 +884,19 @@ void AddStationToQueueForGlobe(uint16_t station)
   char message[QUEUEMESSAGELENGTH];
 
   if(station<MAX_STATIONS+MAX_FAVORITES)
-  { Stations.connect_attempts++;
+  { if(station<MAX_STATIONS)Stations.connect_attempts++;
     DataFromDisplay.D_StationGpsNS = Stations.StationNUG[station].gps_ns;
     DataFromDisplay.D_StationGpsEW = Stations.StationNUG[station].gps_ew;
     sprintf(message, "%f-%f", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
     AddToQueueForGlobe(message, MESSAGE_GET_TIMEZONE_BY_GPS);
     AddToQueueForGlobe(message, MESSAGE_GET_GEOLOCATION_BY_GPS);
+    lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide country flag until new country code is received
+    lv_obj_add_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // hide city name until new country code is received
+    lv_obj_add_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide country name until new country code is received
     AddToQueueForGlobe(Stations.StationNUG[station].url, MESSAGE_START_THIS_STATION);
     lv_label_set_text(ui_Station_Name, Stations.StationNUG[station].name);
     lv_label_set_text(ui_Station_Title, "");
+        
   }
 }
 
@@ -986,14 +985,15 @@ void AppendBadStationToFile(fs::FS &fs, char* filename, char *url)
 bool FindCountryNameByCode(char *countryname, char*code)
 { uint16_t n=0;
   while(n<(sizeof(CountryList) / sizeof(country_info)))
-  { //Serial.printf("CountryList[%d].name = %s countrycode<%s> *p=%s\n", n, CountryList[n].name, CountryList[n].code, p );
+  { //Serial.printf("CountryList[%d].name = %s countrycode %s\n", n, CountryList[n].name, CountryList[n].code);
     if(strncmp(code, CountryList[n].code, 2)==NULL)
-    { strncpy(countryname, CountryList[n].name, 49);
-      countryname[49]=0;
+    { strcpy(countryname, CountryList[n].name);
+      //Serial.println(countryname);
       return true;
     }
     n++;
   }
+  strcpy(countryname, CountryList[n-1].name);
   return false;
 }
 

@@ -202,7 +202,7 @@ void ui_DatabaseScreen_screen_init(void)
                                            _ui_theme_alpha_turquoise);
 
     ui_Database_Flag = lv_img_create(ui_DatabaseScreen);
-    lv_img_set_src(ui_Database_Flag, &ui_img_ad_png);
+    lv_img_set_src(ui_Database_Flag, &ui_img_xx_png);
     lv_obj_set_height(ui_Database_Flag, 72);
     lv_obj_set_width(ui_Database_Flag, LV_SIZE_CONTENT);   /// 96
     lv_obj_set_x(ui_Database_Flag, 0);

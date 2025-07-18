@@ -47,7 +47,7 @@
 #define ESP_PANEL_LCD_RGB_TIMING_HPW              (8)
 #define ESP_PANEL_LCD_RGB_TIMING_HBP              (10)
 #define ESP_PANEL_LCD_RGB_TIMING_HFP              (50)
-#define ESP_PANEL_LCD_RGB_TIMING_VPW              (3)
+#define ESP_PANEL_LCD_RGB_TIMING_VPW              (4) // changed from 3 to 4 18-JUL-25 FB just a gamble to fix the display glitches 
 #define ESP_PANEL_LCD_RGB_TIMING_VBP              (8)
 #define ESP_PANEL_LCD_RGB_TIMING_VFP              (8)
 #define ESP_PANEL_LCD_RGB_FRAME_BUF_NUM           (2)     // 1/2/3
