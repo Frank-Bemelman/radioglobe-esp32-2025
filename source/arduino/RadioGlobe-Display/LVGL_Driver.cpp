@@ -98,5 +98,5 @@ void Lvgl_Init(void)
 void Lvgl_Loop(void)
 {
   lv_timer_handler(); /* let the GUI do its work */
-  // vTaskDelay(pdMS_TO_TICKS(5));
+  // vTaskDelay(pdMS_TO_TICKS(5)); // was commented out -> activated again 14feb26 to see if it helps preventing screen corruption during eeprom writes -> commented out again 15MAR26
 }

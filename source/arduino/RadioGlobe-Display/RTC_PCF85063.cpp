@@ -95,7 +95,9 @@ void PCF85063_Set_All(datetime_t time)
 					  decToBcd(time.day),
 					  decToBcd(time.dotw),
 					  decToBcd(time.month),
-					  decToBcd(time.year - YEAR_OFFSET)};
+//					  decToBcd(time.year - YEAR_OFFSET)}; wrong
+					  decToBcd(time.year%100)};
+
 	esp_err_t ret = I2C_Write(PCF85063_ADDRESS, RTC_SECOND_ADDR, buf, sizeof(buf));
 	if(ret != ESP_OK)
 		printf("PCF85063 : Failed to set the date and time\r\n");
@@ -119,7 +121,8 @@ void PCF85063_Read_Time(datetime_t *time)
 		time->day = bcdToDec(buf[3] & 0x3F);
 		time->dotw = bcdToDec(buf[4] & 0x07);
 		time->month = bcdToDec(buf[5] & 0x1F);
-		time->year = bcdToDec(buf[6]) + YEAR_OFFSET;
+//		time->year = bcdToDec(buf[6]) + YEAR_OFFSET;
+		time->year = bcdToDec(buf[6]);
 	}
 }
 

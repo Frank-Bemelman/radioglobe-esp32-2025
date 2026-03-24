@@ -45,8 +45,9 @@ typedef struct bmpfile{                // Total: 54 + 8 + 8100 bytes
   uint8_t  pixeldata[8640];     // 180 ns entries of 360/8=45 ew bytes, round up to multiple of 4 bytes -> 48 -> 180x48 -> 8460 bytes of pixeldata
 }; 
 
-#define MAX_STATIONS 150
+#define MAX_STATIONS 50 // must !!!! be equal to setting in globe software
 #define MAX_FAVORITES 4
+#define MAX_HOMES 1 // place where you live - used also for base currency for valuta exchange rates
 
 typedef struct station_name_url_gps
 { char name[32];
@@ -59,7 +60,7 @@ typedef struct station_name_url_gps
 };
 
 typedef struct stations_arraybin
-{ station_name_url_gps StationNUG[MAX_STATIONS+MAX_FAVORITES];
+{ station_name_url_gps StationNUG[MAX_STATIONS+MAX_FAVORITES+MAX_HOMES];
   uint16_t count; // number of found stations in this list
   int16_t  requested; // number of station requested by display to globe
   int16_t  playing; // number of station that globe connected to

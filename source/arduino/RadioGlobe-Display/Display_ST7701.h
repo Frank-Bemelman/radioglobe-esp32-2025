@@ -31,12 +31,12 @@
 
 // FB Seen elsewhere: https://www.openpilot.cc/archives/4466
 //    #define ESP_PANEL_LCD_RGB_CLK_HZ            (16 * 1000 * 1000) same
-//    #define ESP_PANEL_LCD_RGB_HPW               (4) // 4 vs 8 here
-//    #define ESP_PANEL_LCD_RGB_HBP               (8) // 8 vs 10  here
+//    #define ESP_PANEL_LCD_RGB_HPW               (4)  // 4 vs 8 here
+//    #define ESP_PANEL_LCD_RGB_HBP               (8)  // 8 vs 10  here
 //    #define ESP_PANEL_LCD_RGB_HFP               (8)  // 8 vs 50  here
-//    #define ESP_PANEL_LCD_RGB_VPW               (4) // 4 vs 3  here
+//    #define ESP_PANEL_LCD_RGB_VPW               (4)  // 4 vs 3  here
 //    #define ESP_PANEL_LCD_RGB_VBP               (16) // 16 vs 8  here
-//    #define ESP_PANEL_LCD_RGB_VFP               (16) 16 vs 8  here
+//    #define ESP_PANEL_LCD_RGB_VFP               (16) // 16 vs 8  here
 
 #define ESP_PANEL_LCD_WIDTH                       (480)
 #define ESP_PANEL_LCD_HEIGHT                      (480)
@@ -47,8 +47,8 @@
 #define ESP_PANEL_LCD_RGB_TIMING_HPW              (8)
 #define ESP_PANEL_LCD_RGB_TIMING_HBP              (10)
 #define ESP_PANEL_LCD_RGB_TIMING_HFP              (50)
-#define ESP_PANEL_LCD_RGB_TIMING_VPW              (4) // changed from 3 to 4 18-JUL-25 FB just a gamble to fix the display glitches 
-#define ESP_PANEL_LCD_RGB_TIMING_VBP              (8)
+#define ESP_PANEL_LCD_RGB_TIMING_VPW              (3) // changed from 3 to 4 18-JUL-25 FB just a gamble to fix the display glitches -> didn't made a difference - back to 3
+#define ESP_PANEL_LCD_RGB_TIMING_VBP              (16) // changed from 8 to 16 19-JUL-25 FB just a gamble to fix the display glitches -> 
 #define ESP_PANEL_LCD_RGB_TIMING_VFP              (8)
 #define ESP_PANEL_LCD_RGB_FRAME_BUF_NUM           (2)     // 1/2/3
 #define ESP_PANEL_LCD_RGB_BOUNCE_BUF_SIZE         (ESP_PANEL_LCD_WIDTH * 10)     // Bounce buffer size in bytes. This function is used to avoid screen drift.

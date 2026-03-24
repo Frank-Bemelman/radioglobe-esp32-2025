@@ -11,6 +11,8 @@ bmpfile StationsMap;  // to maintain a quick lookup map of available directories
 bmpfile NauticMap;    // to have a map of water vs land that have actual timezones according to google
 stations_arraybin Stations;
 
+
+
 char rolldata[(64+2)*MAX_STATIONS];
 
 
@@ -76,7 +78,7 @@ void BuildDatabaseNow(void)
   lv_obj_clear_flag(uic_RebuildDatabaseButtonText, LV_OBJ_FLAG_HIDDEN);
   lv_obj_add_state(uic_RebuildDatabase, LV_STATE_DISABLED);
   lv_obj_add_flag(uic_HomeButton3, LV_OBJ_FLAG_HIDDEN);
-  lv_label_set_text(ui_MapBanner, "All\nThose\nBeautiful\nInternet\nRadio\nStations\nAround\nThe\nWorld\n");
+  //lv_label_set_text(ui_MapBanner, "All\nThose\nBeautiful\nInternet\nRadio\nStations\nAround\nThe\nWorld\n");
 
   if (!SD_MMC.begin("/sdcard", true, false))
   { lv_label_set_text(ui_Database_Dir_Path, "No SD Card Found!");
@@ -161,18 +163,16 @@ void ReadDatabase(fs::FS &fs, char *filename)
     Lvgl_Loop();
     delay(2000); 
   
-    filesize = root.size();
+    filesize = root.size(); // used for progress percentage calculation
     // Serial.printf("filesize of %s is %ld\n", filename, filesize);
-
-    bool readcoords = false;
-    uint16_t citycount = 0;
 
     lv_obj_set_pos(uic_MapCursor, ew, -ns);
     // Start the animation on the map
-    lv_obj_clear_state(uic_MapBanner, LV_STATE_DISABLED);
+    //lv_obj_clear_state(uic_MapBanner, LV_STATE_DISABLED);
     lv_obj_clear_state(uic_MapCursor, LV_STATE_DISABLED);
 
-
+    // invalidate map red dots, make it blank
+    memset(StationsMap.pixeldata, 0x0, sizeof(StationsMap.pixeldata));
 
     while(root.available())//  && urlcount < 500)
     { currentMillis = millis();
@@ -192,8 +192,8 @@ void ReadDatabase(fs::FS &fs, char *filename)
       { case 0:
           if((p = strstr(oneline, "\": {")) != NULL) // city,country
           { // example
-            //    "Winston-Salem,US-NC": {
-            // results in: Winston-Salem_US-NC.txt  
+            //    "Winston-Salem,US": {
+            // results in: Winston-Salem_US.txt  
             if((p=strchr(oneline, '\"'))!=NULL)
             { strcpy(outputfilename, p+1);
               if((p=strchr(outputfilename, '\"')) != NULL)*p=0;
@@ -234,7 +234,7 @@ void ReadDatabase(fs::FS &fs, char *filename)
             lv_label_set_text(ui_Database_Dir_Path, sometext);
             lv_label_set_text(ui_Database_Output_File, outputfilename);
             sprintf(sometext, "/%s/%s", dirpath, outputfilename);
-//            SD_MMC.remove(sometext); // delete old file
+            // SD_MMC.remove(sometext); // delete old file
             urls = SD_MMC.open(sometext, FILE_WRITE);
             parsefase = 4;
           }
@@ -272,7 +272,7 @@ void ReadDatabase(fs::FS &fs, char *filename)
 
     urls.close();
     root.close();
-    lv_obj_add_state(uic_MapBanner, LV_STATE_DISABLED); 
+    //lv_obj_add_state(uic_MapBanner, LV_STATE_DISABLED); 
     lv_obj_add_state(uic_MapCursor, LV_STATE_DISABLED); 
 
     percentagedone = 100;
@@ -330,7 +330,8 @@ void CreateAllDirInPath(fs::FS &fs, char *path)
   }
 }      
 
-bool SnapToNearestStation(int16_t for_ns, int16_t for_ew, int16_t *to_ns, int16_t *to_ew)
+#define EXPAND_STOP 10 // was 45 - original radioglobe by Jude Pullen uses 2 degrees expansion, too small imo
+bool SnapToNearestStation(int16_t for_ns, int16_t for_ew, int16_t *to_ns, int16_t *to_ew, uint16_t hit_count)
 { // convert/round to whole degrees to be used for finding a position with an existing directory path and station file
   int16_t ns;
   int16_t ew;
@@ -341,62 +342,81 @@ bool SnapToNearestStation(int16_t for_ns, int16_t for_ew, int16_t *to_ns, int16_
   int16_t try_lty;
   int16_t try_rbx;
   int16_t try_rby;
+  uint16_t match_count = 0;
+  int16_t expand_stop;
 
   
   ns = for_ns;
   ew = for_ew;
   
-  Serial.printf("[Database.ino ~ 346] SnapToNearestStation NS = %d  EW = %d\n", ns, ew);
-
-
+  Serial.printf("[Database.ino ~ 352] SnapToNearestStation NS = %d  EW = %d\n", ns, ew);
+  if(DisplaySettings.expand_search>100)DisplaySettings.expand_search=100;
+  expand_stop = DisplaySettings.expand_search+1;
+  Serial.printf("expand_stop = %d\n", expand_stop);
+  
   // start at the exact position
   // expand as needed by 1 degree
+  // hit_count parameter to find 1st or 2nd or 3rd pixel in map
+  // to be used if 1st or next pixel gives a dissapointing small amount of stations
+
   try_ns = ns;
   try_ew = ew;
   expand = 0;
 
-  while(expand < 45)
+  
+  while((expand < expand_stop) && (match_count!=hit_count))
   { // define the square to scan
     try_lty = ns - expand;
     try_ltx = ew - expand;
     try_rby = ns + expand;
     try_rbx = ew + expand;
 
-    if(TestPixelInMap(try_ns, try_ew))break;
+    if(TestPixelInMap(try_ns, try_ew) && match_count==0)
+    { match_count++;
+      expand++;
+    }
     else // loop around
     { try_ns = try_lty; 
       try_ew = try_ltx; 
-      while(try_ew<try_rbx) // go right 
+      while(try_ew<try_rbx && (match_count!=hit_count)) // go right 
       { try_ew++;
-        if(TestPixelInMap(try_ns, try_ew))break;
+        if(TestPixelInMap(try_ns, try_ew))
+        { match_count++;
+        }  
       }
-      while(try_ns<try_rby) // go down 
+      while(try_ns<try_rby && (match_count!=hit_count)) // go down 
       { try_ns++;
-        if(TestPixelInMap(try_ns, try_ew))break;
+        if(TestPixelInMap(try_ns, try_ew))
+        { match_count++;
+        }  
       }
-      while(try_ew>try_ltx) // go left 
+      while(try_ew>try_ltx && (match_count!=hit_count)) // go left 
       { try_ew--;
-        if(TestPixelInMap(try_ns, try_ew))break;
+        if(TestPixelInMap(try_ns, try_ew))
+        { match_count++;
+        }  
       }
-      while(try_ns>try_lty) // go up 
+      while(try_ns>try_lty && (match_count!=hit_count)) // go up 
       { try_ns--;
-        if(TestPixelInMap(try_ns, try_ew))break;
+        if(TestPixelInMap(try_ns, try_ew))
+        { match_count++;
+        }  
       }
       expand++;
     }
   }
 
-  if(expand >= 45)
-  { Serial.printf("No station with 45 degrees of expand %d -> NS -> %d WE -> %d\n", expand, try_ns, try_ew);
+  if(expand >= expand_stop)
+  { Serial.printf("No station with expand %d -> NS -> %d WE -> %d\n", expand, try_ns, try_ew);
     return false; 
   }
-  Serial.printf("Nearest station within expand %d -> NS -> %d WE -> %d\n", expand, try_ns, try_ew);
+  Serial.printf("Stations found within expand %d -> NS -> %d WE -> %d\n", expand, try_ns, try_ew);
   *to_ns = try_ns;
   *to_ew = try_ew;
   return true;
 }
 
-// find a new station at current calibrated position
+// find stations at current calibrated position
 void FindNewStation(void)
 { bool dirscan = true;
   bool dirfound = false;
@@ -413,16 +433,17 @@ void FindNewStation(void)
   bool mapfind = false;
   int16_t mapfind_ns;
   int16_t mapfind_ew;
+
+  int32_t mSstartsearch;
+  uint16_t randomrange = 0;
   
-  
+ 
   char dirpath[64];
   File root;
   File file;
   char content[64];
-
-  lv_label_set_text(ui_Station_Name, "Tuning...");
-  lv_label_set_text(ui_Station_Title, "");
-  Lvgl_Loop();
+  
+  
 
   // convert to whole degrees to be used for finding directory path to url file
   ns = DataFromDisplay.ns_cal;
@@ -431,158 +452,114 @@ void FindNewStation(void)
   ew+= 5;
   ns/=10;
   ew/=10;
-  
-  mapfind = SnapToNearestStation(ns, ew, &mapfind_ns, &mapfind_ew);
-   
-  
-
-  // search for url file around center [1]
-  //           10 11 12  
-  //        21  9  2  3 13 
-  //        20  8  1  4 14
-  //        19  7  6  5 15
-  //           18 17 16 
 
   Stations.count = 0;
   Stations.requested -1;
-      
-  if (SD_MMC.begin("/sdcard", true, false))
-  { center = 1;
-    while(dirscan)
-    { switch(center)
-      { case 1:
-          dir_ns = ns;
-          dir_ew = ew;
-          if(mapfind) // get out of this search
-          { dir_ns = mapfind_ns;
-            dir_ew = mapfind_ew;
-            dirscan = false;
-            dirfound = true;
-          }
-          break;
-        case 2:
-          dir_ns = ns+1;
-          dir_ew = ew;
-          break;
-        case 3:
-          dir_ns = ns+1;
-          dir_ew = ew+1;
-          break;
-        case 4:
-          dir_ns = ns;
-          dir_ew = ew+1;
-          break;
-        case 5:
-          dir_ns = ns-1;
-          dir_ew = ew+1;
-          break;
-        case 6:
-          dir_ns = ns-1;
-          dir_ew = ew;
-          break;
-        case 7:
-          dir_ns = ns-1;
-          dir_ew = ew-1;
-          break;
-        case 8:
-          dir_ns = ns;
-          dir_ew = ew-1;
-          break;
-        case 9:
-          dir_ns = ns+1;
-          dir_ew = ew-1;
-          break;
-        //           10 11 12  
-        //        21  9  2  3 13 
-        //        20  8  1  4 14
-        //        19  7  6  5 15
-        //           18 17 16 
-        case 10:
-          dir_ns = ns+2;
-          dir_ew = ew-1;
-          break;
-        case 11:
-          dir_ns = ns+2;
-          dir_ew = ew;
-          break;
-        case 12:
-          dir_ns = ns+2;
-          dir_ew = ew+1;
-          break;
-        case 13:
-          dir_ns = ns+1;
-          dir_ew = ew+2;
-          break;
-        case 14:
-          dir_ns = ns;
-          dir_ew = ew+2;
-          break;
-        case 15:
-          dir_ns = ns-1;
-          dir_ew = ew+2;
-          break;
-        //           10 11 12  
-        //        21  9  2  3 13 
-        //        20  8  1  4 14
-        //        19  7  6  5 15
-        //           18 17 16 
-        case 16: dir_ns = ns-2; dir_ew = ew+1; break;
-        case 17: dir_ns = ns-2; dir_ew = ew;   break;
-        case 18: dir_ns = ns-2; dir_ew = ew-1; break;
-        case 19: dir_ns = ns-1; dir_ew = ew-2; break;
-        case 20: dir_ns = ns;   dir_ew = ew-2; break;
-        case 21: dir_ns = ns+1; dir_ew = ew-2; break;
 
-        default:
-          // game over
-          lv_label_set_text(ui_Station_Name, "No Stations Found");
-          strcpy(Stations.StationNUG[0].name, "");
-          strcpy(Stations.StationNUG[0].url, "");
-          Lvgl_Loop();
-          dirscan = false;
-          break;  
-      }
+  mSstartsearch = millis();
 
-      sprintf(dirpath, "/%c/%d/%d/%c/%d/%d", (dir_ns<0)?'S':'N', abs(dir_ns)/10, abs(dir_ns)%10, (dir_ew<0)?'W':'E', abs(dir_ew)/10, abs(dir_ew)%10);
-      Serial.println(dirpath);
-      lv_label_set_text(ui_Station_Title, dirpath);
-      Lvgl_Loop();
-
-      // only try for white pixels in the map
-      if(TestPixelInMap(dir_ns, dir_ew)) // worth trying
-      { root = SD_MMC.open(dirpath);
-        if (!root) 
-        { Serial.println("Failed to open directory");
-          // if(TestPixelInMap(dir_ns, dir_ew)) Serial.println("Strange, pixel found");
-          // else Serial.println("Correct, no pixel found");
-          center++;
-        }
-        else
-        { dirscan = false;
-          dirfound = true;
-          Serial.println("Succes to open directory");
-          // if(TestPixelInMap(dir_ns, dir_ew)) Serial.println("Indeed pixel found");
-          // else Serial.println("Strange, no pixel found");
-        }
-      } 
-      else  center++;
+  //mapfind = SnapToNearestStation(ns, ew, &mapfind_ns, &mapfind_ew, 1);
+   
+  //nieuw, probeer minimaal 10 stations te vinden, blijf witte pixels zoeken
+  uint16_t hitcount = 0;
+  while(Stations.count < 10 && hitcount<10)
+  { hitcount++;
+    mapfind = SnapToNearestStation(ns, ew, &mapfind_ns, &mapfind_ew, hitcount);
+    if(mapfind == 0)
+    { // game over
+      break;
     }
-  }  
+    CollectStationsAtGps(mapfind_ns, mapfind_ew);
+    if(randomrange==0)randomrange = Stations.count; // count from first succesful find
+    Serial.printf("Collecting Attempt %d gave %d stations\n", hitcount, Stations.count);
+  }
 
-  if(dirfound)
-  //if(1)
-  { file = root.openNextFile();
-    while (file && Stations.count<149) 
+  
+  Serial.printf("End search -> %ld\n", millis() - mSstartsearch);
+  
+  
+
+  if(Stations.count)
+  { sprintf(content, "%d Stations Found", Stations.count);
+    lv_label_set_text(ui_Station_Name, content);
+    
+    AddToQueueForGlobe("Reset Your DataFromGlobe.D_QueueStationIndex to -1", MESSAGE_NEW_LIST_LOADED);
+    
+    // pick a random station from the list
+    uint16_t random_station; 
+    random_station = random(0,randomrange);
+    Stations.connect_attempts = 0;
+    ForceGlobeStationGPSupdate = true; 
+    AddStationToQueueForGlobe(random_station);
+
+    // turn of preset leds
+    SetLed(1, 0);
+    SetLed(2, 0);
+    SetLed(3, 0);
+    SetLed(4, 0);
+  }  
+  else
+  { lv_label_set_text(ui_Station_Name, "No Stations Found");
+      
+    // normally, timezone is requested for the station that is requested
+    // if no stations are found, set the timezone according to the coordinates from the globe
+    sprintf(content, "%d-%d", DataFromDisplay.ns_cal, DataFromDisplay.ew_cal);
+    AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE);
+    AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION_BY_GPS); // not tested yet
+  }
+
+  
+  // dump to serial port
+  //for(int n = 0; n<Stations.count; n++)
+  //{ Serial.printf("[%d] N=%s\nU=%s\n", n, Stations.StationNUG[n].name, Stations.StationNUG[n].url);
+  //}
+
+  Stations.connect_attempts = 0;
+  
+}
+
+void CollectStationsAtGps(int16_t mapfind_ns, int16_t mapfind_ew)
+{ File root;
+  File file;
+  char dirpath[64];
+  char content[64];
+  int16_t dir_ns;
+  int16_t dir_ew;
+  char oneline[128];
+  size_t bytesread;
+  char *p;
+
+  if (SD_MMC.begin("/sdcard", true, false))
+  { dir_ns = mapfind_ns;
+    dir_ew = mapfind_ew;
+    sprintf(dirpath, "/%c/%d/%d/%c/%d/%d", (dir_ns<0)?'S':'N', abs(dir_ns)/10, abs(dir_ns)%10, (dir_ew<0)?'W':'E', abs(dir_ew)/10, abs(dir_ew)%10);
+    Serial.println(dirpath);
+    //lv_label_set_text(ui_Station_Title, dirpath);
+  
+    Lvgl_Loop();
+
+    root = SD_MMC.open(dirpath);
+    if (!root) 
+    { Serial.println("Failed to open directory");
+      return;
+    }
+    
+    file = root.openNextFile();
+//    while (file && Stations.count<(MAX_STATIONS-1))
+// dit gaat op tilt, met name bij de reload scroll als meer dan ?? stations, zeker geen 100 of 150 mogelijk 
+// dus even naar 25 max
+    while (file && Stations.count<25) 
     { if(!file.isDirectory()) 
       { Serial.print("STATIONS FILE: ");
         Serial.print(file.name());
-        Serial.print("FILE SIZE: ");
+        Serial.print(" FILE SIZE: ");
         Serial.println(file.size());
         lv_label_set_text(ui_Station_Title, file.name());
         char town[32] = "";
         char countrycode[3] = "";
         char countryname[50] = "";
         strcpy(town, file.name());
+        // filenames are constructed from name of town, underscore, and 2 letter land code, like -> Naaldwijk_NL.txt
         if((p=strchr(town, '_')) != NULL)
         { *p++ = 0;
           //Serial.printf("sizeof(Countrylist) = %ld\n", sizeof(CountryList) / sizeof(country_info));
@@ -596,7 +573,7 @@ void FindNewStation(void)
 
         Lvgl_Loop();
 
-        while(file.available() && Stations.count<MAX_STATIONS)//  && urlcount < 500)
+        while(file.available() && Stations.count<25)
         { bytesread = file.readBytesUntil(0x0a, oneline, sizeof(oneline)-1);
           oneline[bytesread]=0;
           if((p = strrchr(oneline, '\"')) != NULL)*p=0; // get rid of the last "
@@ -617,7 +594,7 @@ void FindNewStation(void)
           else if((p = strstr(oneline, "\"gps\": \"")) != NULL)
           { // example:  "url": "https://stream.radio-fratz.de/stream_high.mp3"
             // Serial.println(p+8);
-            p+=8; // jump forward to start of url
+            p+=8; // jump forward to start of gps coordinates
             sscanf(p, "%f,%f", &Stations.StationNUG[Stations.count].gps_ns, &Stations.StationNUG[Stations.count].gps_ew);
 
             //if((p = strstr(StationArray[stationsfound].url, ".m3u")) == NULL) // no links to m3u file
@@ -633,52 +610,12 @@ void FindNewStation(void)
             Stations.count++;
           }
         }
-        file = root.openNextFile();
+        //file = root.openNextFile();
       }
+      file = root.openNextFile();
     } 
     SD_MMC.end();  
   }
-  else
-  { lv_label_set_text(ui_Station_Name, "No SD Card");
-  }
-
-  // for test only   
-  // strcpy(DataFromDisplay.RadioUrlRequest,  "http://stream.srg-ssr.ch/m/rsj/mp3_128");
-  // strcpy(DataFromDisplay.RadioUrlRequest,  "https://icecast.omroep.nl/radio1-sb-mp3");
-  // strcpy(DataFromDisplay.RadioUrlRequest,  "https://185.74.70.31/vocenustrale-128.mp3");
-
-  if(Stations.count)
-  { 
-  
-    AddToQueueForGlobe("Reset Your DataFromGlobe.D_QueueStationIndex to -1", MESSAGE_NEW_LIST_LOADED);
-    
-    // pick a random station from the list
-    uint16_t random_station; 
-    random_station = random(0,Stations.count);
-    Stations.connect_attempts = 0;
-    AddStationToQueueForGlobe(random_station);
-
-    // turn of preset leds
-    SetLed(1, 0);
-    SetLed(2, 0);
-    SetLed(3, 0);
-    SetLed(4, 0);
-  }  
-  else
-  { // normally, timezone is requested for the station that is requested
-    // if no stations are found, set the timezone according to the coordinates from the globe
-    sprintf(content, "%d-%d", DataFromDisplay.ns_cal, DataFromDisplay.ew_cal);
-    AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE);
-  }
-
-  
-  // dump to serial port
-  //for(int n = 0; n<Stations.count; n++)
-  //{ Serial.printf("[%d] N=%s\nU=%s\n", n, Stations.StationNUG[n].name, Stations.StationNUG[n].url);
-  //}
-
-  Stations.connect_attempts = 0;
-  
 }
 
 void SetPixelInMap(int16_t ns, int16_t ew)
@@ -745,11 +682,19 @@ static uint32_t currentMillis;
 
 void RadioGlobeClick(lv_event_t * e)
 { if(Stations.count == 0)
-  { FindNewStation();
+  { SetFlag("xxxx");
+    lv_obj_add_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // hide city name until new country code is received
+    lv_obj_add_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide country name until new country code is received
+
+    lv_label_set_text(ui_Station_Name, "Searching...");
+    lv_label_set_text(ui_Station_Title, "");
+    Lvgl_Loop();  
+    FindNewStation();
   }
   ReloadScroll();
   lv_scr_load(ui_StationSelectScreen);
   startMillis = millis(); 
+  Serial.printf("RadioGlobeClick() return\n");
 }
 
 void ReloadScroll(void)
@@ -784,7 +729,7 @@ void ReloadScroll(void)
   // Serial.println(rolldata);
   // Serial.println(n);
   lv_roller_set_options(uic_StationRoller, rolldata, LV_ROLLER_MODE_NORMAL);
-  if((Stations.requested >=0) && Stations.requested<MAX_STATIONS)
+  if((Stations.requested >=0) && (Stations.requested<Stations.count))
   { char content[32];
     sprintf(content, "%d-%d", Stations.requested+1, Stations.count); // top label 1-150 in stations roller
     lv_label_set_text(ui_StationRollerSelected, content);
@@ -813,34 +758,31 @@ void StationScroll(lv_event_t * e)
   sprintf(content, "%d-%d", index+1, Stations.count);
   lv_label_set_text(ui_StationRollerSelected, content); 
   
-    if(event_code == LV_EVENT_CLICKED) 
-    { index = lv_roller_get_selected(uic_StationRoller);
-      currentMillis = millis(); 
-      if(currentMillis - startMillis > 250)  //test to distuigish between scrolling and clicking
-      { RollSelection = index;
-      }
-      else // short click
-      { Serial.printf("index=%d\n", index);
-        if(RollSelection == index)
-        { if(index < MAX_STATIONS) // just check in case
-          { Stations.playing = -1;
-            Stations.requested = index; 
-            sprintf(content, "%s - Tuning", Stations.StationNUG[Stations.requested].name);
-            lv_label_set_text(ui_StationRollerComment, content); 
-            Stations.connect_attempts = 0;
-            AddStationToQueueForGlobe(Stations.requested);
-          }
-          Set_EXIO(EXIO_PIN8,High);
-          delay(50);
-          Set_EXIO(EXIO_PIN8,Low);
-        }  
-        RollSelection = index;
-      }
+  if(event_code == LV_EVENT_CLICKED) 
+  { index = lv_roller_get_selected(uic_StationRoller);
+    currentMillis = millis(); 
+    if(currentMillis - startMillis > 250)  //test to distuigish between scrolling and clicking
+    { RollSelection = index;
     }
-    if(event_code == LV_EVENT_PRESSED) 
-    { startMillis = millis();  //get the current "time" (actually the number of milliseconds since the program started)
+    else // short click
+    { Serial.printf("index=%d\n", index);
+      if(RollSelection == index)
+      { if(index < Stations.count) // just check in case
+        { Stations.playing = -1;
+          Stations.requested = index; 
+          sprintf(content, "Connecting to %s", Stations.StationNUG[Stations.requested].name);
+          lv_label_set_text(ui_StationRollerComment, content); 
+          Stations.connect_attempts = 0;
+          AddStationToQueueForGlobe(Stations.requested);
+        }
+        beepforMs(50);
+      }  
+      RollSelection = index;
     }
-    
+  }
+  if(event_code == LV_EVENT_PRESSED) 
+  { startMillis = millis();  //get the current "time" (actually the number of milliseconds since the program started)
+  }
 }
 
 
@@ -878,25 +820,57 @@ void RollDown(lv_event_t * e)
 
 void AddStationToQueueForGlobe(uint16_t station)
 { // prepare gps position and url for the station we want to hear and get timezone for
+  static char lastgpsrequest[32];
   DataFromDisplay.D_QueueStationIndex = station;
   Stations.requested = station; 
   Stations.playing = -1;
   char message[QUEUEMESSAGELENGTH];
+  char content[128];
 
   if(station<MAX_STATIONS+MAX_FAVORITES)
   { if(station<MAX_STATIONS)Stations.connect_attempts++;
     DataFromDisplay.D_StationGpsNS = Stations.StationNUG[station].gps_ns;
     DataFromDisplay.D_StationGpsEW = Stations.StationNUG[station].gps_ew;
     sprintf(message, "%f-%f", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
-    AddToQueueForGlobe(message, MESSAGE_GET_TIMEZONE_BY_GPS);
-    AddToQueueForGlobe(message, MESSAGE_GET_GEOLOCATION_BY_GPS);
-    lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide country flag until new country code is received
-    lv_obj_add_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // hide city name until new country code is received
-    lv_obj_add_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide country name until new country code is received
-    AddToQueueForGlobe(Stations.StationNUG[station].url, MESSAGE_START_THIS_STATION);
+    if(strcmp(lastgpsrequest, message) != NULL || (ForceGlobeStationGPSupdate == true))
+    {  strcpy(lastgpsrequest, message);
+       ForceGlobeStationGPSupdate = false;
+      // checked if position has changed, yes it has
+      AddToQueueForGlobe(message, MESSAGE_GET_GEOLOCATION_BY_GPS);
+      AddToQueueForGlobe(message, MESSAGE_GET_TIMEZONE_BY_GPS);
+      Serial.printf("Flag = %s\n", Stations.StationNUG[station].countrycode);
+      SetFlag(Stations.StationNUG[station].countrycode);
+
+      strcpy(GlobePositionCountryCode, Stations.StationNUG[station].countrycode);
+
+      lv_obj_clear_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
+
+      Serial.printf("Town = %s\n", Stations.StationNUG[station].town);
+      lv_label_set_text(uic_Home_City, Stations.StationNUG[station].town);
+      lv_obj_clear_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
+      Serial.printf("Country = %s\n", Stations.StationNUG[station].countryname);
+      lv_label_set_text(uic_Home_Country, AllUpperCase(Stations.StationNUG[station].countryname));
+      lv_obj_clear_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
+      lv_label_set_text(uic_Clock_Country, AllUpperCase(Stations.StationNUG[station].countryname));
+      lv_obj_clear_flag(uic_Clock_Country, LV_OBJ_FLAG_HIDDEN); // unhide country name 
+
+      // update the world map screen
+      sprintf(content,"Greetings From  %s", Stations.StationNUG[station].countryname);
+      lv_label_set_text(ui_Database_Town_Name, content);
+      lv_label_set_text(ui_Database_Progress, ""); // erase exchange currency and rate
+      sprintf(content, "GPS NS %2.4f - EW %3.4f", Stations.StationNUG[station].gps_ns, Stations.StationNUG[station].gps_ew);
+      lv_label_set_text(ui_Database_GPS_Position, content);
+      sprintf(content,"You Are In  %s", Stations.StationNUG[station].town);
+      lv_label_set_text(ui_Database_Output_File, content);
+
+
+      ShowWeatherData(false);
+    }
+    if(bPowerStatus == true)
+    { AddToQueueForGlobe(Stations.StationNUG[station].url, MESSAGE_START_THIS_STATION);
+    }
     lv_label_set_text(ui_Station_Name, Stations.StationNUG[station].name);
     lv_label_set_text(ui_Station_Title, "");
-        
   }
 }
 
@@ -972,28 +946,39 @@ void AppendBadStationToFile(fs::FS &fs, char* filename, char *url)
   { Serial.printf("Could not open Bad Station File %s for append\n", filename);
     badfile.close();
     badfile = fs.open(filename, FILE_WRITE);
-    badfile.println("append");  
+    badfile.printf("File %s created\n", filename);  
+    Serial.printf("File %s created\n", filename);  
     badfile.close();
     return;
   }
-  Serial.printf("Bad Station File %s opened for append, writeln %s\n", filename, url);
-//  badfile.seek(EOF);
+  Serial.printf("Station File %s appended with %s\n", filename, url);
   badfile.println(url);  
   badfile.close();
 }
 
-bool FindCountryNameByCode(char *countryname, char*code)
+bool FindCountryNameByCode(char *countryname, char*countrycode)
 { uint16_t n=0;
+  static char prevcountrycode[3] = "";
+  static char prevcountryname[50] = "";
+  
+  if(strcmp(prevcountrycode, countrycode)==NULL)
+  { strcpy(countryname, prevcountryname);
+    return true;
+  }
   while(n<(sizeof(CountryList) / sizeof(country_info)))
   { //Serial.printf("CountryList[%d].name = %s countrycode %s\n", n, CountryList[n].name, CountryList[n].code);
-    if(strncmp(code, CountryList[n].code, 2)==NULL)
-    { strcpy(countryname, CountryList[n].name);
+    if(strncmp(countrycode, CountryList[n].code, 2)==NULL)
+    { strncpy(prevcountrycode, CountryList[n].code, 2);
+      prevcountrycode[2]=0;
+      strncpy(prevcountryname, CountryList[n].name, 49);
+      prevcountryname[49]=0;
       //Serial.println(countryname);
+      strcpy(countryname, prevcountryname);
       return true;
     }
     n++;
   }
-  strcpy(countryname, CountryList[n-1].name);
+  strcpy(countryname, "");
   return false;
 }
 
@@ -1031,3 +1016,39 @@ Symbols : paste the above characters collections
 
 
 
+char * AllUpperCase(char *s)
+{ int i, slash_count = 0;
+  int len = strlen(s);
+
+  // replace all occurencies of '/' with " / "
+  // and make all characters uppercase 
+  // example "TZ - Asia/Calcutta" becomes -> "TZ - ASIA / CALCUTTA"
+
+  // Serial.println(s);
+  // count occurencies of '/'
+  for (i = 0; i < len; i++) 
+  { if (s[i] == '/')
+    slash_count++;
+  }
+
+  // new length
+  int new_len = len + slash_count * 2;
+  s[new_len--] = '\0';
+
+  // Serial.println(new_len);
+
+  // work backwards
+  for (i = len - 1; i >= 0; i--) 
+  { //Serial.printf("%d = '%c'\n", i, s[i]);
+    if (s[i] == '/') 
+    { s[new_len--] = ' ';
+      s[new_len--] = '/';
+      s[new_len--] = ' ';
+    } 
+    else 
+    { s[new_len--] = toupper(s[i]);
+    }
+  }
+  // Serial.println(s);
+  return s;
+}

@@ -8,6 +8,35 @@
 #include "database.h"
 #include "favorites.h"
 
+void playpreset(uint32_t station)
+{ if(station<0 || station>=MAX_FAVORITES)return;
+  if(strlen(Stations.StationNUG[station+MAX_STATIONS].url)>0) // only respond to loaded buttons
+  { Serial.printf("Favorites Select station %s under Preset %d\n", Stations.StationNUG[station+MAX_STATIONS].name, station);
+    AddStationToQueueForGlobe(station+MAX_STATIONS); // presets come just after the regular list of stations
+    lv_label_set_text(ui_Station_Name, Stations.StationNUG[station+MAX_STATIONS].name);
+    if(station==0)
+    { lv_label_set_text(ui_StationPresetName1, Stations.StationNUG[0+MAX_STATIONS].name); 
+      SetLed(station, UI_THEME_COLOR_RED);
+    }
+    if(station==1)
+    { lv_label_set_text(ui_StationPresetName2, Stations.StationNUG[1+MAX_STATIONS].name); 
+      SetLed(station, UI_THEME_COLOR_RED);
+    }
+    if(station==2)
+    { lv_label_set_text(ui_StationPresetName3, Stations.StationNUG[2+MAX_STATIONS].name); 
+      SetLed(station, UI_THEME_COLOR_RED);
+    }
+    if(station==3)
+    { lv_label_set_text(ui_StationPresetName4, Stations.StationNUG[3+MAX_STATIONS].name); 
+      SetLed(station, UI_THEME_COLOR_RED);
+    }
+    for(int16_t n=0; n<MAX_FAVORITES; n++)
+    { if(n!=station)SetLed(n, 0);
+    }          
+    beepforMs(50);
+  }  
+}
+
 void station1234(lv_event_t * e, uint16_t station)
 { static uint16_t longpressed;
   lv_event_code_t event_code = lv_event_get_code(e);
@@ -48,6 +77,7 @@ void station1234(lv_event_t * e, uint16_t station)
         }          
         Serial.printf("Favorites STORE station %s under Preset %d\n", Stations.StationNUG[station+MAX_STATIONS].name, station);
         SaveFavorites();
+        //SaveFavoritesToEEprom(); // makes display go funny
         beepforMs(1000);
       }
     }  
@@ -113,7 +143,7 @@ void SaveFavorites(void)
   SD_MMC.remove(favfilename); // delete old file
   favfile = SD_MMC.open(favfilename, FILE_WRITE);
   if(favfile)
-  { for(int16_t n = 0; n<MAX_FAVORITES; n++)
+  { for(int16_t n = 0; n<(MAX_FAVORITES+MAX_HOMES); n++)
     { if((p=strchr(Stations.StationNUG[n+MAX_STATIONS].name, '\n'))!=NULL)*p=0;
       if((p=strchr(Stations.StationNUG[n+MAX_STATIONS].url, '\n'))!=NULL)*p=0;
       if((p=strchr(Stations.StationNUG[n+MAX_STATIONS].name, '\r'))!=NULL)*p=0;
@@ -134,7 +164,19 @@ void SaveFavorites(void)
   }
   favfile.close();
   SD_MMC.end();
+
 }
+
+// just save the favorites to Eeprom
+void SaveFavoritesToEEprom(void)
+{ int16_t station;
+  for(station = 0; station<MAX_FAVORITES+MAX_HOMES; station++)
+  { memcpy(&DisplaySettings.stationnug[station], &Stations.StationNUG[MAX_STATIONS+station], sizeof(Stations.StationNUG[0]));
+  }
+  SaveDisplaySettingsToEeprom();
+  Serial.println("Finished saving favorites/presets to EEprom");
+}
+
 
 void LoadFavorites(void)
 { File favfile;
@@ -142,6 +184,17 @@ void LoadFavorites(void)
   char *p;
   char text[140];  
   int16_t favcount;
+
+  for(favcount=0; favcount<5; favcount++)
+  { strcpy(Stations.StationNUG[favcount+MAX_STATIONS].name, "");
+    strcpy(Stations.StationNUG[favcount+MAX_STATIONS].url, "");
+    strcpy(Stations.StationNUG[favcount+MAX_STATIONS].url, "");
+    Stations.StationNUG[favcount+MAX_STATIONS].gps_ns = 0; 
+    Stations.StationNUG[favcount+MAX_STATIONS].gps_ew = 0; 
+    strcpy(Stations.StationNUG[favcount+MAX_STATIONS].town, "");
+    strcpy(Stations.StationNUG[favcount+MAX_STATIONS].countrycode, "??");
+    strcpy(Stations.StationNUG[favcount+MAX_STATIONS].countryname, "");
+  }
 
   if (!SD_MMC.begin("/sdcard", true, false))return; // no card
 
@@ -161,9 +214,9 @@ void LoadFavorites(void)
         Stations.StationNUG[favcount+MAX_STATIONS].name[sizeof(Stations.StationNUG[0].name)-1]=0;
       }
 
-      //Serial.printf("Preset % d text = <%s>\n", favcount, text);
+      Serial.printf("Preset % d text = <%s>\n", favcount, text);
       
-      if(favcount>=0 && favcount<MAX_FAVORITES) // max 4 presets
+      if(favcount>=0 && favcount<MAX_FAVORITES+MAX_HOMES) // max 4 presets + 1 home location
       {
         if((p = strstr(text, "\"url\": ")) != NULL) 
         { p+=8; // jump forward to start of name
@@ -180,12 +233,14 @@ void LoadFavorites(void)
         if((p = strstr(text, "\"countrycode\": ")) != NULL) 
         { p+=16; // jump forward to start of name
           strncpy(Stations.StationNUG[favcount+MAX_STATIONS].countrycode, p, 2);
-          Stations.StationNUG[favcount+MAX_STATIONS].countrycode[3]=0;
+          Stations.StationNUG[favcount+MAX_STATIONS].countrycode[2]=0;
+          Serial.printf("Preset % d countrycode = <%s>\n", favcount, Stations.StationNUG[favcount+MAX_STATIONS].countrycode);
         }
         if((p = strstr(text, "\"countryname\": ")) != NULL) 
         { p+=16; // jump forward to start of name
           strncpy(Stations.StationNUG[favcount+MAX_STATIONS].countryname, p, 49);
           Stations.StationNUG[favcount+MAX_STATIONS].countryname[49]=0;
+          Serial.printf("Preset % d countryname = <%s>\n", favcount, Stations.StationNUG[favcount+MAX_STATIONS].countryname);
         }
       }
     }
@@ -206,7 +261,31 @@ void LoadFavorites(void)
   favfile.close();
   SD_MMC.end();
   Serial.println("Finished loading favorites/presets from SD");
+
+
 }
+
+
+void LoadFavoritesFromEEprom(void)
+{ int16_t station;
+
+  for(station = 0; station<MAX_FAVORITES+MAX_HOMES; station++)
+  { memcpy(&Stations.StationNUG[MAX_STATIONS+station], &DisplaySettings.stationnug[station], sizeof(Stations.StationNUG[0]));
+    if(station==0)lv_label_set_text(ui_StationPresetName1, DisplaySettings.stationnug[0].name); 
+    if(station==1)lv_label_set_text(ui_StationPresetName2, DisplaySettings.stationnug[1].name); 
+    if(station==2)lv_label_set_text(ui_StationPresetName3, DisplaySettings.stationnug[2].name); 
+    if(station==3)lv_label_set_text(ui_StationPresetName4, DisplaySettings.stationnug[3].name); 
+  }
+  // turn of preset leds
+  SetLed(1, 0);
+  SetLed(2, 0);
+  SetLed(3, 0);
+  SetLed(4, 0);
+  Lvgl_Loop();
+  Serial.println("Finished loading favorites/presets from EEprom");
+}
+
+
 
 
 
@@ -221,8 +300,7 @@ void SetLed(int16_t preset, int16_t themecolor)
   else return;
 
   if(themecolor == 0)
-  { lv_obj_clear_flag(led, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag(led, LV_OBJ_FLAG_HIDDEN);
+  { lv_obj_add_flag(led, LV_OBJ_FLAG_HIDDEN);
     return;
   }
   lv_obj_clear_flag(led, LV_OBJ_FLAG_HIDDEN);
@@ -241,6 +319,74 @@ void SetLed(int16_t preset, int16_t themecolor)
 
 }
 
+
+void LoadApiKeys(void)
+{ File favfile;
+  char favfilename[] = {"/api-keys.txt"};
+  char *p;
+  char text[140];  
+  char googlekey[64];  
+  char weatherkey[64];  
+
+  // default keys are stored in secret.h
+  // as defined in ..\secrets.h
+  // char google_api_key[] = "YOUR-API-KEY"; // free, get your own at google developer platform, used for timezone retrieval
+  // char open_weather_map_api_key[] = "YOUR-API-KEY"; // free, get your own at https://openweathermap.org/api
+
+  strcpy(googlekey, google_api_key);
+  strcpy(weatherkey, open_weather_map_api_key);
+
+  if (SD_MMC.begin("/sdcard", true, false))
+  {  // file content is like this:
+     // char google_api_key[] = "YOURAPIKEY";
+     // char open_weather_map_api_key[] = "YOURAPIKEY";
+
+     favfile = SD_MMC.open(favfilename, FILE_READ);
+     if(favfile)
+     { while(favfile.available()) 
+       { String data = favfile.readStringUntil('\n');
+         strcpy(text, data.c_str());
+         if((p=strchr(text, '\n'))!=NULL)*p=0;
+         if((p=strchr(text, '\r'))!=NULL)*p=0;
+
+         Serial.printf("Read from api-keys.txt = %s\n", text);
+      
+         if((p = strstr(text, "google_api_key")) != NULL) 
+         { if((p = strstr(text, "\"")) != NULL) 
+           { p++;
+             strcpy(googlekey, p);
+             if((p = strstr(googlekey, "\"")) != NULL)*p=0; 
+             Serial.printf("googlekey read = %s\n", googlekey);
+           }  
+         }
+         if((p = strstr(text, "open_weather_map_api_key")) != NULL) 
+         { if((p = strstr(text, "\"")) != NULL) 
+           { p++;
+             strcpy(weatherkey, p);
+             if((p = strstr(weatherkey, "\"")) != NULL)*p=0; 
+             Serial.printf("weatherkey read = %s\n", weatherkey);
+           }  
+         }
+       }
+     }
+     favfile.close();
+     SD_MMC.end();
+  }
+
+  // local keys now filled with defaults from ..\secrets.h or fetched from api-keys.txt
+  if(strcmp(DisplaySettings.google_api_key, googlekey) != NULL)
+  { strcpy(DisplaySettings.google_api_key, googlekey);
+    SaveDisplaySettingsToEeprom();
+  }
+  if(strcmp(DisplaySettings.open_weather_map_api_key, weatherkey) != NULL)
+  { strcpy(DisplaySettings.open_weather_map_api_key, weatherkey);
+    SaveDisplaySettingsToEeprom();
+  }
+
+  Serial.printf("Currently stored in eeprom google_api_key  = %s\n", DisplaySettings.google_api_key);
+  Serial.printf("Currently stored in eeprom open_weather_map_api_key  = %s\n", DisplaySettings.open_weather_map_api_key);
+  Serial.println("Finished loading api-keysfrom SD");
+}
 
 
 

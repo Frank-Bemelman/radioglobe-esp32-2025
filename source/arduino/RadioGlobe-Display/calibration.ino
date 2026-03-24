@@ -34,8 +34,9 @@ bool CalibrationSpinLock;
 
 // SET AS ZERO BUTTON
 void CalibrationSetAsZero(lv_event_t * e)
-{ if(isLongPressed(e)==5)
+{ if(isLongPressed(e)==25) // extra super long press needed for this one
   { beepforMs(1000);
+    AddToQueueForGlobe("1234", MESSAGE_CALIBRATE_ZERO);
   }
 }
 
@@ -241,7 +242,7 @@ void RollerNSorEWChanged(lv_event_t * e)
 }
 
 
-// called upon receiving new position from globe
+// called upon receiving new raw &uncalibrated coordinates from globe
 void remap_ns_ew(int16_t from_globe_ns, int16_t from_globe_ew)
 { // remap coordinates
   // find the 'square' where we are in
@@ -250,6 +251,8 @@ void remap_ns_ew(int16_t from_globe_ns, int16_t from_globe_ew)
   int32_t square_area;
   int32_t coord_area;
   int16_t scenario = 1234;
+  int16_t roller_ns;
+  int16_t roller_ew;
   
   static uint32_t lapMillis;
   static uint32_t currentMillis;
@@ -274,27 +277,28 @@ void remap_ns_ew(int16_t from_globe_ns, int16_t from_globe_ew)
   if(square_ew>=24)square_ew%=24; // watch out for the pitfall at E180W
   if(square_ns ==6)square_ns++; // skip 6
 
-  // first snap calibration rollers to nearest lat/long lines on the globe
-  if(from_globe_ns>0) // north pole is not to be calibrated, all others are
-  { // sync NS and EW rollers used in the advance calibration menu
-    // snap to nearest NS latitude
-    lv_roller_set_selected(uic_RollerNS, ((-from_globe_ns + 900+75) / 150)-1, LV_ANIM_ON); // minus 1 because NS roller starts at N75
+  // also snap calibration rollers to nearest lat/long lines on the globe
+  roller_ns = ((-from_globe_ns + 900+75) / 150);
+  if(from_globe_ns>0)roller_ns--; // minus 1 because around equator two calibration points N-0 and S-0 for globes with serious misaligned halves
+  roller_ew = ((from_globe_ew + 1800+75) / 150);
+  //Serial.printf("roller_ns =%d roller_ew =%d\n", roller_ns, roller_ew);
 
-    // snap to nearest EW longitude
-    // when coming from E165 towards E180W the snapped square is 24 which is ok because the roller has E180 and W180 positions
-    // therefore, we don't need to mod EW with %24
-    lv_roller_set_selected(uic_RollerEW, ((from_globe_ew + 1800+75) / 150), LV_ANIM_ON);
+  if(roller_ns>=0) // north pole is not to be calibrated, all others are
+  { // sync NS and EW rollers used in the calibration menus
+    lv_roller_set_selected(uic_RollerNS, roller_ns, LV_ANIM_ON); 
+    lv_roller_set_selected(uic_RollerEW, roller_ew, LV_ANIM_ON); 
     Lvgl_Loop();
     lv_event_t * e;
     RollerNSorEWChanged(e); 
   }
-  else
-  { lv_roller_set_selected(uic_RollerNS, ((-from_globe_ns + 900+75) / 150)-1, LV_ANIM_ON); // not minus 1 because NS roller two values around equator
-    lv_roller_set_selected(uic_RollerEW, ((from_globe_ew + 1800+75) / 150), LV_ANIM_ON);
-    Lvgl_Loop();
-    CalibrationSpinLock = true; // keep the button locked
+  else // north pole is not a calibration point
+  { lv_roller_set_selected(uic_RollerNS, 0, LV_ANIM_ON); // set roller maximum north
     lv_obj_add_state(uic_CalibrationPointText, LV_STATE_DISABLED);
+    CalibrationSpinLock = true; // keep the button locked
     lv_label_set_text(ui_SpinLock, "- North Pole Is Fixed -"); 
+    Lvgl_Loop();
+    lv_event_t * e;
+    RollerNSorEWChanged(e); 
   }
 
   Serial.printf("\nMAPPING STARTED square_ns=%d square_ew=%d globe_ns=%d globe_ew=%d\n", square_ns, square_ew, from_globe_ns, from_globe_ew);
@@ -379,16 +383,15 @@ void remap_ns_ew(int16_t from_globe_ns, int16_t from_globe_ew)
 
 
   // time to remap
-  // map the coordinate with a span of 150 in both directions to the actual square we landed in
-
-  // adjust the perfect but raw position to the actual warped/skewed square we are in
+  // map the raw coordinate inside a square of 150x150 to the actual square we landed in
+  // adjust the raw position to the actual warped/skewed square we are in to get coordinates that match the actual globe
   int16_t mapped_ns;
   int16_t mapped_ew;
   remap_by_square_number(square_ns, square_ew, from_globe_ns, from_globe_ew, &mapped_ns, &mapped_ew);
   DataFromDisplay.ns_cal = remapped_ns;
   DataFromDisplay.ew_cal = remapped_ew;
 
-  Serial.printf("MAPPING FINISHED -> time elapsed = %ld\n", (currentMillis = millis()) - lapMillis);
+  Serial.printf("MAPPING FINISHED -> time elapsed = %ldmS\n", (currentMillis = millis()) - lapMillis);
 
 }
 
