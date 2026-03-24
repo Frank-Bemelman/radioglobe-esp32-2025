@@ -1,5 +1,8 @@
 #pragma once
 
+#define MAX_STATIONS 50
+#define MAX_FAVORITES 4
+
 #define QUEUESIZE 50
 #define QUEUEMESSAGELENGTH 128
 typedef struct {               
@@ -8,7 +11,7 @@ typedef struct {
   uint16_t QueueIndexIn;
   uint16_t QueueIndexOut;
   uint16_t QueueCnt;
-} QueueOut;
+} Queue;
 
 const char * messagetexts[] = {
    { "UNSUPPORTED MESSAGE"},
@@ -18,12 +21,12 @@ const char * messagetexts[] = {
    { "GENRE 4"},
    { "STATION_NAME 5"},
    { "DESCRIPTION 6"},
-   { "GET_GOOGLE_API_KEY 7"},
+   { "OPEN_WEATHER_MAP_API_KEY 7"},
    { "GOOGLE_API_KEY 8"},
    { "TIMEZONE_ID 9"},
    { "TIMEZONE_NAME 10"},
-   { "GET_WIFI_CREDENTIALS 11"},
-   { "---------- 12"},
+   { "THIS_IS_HOME 11"},
+   { "EX_CHANGE_RATE 12"},
    { "SSID_FOR_GLOBE 13"},
    { "PASSWORD_FOR_GLOBE 14"},
    { "WIFI_STATUS 15"},
@@ -48,11 +51,27 @@ const char * messagetexts[] = {
    { "DISPLAY_WANTS_VOLUME_AND_TONE 34"},
    { "STORE_VOLUME_AND_TONE 35"},
    { "AUDIO_EOF_STREAM 36"},
-   { "---------- 37"},
-   { "---------- 38"},
-   { "---------- 39"},
+   { "STATION_CONNECTED_IN_MS 37"},
+   { "INTERNAL_SPEAKER_TOGGLE 38"},
+   { "GET_WEATHER_DATA_BY_GPS 39"},
    { "GET_GEOLOCATION_BY_GPS 40"},
-   { "CONNECTTOHOST_FAILURE 41"}
+   { "CONNECTTOHOST_FAILURE 41"},
+   { "STATION_WEATHER_DATA 42"},
+   { "INTERNAL_SPEAKER_ON 43"},
+   { "INTERNAL_SPEAKER_OFF 44"},
+   { "GLOBE_BUILD_DATE_TIME 45"},
+   { "RADIO PRESET 46"},
+   { "WEATHER_API_KEY 47"},
+   { "MQTT_STATUS 48"},
+   { "DISPLAY_SERIALNUMBER 49"},
+   { "MESSAGE_DISPLAY_BT_SWITCHABLE_STATE 50"},
+   { "OPEN PORTAL 51"},
+   { "GLOBE CLOSED PORTAL 52"},
+   { "PUCK_ESP_NOW_INIT 53"},
+   { "SET_PUCK_WIFI_CHANNEL 54"},
+   { "GLOBE_HAS_SD 55"},
+   { "MESSAGE_MAX 56"}
+ 
  };
 
 
@@ -62,14 +81,14 @@ const char * messagetexts[] = {
 #define MESSAGE_GENRE 4
 #define MESSAGE_STATION_NAME 5
 #define MESSAGE_DESCRIPTION 6
-#define MESSAGE_GET_GOOGLE_API_KEY 7
+#define MESSAGE_OPEN_WEATHER_MAP_API_KEY 7
 #define MESSAGE_GOOGLE_API_KEY 8
 #define MESSAGE_TIMEZONE_ID 9
 #define MESSAGE_TIMEZONE_NAME 10
-#define MESSAGE_GET_WIFI_CREDENTIALS 11
-///
-#define MESSAGE_SSID_FOR_GLOBE 13
-#define MESSAGE_PASSWORD_FOR_GLOBE 14
+#define MESSAGE_THIS_IS_HOME 11
+#define MESSAGE_EX_CHANGE_RATE 12
+#define MESSAGE_13 13
+#define MESSAGE_14 14
 #define MESSAGE_NO_WIFI 15
 #define MESSAGE_CALIBRATE_ZERO 16
 #define MESSAGE_FINDNEWSTATION 17
@@ -95,11 +114,28 @@ const char * messagetexts[] = {
 #define MESSAGE_DISPLAY_WANTS_VOLUME_AND_TONE 34
 #define MESSAGE_STORE_VOLUME_AND_TONE 35
 #define MESSAGE_AUDIO_EOF_STREAM 36
-///
-////
-///
+#define MESSAGE_STATION_CONNECTED_IN_MS 37
+#define MESSAGE_INTERNAL_SPEAKER_TOGGLE 38
+#define MESSAGE_GET_WEATHER_DATA_BY_GPS 39
 #define MESSAGE_GET_GEOLOCATION_BY_GPS 40
 #define MESSAGE_CONNECTTOHOST_FAILURE 41
+
+#define MESSAGE_STATION_WEATHER_DATA 42
+#define MESSAGE_INTERNAL_SPEAKER_ON 43
+#define MESSAGE_INTERNAL_SPEAKER_OFF 44
+#define MESSAGE_GLOBE_BUILD_DATE_TIME 45
+#define MESSAGE_STATION_PRESET 46
+#define MESSAGE_WEATHER_API_KEY 47
+#define MESSAGE_MQTT_STATUS 48
+#define MESSAGE_DISPLAY_SERIALNUMBER 49
+#define MESSAGE_DISPLAY_BT_SWITCHABLE_STATE 50
+#define MESSAGE_OPEN_PORTAL 51
+#define MESSAGE_GLOBE_CLOSED_PORTAL 52
+#define MESSAGE_PUCK_ESP_NOW_INIT 53
+#define MESSAGE_SET_PUCK_WIFI_CHANNEL 54
+#define MESSAGE_GLOBE_HAS_SD 55
+
+#define MESSAGE_MAX 56
 
 #define MESSAGE_URL_HTTP_400_BAD_REQUEST 400
 #define MESSAGE_URL_HTTP_403_REFUSED 403
@@ -123,6 +159,10 @@ typedef struct struct_message1 {
     uint16_t G_QueueSerialNumber; // echo back to globe confirm reception
     float    D_StationGpsNS; // used by globe to get timezone
     float    D_StationGpsEW; // used by globe to get timezone
+    uint16_t internalspeakeron; // speakers on or off
+    uint16_t D_BatteryVoltage;
+    uint16_t btmodule_power_on; // bluetooth on or off
+    
 } struct_from_display;
 
 typedef struct struct_message2 {
@@ -139,9 +179,12 @@ typedef struct struct_message2 {
     char     G_QueueMessage[QUEUEMESSAGELENGTH];
     uint16_t D_QueueSerialNumber; // echo back to display confirm reception
     uint16_t D_QueueMessageType;
+    uint16_t D_QueueMessageCount; // number of message in queue
     uint16_t G_QueueBytesStreamed; // can be used to monitor actual streaming of data
     uint32_t G_QueueStreamIdleMs; // copier idle time
+    uint16_t G_Volume;
     bool     G_EncoderReliable;
+    int16_t  G_rssi_globe;
 
 
 } struct_from_globe;
@@ -156,6 +199,9 @@ struct_from_globe DataFromGlobe;
 // Declare two structures named DataFromDisplay for storing/comparing
 struct_from_display DataFromDisplay;
 struct_from_display PrevDataFromDisplay;
+
+Queue ToDisplay; // queue with messages for display
+Queue FromDisplay; // queue with messages from display
 
 
 int16_t CalibrateZeroPos = 0;

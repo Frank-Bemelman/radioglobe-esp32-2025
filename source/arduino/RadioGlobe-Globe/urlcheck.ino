@@ -66,7 +66,7 @@ void CheckUrl(void * pvParameters)
        Serial.println("MFree Heap Check() finished1 " + String(ESP.getFreeHeap()));   
        DataFromGlobe.Unraveling = 0;
     }
-    vTaskDelay(200 / portTICK_PERIOD_MS); // lowered to 100, was 200
+    vTaskDelay(200 / portTICK_PERIOD_MS); 
   }  
 }
 
