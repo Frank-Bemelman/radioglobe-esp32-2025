@@ -3,6 +3,7 @@
 # radioglobe-esp32-2025
 Radio Globe using ESP32 and Waveshare round touch LCD 2.1 inch
 
+UPDATE 24-MRT-2026 - Added lots of features, worldmap, clock, weather status, currency exchange
 UPDATE 15-JULY-2025 Lots of improvements made. Most stations now play without issues. Happy with the result.<br> 
 UPDATE 6-JULY-2025 It actually works! Performance is improved, few bugs, some extras. <br>
 UPDATE 1-JULY-2025 It actually works! Performance is perhaps not perfect but certainly acceptable.
@@ -29,14 +30,14 @@ remapped coordinates, it sends a radiostation url. The urls are stored on a micr
 There are two directories with source files. One for the globe and one for the display. It is all based on Arduino IDE 2.3.6 
 
 Essential hardware for the globe:<br/>
-ESP32-WROOM-32 -> https://www.aliexpress.com/item/1005006456519790.html<br/>
+ESP32S3-N16R8 
 MP3 decoder -> https://www.aliexpress.com/item/32893187079.html<br/>
-2x absolute encoder -> https://www.aliexpress.com/item/1005007718766639.html<br/>
+2x magnetic encoder AS5600
 <br/>
 Essential hardware for the display:<br/>
 ESP32S3 Waveshare 2.1 inch LCD -> https://www.aliexpress.com/item/1005008679530480.html<br/>
 Lithium battery -> https://www.aliexpress.com/item/1005008575678945.html<br/>
-2x Magnets 10mmx2mm -> https://www.aliexpress.com/item/1005008882136145.html<br/>
+2x Magnets 10mmx2mm
 Pogo 3 pin connector -> https://www.aliexpress.com/item/1005007457425590.html<br/> 
 MicroSD card -> I used a 32GB one<br/>
 
