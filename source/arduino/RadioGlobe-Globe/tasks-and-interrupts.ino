@@ -27,14 +27,14 @@ void setup_tasks(void)
                     1,           /* priority of the task */
                     NULL,      /* Task handle to keep track of created task */
                     1);          /* pin task to core 0 */      
-  //xTaskCreatePinnedToCore(
-  //                  TaskTouch,   /* Task function. */
-  //                  "TaskTouch",     /* name of task. */
-  //                  5000,       /* Stack size of task */
-  //                  NULL,        /* parameter of the task */
-  //                 2,           /* priority of the task */
-  //                  NULL,      /* Task handle to keep track of created task */
-  //                  1);          /* pin task to core 0 */      
+  xTaskCreatePinnedToCore(
+                    TaskTouch,   /* Task function. */
+                    "TaskTouch",     /* name of task. */
+                    5000,       /* Stack size of task */
+                    NULL,        /* parameter of the task */
+                   2,           /* priority of the task */
+                    NULL,      /* Task handle to keep track of created task */
+                    1);          /* pin task to core 0 */      
 
 
 }
