@@ -343,6 +343,8 @@ void SetFlag(char *countrycode)
   { lowercasecode[i] = tolower(lowercasecode[i]);
   }
   if(strcmp(countrycode, "??")==NULL)strcpy(lowercasecode, "xxxx");
+  if(strcmp(countrycode, "XX")==NULL)strcpy(lowercasecode, "xx-sea");
+  
   
   sprintf(path, "/flags-bin/%s.bin", lowercasecode );
   Serial.printf("Setflag with %s\n", path);

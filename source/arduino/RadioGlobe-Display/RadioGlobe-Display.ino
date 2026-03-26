@@ -439,6 +439,9 @@ void loop()
            if(digit>3)digit=3;
            AddStationToQueueForGlobe(digit+MAX_STATIONS); // presets come just after the regular list of stations
          }
+         else if(receivedMessage[0]=='Q')
+         { AddToQueueForGlobe("", MESSAGE_GLOBE_PLAY_SD);
+         }
 
          receivedMessage = "";
        }
@@ -554,34 +557,33 @@ void loop()
            break;
 
          case MESSAGE_FINDNEWSTATION:
-           //if(bPowerStatus == true)
-           { if((screen != ui_CalibrationScreen) && (screen != ui_CalibrationScreenAdvanced))
-             { // if in tone controle screen or preset screen, jump back to home screen
-               if((screen != ui_DatabaseScreen) || (bInfoScreen==true))
-               { if(screen==ui_Power) // clock screen
-                 { Serial.printf("Clock screen, find new station for flag and time update \n");
-                   ClockHomeTime = false;
-                   FindNewStation();
-                   ReloadScroll();
-                 }
-                 else if(bPowerStatus == true)
-                 { lv_scr_load(ui_Home);
-                   // hide all info stuff until new station is requested after search
-                   lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide flag 
-                   lv_obj_add_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // hide city name 
-                   lv_obj_add_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide country name 
-                   lv_obj_add_flag(uic_Clock_Country, LV_OBJ_FLAG_HIDDEN); // hide country name 
-                   ShowWeatherData(false); // hide weather info
-                   lv_label_set_text(ui_Station_Name, "Searching...");
-                   lv_label_set_text(ui_Station_Title, "");
-                   Lvgl_Loop();  
-                   FindNewStation();
-                   ReloadScroll();
-                 }
-               }  
-               
-             }
-           }  
+           Stations.requested = 0;
+           SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0); // turn off preset leds
+           if((screen != ui_CalibrationScreen) && (screen != ui_CalibrationScreenAdvanced))
+           { // if in tone controle screen or preset screen, jump back to home screen
+             if((screen != ui_DatabaseScreen) || (bInfoScreen==true))
+             { if(screen==ui_Power) // clock screen
+               { Serial.printf("Clock screen, find new station for flag and time update \n");
+                 ClockHomeTime = false;
+                 FindNewStation();
+                 ReloadScroll();
+               }
+               else if(bPowerStatus == true)
+               { lv_scr_load(ui_Home);
+                 // hide all info stuff until new station is requested after search
+                 lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide flag 
+                 lv_obj_add_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // hide city name 
+                 lv_obj_add_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide country name 
+                 lv_obj_add_flag(uic_Clock_Country, LV_OBJ_FLAG_HIDDEN); // hide country name 
+                 ShowWeatherData(false); // hide weather info
+                 lv_label_set_text(ui_Station_Name, "Searching...");
+                 lv_label_set_text(ui_Station_Title, "");
+                 Lvgl_Loop();  
+                 FindNewStation();
+                 ReloadScroll();
+               }
+             }  
+           }
            break;
          case MESSAGE_GLOBE_MAC:
            // check if different from what we have
@@ -698,7 +700,7 @@ void loop()
              Stations.playing = Stations.requested;
              lv_label_set_text(ui_StationRollerComment, content); 
 
-             if(Stations.requested<MAX_STATIONS)
+             if(Stations.requested<MAX_STATIONS) // not a preset but from the list of available stations
              { if(Stations.connect_attempts>0)Stations.connect_attempts--;
                Serial.printf("(GLOBE SAYS): Station Playing %s\n", Stations.StationNUG[Stations.requested].name);
                SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
@@ -969,6 +971,8 @@ void loop()
            { DisplaySettings.wifichannel = new_channel;
              SaveDisplaySettingsToEeprom();
              Serial.println("New Wifi Channel saved to EEprom..");
+             // reset puck
+             ESP.restart();
            }
            break;
 
@@ -978,8 +982,43 @@ void loop()
 
            if(DisplaySettings.sdcard_present==1)lv_obj_clear_flag(uic_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
            else lv_obj_add_flag(uic_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
+           break;
 
 
+         case MESSAGE_GET_GEOLOCATION:
+           strcpy(town, "");
+           strcpy(countrycode, "");
+           if((p1=strchr(QueueMessage, ','))!= NULL)strcpy(town, p1+1);
+           if(isalpha(QueueMessage[0]))
+           { countrycode[0] = QueueMessage[0];
+             if(isalpha(QueueMessage[1]))
+             { countrycode[1] = QueueMessage[1];
+               countrycode[2] = 0;
+             }
+             else countrycode[0] = 0;
+           }
+           Serial.printf("Countrycode = %s and town = %s\n", countrycode, town);
+
+           if(strlen(countrycode)==2)
+           { if(FindCountryNameByCode(Stations.StationNUG[Stations.requested].countryname, countrycode))
+             { SetFlag(countrycode);
+               lv_event_send(ui_Home_Flag, LV_EVENT_REFRESH, NULL);
+               lv_obj_clear_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // show flag 
+               lv_label_set_text(uic_Home_Country, AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
+               lv_obj_clear_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
+               lv_label_set_text(uic_Clock_Country, AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
+               lv_obj_clear_flag(uic_Clock_Country, LV_OBJ_FLAG_HIDDEN); // unhide country name 
+               sprintf(content, "%s  -  %s", town, AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
+               lv_label_set_text(uic_StationRollerPlace, content);
+               AddToQueueForGlobe(countrycode, MESSAGE_EX_CHANGE_RATE);
+             }
+             else
+             { sprintf(content, "Countrycode %s Not In List", QueueMessage);
+               lv_label_set_text(uic_Home_Country, content);
+               sprintf(content, "%s", Stations.StationNUG[Stations.requested].town);
+               lv_label_set_text(uic_StationRollerPlace, content);
+             }
+           }  
            break;
 
          default:

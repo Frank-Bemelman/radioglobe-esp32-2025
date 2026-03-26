@@ -56,6 +56,7 @@ bool setup_esp_now(void)
   FromGlobe.QueueIndexOut = 0;
   FromGlobe.QueueCnt = 0;
 
+  btStop(); // BT off, as recommended by Cellie
   WiFi.persistent(false);
   WiFi.disconnect();
   WiFi.mode(WIFI_OFF);

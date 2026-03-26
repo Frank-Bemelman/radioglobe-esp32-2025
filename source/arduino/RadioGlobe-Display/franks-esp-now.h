@@ -69,7 +69,8 @@ const char * messagetexts[] = {
    { "SET_PUCK_WIFI_CHANNEL 54"},
    { "GLOBE_HAS_SD 55"},
    { "GLOBE_PLAY_SD 56"},
-   { "MESSAGE_MAX 57"}
+   { "GET_GEOLOCATION 57"},
+   { "MESSAGE_MAX 58"}
 };
 
 #define MESSAGE_SONG_TITLE 1
@@ -140,7 +141,8 @@ const char * messagetexts[] = {
 #define MESSAGE_SET_PUCK_WIFI_CHANNEL 54
 #define MESSAGE_GLOBE_HAS_SD 55
 #define MESSAGE_GLOBE_PLAY_SD 56
-#define MESSAGE_MAX 57
+#define MESSAGE_GET_GEOLOCATION 57
+#define MESSAGE_MAX 58
 
 typedef struct struct_message1 {
     int16_t  ns_cal;

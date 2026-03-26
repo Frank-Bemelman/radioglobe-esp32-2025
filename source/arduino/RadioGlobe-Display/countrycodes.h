@@ -225,7 +225,7 @@ country_info CountryList[] =
  { "RE", "Reunion", "", "", 0 },
  { "RO", "Romania", "", "", 0 },
  { "RS", "Serbia", "", "", 0 },
- { "RU", "Russian Federation", "", "", 0 },
+ { "RU", "Russia", "", "", 0 },
  { "RW", "Rwanda", "", "", 0 },
 
  { "SA", "Saudi Arabia", "", "", 0 },
@@ -293,7 +293,7 @@ country_info CountryList[] =
  { "ZW", "Zimbabwe", "", "", 0 },
 
  { "XK", "Kosovo", "", "", 0},
- { "XX", "XX-???", "", "", 0}
+ { "XX", "At Sea", "", "", 0}
 };
 
 

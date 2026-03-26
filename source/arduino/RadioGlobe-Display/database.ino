@@ -503,9 +503,10 @@ void FindNewStation(void)
       
     // normally, timezone is requested for the station that is requested
     // if no stations are found, set the timezone according to the coordinates from the globe
+    Stations.requested = 0; 
     sprintf(content, "%d-%d", DataFromDisplay.ns_cal, DataFromDisplay.ew_cal);
     AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE);
-    AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION_BY_GPS); // not tested yet
+    AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION); // not tested yet
   }
 
   
