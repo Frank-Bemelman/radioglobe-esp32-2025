@@ -1555,12 +1555,11 @@ void Speakers(uint8_t on)
   if(prev_on!=on)
   { prev_on=on;
     if(on)
-    { SpeakerOffAfter25mS = 12; // turn of after 8 x 25 -> 200mS delay
-      Serial.print("Speakers OFF\n");
+    { SpeakerOffAfter25mS = 400; // turn of after 100 x 25 -> 2500mS delay
     }
     else 
     { SpeakerOffAfter25mS = 0;
-      Serial.print("Speakers ON\n");
+      Serial.println("Speakers ON");
       digitalWrite(MUTE_AMPLIFIERS, 0); // turn on immediately
     }
   }  

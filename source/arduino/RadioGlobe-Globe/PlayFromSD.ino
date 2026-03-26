@@ -194,8 +194,9 @@ void PlaySomethingFromSD(void)
 
   Serial.printf("%s/%s\n", StartPathSD, Playlist[0]);
   sprintf(filepath, "%s/%s", StartPathSD, Playlist[0]);
-  stream.connecttofile(SD, filepath); // play it
 
+  Speakers(SPEAKERS_ON);
+  stream.connecttofile(SD, filepath); // play it
   Serial.printf("Done\n");
 
 }

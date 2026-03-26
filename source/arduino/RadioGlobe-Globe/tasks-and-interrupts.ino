@@ -259,6 +259,7 @@ void TaskTouch(void * pvParameters)
     { SpeakerOffAfter25mS--;
       if(SpeakerOffAfter25mS == 0)
       { digitalWrite(MUTE_AMPLIFIERS, 1);
+        Serial.println("Speakers Timeout OFF");
       }
     }
 
