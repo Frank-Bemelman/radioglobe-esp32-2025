@@ -70,7 +70,10 @@ const char * messagetexts[] = {
    { "PUCK_ESP_NOW_INIT 53"},
    { "SET_PUCK_WIFI_CHANNEL 54"},
    { "GLOBE_HAS_SD 55"},
-   { "MESSAGE_MAX 56"}
+   { "GLOBE_PLAY_SD 56"},
+   { "GET_GEOLOCATION 57"},
+   { "GET_WEATHER_DATA 58"},
+   { "MESSAGE_MAX 58"}
  
  };
 
@@ -134,8 +137,11 @@ const char * messagetexts[] = {
 #define MESSAGE_PUCK_ESP_NOW_INIT 53
 #define MESSAGE_SET_PUCK_WIFI_CHANNEL 54
 #define MESSAGE_GLOBE_HAS_SD 55
+#define MESSAGE_GLOBE_PLAY_SD 56
+#define MESSAGE_GET_GEOLOCATION 57
+#define MESSAGE_GET_WEATHER_DATA 58
 
-#define MESSAGE_MAX 56
+#define MESSAGE_MAX 59
 
 #define MESSAGE_URL_HTTP_400_BAD_REQUEST 400
 #define MESSAGE_URL_HTTP_403_REFUSED 403

@@ -205,6 +205,9 @@ void PixelUpdate(uint16_t mode, uint32_t color1, uint32_t color2, uint16_t msek)
 
 char HostName[32];
 
+#define MAX(a,b) (((a) > (b)) ? (a) : (b))
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+
 void readMacAddress()
 { esp_err_t ret = esp_wifi_get_mac(WIFI_IF_STA, GlobeMac);
   // my test board is b4:3a:45:a5:03:10
@@ -278,12 +281,11 @@ void setup()
 
   InitializeGlobeSettings(); // at first run, initialize with some reasonable values
 
+  // start SD card
   hspi = new SPIClass (HSPI);
   hspi->begin(SD_CLK, SD_MISO, SD_MOSI, SD_CS);
-  // start SD card
   if(CheckSD())GlobeSettings.sdcard_present = 1;
   else GlobeSettings.sdcard_present = 0;
-
 
   if(CheckIfBTSwitchable())GlobeSettings.btmodule_switchable = 1;
   else GlobeSettings.btmodule_switchable = 0;
@@ -363,6 +365,7 @@ void setup()
   WiFi.setHostname(HostName);
 
   WiFi.begin(GlobeSettings.ssid, GlobeSettings.password); 
+  btStop(); // as recommended by Cellie
   WiFi.setSleep(false); // as recommended by Cellie
   Serial.print("Connecting to WiFi");
   delay(1000);
@@ -804,6 +807,11 @@ void loop()
         checkButton(true); // force open portal
         break;
 
+      // let's play from SD card now
+      case MESSAGE_GLOBE_PLAY_SD:
+        StartPlayFromSD();
+        break;
+
       default:
         Serial.printf("Unsupported message type %d from display: >%s<\n", QueueMessageType, QueueMessage);  
         AddToQueueForDisplay("Unsupported", MESSAGE_MAX); 
@@ -967,6 +975,9 @@ bool StartNewStation(void)
 //  strcpy(UnraveledUrl, "https://stream.zeno.fm/2ee8m52mb"); 
 //  strcpy(UnraveledUrl, "https://stream.zeno.fm/8pbaase2w2quv");
 //  strcpy(UnraveledUrl, "http://178.19.58.119:1818/;"); // mime ="" ???? but plays when just assume MP3
+// this one crashes the globe and keeps crashing/rebooting 
+// "name": "Onda Cabanillas",
+// "url": "http://212.83.151.18:8076/stream"
 
 
   Serial.printf("Now connect: %s\n", UnraveledUrl);
@@ -1555,20 +1566,6 @@ void Speakers(uint8_t on)
   }  
 }
 
-bool CheckSD(void)
-{ if (!SD.begin(SD_CS, *hspi, 80000000)) // 40000000 works and so does 80000000
-  { Serial.println("[ERROR] No SD card present");
-    return false;
-  } 
-  else 
-  {
-    Serial.println("[INFO] SD card present");
-    Serial.print("[INFO] Capacity SD: ");
-    Serial.print(SD.cardSize() / (1024 * 1024));
-    Serial.println("MB");
-    return true;
-  }
-}
 
 
 // EOF

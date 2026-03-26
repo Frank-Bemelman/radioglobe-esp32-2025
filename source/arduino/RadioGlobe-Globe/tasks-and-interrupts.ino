@@ -50,10 +50,20 @@ void CallGetTimeZone(void * pvParameters)
     { GetTimeZone(D_StationGpsNS, D_StationGpsEW);
       DataFromGlobe.FindTimeZone = 0;
     }
+
+    else if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_GEOLOCATION)
+    { GetGeolocationData(ns_cal_received/10, ew_cal_received/10);
+      DataFromGlobe.FindGeoLocationData = MESSAGE_GET_WEATHER_DATA; // also find weather data after this TODO -> by ns_cal_receved etc
+    }
+    else if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_WEATHER_DATA)
+    { GetOpenWeatherData(ns_cal_received/10, ew_cal_received/10);
+      DataFromGlobe.FindGeoLocationData = 0;
+    }
+
+
     else if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_GEOLOCATION_BY_GPS)
     { GetGeolocationData(D_GeoLocationGpsNS, D_GeoLocationGpsEW);
-      DataFromGlobe.FindGeoLocationData = 0;
-      DataFromGlobe.FindGeoLocationData = MESSAGE_GET_WEATHER_DATA_BY_GPS;
+      DataFromGlobe.FindGeoLocationData = MESSAGE_GET_WEATHER_DATA_BY_GPS; // also find weather data after this
     }
     else if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_WEATHER_DATA_BY_GPS)
     { GetOpenWeatherData(D_GeoLocationGpsNS, D_GeoLocationGpsEW);

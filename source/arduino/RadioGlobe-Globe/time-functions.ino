@@ -126,7 +126,16 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW)
   // https://maps.googleapis.com/maps/api/geocode/json?latlng=42.464699,21.466900&key=YOUR-API-KEY-FROM-GOOGLE
   // https://maps.googleapis.com/maps/api/geocode/json?latlng=19.286900,-81.367401&key=YOUR-API-KEY-FROM-GOOGLE
 
+
   sprintf(api_url, "%s%.6f%%2C%.6f&key=%s", gps_to_geocoding, StationGpsNS, StationGpsEW, GlobeSettings.google_api_key);
+
+  // get ocean name??
+  // https://maps.googleapis.com/maps/api/geocode/json?latlng=19.286900,-81.367401&result_type=natural_feature&key=YOUR-API-KEY-FROM-GOOGLE
+  // sprintf(api_url, "%s%.6f%%2C%.6f&result_type=natural_feature&key=%s", gps_to_geocoding, StationGpsNS, StationGpsEW, GlobeSettings.google_api_key); // does not give name of sea
+
+  // to investigate, getting the name of sea or ocean
+  //  api.geonames.org/oceanJSON?lat=40.78343&lng=-43.96625&username=demo
+  //  as seen here https://www.geonames.org/export/web-services.html#ocean
   
   if(print)Serial.println(api_url);
   client.setInsecure();
@@ -164,6 +173,7 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW)
       }
       if((p = strstr(payload, "\"country")) != NULL)
       { strcpy(countrycode, shortname);
+        countrycode[2] = 0; // shorten to 2 characters just in case
         countryfound = true;
       }
       if(townfound && countryfound)found=true;
@@ -178,7 +188,11 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW)
 
   https.end();
   client.stop(); // stop insecure client
-  AddToQueueForDisplay(payload, MESSAGE_GET_GEOLOCATION_BY_GPS);
+
+  // use this country code if we go play music from SD
+  strcpy(CountryCodeSelectorSD, countrycode);
+  if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_GEOLOCATION_BY_GPS)AddToQueueForDisplay(payload, MESSAGE_GET_GEOLOCATION_BY_GPS);
+  else if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_GEOLOCATION)AddToQueueForDisplay(payload, MESSAGE_GET_GEOLOCATION);
 
 }
 

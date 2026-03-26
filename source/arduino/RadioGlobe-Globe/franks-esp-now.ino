@@ -55,11 +55,21 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
       DataFromGlobe.FindGeoLocationData = MESSAGE_GET_GEOLOCATION_BY_GPS; // makes the CallGetTimeZone task actually do it
       return; // don't add to queue
     }  
+
+    if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_GEOLOCATION)
+    { ns_cal_received = DataFromDisplay.ns_cal;
+      ew_cal_received = DataFromDisplay.ew_cal;
+      DataFromGlobe.FindGeoLocationData = MESSAGE_GET_GEOLOCATION; // makes the CallGetTimeZone task actually do it
+      return; // don't add to queue
+    }  
+
+
   }  
 
   if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_TIMEZONE_BY_GPS)return;
   if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_TIMEZONE)return;
   if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_GEOLOCATION_BY_GPS)return;
+  if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_GEOLOCATION)return;
 
   // put in receiving queue
   if(MessageSerialNumber != DataFromDisplay.D_QueueSerialNumber)
