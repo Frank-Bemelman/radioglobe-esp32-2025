@@ -167,10 +167,15 @@ void loop_esp_now() {
         }
         ToDisplay.QueueCnt--;
         esp_err_t result = esp_now_send(PuckMac, (uint8_t *) &DataFromGlobe, sizeof(DataFromGlobe));
+        // memcpy(&PrevDataFromGlobe, &DataFromGlobe, sizeof(PrevDataFromGlobe));
       }
     }
     else // keep sending last one, with perhaps updated coordinates
-    { esp_err_t result = esp_now_send(PuckMac, (uint8_t *) &DataFromGlobe, sizeof(DataFromGlobe));
+    { if(memcmp(&PrevDataFromGlobe, &DataFromGlobe,sizeof(PrevDataFromGlobe)) != 0)
+      { esp_err_t result = esp_now_send(PuckMac, (uint8_t *) &DataFromGlobe, sizeof(DataFromGlobe));
+        // Serial.printf("Stuff (usually coordinates or rssi changed) send\n");
+        memcpy(&PrevDataFromGlobe, &DataFromGlobe, sizeof(PrevDataFromGlobe));
+      }  
     }
   }
   Q_sending = false;

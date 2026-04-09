@@ -2,7 +2,7 @@
 
    https://tomeko.net/online_tools/file_to_hex.php?lang=en
 
-   Paste the byte array into a sketch tab "jpeg_name" and add
+   Paste the byte array into a sketch tab "mp3_name.h" and add
    two lines at the start with a unique array name:
 
                 const uint8_t  mp3_name[] PROGMEM = {

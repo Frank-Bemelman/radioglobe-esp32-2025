@@ -11,6 +11,16 @@ void setup_tasks(void)
   //                  NULL,      /* Task handle to keep track of created task */
   //                  0);          /* pin task to core 0 */      
 
+// crashes
+//  xTaskCreatePinnedToCore(
+//                    LoopVS1053,   /* Task function. */
+//                    "LoopVS1053",     /* name of task. */
+//                    25000,       /* Stack size of task */
+//                    NULL,        /* parameter of the task */
+//                    1,           /* priority of the task */
+//                    NULL,      /* Task handle to keep track of created task */
+//                    1);          /* pin task to core 0 */      
+
   xTaskCreatePinnedToCore(
                     CallGetTimeZone,   /* Task function. */
                     "CallGetTimeZone",     /* name of task. */
@@ -39,6 +49,13 @@ void setup_tasks(void)
 
 }
 
+
+void LoopVS1053(void * pvParameters)
+{ while(1)
+  { if(bSetupCompleted)stream.loop();
+    vTaskDelay(1 / portTICK_PERIOD_MS); // lowered to 100, was 200
+  }
+}
 
 void CallGetTimeZone(void * pvParameters)
 { while(1)
@@ -152,8 +169,14 @@ void ReadAS5600Encoders(void * pvParameters)
       PixelUpdate(0, 0xFFFFFF, 0x000000, 2000); // solid white to light up globe                    
       LedAnimationBrightness=255;
 
-      if(bPowerStatus && !stable && !bEncoderKillStation && bSetupCompleted)
-      { PlayWhile((uint8_t *)mp3_radio_tuning, sizeof(mp3_radio_tuning), true); // play one snippet and loop around if need be
+      if(bPowerStatus && !stable && !bEncoderKillStation && bSetupCompleted && !Tuning)
+      { //if(stream.isRunning())
+        //{ SetVolumeMapped(0);
+        //  stream.stopSong();
+        //  chunkplayer.switchToMp3Mode();
+
+        //}
+        PlayWhile((uint8_t *)mp3_radio_tuning, sizeof(mp3_radio_tuning), true); // play one snippet and loop around if need be
       }
 
     }
@@ -176,7 +199,9 @@ void ReadAS5600Encoders(void * pvParameters)
     { if(abs(((OldCurrentEW4096 - CurrentEW4096))%4096)>1)
       { OldCurrentEW4096 = CurrentEW4096;
         EWDegLive10 = (CurrentEW4096) * 3600 / 4096; // convert to degrees times 10
-        if((EWDegLive10>=-1800) && (EWDegLive10<=1800)) DataFromGlobe.ew = EWDegLive10;
+        if((EWDegLive10>=-1800) && (EWDegLive10<=1800)) 
+        { DataFromGlobe.ew = EWDegLive10;
+        }
       }
     }
 

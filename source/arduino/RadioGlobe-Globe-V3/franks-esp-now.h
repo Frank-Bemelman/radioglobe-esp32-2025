@@ -73,8 +73,11 @@ const char * messagetexts[] = {
    { "GLOBE_PLAY_SD 56"},
    { "GET_GEOLOCATION 57"},
    { "GET_WEATHER_DATA 58"},
-   { "MESSAGE_MAX 58"}
- 
+   { "MUSIC_MODE 59"},
+   { "PLAYLIST_SONG_ARTIST 60"},
+   { "START_THIS_FILE 61"},
+   { "RELOAD_SD_WITH_COUNTRY 62"},
+   { "MESSAGE_MAX 63"}
  };
 
 
@@ -104,7 +107,7 @@ const char * messagetexts[] = {
 #define MESSAGE_RESUME_RADIO 23
 #define MESSAGE_WANT_NEXT_STATION 24
 #define MESSAGE_STATION_CONNECTED 25
-// when globe reboots
+// when globe powers up by remote control
 #define MESSAGE_GLOBE_WANTS_CURRENT_STATION 26
 // request from display to get a certain timezone
 #define MESSAGE_GET_TIMEZONE_BY_GPS 27
@@ -140,8 +143,11 @@ const char * messagetexts[] = {
 #define MESSAGE_GLOBE_PLAY_SD 56
 #define MESSAGE_GET_GEOLOCATION 57
 #define MESSAGE_GET_WEATHER_DATA 58
-
-#define MESSAGE_MAX 59
+#define MESSAGE_MUSIC_MODE 59
+#define MESSAGE_PLAYLIST_SONG_ARTIST 60
+#define MESSAGE_START_THIS_FILE 61
+#define MESSAGE_RELOAD_SD_WITH_COUNTRY 62
+#define MESSAGE_MAX 63
 
 #define MESSAGE_URL_HTTP_400_BAD_REQUEST 400
 #define MESSAGE_URL_HTTP_403_REFUSED 403
@@ -181,7 +187,7 @@ typedef struct struct_message2 {
     int16_t  UnravelingResult; // tells display that Globe is occupied unraveling .m3u or .pls url to get the actual streaming url
     uint16_t G_QueueSerialNumber;
     uint16_t G_QueueMessageType;
-    uint16_t D_QueueStationIndex; // echo back unaltered
+    int16_t D_QueueStationIndex; // echo back unaltered
     char     G_QueueMessage[QUEUEMESSAGELENGTH];
     uint16_t D_QueueSerialNumber; // echo back to display confirm reception
     uint16_t D_QueueMessageType;
@@ -200,6 +206,7 @@ typedef struct struct_message2 {
 
 // Declare a structurs named DataFromGlobe to hold various variables
 struct_from_globe DataFromGlobe;
+struct_from_globe PrevDataFromGlobe;
 
 
 // Declare two structures named DataFromDisplay for storing/comparing

@@ -41,6 +41,7 @@
 #include "mp3_shutdown.h"
 #include "mp3_voice_prompts.h"
 #include "mp3_radio_tuning.h"
+#include "mp3_happy_ping.h"
 
 #include "..\secrets.h"
 // as defined in ..\secrets.h
@@ -148,10 +149,8 @@ int16_t NSDeg10; // uncalibrated NS degrees times 10
 int16_t EWDeg10; // uncalibrated EW degrees times 10
 
 
-char RequestedUrl[QUEUEMESSAGELENGTH]; // holds the url requested by display
-char ActiveUrl[QUEUEMESSAGELENGTH]; // holds the url requested by display
-char UnraveledUrl[2048] = ""; // checked for redirects 
-char ConnectedUrl[2048] = ""; // actual url that connected with succes
+char ActiveUrl[QUEUEMESSAGELENGTH] =""; // most recent url requested by display
+char TargetUrl[2048] = ""; // checked for redirects 
 
 bool Tuning = false;
 
@@ -201,12 +200,14 @@ char ActiveStationTitle[256] = "";
 char ActiveSongTitle[256] = "";
 char MetaDataSongTitle[256] = "";
 char MetaDataRadioStation[256] = "";
-char UnsupportedMime[64];
 
 void TaskTouch(void * pvParameters);
 void PixelUpdate(uint16_t mode, uint32_t color1, uint32_t color2, uint16_t msek);
 
 char HostName[32];
+
+bool bMusicMode = false;
+bool bMusicModePrev = false;
 
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
@@ -245,22 +246,23 @@ void setup()
   pinMode(BT_CONNECT_PIN, OUTPUT);
   digitalWrite(BT_CONNECT_PIN, HIGH);  
   
-  pinMode(VS1053_RESET, OUTPUT);
-  digitalWrite(VS1053_RESET, LOW);  
-  delay(50);   
+  pinMode(MUTE_AMPLIFIERS, OUTPUT);
+  Speakers(SPEAKERS_OFF);
+  pinMode(SPEAKER_TOGGLE_PIN, INPUT_PULLUP);
+  pinMode(PORTALSWITCH_PIN, INPUT_PULLUP); // input to button for opening portal
 
   Serial.begin(115200);
 
- 
-
-  
   //Start SPI bus
   SPI.setHwCs(true);
   SPI.begin(SPI_CLK_PIN, SPI_MISO_PIN, SPI_MOSI_PIN);
   Serial.println("vspi bus started.");
 
+  pinMode(VS1053_RESET, OUTPUT);
+  digitalWrite(VS1053_RESET, LOW);  
+  delay(50);   
   digitalWrite(VS1053_RESET, HIGH); 
-  delay(50);            // waits for a half second
+  delay(50);          
 
   // Initialize the VS1053 decoder
   if (!stream.startDecoder(VS1053_CS, VS1053_DCS, VS1053_DREQ) || !stream.isChipConnected()) 
@@ -268,9 +270,9 @@ void setup()
   }
   else Serial.println("VS1053 up & running");
   // Set the codec callback
-//  stream.setCodecCB(codecCallBack);
+  stream.setCodecCB(codecCallBack);
   // Set the bitrate callback
-//  stream.setBitrateCB(bitrateCallback);   
+  // stream.setBitrateCB(bitrateCallback);   
   // Set the station name callback
   stream.setStationCB(audio_showstation);
   // Set the stream metadata callback
@@ -280,11 +282,7 @@ void setup()
 
   delay(50);
 
-  
-  pinMode(MUTE_AMPLIFIERS, OUTPUT);
-  Speakers(SPEAKERS_OFF);
-  pinMode(SPEAKER_TOGGLE_PIN, INPUT_PULLUP);
-  pinMode(PORTALSWITCH_PIN, INPUT_PULLUP); // input to button for opening portal
+ 
 
   // Initialise as5600_0 Connection
   Wire.begin(SDA_1, SCL_1);
@@ -353,7 +351,7 @@ void setup()
   Serial.printf("Puck Mac %02X:%02X:%02X:%02X:%02X:%02X as stored in eeprom\n", GlobeSettings.ee_puckmac[0], GlobeSettings.ee_puckmac[1], GlobeSettings.ee_puckmac[2], GlobeSettings.ee_puckmac[3], GlobeSettings.ee_puckmac[4], GlobeSettings.ee_puckmac[5]);
   memcpy(PuckMac, GlobeSettings.ee_puckmac, 6);
 
-  PlaySoundBite((uint8_t *)mp3_startup, sizeof(mp3_startup), 0); 
+  PlaySoundBite((uint8_t *)mp3_happy_ping, sizeof(mp3_happy_ping), 0); 
 
   DataFromGlobe.D_QueueStationIndex = -1;
 
@@ -448,19 +446,17 @@ void setup()
 
   sprintf(message, "%d", GlobeSettings.serialnumber);
   AddToQueueForDisplay(message, MESSAGE_DISPLAY_SERIALNUMBER); // set puck to same serial number
-  AddToQueueForDisplay("Globe Just Booted", MESSAGE_GLOBE_WANTS_CURRENT_STATION);
-  AddToQueueForDisplay("Globe Closed Portal", MESSAGE_GLOBE_CLOSED_PORTAL); // mainly to set color of portal cog-wheel-button to normal
   // end of setup
   GetRatesNow = true;
   bSetupCompleted = true;
   
-  
+  //if(GlobeSettings.sdcard_present)CollectFilePathsForCountry("DE");
 
 }
 
 
 static bool once = true;
-uint16_t MaxTryAgain = 2;
+
 void loop()
 { char message[QUEUEMESSAGELENGTH];
   float GpsNS;
@@ -474,7 +470,8 @@ void loop()
   static char QueueMessage[QUEUEMESSAGELENGTH];
   static uint32_t value_int32t = 0;
   static uint16_t connection_lost_counter;
-
+  static char PreviousUrl[QUEUEMESSAGELENGTH] =""; // holds the url requested by display
+  static bool bFirst = true;
 
 
   loop2(); // checks portal button
@@ -629,9 +626,11 @@ void loop()
          else 
          { int16_t fromindex = IsCountryCodeValid(GlobeSettings.HomeCountryCode);
            int16_t toindex = IsCountryCodeValid(QueueMessage);
+           Serial.printf("-------------------> valuta from %d to %d\n", fromindex, toindex);
            if(((fromindex>=0) && (toindex>=0)) && (fromindex!=toindex)) // valid it is and sense it makes
-           { // create text like 1 euro = 1.13 US Dollar
-             //check if these countries actually use different valuta
+           { // we are not in our home location
+             // create text like 1 euro = 1.13 US Dollar
+             // check if these countries actually use different valuta
              if(CountryList[fromindex].valutanumber != CountryList[toindex].valutanumber)
              { if((CountryList[toindex].exchangerate)>=100.0)sprintf(message, "1 %s = %.0f %s", CountryList[fromindex].valutaname, CountryList[toindex].exchangerate, CountryList[toindex].valutaname);
                else if((CountryList[toindex].exchangerate)>=10.0)sprintf(message, "1 %s = %.1f %s", CountryList[fromindex].valutaname, CountryList[toindex].exchangerate, CountryList[toindex].valutaname);
@@ -648,7 +647,7 @@ void loop()
              }
            }
            else 
-           { AddToQueueForDisplay("=", MESSAGE_EX_CHANGE_RATE); // countrycode is homelocation
+           { AddToQueueForDisplay("Pay With Your Own Currency", MESSAGE_EX_CHANGE_RATE); // countrycode is homelocation
            }
          }  
          break;
@@ -660,39 +659,40 @@ void loop()
          break;  
 
        case MESSAGE_START_THIS_STATION:
+         
+         
          if(!bPowerStatus)
          { Serial.printf("MESSAGE_START_THIS_STATION: IGNORED (Power Down)\n");
+           break;
          }
 
-         // DataFromDisplay.D_QueueStationIndex range = 0-149 for found stations and 150-153 for presets
+         if((strcmp(PreviousUrl, QueueMessage) == NULL) && stream.isRunning())
+         { // already conmected PLAYING
+           Serial.printf("ALREADY CONNECTED TO STATION: %s\n", QueueMessage);  
+           AddToQueueForDisplay(TargetUrl, MESSAGE_STATION_CONNECTED);
+           break;
+         }
+             
+         strcpy(PreviousUrl, QueueMessage);
+         strcpy(TargetUrl, QueueMessage);
+
+         // DataFromDisplay.D_QueueStationIndex range = 0-49 for found stations and 50-53 for presets, -1 if idle
          Serial.printf("DataFromDisplay.D_QueueStationIndex = %d\n", DataFromDisplay.D_QueueStationIndex);
          
-         MaxTryAgain = 2; // try http(s) and back
-         strcpy(RequestedUrl, QueueMessage);
-
-         // will be unraveled later, redirected, derived from pls or m3u file
-         strcpy(UnraveledUrl, RequestedUrl);
-
-         if((DataFromGlobe.D_QueueStationIndex == DataFromDisplay.D_QueueStationIndex) && (stream.isRunning()) )
-         { // already conmected PLAYING
-          Serial.printf("ALREADY CONNECTED TO STATIONINDEX %d\n", DataFromGlobe.D_QueueStationIndex);  
-          AddToQueueForDisplay(RequestedUrl, MESSAGE_STATION_CONNECTED);
-          break;
-         }
-
+         
          if(DataFromDisplay.D_QueueStationIndex>=MAX_STATIONS) // it's a preset
          { PresetRequestFromHA = DataFromDisplay.D_QueueStationIndex-MAX_STATIONS+1;
            // will be picked up by mqtt loop to inform HA
          }  
          else PresetRequestFromHA = 0;       
         
-         Tuning = true;
 
          // quick & dirty, but maybe too dirty, as not all https urls are http appraocheable (HTTP error 400)
          // but we also catch the 400 and do a retry on https in that case 
          // so, always try http first, remove the 's' from https
-         if(UnraveledUrl[4]=='s')strcpy(&UnraveledUrl[4], &UnraveledUrl[5]);  
+         if(TargetUrl[4]=='s')strcpy(&TargetUrl[4], &TargetUrl[5]);  
         
+         Tuning = true;
          if(StartNewStation()==1) // succes
          { DataFromGlobe.D_QueueStationIndex = DataFromDisplay.D_QueueStationIndex;
            AddToQueueForDisplay(ActiveUrl, MESSAGE_STATION_CONNECTED); 
@@ -702,13 +702,8 @@ void loop()
          else
          {  DataFromGlobe.D_QueueStationIndex = -1;
             Serial.printf("FAILED: stream.connecttohost HTTP code %d\n", stream_connecttohost_result);
-            audio_eof_stream("Retry from main message loop for HTTP errors < 0");
-            // sprintf(message, "%d", stream_connecttohost_result);
-            // AddToQueueForDisplay(message, MESSAGE_CONNECTTOHOST_FAILURE);
-            // AddToQueueForDisplay(RequestedUrl, MESSAGE_DEAD_STATION); // let display store this url in text file
-            // AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);
+            audio_eof_stream("Retry from main message loop for HTTP errors < 0", 0);
          }
-
          Tuning = false;
 
          break;
@@ -760,7 +755,25 @@ void loop()
 
       // let's play from SD card now
       case MESSAGE_GLOBE_PLAY_SD:
+        DataFromGlobe.D_QueueStationIndex = -1; 
+        strcpy(PreviousUrl, "");
         StartPlayFromSD();
+        break;
+
+      case  MESSAGE_START_THIS_FILE: 
+        DataFromGlobe.D_QueueStationIndex = -1; 
+        strcpy(PreviousUrl, QueueMessage);
+        stream.stopSong(); // stop whatever stream or file was playing
+         // delay(1000); check to see if click/
+        Speakers(SPEAKERS_ON);
+        SetVolumeMapped(DataFromDisplay.volumevalue); 
+        stream.connectToFile(SD, QueueMessage); // play it 
+        break;
+      
+      case MESSAGE_RELOAD_SD_WITH_COUNTRY:
+        extern char CountryCodeSelectorSD[3];
+        strcpy(CountryCodeSelectorSD, QueueMessage);
+        strcpy(PreviousUrl, "");
         break;
 
       default:
@@ -784,12 +797,9 @@ void loop()
   if(bEncoderKillStation)
   { bEncoderKillStation = false;
     stream.stopSong();
-    chunkplayer.softReset(); // apperenty needed when previously a wav file was playing from SD which otherwise sounded scratchy
-    ////  delay(50);
-    chunkplayer.switchToMp3Mode();     
+    chunkplayer.switchToMp3Mode(); // or Playwhile (radio-tuning-effect-sound) goes chit-chit-chit if this interrupted a file playing
     Speakers(SPEAKERS_DELAYED_OFF);
     DataFromGlobe.D_QueueStationIndex = -1;
-    strcpy(ConnectedUrl,"");
     strcpy(ActiveUrl, "");
   }
   
@@ -798,7 +808,7 @@ void loop()
   if(bVolumeToneControlsActive == true)
   { if(PrevTick != ReadEncoderTicker100mS)
     { PrevTick = ReadEncoderTicker100mS;
-      if(PrevDataFromDisplay.volumevalue != DataFromDisplay.volumevalue)
+      if((PrevDataFromDisplay.volumevalue != DataFromDisplay.volumevalue) || bFirst)
       { PrevDataFromDisplay.volumevalue = DataFromDisplay.volumevalue;
         SetVolumeMapped(DataFromDisplay.volumevalue);
         if(bPowerStatus == true) // when user swtiches off, volume is zero but meaning less, just stick with current value
@@ -806,7 +816,7 @@ void loop()
         }  
       }
 
-      if(PrevDataFromDisplay.bassvalue != DataFromDisplay.bassvalue)
+      if((PrevDataFromDisplay.bassvalue != DataFromDisplay.bassvalue) || bFirst)
       { PrevDataFromDisplay.bassvalue = DataFromDisplay.bassvalue;
         // bass usuable values is rtone[3] = 14 for lower frequency limit and rtone[2] = 0-15 for level control    
         rtone[3] = 14;
@@ -817,7 +827,7 @@ void loop()
         // Serial.printf("Bass=level %x cutoff %x\n", (uint16_t)rtone[2], (uint16_t)rtone[3]);
       }
 
-      if(PrevDataFromDisplay.treblevalue != DataFromDisplay.treblevalue)
+      if((PrevDataFromDisplay.treblevalue != DataFromDisplay.treblevalue) || bFirst)
       { PrevDataFromDisplay.treblevalue = DataFromDisplay.treblevalue;
         // treble usuable values is rtone[1] = 3 for higher frequency limit and rtone[0] = 0-15 for level control
         // convert from 0-100 to signed nibble f-e-d-c-b-a-9-0-1-2-3-4-5-6-7
@@ -831,7 +841,7 @@ void loop()
         GlobeSettings.ee_volume = DataFromDisplay.volumevalue;
         // Serial.printf("Treble=level %x cutoff %x\n", (uint16_t)rtone[0], (uint16_t)rtone[1]);
       }
-      if(PrevDataFromDisplay.internalspeakeron != DataFromDisplay.internalspeakeron)
+      if((PrevDataFromDisplay.internalspeakeron != DataFromDisplay.internalspeakeron) || bFirst)
       { PrevDataFromDisplay.internalspeakeron = DataFromDisplay.internalspeakeron;
         GlobeSettings.ee_internal_speakers = DataFromDisplay.internalspeakeron;
         if(GlobeSettings.ee_internal_speakers == 1)
@@ -843,9 +853,9 @@ void loop()
         else 
         { Speakers(SPEAKERS_OFF);
           Serial.println("SPEAKERS_OFF by DataFromDisplay.internalspeakeron");
-        }          
+        }           
       }
-      if(PrevDataFromDisplay.btmodule_power_on != DataFromDisplay.btmodule_power_on)
+      if((PrevDataFromDisplay.btmodule_power_on != DataFromDisplay.btmodule_power_on) || bFirst)
       { PrevDataFromDisplay.btmodule_power_on = DataFromDisplay.btmodule_power_on;
         GlobeSettings.btmodule_power_on = DataFromDisplay.btmodule_power_on;
         if(GlobeSettings.btmodule_power_on == 1)
@@ -863,9 +873,10 @@ void loop()
       { calibrate_globe();
         CalibrateZeroPos = 0;
       }
+      bFirst = false;
     }
   }  
-  delay(5);
+  //delay(5);
 }
 
 
@@ -876,60 +887,62 @@ bool StartNewStation(void)
 { bool return_result = false;
   char message[QUEUEMESSAGELENGTH];
 
-  Tuning = true;
+  bMusicMode = false;
+  if(bMusicModePrev != bMusicMode)
+  { bMusicModePrev = bMusicMode;
+    AddToQueueForDisplay("0", MESSAGE_MUSIC_MODE);
+  }  
+
   PixelUpdate(0, 0xFF00FF, 0x000000, 5000); // solid purple
 
-
-  Serial.printf("StartNewStation with %s\n", UnraveledUrl);
-  Serial.printf("First stop this one: %s\n", ConnectedUrl);
+  Serial.printf("StartNewStation with %s\n", TargetUrl);
   SetVolumeMapped(0);
-  stream.stopSong();
+  if(stream.isRunning())
+  { Serial.printf("First stop this one: %s\n", ActiveUrl);
+    stream.stopSong();
+//    chunkplayer.switchToMp3Mode();
+  }
+  
   Speakers(SPEAKERS_DELAYED_OFF);
   DataFromGlobe.D_QueueStationIndex = -1;
-  strcpy(ConnectedUrl,"");
   strcpy(ActiveUrl, "");
   strcpy(ActiveStationTitle, "");
   strcpy(ActiveSongTitle, "");
-  strcpy(UnsupportedMime, "???");
-  //AddToQueueForDisplay("", MESSAGE_NAME); // already filled in early by display station search, perhaps to be updated by actual station connecting
   AddToQueueForDisplay("", MESSAGE_SONG_TITLE); // remove 'now playing title'
 
-  lapMillis = millis(); 
-
+  
 //  interesting - these url play fine in chrome browser, but not here, unless you change https to http
-//  strcpy(UnraveledUrl, "https://cosmo.shoutca.st/proxy/jubileefm/stream"); 
-//  strcpy(UnraveledUrl, "https://stream.zeno.fm/89fkq77gb4duv");
-//  strcpy(UnraveledUrl, "https://stream.zeno.fm/7ns6amt68qruv");
-//  strcpy(UnraveledUrl, "https://stream.zeno.fm/yerp85sughwtv");
-//  strcpy(UnraveledUrl, "https://stream.zeno.fm/bux0vqx79zquv");
-//  strcpy(UnraveledUrl, "https://www.radioking.com/play/radio-paysan-fm-san/652837");
-//  strcpy(UnraveledUrl, "https://betelgeuse.dribbcast.com/proxy/diaremefm?mp=/stream");
-//  strcpy(UnraveledUrl, "https://webradio.tda.dz/ElBahdja_64K.mp3");
-//  strcpy(UnraveledUrl, "https://webradio.tda.dz/Illizi_64K.mp3");
-//  strcpy(UnraveledUrl, "https://webradio.tda.dz/Ouargla_64K.mp3");
-//  strcpy(UnraveledUrl, "https://stream.zeno.fm/hfbgmx6rwrhvv");
-//  strcpy(UnraveledUrl, "https://webradio.tda.dz/Chaine3_64K.mp3");
-//  strcpy(UnraveledUrl, "https://webradio.tda.dz/Jeunesse_64K.mp3");
-//  strcpy(UnraveledUrl, "https://radio-dzair.net/proxy/chaabia/chaabia");
-//  strcpy(UnraveledUrl, "https://webradio.tda.dz/ElBahdja_64K.mp3");
-//  strcpy(UnraveledUrl, "https://webradio.tda.dz/Coran_64K.mp3");
-//  strcpy(UnraveledUrl, "https://stream.zeno.fm/1dkectoxpqgvv");
-//  strcpy(UnraveledUrl, "https://betelgeuse.dribbcast.com/proxy/mamediarra?mp=/stream");
-//  strcpy(UnraveledUrl, "https://playerservices.streamtheworld.com/api/livestream-redirect/SP_R2982692.aac");
-//  strcpy(UnraveledUrl, "https://live.paineldj.com.br/proxy/radio1ago?mp=/stream");
-//  strcpy(UnraveledUrl, "https://sc1.xdevel.com/ribeirabrava");
-//  strcpy(UnraveledUrl, "https://stream.zeno.fm/85whutype7duv");
-//  strcpy(UnraveledUrl, "https://stream.zeno.fm/e59pwkvm3reuv");
-//  strcpy(UnraveledUrl, "https://stream.zeno.fm/2ee8m52mb"); 
-//  strcpy(UnraveledUrl, "https://stream.zeno.fm/8pbaase2w2quv");
-//  strcpy(UnraveledUrl, "http://178.19.58.119:1818/;"); // mime ="" ???? but plays when just assume MP3
-// this one crashes the globe and keeps crashing/rebooting 
-// "name": "Onda Cabanillas",
-// "url": "http://212.83.151.18:8076/stream"
+//  strcpy(TargetUrl, "https://cosmo.shoutca.st/proxy/jubileefm/stream"); 
+//  strcpy(TargetUrl, "https://stream.zeno.fm/89fkq77gb4duv");
+//  strcpy(TargetUrl, "https://stream.zeno.fm/7ns6amt68qruv");
+//  strcpy(TargetUrl, "https://stream.zeno.fm/yerp85sughwtv");
+//  strcpy(TargetUrl, "https://stream.zeno.fm/bux0vqx79zquv");
+//  strcpy(TargetUrl, "https://www.radioking.com/play/radio-paysan-fm-san/652837");
+//  strcpy(TargetUrl, "https://betelgeuse.dribbcast.com/proxy/diaremefm?mp=/stream");
+//  strcpy(TargetUrl, "https://webradio.tda.dz/ElBahdja_64K.mp3");
+//  strcpy(TargetUrl, "https://webradio.tda.dz/Illizi_64K.mp3");
+//  strcpy(TargetUrl, "https://webradio.tda.dz/Ouargla_64K.mp3");
+//  strcpy(TargetUrl, "https://stream.zeno.fm/hfbgmx6rwrhvv");
+//  strcpy(TargetUrl, "https://webradio.tda.dz/Chaine3_64K.mp3");
+//  strcpy(TargetUrl, "https://webradio.tda.dz/Jeunesse_64K.mp3");
+//  strcpy(TargetUrl, "https://radio-dzair.net/proxy/chaabia/chaabia");
+//  strcpy(TargetUrl, "https://webradio.tda.dz/ElBahdja_64K.mp3");
+//  strcpy(TargetUrl, "https://webradio.tda.dz/Coran_64K.mp3");
+//  strcpy(TargetUrl, "https://stream.zeno.fm/1dkectoxpqgvv");
+//  strcpy(TargetUrl, "https://betelgeuse.dribbcast.com/proxy/mamediarra?mp=/stream");
+//  strcpy(TargetUrl, "https://playerservices.streamtheworld.com/api/livestream-redirect/SP_R2982692.aac");
+//  strcpy(TargetUrl, "https://live.paineldj.com.br/proxy/radio1ago?mp=/stream");
+//  strcpy(TargetUrl, "https://sc1.xdevel.com/ribeirabrava");
+//  strcpy(TargetUrl, "https://stream.zeno.fm/85whutype7duv");
+//  strcpy(TargetUrl, "https://stream.zeno.fm/e59pwkvm3reuv");
+//  strcpy(TargetUrl, "https://stream.zeno.fm/2ee8m52mb"); 
+//  strcpy(TargetUrl, "https://stream.zeno.fm/8pbaase2w2quv");
+//  strcpy(TargetUrl, "http://178.19.58.119:1818/;"); // mime ="" ???? but plays when just assume MP3
 
 
-  Serial.printf("Now connect: %s\n", UnraveledUrl);
-  stream.connectToHost(UnraveledUrl);  
+  lapMillis = millis(); 
+  Serial.printf("Now connect: %s\n", TargetUrl);
+  stream.connectToHost(TargetUrl);  
 
   //  test - playing from SD card
   //  stream.connecttofile(SD, "/A01-Cor Bakker-Feel My Love.mp3"); // works, at SPI frequency 4000000 (stutters at default speed)
@@ -941,54 +954,70 @@ bool StartNewStation(void)
   //  stream.connecttofile(SD, "/GLOBEMUSIC/JUKEBOX//G03 Master KG-Jerusalema.mp3"); // works also 
 
   if(stream.isRunning()) 
-  { SetVolumeMapped(DataFromDisplay.volumevalue); // will also enable amplifiers
-           
+  { 
+
+    // wait short time with volume 0 to avoid audible clicks/snippets between station switching
+//    currentMillis = millis();
+//    while (millis() - currentMillis < 250)
+//    { stream.loop();
+//    }
+
+//    SetVolumeMapped(DataFromDisplay.volumevalue); // will also enable amplifiers
+
     currentMillis = millis();
     ConnectedInMillis = currentMillis - lapMillis;
-    Serial.printf("Succesfully connected: %s -> time elapsed = %ld\n", UnraveledUrl, ConnectedInMillis);
-//    Serial.print("Codec: ");
-//    Serial.println(stream.currentCodec());
-//    Serial.print("Bitrate: ");
-//    Serial.print(stream.bitrate());
-//    Serial.println(" kbps");
+    Serial.printf("Succesfully connected: %s -> time elapsed = %ld\n", TargetUrl, ConnectedInMillis);
     return_result = 1;
-    strcpy(ConnectedUrl, UnraveledUrl);
-    strcpy(ActiveUrl, RequestedUrl);
+    strcpy(ActiveUrl, TargetUrl);
     PixelUpdate(0, 0x000000, 0x000000, 5000); // all off
-
   }
   else
-  { Serial.printf("Could not connect: %s -> time elapsed = %ld\n", UnraveledUrl, (currentMillis = millis()) - lapMillis);
+  { Serial.printf("Could not connect: %s -> time elapsed = %ld\n", TargetUrl, (currentMillis = millis()) - lapMillis);
+    stream_connecttohost_result = 400;
   }  
  
-  Tuning = false;
   return return_result;
 }
+
+void ReStartNewStation(const char* info) 
+{ if((stream_connecttohost_result == 400) || (stream_connecttohost_result == -5) || (stream_connecttohost_result == -1) )  // -5 means could not connect -1 refused
+  { // try again, toggle https<>http, insert 's' to url
+    if(TargetUrl[4]==':') // try again, with https, insert 's' to url
+    { int16_t len = strlen(TargetUrl);
+      while(len>3)
+      { TargetUrl[len+1]=TargetUrl[len];
+        len--;
+      }
+      TargetUrl[4]='s';
+    }
+    else // try again, with http, remove 's' from url
+    { if(TargetUrl[4]=='s')strcpy(&TargetUrl[4], &TargetUrl[5]);
+    } 
+  }   
+} 
+
+
 
 // would be nice if it went gradually
 void SetVolumeMapped(uint16_t volume)
 { static uint16_t prevvol;
   static uint8_t Actual_vs1053vol=0;
   static uint8_t New_vs1053vol;
-  
-  Actual_vs1053vol = stream.getVolume();
-  New_vs1053vol = map(volume, 0, 100, 68, 100); // range is 128db - useable volume range of VS1053 is 68-100, 100-> 0dB and 68 being very quiet -40db
-  if(volume==0)New_vs1053vol=0;
 
+  New_vs1053vol = map(volume, 0, 100, 60, 100); // range is 128db - more practical useable volume range of VS1053 is 68-100, 100-> 0dB and 68 being very quiet -40db
+//  if(volume==0)New_vs1053vol=0;
+  
   Serial.printf("New_vs1053vol (mapped parameter) = %d - Actual_vs1053vol = %d\n", New_vs1053vol, Actual_vs1053vol);
 
   if(bSetupCompleted)
   { if(volume>prevvol)
-    { //Serial.printf("New Volume up %d\n", volume);
-      PixelUpdate(4, 0xFFFF00, 0x000000, 1000); // right turn yellow
+    { PixelUpdate(4, 0xFFFF00, 0x000000, 1000); // right turn yellow
     }  
     if(volume<prevvol)
-    { //Serial.printf("New Volume down %d\n", volume);
-      PixelUpdate(3, 0xFFFF00, 0x000000, 1000); // left turn yellow
+    { PixelUpdate(3, 0xFFFF00, 0x000000, 1000); // left turn yellow
     }
   }  
   prevvol = volume;
-
 
   if(volume==0)Speakers(SPEAKERS_DELAYED_OFF);
   else // we have a volume
@@ -999,14 +1028,47 @@ void SetVolumeMapped(uint16_t volume)
   } 
 
 
-  //if(Actual_vs1053vol!=New_vs1053vol)
+//if(Actual_vs1053vol!=New_vs1053vol)
   { Serial.printf("New Volume adjusted to %d\n", New_vs1053vol);
-    stream.setVolume(New_vs1053vol);
-    Actual_vs1053vol=New_vs1053vol;
-    stream.loop(); // does this make it happen faster??
-  }  
 
+    if(Actual_vs1053vol < New_vs1053vol) // volume up
+    { if(Actual_vs1053vol==0)Actual_vs1053vol = map(1, 0, 100, 60, 100);
+      while(Actual_vs1053vol < New_vs1053vol)
+      { Actual_vs1053vol+= MIN(20, (New_vs1053vol - Actual_vs1053vol));
+
+        Actual_vs1053vol = New_vs1053vol; // uncomment for immediate volume up
+        
+        stream.setVolume(Actual_vs1053vol);
+        Serial.printf("volume up -> %d\n", Actual_vs1053vol);
+        // stream.loop(); // make it effective immediately - essential when using gradual volume up
+      }
+    }
+    else if (Actual_vs1053vol == New_vs1053vol)
+    { stream.setVolume(Actual_vs1053vol);
+    }
+    else
+    { 
+      while(Actual_vs1053vol > New_vs1053vol) // volume down
+      { Actual_vs1053vol-= MIN(20, (Actual_vs1053vol - New_vs1053vol));
+
+        Actual_vs1053vol = New_vs1053vol; // uncomment for immediate volume up
+        
+        stream.setVolume(Actual_vs1053vol);
+        Serial.printf("volume down -> %d\n", Actual_vs1053vol);
+        // stream.loop(); // make it effective immediately - essential when using gradual volume up
+      }
+      
+      if(volume==0)
+      { New_vs1053vol = 0;
+        Actual_vs1053vol=New_vs1053vol;
+        stream.setVolume(Actual_vs1053vol);
+        //stream.loop(); // make it effective immediately
+      }  
+    }  
+  }  
 }
+
+
 
 void audio_showstation(const char* info) 
 { char *p;
@@ -1092,64 +1154,45 @@ void audio_connect_result(const int16_t result)
 }
 
 // called from VS1053 driver
-void audio_eof_stream(const char* info) 
+void audio_eof_stream(const char* info, int16_t reasonForQuitting) 
 { char message[QUEUEMESSAGELENGTH];
+  
   Speakers(SPEAKERS_DELAYED_OFF);
-  Serial.printf("End of stream: %s\n", info);
-  if(--MaxTryAgain<1)
-  { AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);
-    return;
-  }  
+  Serial.printf("End of stream  -> %s\n", info);
+
+  strcpy(ActiveUrl, "");
+  DataFromGlobe.D_QueueStationIndex = -1;
+
+  sprintf(message, "%d -> %s", stream_connecttohost_result, ActiveUrl); // could  be http return code or failure enum
+  //AddToQueueForDisplay(message, MESSAGE_CONNECTTOHOST_FAILURE); // let display store this number for log report
+  //AddToQueueForDisplay(message, MESSAGE_AUDIO_EOF_STREAM); // let display store this url in text file
+ 
+  
+  // only restart new station or file if power is on
   if(bPowerStatus == true)
-  { DataFromGlobe.D_QueueStationIndex = -1;
-    sprintf(message, "%d %s -> %s", stream_connecttohost_result, info, UnsupportedMime); // could  be http return code or failure enum
-    AddToQueueForDisplay(message, MESSAGE_CONNECTTOHOST_FAILURE); // let display store this number for log report
-    AddToQueueForDisplay(RequestedUrl, MESSAGE_AUDIO_EOF_STREAM); // let display store this url in text file
-
-    // https url was called, with no luck
-    //    if(stream_connecttohost_result == FAIL_LOOP_EOF_NO_REMAINING_BYTES_HTTPS)
-    //    { // try again, with http, remove 's' from url
-    //      if(UnraveledUrl[4]=='s')
-    //      { strcpy(&UnraveledUrl[4], &UnraveledUrl[5]);  
-    //        Serial.printf("Try again with http: %s\n", UnraveledUrl);
-    //        if(StartNewStation()==1) // succes
-    //        { // restore volume setting
-    //          SetVolumeMapped(DataFromDisplay.volumevalue);
-    //          DataFromGlobe.D_QueueStationIndex = DataFromDisplay.D_QueueStationIndex;
-    //          AddToQueueForDisplay(ActiveUrl, MESSAGE_STATION_CONNECTED); 
-    //          sprintf(message, "%ld,\"%s\"", ConnectedInMillis, ActiveUrl); 
-    //          AddToQueueForDisplay(message, MESSAGE_STATION_CONNECTED_IN_MS); 
-    //          return;
-    //        }
-    //      }
-    //    }
-
-    // 400 error, possibly if http call was made for https destination
-    // may not for RequestedUrl being http (just a thought)
-    if((stream_connecttohost_result == 400) || (stream_connecttohost_result == -5) || (stream_connecttohost_result == -1) )  // -5 means could not connect -1 refused
-    { // try again, with https, insert 's' to url
-      if(UnraveledUrl[4]==':')
-      { int16_t len = strlen(UnraveledUrl);
-        while(len>3)
-        { UnraveledUrl[len+1]=UnraveledUrl[len];
-          len--;
-        }
-        UnraveledUrl[4]='s';
-
-        Serial.printf("Try again with https: %s\n", UnraveledUrl);
-        if(StartNewStation()==1) // succes
-        { // restore volume setting
-          SetVolumeMapped(DataFromDisplay.volumevalue);
-          DataFromGlobe.D_QueueStationIndex = DataFromDisplay.D_QueueStationIndex;
-          AddToQueueForDisplay(ActiveUrl, MESSAGE_STATION_CONNECTED); 
-          sprintf(message, "%ld,\"%s\"", ConnectedInMillis, ActiveUrl); 
-          AddToQueueForDisplay(message, MESSAGE_STATION_CONNECTED_IN_MS); 
-          return;
-        }
+  { if(!bMusicMode)
+    { switch(reasonForQuitting)
+      { case 9999:
+          Serial.printf("Try again with -> %s\n", TargetUrl);
+          if(StartNewStation()==1) // succes
+          { strcpy(ActiveUrl, TargetUrl);
+            // restore volume setting
+            SetVolumeMapped(DataFromDisplay.volumevalue);
+            DataFromGlobe.D_QueueStationIndex = DataFromDisplay.D_QueueStationIndex;
+            AddToQueueForDisplay(ActiveUrl, MESSAGE_STATION_CONNECTED); 
+            sprintf(message, "%ld,\"%s\"", ConnectedInMillis, ActiveUrl); 
+            AddToQueueForDisplay(message, MESSAGE_STATION_CONNECTED_IN_MS);
+          }
+          break;   
+        
+        default:
+          AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);
+          break;
       }
-
     }
-    AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);
+    else
+    { StartPlayFromSD(); // plays next
+    }
   }    
 }
 
@@ -1224,19 +1267,19 @@ void UTF8ToExtAscii(char *target)
   //strcpy(p, "218.ÃÑ¡àÃÒäÁèà¡èÒàÅÂ - äÁèÁÕàËµØ¼Å - ã¤ÃÊÑ¡¤¹");
 
   len = strlen(p);
-  Serial.printf("%s -> %d bytes\n", p, len);
+  Serial.printf("UTF8ToExtAscii() %s -> %d bytes\n", p, len);
   while(*p!=0)
   { again:
     //while(1)
     len = strlen(p);
-    Serial.printf("len=%d\n", len);
+    //Serial.printf("len=%d\n", len);
     if(len==0)break;
 
     { if(len>3)
       { if( ((*(p+0) & 0b11111000) == 0b11110000) && ((*(p+1) & 0b11000000) == 0b10000000) && ((*(p+2) & 0b11000000) == 0b10000000) && ((*(p+3) & 0b11000000) == 0b10000000) )
         { // U+010000..U+10FFFF skip this, can't print that at all
           memmove(p, p+4, len-3);
-          Serial.printf("4:%s\n", p);
+          //Serial.printf("4:%s\n", p);
           goto again;
         }
       }
@@ -1246,7 +1289,7 @@ void UTF8ToExtAscii(char *target)
       { if( ((*(p+0) & 0b11110000) == 0b11100000) && ((*(p+1) & 0b11000000) == 0b10000000) && ((*(p+2) & 0b11000000) == 0b10000000) )
         { // U+0800..U+D7FF en U+E000..U+FFFF skip this, can't print that at all
           memmove(p, p+3, len-2);
-          Serial.printf("3:%s (%d)\n", p, len);
+          //Serial.printf("3:%s (%d)\n", p, len);
           goto again;
         }
       }
@@ -1256,19 +1299,19 @@ void UTF8ToExtAscii(char *target)
         Serial.printf("len>1B:%s = %02X\n", p, *(p+1));
         if ( ((*(p+0) & 0b11100000) == 0b11000000) && ((*(p+1) & 0b11000000) == 0b10000000) )
         { // U+0080..U+07FF 110bbbaa 10aaaaaa
-          Serial.printf("len>1C:%s = %02X\n", p, *(p+1));
+          //Serial.printf("len>1C:%s = %02X\n", p, *(p+1));
 
           if( (*(p+0) & 0b00011100) ) // > 0xff skip this, can't print that at all
           { memmove(p, p+2, len-1);
-            Serial.printf("2:%s\n", p);
+            //Serial.printf("2:%s\n", p);
             goto again;
           }
           else // U+0080..U+00FF 110bbbaa 10aaaaaa
           { c = (*(p+0)<<6) | (*(p+1)& 0b00111111);  
             memmove(p, p+1, len);
             *p = c;
-            Serial.printf("1:%s = %02X\n", p, *p);
-            Serial.printf("char %c\n", *p);
+            //Serial.printf("1:%s = %02X\n", p, *p);
+            //Serial.printf("char %c\n", *p);
             
             p++;
             goto again;
@@ -1276,11 +1319,14 @@ void UTF8ToExtAscii(char *target)
         }
       }
       // U+0000..U+007F // do nothing
-      Serial.printf("Single:%s = %02X\n", p, *p) ;
+      //Serial.printf("Single:%s = %02X\n", p, *p) ;
       p++;
     }
   }
-  Serial.printf("UTF8-decoded -> %s\n", target);
+
+  p = target;
+  len = strlen(p);
+  Serial.printf("UTF8-decoded -> %s -> %d bytes\n", p, len);
 }
 
 
@@ -1353,11 +1399,8 @@ void PlaySoundBite(uint8_t *soundbite, unsigned long long length, uint16_t volum
   SetVolumeMapped(volume_to_use); // also enables amplifiers
 
   // extra reset, or else sometimes an old snippet of station music is played before the power down tune is played
-  //   chunkplayer.softReset();
-  //   delay(50);
-  //   chunkplayer.switchToMp3Mode(); 
-  //   delay(50);
-  //   Speakers(SPEAKERS_OFF);
+  chunkplayer.switchToMp3Mode(); // does a softReset() also
+
   Speakers(SPEAKERS_ON);
   // delay(250); // move to Speakers function
   //   chunkplayer.playChunk((uint8_t *)mp3_silence_1_sec, sizeof(mp3_silence_1_sec));
@@ -1381,6 +1424,7 @@ void GlobePowerDown(void)
   stream.stopSong();
   strcpy(ActiveStationTitle, "");
   strcpy(ActiveSongTitle, "");
+  AddToQueueForDisplay(ActiveStationTitle, MESSAGE_STATION_NAME);
   AddToQueueForDisplay(ActiveSongTitle, MESSAGE_SONG_TITLE);
   loopMQTT();
   delay(500); // really?? can't remember
@@ -1522,7 +1566,7 @@ void Speakers(uint8_t mode)
       Serial.println("Speakers OFF");
     }
     else if(mode == SPEAKERS_DELAYED_OFF)
-    { SpeakerOffAfter25mS = 400; // turn of after 100 x 25 -> 2500mS delay
+    { SpeakerOffAfter25mS = 1200; // turn of after 200 x 25 -> 5000 delay
     }
     else if(mode == SPEAKERS_ON)
     { SpeakerOffAfter25mS = 0;
@@ -1532,6 +1576,14 @@ void Speakers(uint8_t mode)
     }
   }  
 }
+
+// Called when codec is detected
+void codecCallBack(const char *codec)
+{
+    Serial.printf("codec: %s\n", codec);
+    SetVolumeMapped(DataFromDisplay.volumevalue); // will also enable amplifiers
+}
+
 
 
 

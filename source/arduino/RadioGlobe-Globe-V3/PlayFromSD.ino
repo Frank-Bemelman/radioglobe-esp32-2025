@@ -6,16 +6,16 @@
 // max 25 tracks to fill the playlist with
 #define MAXSINGLETRACKS 10
 #define MAXALBUMSTRACKS 15
-#define MAXTRACKPATHLEN 100
+#define MAXTRACKPATHLEN 256
 
-char CountriesOnSD[MAXCOUNTRIES][2];
 char CountryCodeSelectorSD[3];
-char StartPathSD[32];
+char StartPathSD[256];
 int16_t SingleTracksIdx;
 int16_t ArtistFoldersIdx;
 char SingleTracks[100][64]; // in a country folder
 char ArtistFolders[100][32]; // in a country folder
 char Playlist[25][MAXTRACKPATHLEN];
+
 uint16_t PlaylistTracks = 0;
 
 // called from setup()
@@ -30,212 +30,209 @@ bool CheckSD(void)
     Serial.print("[INFO] Capacity SD: ");
     Serial.print(SD.cardSize() / (1024 * 1024));
     Serial.println("MB");
-    ReadMusicFolderFromSD();
     return true;
   }
 }
 
-// called from CheckSD() if SD card detected
-void ReadMusicFolderFromSD(void)
-{ // directory SD card should contain a \GLOBEMUSIC folder
-  // in this folder, should be a list of subfolders, named with 2 letter countrycodes
-  // XX folder is for nautic areas
-  // UNSORTED folder is for music collections without country associated
-  // Each of these folders (may) contain playable files, mp3, wav etc
-  // Each of these folders (may)(also) contain new folders, typically named after albums name
 
-  // the \GLOBEMUSIC folder contents is nice to have, as it tells what countries are available
-  // so we only read that folder to collect countries
-  File root = SD.open("/GLOBEMUSIC");
-  if (!root) {
-    Serial.println("Failed to open directory");
-    return;
-  }
-
-  File file = root.openNextFile();
-  uint16_t country_idx = 0;
-  size_t filenamelength;
-  while (file && country_idx<MAXCOUNTRIES) {
-    if (file.isDirectory()) 
-    { Serial.print("  DIR : ");
-      Serial.println(file.name());
-      // is it a country folder?
-      if(strlen(file.name())==2)
-      { memcpy(&CountriesOnSD[country_idx], file.name(), 2);
-        country_idx++;
-        CountriesOnSD[country_idx][0] = 0;
-      }
-      else CountriesOnSD[country_idx][0] = 0; // end list
-    } 
-    //else 
-    //{ Serial.print("  FILE: ");
-    //  Serial.print(file.name());
-    //  Serial.print("  SIZE: ");
-    //  Serial.println(file.size());
-    //}
-    file = root.openNextFile();
-  }
-
-  Serial.println(CountriesOnSD[0]);
-}
-
-
-// called by puck message
+// called by puck message (and subsequent when filehas ended)
 void StartPlayFromSD(void)
 { static char PrevCountryCodeSelectorSD[3] = "";
-  static char PrevPath[32] = "";
-  bool found = false;
   Serial.println("Play from SD as requested by puck ");
-  Serial.print("CountriesOnSD[0] -> "); Serial.println(CountriesOnSD[0]);
-  Serial.print("CountryCodeSelectorSD -> ");Serial.println(CountryCodeSelectorSD);
 
-  uint16_t country_idx = 0;
-  while((CountriesOnSD[country_idx][0] != 0) && !found)
-  { //Serial.printf("CountriesOnSD[%d] = %.2s\n", country_idx, CountriesOnSD[country_idx]);
-    if(memcmp(CountriesOnSD[country_idx], CountryCodeSelectorSD, 2) == 0)
-    { // country folder exists on SD
-      found = true;
-      break;
-    }
-    country_idx++;
-  }
-  
-  if(found)
-  { sprintf(StartPathSD, "/GLOBEMUSIC/%s", CountryCodeSelectorSD);
-    if(strcmp(PrevPath, StartPathSD) != NULL)
-    { strcpy(PrevPath, StartPathSD);
-      PlaylistTracks = 0;
-      GetFoldersAndTracksFromSD();
-    }  
-  }
-  else
-  { sprintf(StartPathSD, "/GLOBEMUSIC/JUKEBOX", CountryCodeSelectorSD); // or from UNSORTED?? MOVE JUKEBOX to UNSORTED??
-    if(strcmp(PrevPath, StartPathSD) != NULL)
-    { strcpy(PrevPath, StartPathSD);
-      PlaylistTracks = 0;
-      GetFoldersAndTracksFromSD();
-    }  
+  // force a reload from SD
+  if(strcmp(PrevCountryCodeSelectorSD, CountryCodeSelectorSD) !=NULL)
+  { strcpy(PrevCountryCodeSelectorSD, CountryCodeSelectorSD); 
+    bMusicMode = false;
+    bMusicModePrev = false;
   }
 
-  PlaySomethingFromSD();
-
-}
-
-void GetFoldersAndTracksFromSD(void)
-{   
-  SingleTracksIdx = 0;
-  ArtistFoldersIdx = 0;
-  Serial.print("GetFoldersAndTracksFromSD from ");Serial.println(StartPathSD);
-  
-  
-   
-  File root = SD.open(StartPathSD);
-  if (!root) 
-  { Serial.println("Failed to open StartPathSD directory");
+  if(0) // for test purposes
+  { stream.stopSong(); // stop whatever stream or file was playing
+    Speakers(SPEAKERS_ON);
+    Serial.println("Play 1000Kz test.wav from SD");
+    stream.connectToFile(SD, "/1000hz10s.wav"); // play it
     return;
+  }  
+
+  if(bMusicMode)Serial.printf("MusicMode true\n");
+  else Serial.printf("MusicMode false\n");
+
+  bMusicMode = true;
+  if(bMusicModePrev != bMusicMode)
+  { bMusicModePrev = bMusicMode;
+    Serial.printf("Do it for country %s\n", CountryCodeSelectorSD);
+    AddToQueueForDisplay("1", MESSAGE_MUSIC_MODE);
+    strcpy(ActiveStationTitle, "SD-Card Music Files");
+    AddToQueueForDisplay(ActiveStationTitle, MESSAGE_STATION_NAME);
+    DataFromGlobe.D_QueueStationIndex = -1; // forget radiostation playing
+    PlaylistTracks=0;
+    if(GlobeSettings.sdcard_present)CollectFilePathsForCountry(CountryCodeSelectorSD);
+    else Serial.printf("No SD card???\n");
+    
   }
-  
-  // read names of all folders and names of all single tracks in start folder
-  File file = root.openNextFile();
-  while (file && (ArtistFoldersIdx<100) &&  (SingleTracksIdx<100))
-  { if (file.isDirectory()) 
-    { //Serial.print("  DIR : ");
-      //Serial.println(file.name());
-      strcpy(ArtistFolders[ArtistFoldersIdx], file.name());
-      ArtistFoldersIdx++;
-    } 
-    else 
-    { if(strcasestr(file.name(), "mp3") || strcasestr(file.name(), "wav") ) // only accept music files
-      { //Serial.print("  -FILE: ");
-        //Serial.print(file.name());
-        //Serial.print("  -SIZE: ");
-        //Serial.println(file.size());
-        strcpy(SingleTracks[SingleTracksIdx], file.name());
-        SingleTracksIdx++;
-      }
-    }
-    file = root.openNextFile();
-  }
-  Serial.printf("Found: ArtistFoldersIdx = %d - SingleTracksIdx = %d\n", ArtistFoldersIdx, SingleTracksIdx);
+
+ 
+//  if((strcmp(PrevCountryCodeSelectorSD, CountryCodeSelectorSD) != NULL) || (PlaylistTracks==0))
+//  { strcpy(PrevCountryCodeSelectorSD, CountryCodeSelectorSD);
+//    PlaylistTracks=0;
+//    if(GlobeSettings.sdcard_present)CollectFilePathsForCountry(CountryCodeSelectorSD);
+//  }
+
+  if(PlaylistTracks>0)PlaySomethingFromSD();
 }
 
 
 void PlaySomethingFromSD(void)
 { static uint16_t idx;
-  char filepath[256];
+  char *p;
 
-
-  stream.stopSong(); // stop whatever stream or file was playing
-  // we have 0-?? single tracks
-  // we also have 0-?? artist or collection folders containing album folders
-  // let's try to collect 25 random songs to create a playlist
-  // max 10 from the single tracks
-  // max 15 from the albums
-
-  if(PlaylistTracks==0)
-  { idx = FillTrackList();
-  }
-  else
-  { idx++;
-    idx %= PlaylistTracks;
-  }
-
+  idx++;
+  idx %= PlaylistTracks;
   
-  Serial.printf("%s/%s\n", StartPathSD, Playlist[idx]);
-  sprintf(filepath, "%s/%s", StartPathSD, Playlist[idx]);
+  Serial.printf("Play from SD Playlist -> %s\n", Playlist[idx]);
 
-  Speakers(SPEAKERS_ON);
-  SetVolumeMapped(DataFromDisplay.volumevalue); 
-  stream.connectToFile(SD, filepath); // play it
+  SetVolumeMapped(0);
+
+  if(stream.isRunning())
+  { stream.stopSong(); // stop whatever stream or file was playing
+    // chunkplayer.switchToMp3Mode();
+  }  
+
+  stream.connectToFile(SD, Playlist[idx]); // play it
+
+  if(stream.isRunning())
+  { // wait short time with volume 0 to avoid audible clicks/snippets between station switching
+    // currentMillis = millis();
+    // while (millis() - currentMillis < 250)
+    // { stream.loop();
+    // }    
+
+    // get songname from entire filepath
+    char *p;
+    char *q;
+    if((p=strrchr(Playlist[idx], '/'))!= NULL)
+    { strcpy(ActiveSongTitle, p+1);
+      if((q=strrchr(ActiveSongTitle, '.'))!= NULL)*q=0; // remove file extension
+      AddToQueueForDisplay(ActiveSongTitle, MESSAGE_SONG_TITLE);
+    }  
+  }
   Serial.printf("Done\n");
-
 }
 
 
-uint16_t FillTrackList(void)
-{ uint16_t n;
-  uint16_t randomidx;
-  uint16_t tracks = 0;
+int DirNested = 0;
+
+void CollectFilePathsForCountry(char *countrycode)
+{ sprintf(StartPathSD, "/GLOBEMUSIC/%s", countrycode);
+
+  File root = SD.open(StartPathSD);
+  if (!root) 
+  { Serial.printf("Failed to open StartPathSD directory -> %s", StartPathSD);
+    strcpy(StartPathSD, "/GLOBEMUSIC/JUKEBOX");
+  }
   
-  PlaylistTracks = 0;
-
-  randomidx = random(0, SingleTracksIdx);
-  Serial.printf("randomidx = %d\n", randomidx);
-  for(n=0;n<MIN(MAXSINGLETRACKS, SingleTracksIdx);n++)
-  { if(strlen(SingleTracks[randomidx]) < MAXTRACKPATHLEN)
-    { strcpy(Playlist[n], SingleTracks[randomidx]);
-      Serial.printf("Playlist added random #%02d -> %s\n", randomidx, Playlist[tracks]);
-      tracks++;
-    }
-    randomidx++;
-    randomidx %= SingleTracksIdx;
-  }
-
-  //Serial.printf("Playlist tracks = %d\n", tracks);
-
-  n = tracks;
-  while(n < (MAXSINGLETRACKS + MAXALBUMSTRACKS))
-  { // go find more tracks in ArtistFolders[]
-    // go dig into folders in StartPathSD
-    // if no folders in there
-    n++;
-  }
-
-  n = tracks;
-  while(n<(MAXSINGLETRACKS + MAXALBUMSTRACKS)) 
-  { // go find more tracks in ArtistFolders[]
-    strcpy(Playlist[n], "EMPTY");
-    n++;
-  }
-
-  n = 0;
-  // for(n=0; n<(MAXSINGLETRACKS + MAXALBUMSTRACKS); n++)
-  while(n < (MAXSINGLETRACKS + MAXALBUMSTRACKS))
-  { Serial.printf("Playlist #%02d -> %s\n", n, Playlist[n]);
-    n++;
-  }
-
-  PlaylistTracks = tracks; 
-  return(random(0, PlaylistTracks));
+  Serial.printf("Go get the tracks for %s\n", StartPathSD);
+  // from this start path, dive in and collect max 25 random music files, dive in subdirectories if need be
+  PlaylistTracks = 0; 
+  DirNested = 0;
+  CollectTracksPaths(StartPathSD);
+  
 }
 
+char subdirectories[100][64];
+
+char ScrollToAdd[256];
+
+
+void CollectTracksPaths(char *path)
+{ char trackdirfile[256];
+  char txtline[256];
+  uint16_t subdiridx = 0;
+
+  Serial.println(path);
+  
+  sprintf(trackdirfile, "%s/track-dir.txt", path);
+
+  File root = SD.open(path);
+  if (!root) 
+  { Serial.printf("Failed to open directory -> %s\n", path);
+    return;
+  }
+
+
+  
+  File trackdirtxt = SD.open(trackdirfile);
+  if (!trackdirtxt) // create it if not exsisisting
+  { Serial.printf("Failed to open -> %s\n", trackdirfile);
+    trackdirtxt = SD.open(trackdirfile, "w", true);
+    if (!trackdirtxt)return;
+
+    // write list of files in directory
+      // read names of all folders and names of all single tracks in start folder
+    File file = root.openNextFile();
+
+    while (file)
+    { if (file.isDirectory()) 
+      { Serial.print("  DIR : ");
+        Serial.println(file.name());
+        trackdirtxt.printf("D-%s\n", file.name());
+      } 
+      else 
+      { if(strcasestr(file.name(), "mp3") || strcasestr(file.name(), "wav") ) // only accept music files
+        { Serial.print("  -FILE: ");
+          Serial.print(file.name());
+          Serial.print("  -SIZE: ");
+          Serial.println(file.size());
+          trackdirtxt.printf("F-%s\n", file.name());
+        }
+      }
+      file = root.openNextFile();
+    }
+    trackdirtxt.close();  
+    trackdirtxt = SD.open(trackdirfile);
+  }
+  
+  if(!trackdirtxt) return;
+
+  while(trackdirtxt.available())
+  { // read all of them{ int n;
+    uint16_t n;
+    n = trackdirtxt.readBytesUntil('\n', txtline, sizeof(txtline));
+    txtline[n]=0;
+    Serial.println(txtline);
+
+    if(txtline[0]=='D')
+    { if(subdiridx<100)
+      { //strcpy(subdirectories[subdiridx], "/");
+        strcpy(subdirectories[subdiridx++], &txtline[2]);
+      }
+      else break;
+    }  
+    else if(txtline[0]=='F')
+    { if(PlaylistTracks<25)
+      { Serial.printf("Added %d -> %s to path -> %s\n", PlaylistTracks, &txtline[2], path);
+      
+        sprintf(ScrollToAdd, "%s/%s", path, &txtline[2]);
+        strcpy(Playlist[PlaylistTracks++], ScrollToAdd);
+        if(strlen(ScrollToAdd)<=QUEUEMESSAGELENGTH)
+        { AddToQueueForDisplay(ScrollToAdd, MESSAGE_PLAYLIST_SONG_ARTIST);
+        }
+      }
+      else break;
+    }
+  }
+  trackdirtxt.close(); 
+
+
+  if(PlaylistTracks<(25-1)) // need more tracks, open another, deeper directory
+  { Serial.printf("We have %d tracks collected\n", PlaylistTracks);
+    if(subdiridx) // we have directories
+    { Serial.printf("We have %d subdirectories\n", subdiridx);
+      DirNested++;
+
+      sprintf(trackdirfile, "%s/%s", path, subdirectories[random(0, subdiridx)]);
+      if(DirNested<3)CollectTracksPaths(trackdirfile);
+    }
+  }
+}  
