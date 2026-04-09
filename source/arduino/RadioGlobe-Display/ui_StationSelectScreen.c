@@ -56,7 +56,7 @@ void ui_StationSelectScreen_screen_init(void)
     lv_obj_set_height(ui_StationRoller, 240);
     lv_obj_set_align(ui_StationRoller, LV_ALIGN_CENTER);
     lv_obj_set_style_text_align(ui_StationRoller, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_StationRoller, &lv_font_montserrat_32, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_StationRoller, &ui_font_Font32, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_set_style_text_color(ui_StationRoller, lv_color_hex(0x000000), LV_PART_SELECTED | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_StationRoller, 255, LV_PART_SELECTED | LV_STATE_DEFAULT);
