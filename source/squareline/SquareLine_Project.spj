@@ -1637,7 +1637,7 @@
               {
                 "nid": 1030,
                 "strtype": "LABEL/Text",
-                "strval": "",
+                "strval": "ABC",
                 "InheritedType": 10
               },
               {
@@ -4081,7 +4081,7 @@
                       {
                         "nid": 10450,
                         "strtype": "_style/Text_Font",
-                        "strval": "montserrat_20",
+                        "strval": "font1",
                         "InheritedType": 3
                       }
                     ],
@@ -4272,7 +4272,7 @@
                       {
                         "nid": 10450,
                         "strtype": "_style/Text_Font",
-                        "strval": "montserrat_20",
+                        "strval": "font1",
                         "InheritedType": 3
                       }
                     ],
@@ -12123,7 +12123,7 @@
                       {
                         "nid": 10450,
                         "strtype": "_style/Text_Font",
-                        "strval": "montserrat_20",
+                        "strval": "font1",
                         "InheritedType": 3
                       }
                     ],
@@ -12303,7 +12303,7 @@
                       {
                         "nid": 10450,
                         "strtype": "_style/Text_Font",
-                        "strval": "montserrat_20",
+                        "strval": "font1",
                         "InheritedType": 3
                       }
                     ],
@@ -13002,7 +13002,7 @@
                       {
                         "nid": 10450,
                         "strtype": "_style/Text_Font",
-                        "strval": "montserrat_20",
+                        "strval": "font1",
                         "InheritedType": 3
                       }
                     ],
@@ -13195,7 +13195,7 @@
                       {
                         "nid": 10450,
                         "strtype": "_style/Text_Font",
-                        "strval": "montserrat_20",
+                        "strval": "font1",
                         "InheritedType": 3
                       }
                     ],
@@ -13375,7 +13375,7 @@
                       {
                         "nid": 10450,
                         "strtype": "_style/Text_Font",
-                        "strval": "montserrat_20",
+                        "strval": "font1",
                         "InheritedType": 3
                       }
                     ],
@@ -18444,6 +18444,12 @@
                 "InheritedType": 1
               },
               {
+                "nid": 100,
+                "strtype": "ROLLER/Hidden",
+                "strval": "False",
+                "InheritedType": 2
+              },
+              {
                 "nid": 225,
                 "strtype": "OBJECT/Scrolling",
                 "InheritedType": 1
@@ -18518,7 +18524,7 @@
                       {
                         "nid": 10450,
                         "strtype": "_style/Text_Font",
-                        "strval": "montserrat_32",
+                        "strval": "Font32",
                         "InheritedType": 3
                       }
                     ],
@@ -18552,7 +18558,7 @@
                       {
                         "nid": 10450,
                         "strtype": "_style/Text_Font",
-                        "strval": "montserrat_42",
+                        "strval": "Font42",
                         "InheritedType": 3
                       },
                       {
@@ -18850,6 +18856,12 @@
                 "InheritedType": 1
               },
               {
+                "nid": 100,
+                "strtype": "IMAGE/Hidden",
+                "strval": "False",
+                "InheritedType": 2
+              },
+              {
                 "nid": 150,
                 "strtype": "OBJECT/Adv_hittest",
                 "strval": "True",
@@ -19145,6 +19157,12 @@
                 "InheritedType": 1
               },
               {
+                "nid": 100,
+                "strtype": "LABEL/Hidden",
+                "strval": "False",
+                "InheritedType": 2
+              },
+              {
                 "nid": 110,
                 "strtype": "OBJECT/Clickable",
                 "strval": "False",
@@ -19309,6 +19327,12 @@
                 "flags": 1048576,
                 "strtype": "OBJECT/Flags",
                 "InheritedType": 1
+              },
+              {
+                "nid": 100,
+                "strtype": "LABEL/Hidden",
+                "strval": "False",
+                "InheritedType": 2
               },
               {
                 "nid": 110,
@@ -19496,6 +19520,12 @@
                 "InheritedType": 1
               },
               {
+                "nid": 100,
+                "strtype": "LABEL/Hidden",
+                "strval": "False",
+                "InheritedType": 2
+              },
+              {
                 "nid": 110,
                 "strtype": "OBJECT/Clickable",
                 "strval": "False",
@@ -19681,6 +19711,12 @@
                 "InheritedType": 1
               },
               {
+                "nid": 100,
+                "strtype": "LABEL/Hidden",
+                "strval": "False",
+                "InheritedType": 2
+              },
+              {
                 "nid": 110,
                 "strtype": "OBJECT/Clickable",
                 "strval": "False",
@@ -19762,7 +19798,7 @@
                       {
                         "nid": 10450,
                         "strtype": "_style/Text_Font",
-                        "strval": "montserrat_20",
+                        "strval": "font1",
                         "InheritedType": 3
                       }
                     ],
@@ -19824,6 +19860,12 @@
             "flags": 1048576,
             "strtype": "OBJECT/Flags",
             "InheritedType": 1
+          },
+          {
+            "nid": 100,
+            "strtype": "SCREEN/Hidden",
+            "strval": "False",
+            "InheritedType": 2
           },
           {
             "nid": 225,
@@ -33815,7 +33857,7 @@
   },
   "animations": [],
   "selected_theme": "Default",
-  "selected_screen": "GUID95506921-983425S468264160",
+  "selected_screen": "GUID60695916-16194S170444162",
   "info": {
     "name": "SquareLine_Project.spj",
     "depth": 1,
@@ -33843,10 +33885,10 @@
     "custom_variable_prefix": "uic",
     "separate_screen_save": false,
     "hierarchy_state_save": false,
-    "backup_cnt": 349,
+    "backup_cnt": 359,
     "autosave_cnt": 0,
     "group_color_cnt": 11,
-    "imagebytearrayprefix": null,
+    "imagebytearrayprefix": "",
     "lvgl_version": "8.3.11",
     "callfuncsexport": "C_FILE",
     "imageexport": "SOURCE",
