@@ -1,0 +1,16 @@
+{
+  "codename": "Font42",
+  "ttf_path": "/assets/Montserrat-Medium.ttf",
+  "bin_path": "/assets\\ui_font_Font42.bin",
+  "c_path": "/assets\\ui_font_Font42.c",
+  "cfg_path": "/assets\\ui_font_Font42.fcfg",
+  "size": 42,
+  "bpp": 4,
+  "letters": 3,
+  "ranges": [
+    "0x20-0xff"
+  ],
+  "symbols": "",
+  "customparams": "--no-compress --no-prefilter",
+  "uploaded": false
+}
