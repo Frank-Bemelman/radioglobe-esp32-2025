@@ -3,6 +3,7 @@
 # radioglobe-esp32-2025
 Radio Globe using ESP32 and Waveshare round touch LCD 2.1 inch
 
+UPDATE 30-JUN-2026 - Added auto update feature -> long press serial number in setup menu for auto update globe and puck
 UPDATE 24-MRT-2026 - Added lots of features, worldmap, clock, weather status, currency exchange
 UPDATE 15-JULY-2025 Lots of improvements made. Most stations now play without issues. Happy with the result.<br> 
 UPDATE 6-JULY-2025 It actually works! Performance is improved, few bugs, some extras. <br>
