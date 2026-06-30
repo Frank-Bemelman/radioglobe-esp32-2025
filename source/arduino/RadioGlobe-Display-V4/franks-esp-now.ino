@@ -58,13 +58,16 @@ bool setup_esp_now(void)
 
   btStop(); // BT off, as recommended by Cellie
   WiFi.persistent(false);
-  WiFi.disconnect();
-  WiFi.mode(WIFI_OFF);
+//  WiFi.disconnect();
+//  WiFi.mode(WIFI_OFF);
+//  WiFi.mode(WIFI_OFF);
+  
   delay(100);
   
    
   
   revertChan = DisplaySettings.wifichannel;
+  if(revertChan==0)revertChan = 11;
   // first try with stored wifi channel to see if that connects with globe or gives a response from globe
   // when first channel fails, loop through all channels
   loopchannels:

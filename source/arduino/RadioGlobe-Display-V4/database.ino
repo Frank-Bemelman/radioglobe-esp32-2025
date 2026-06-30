@@ -10,7 +10,7 @@
 
 
 bmpfile StationsMap;  // to maintain a quick lookup map of available directories     
-bmpfile NauticMap;    // to have a map of water vs land that have actual timezones according to google
+//bmpfile NauticMap;    // to have a map of water vs land that have actual timezones according to google
 stations_arraybin Stations;
 
 
@@ -443,6 +443,8 @@ void FindNewStation(void)
 
   Stations.count = 0;
   Stations.requested -1;
+  char firstcountrycode[3] = ""; // near borders, different countries can be in the directory, decided to stick with the first found
+
 
   mSstartsearch = millis();
 
@@ -457,7 +459,7 @@ void FindNewStation(void)
     { // game over
       break;
     }
-    CollectStationsAtGps(mapfind_ns, mapfind_ew);
+    CollectStationsAtGps(mapfind_ns, mapfind_ew, firstcountrycode);
     if(randomrange==0)randomrange = Stations.count; // count from first succesful find
     Serial.printf("Collecting Attempt %d gave %d stations\n", hitcount, Stations.count);
   }
@@ -505,7 +507,7 @@ void FindNewStation(void)
   ScrollNeedsReload = true;
 }
 
-void CollectStationsAtGps(int16_t mapfind_ns, int16_t mapfind_ew)
+void CollectStationsAtGps(int16_t mapfind_ns, int16_t mapfind_ew, char *firstcountrycode)
 { File root;
   File file;
   char dirpath[64];
@@ -535,16 +537,19 @@ void CollectStationsAtGps(int16_t mapfind_ns, int16_t mapfind_ew)
 //    while (file && Stations.count<(MAX_STATIONS-1))
 // dit gaat op tilt, met name bij de reload scroll als meer dan ?? stations, zeker geen 100 of 150 mogelijk 
 // dus even naar 25 max
+
+
     while (file && Stations.count<25) 
     { if(!file.isDirectory()) 
-      { Serial.print("STATIONS FILE: ");
-        Serial.print(file.name());
-        Serial.print(" FILE SIZE: ");
-        Serial.println(file.size());
+      { //Serial.print("STATIONS FILE: ");
+        //Serial.print(file.name());
+        //Serial.print(" FILE SIZE: ");
+        //Serial.println(file.size());
         lv_label_set_text(ui_Station_Title, file.name());
         char town[32] = "";
         char countrycode[3] = "";
         char countryname[50]="";
+        
         strcpy(town, file.name());
         // filenames are constructed from name of town, underscore, and 2 letter land code, like -> Naaldwijk_NL.txt
         if((p=strchr(town, '_')) != NULL)
@@ -553,14 +558,18 @@ void CollectStationsAtGps(int16_t mapfind_ns, int16_t mapfind_ew)
           strncpy(countrycode, p, 2);
           countrycode[2]=0;
 
+          if(strlen(firstcountrycode) == 0)strcpy(firstcountrycode, countrycode);
+
           if(!FindCountryNameByCode(countryname, countrycode))
           { Serial.printf("Not a valid countrycode %s !!!!!!!!!!!!!!!\n", countrycode);
           }
-          Serial.printf("Found country: <%s>\n", countryname);
+          //Serial.printf("Found country: <%s>\n", countryname);
         }
 
         Lvgl_Loop();
 
+        if(strcmp(firstcountrycode, countrycode) == 0) // same country
+        {
         while(file.available() && Stations.count<25)
         { bytesread = file.readBytesUntil(0x0a, oneline, sizeof(oneline)-1);
           oneline[bytesread]=0;
@@ -595,8 +604,17 @@ void CollectStationsAtGps(int16_t mapfind_ns, int16_t mapfind_ew)
             strcpy(Stations.StationNUG[Stations.count].town, town);
             strcpy(Stations.StationNUG[Stations.count].countrycode, countrycode);
             strcpy(Stations.StationNUG[Stations.count].countryname, countryname);
-            Stations.count++;
+            // in all honesty, ignore if country and ignore this url if already in list
+            if(strcmp(firstcountrycode, countrycode) == 0) // same country
+            { //Serial.printf("%s same as %s\n", firstcountrycode, countrycode);
+              if(CheckIfUniqueUrl())Stations.count++;
+            }
+            else
+            { Serial.printf("%s differs from %s\n", firstcountrycode, countrycode);
+              //if(CheckIfUniqueUrl())Stations.count++;
+            }
           }
+        }
         }
         //file = root.openNextFile();
       }
@@ -604,6 +622,16 @@ void CollectStationsAtGps(int16_t mapfind_ns, int16_t mapfind_ew)
     } 
     SD_MMC.end();  
   }
+}
+
+bool CheckIfUniqueUrl(void)
+{ uint16_t idx=0;
+  if(!Stations.count)return true;
+  while(idx<Stations.count)
+  { if(strcmp(Stations.StationNUG[Stations.count].url, Stations.StationNUG[idx].url)==0)return false; // url already in list of stations
+    idx++;
+  }
+  return true;
 }
 
 void SetPixelInMap(int16_t ns, int16_t ew)
@@ -681,9 +709,10 @@ void RadioGlobeClick(lv_event_t * e)
       FindNewStation();
       ReloadScroll();
     }
-
-  }  
-  ReloadScroll();
+  }
+  else
+  { ReloadScroll();
+  }
   lv_scr_load(ui_StationSelectScreen);
   startMillis = millis(); 
   Serial.printf("RadioGlobeClick() return\n");
@@ -725,7 +754,17 @@ void ReloadScroll(void)
   }
   // Serial.println(rolldata);
   // Serial.println(n);
-  lv_label_set_text(ui_StationRollerComment, ""); // usually says connected to station or something
+
+  if(bMusicMode)
+  { lv_label_set_text(ui_StationRollerComment, "Playlist From SD-Card"); // usually says connected to station or something
+  }
+  else 
+  { lv_label_set_text(ui_StationRollerComment, ""); 
+  }
+  
+  lv_label_set_text(uic_StationRollerPlace, "");
+
+
   lv_roller_set_options(uic_StationRoller, rolldata, LV_ROLLER_MODE_NORMAL);
   if(Stations.count)
   { char content[32];
@@ -939,10 +978,13 @@ void AddFileToQueueForGlobe(uint16_t station)
 { //DataFromDisplay.D_QueueStationIndex = station;
   //Stations.requested = station; 
   //Stations.playing = -1;
+  char message[16];
   
   if(station<Stations.count)
   { if(bPowerStatus == true)
-    { AddToQueueForGlobe(Stations.StationNUG[station].url, MESSAGE_START_THIS_FILE);
+    { //AddToQueueForGlobe(Stations.StationNUG[station].url, MESSAGE_START_THIS_FILE);
+      sprintf(message, "%d", station);
+      AddToQueueForGlobe(message, MESSAGE_START_FILE_BY_INDEX);
     }
     //lv_label_set_text(ui_Station_Title, Stations.StationNUG[station].name); // rebuild songname from url
     lv_label_set_text(ui_Station_Title, ""); // for now

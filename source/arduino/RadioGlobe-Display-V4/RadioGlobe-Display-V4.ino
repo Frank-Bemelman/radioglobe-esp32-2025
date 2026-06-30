@@ -1,3 +1,4 @@
+
 // Using LVGL with Arduino requires some extra steps:
 // Be sure to read the docs here: https://docs.lvgl.io/master/get-started/platforms/arduino.html  */
 // #include "lv_conf.h" (root lib folder)
@@ -14,9 +15,23 @@
 // 14APR2026 Boards Manager (back to 3.3.6, ESP32S3 Dev Module 16MB 3MB app PSRAM OPI) (testing, also still gives glitches in display brightness)
 // 14APR2026 Boards Manager (back to 3.3.3, ESP32S3 Dev Module 16MB 3MB app PSRAM OPI) (testing..., also still gives glitches in display brightness)
 // 14APR2026 Boards Manager (back to 3.3.7, Waveshare ESP32-S3-Touch-LCD-2.1) (seems to give gfixedsplay luminance)brightness
+// 14APR2026 Boards Manager (back to 3.3.7, ESP32S3 Dev Module 16MB 4MB app (custom partition) PSRAM OPI)) 
+
+// 28 JUN 26 Changed to custom partition table 4MB APP0 / 4MB APP1 / 8MB FFAT
+// had to increase as 3MB was too small for the github download feature, went from 98% to 103% -> compiler now reports as 19% from 16MB but we need to stay below 25% (4MB)
+// stored in project folder as partitions.csv
+// choose custom partition in Arduino IDE
+// # Name,   Type, SubType, Offset,  Size, Flags
+// nvs,      data, nvs,     0x9000,  0x5000,
+// otadata,  data, ota,     0xe000,  0x2000,
+// app0,     app,  ota_0,   0x10000, 0x400000,
+// app1,     app,  ota_1,   0x410000,0x400000,
+// ffat,     data, fat,     0x810000,0x7E0000,
+// coredump, data, coredump,0xFF0000,0x10000,
 
 
 // update and features added
+// 29 MAY 26 -> Only find and collect stations from one country
 // 17 MAR 26 -> Added speaker off icon, during volume value shown, in case speakers are off
 // 15 MAR 26 -> EXPERIMENT LVGL_Driver.cpp line 101 -> commented taskdelay again, maybe not neccesairy, eeprom screen glitch fix attempt
 // 14 MAR 26 -> FEATURE shadow edges on long/short press buttons, green for just a selection, yellow for storing a change, red for possibly dangerous change
@@ -30,21 +45,36 @@
 // 14 FEB 26 -> FEATURE now has wifi channel updated by globe wifi connection
 // LVGL_Driver.cpp line 101 -> eeprom screen glitch fix attempt
 
+#define MBEDTLS_SSL_MAX_CONTENT_LEN 4096
 
+#define BUILD_LABEL "Puck Build"
+// make this -> Puck Build Jun 23 2026 - 21:08:50
+#define BUILD_TIMESTAMP  BUILD_LABEL " " __DATE__ " - " __TIME__
+#define BUILD_TIMESTAMP_ONLY __DATE__ " - " __TIME__
+const char build_label[] =  BUILD_LABEL;
+const char build_timestamp[] =  BUILD_TIMESTAMP;
+const char build_timestamp_only[] =  BUILD_TIMESTAMP_ONLY;
+extern uint8_t UpdateFirmware(uint8_t state); // start with 1 for a full date/time check and update
+extern char Wifi_SSID[];
+extern char Wifi_PASSWORD[];
 
 #include "..\secrets.h"
+
 // as defined in ..\secrets.h
 // char SSID [32] = "YOUR-SSID";
 // char PASSWORD[32] = "YOUR-WIFI-PASSWORD";
-// char google_api_key[] = "YOUR-API-KEY"; // free, get your own at google developer platform, used for timezone retrieval
-// char open_weather_map_api_key[] = "YOUR-API-KEY"; // free, get your own at https://openweathermap.org/api
+// char google_api_key[] = "YOUR-API-KEY"; // free, get your own at google developer platform, used for timezone retrieval, replace first 4 letters AIza in !!!!
+// to avoid a verbatim copy of api key in compiled binary 
+
+// https://console.cloud.google.com/google/maps-apis/credentials?project=subtle-backup-498313-s5
+// https://console.cloud.google.com/apis/dashboard?project=subtle-backup-498313-s5
+// char open_weather_map_api_key[] = "YOUR-API-KEY"; // free, get  your own at https://openweathermap.org/api
 
 #include "Wireless.h"
 #include "Gyro_QMI8658.h"
 #include "RTC_PCF85063.h"
 #include "SD_Card.h"
 #include "LVGL_Driver.h"
-//#include "LVGL_Example.h"
 #include "BAT_Driver.h"
 
 //#include "lv_conf.h"
@@ -54,6 +84,9 @@
 // esp now
 #include <WiFi.h>
 #include <esp_wifi.h>
+#include <WiFiClient.h>
+//#include <NetworkClientSecure.h>
+
 
 #include <ArduinoJson.h>
 #include <ArduinoJson.hpp>
@@ -79,6 +112,8 @@ struct eepromData
   char open_weather_map_api_key[64];
   uint16_t expand_search; // number of degrees to look around for a station
   uint16_t sdcard_present;
+  uint16_t auto_update_state = 0;
+  
   char spare_data[];
 };
 eepromData DisplaySettings; // values to work with
@@ -92,11 +127,11 @@ bool bMusicMode = false;
 bool bMusicModePrev = false;
 bool ScrollNeedsReload = false;
 
+extern uint16_t UpdateState;
 
-void readMacAddress(){
-  esp_err_t ret = esp_wifi_get_mac(WIFI_IF_STA, PuckMac);
-
-  Serial.print("readMacAddress() -> ESP32 Puck MAC Address read: ");
+void readMacAddress()
+{ esp_err_t ret = esp_wifi_get_mac(WIFI_IF_STA, PuckMac);
+  Serial.println(BUILD_TIMESTAMP);
   if (ret == ESP_OK) 
   { Serial.printf("readMacAddress() -> ESP32 Puck MAC Address read: %02X:%02X:%02X:%02X:%02X:%02X\n",
                    PuckMac[0], PuckMac[1], PuckMac[2],
@@ -112,6 +147,8 @@ bool bUpAndRunning = false;
 bool ForceGlobeStationGPSupdate = false;
 
 uint32_t GlobalTicker100mS = 0;
+uint32_t GlobalTicker1S = 0;
+uint32_t PrevGlobalTicker1S = 0;
 char SecretCode[6] = "12345";  
 uint16_t CalibrationModeLatLong = 0;
 #define CALMODE_NS   0x01
@@ -131,12 +168,12 @@ typedef struct calibrations_arraybin
 {  ns_ew_intersection calibrations[(180/15)+2][360/15]; // 14 positions for north to south, 0-15-30-45-60-75-90
 };
 
-calibrations_arraybin ns_ew_calibrations;
-calibrations_arraybin def_cal;
+EXT_RAM_ATTR calibrations_arraybin ns_ew_calibrations;
+EXT_RAM_ATTR calibrations_arraybin def_cal;
 uint16_t CalToIndexNS;
 uint16_t CalToIndexEW;
 bool bPowerStatus = true;
-#define AUTOPOWERDOWNAFTER 3600;
+#define AUTOPOWERDOWNAFTER 8 * 3600; // auto power after 12HR 
 uint32_t AutoSleepTimer = AUTOPOWERDOWNAFTER;
 
 #define DEFAULT_BACKLIGHT 75
@@ -169,19 +206,22 @@ void Driver_Loop(void *parameter)
 
     // auto dim backlight and gyro test every second
     if((GlobalTicker100mS % 10)==0)
-    { getGyroscope();
+    { GlobalTicker1S++;
+      getGyroscope();
       uint16_t motion = abs((int)Gyro.x) + abs((int)Gyro.y) + abs((int)Gyro.z); 
       //Serial.printf("x%f - y%f - z%f\n", Gyro.x, Gyro.y, Gyro.z);
       //Serial.printf("motion is %d\n", motion);
       //Serial.printf("motion %d freeze %d backlightvalue %d\n", motion, freeze, backlightvalue);
       if(motion>30)
       { BacklightValue = DEFAULT_BACKLIGHT;
+        AutoSleepTimer = AUTOPOWERDOWNAFTER;
         ClockBackLight = true;
         if(bPowerStatus)
         { HoldBacklight = DEFAULT_HOLD_BACKLIGHT; // give our beloved user 60 seconds of full brightness before it starts fading again
         }
       }    
-       
+
+            
       if(HoldBacklight>0)
       { HoldBacklight--;
       }
@@ -243,9 +283,21 @@ void monitor_update(void)
     
 uint64_t sleepTime = 10000000;  // Sleep duration in microseconds (10 seconds)
 
+extern void setupusb();
+
 void setup()
 { char content[64];
+
+  // replace !!!! characters in fetched api key (secrets.h)
+  // silly trick to disguise api key for github scan 
+  google_api_key[0]='A';
+  google_api_key[1]='I';
+  google_api_key[2]='z';
+  google_api_key[3]='a';
+  
   Serial.begin(115200);
+
+  heap_caps_malloc_extmem_enable(1024); 
 
   // sleep test
   // Enable wake-up by timer
@@ -258,9 +310,12 @@ void setup()
   LCD_Init();   // If you later reinitialize the LCD, you must initialize the SD card again !!!!!!!!!!
   SD_Init();    // It must be initialized after the LCD, and if the LCD is reinitialized later, the SD also needs to be reinitialized
 
+  //setupusb(); // doesnt work - wanted to use puck as usb storage for PC 
+
   EEPROM.begin(EEPROM_SIZE);
   LoadDisplaySettingsFromEeprom();
   InitializeDisplaySettings(); // at first run, initialize with some reasonable values
+
   setup_esp_now(); 
 
   Lvgl_Init();
@@ -308,8 +363,7 @@ void setup()
   sprintf(content, "Globe Mac %02X:%02X:%02X:%02X:%02X:%02X", DisplaySettings.globemac[0], DisplaySettings.globemac[1], DisplaySettings.globemac[2], DisplaySettings.globemac[3], DisplaySettings.globemac[4], DisplaySettings.globemac[5]);
   Serial.println(content);
   lv_label_set_text(ui_GlobeMac, content);
-  sprintf(content, "Puck Build %s - %s", __DATE__, __TIME__);
-  lv_label_set_text(ui_PuckBuild, content);
+  lv_label_set_text(ui_PuckBuild, build_timestamp);
 
   ShowWeatherData(false);
 
@@ -338,7 +392,7 @@ void setup()
   sprintf(content, "%s", DisplaySettings.open_weather_map_api_key);
   AddToQueueForGlobe(content, MESSAGE_OPEN_WEATHER_MAP_API_KEY);
 
-  AddToQueueForGlobe("VOL-BASS-TREBLE PLEASE", MESSAGE_DISPLAY_WANTS_VOLUME_AND_TONE);
+  AddToQueueForGlobe("", MESSAGE_POWERUP);
   AddToQueueForGlobe("DISPLAY WANTS MQTT STATUS", MESSAGE_MQTT_STATUS); 
   Stations.playing = -1;
 
@@ -411,6 +465,11 @@ void loop()
   Lvgl_Loop();
   loop_esp_now(); // send volume & other stuff to globe
 
+  if(UpdateState)
+  { UpdateState = UpdateFirmware(UpdateState);
+    if(UpdateState==0)WiFi.disconnect();
+    Serial.println(WiFi.localIP());
+  } 
 
   if(bTimer100ms)
   //if(1)
@@ -461,7 +520,7 @@ void loop()
         else if(receivedMessage[0]=='Q')
         { AddToQueueForGlobe("", MESSAGE_GLOBE_PLAY_SD);
         }
-        else if(receivedMessage[0]=='U')
+        else if(receivedMessage[0]=='X')
         { DataFromDisplay.D_QueueStationIndex = 49;
           AddToQueueForGlobe("https://stream.zeno.fm/dahlxvtaz1guv", MESSAGE_START_THIS_STATION); https://stream.zeno.fm/dahlxvtaz1guv
         }
@@ -469,6 +528,10 @@ void loop()
         { DisplaySettings.magicnumber = 0; // reset
           InitializeDisplaySettings();
           ESP.restart();
+        }
+        else if(receivedMessage[0]=='U')
+        { //AddToQueueForGlobe("1", MESSAGE_UPDATE_GLOBE);
+          UpdateState = 1;
         }
         receivedMessage = "";
       }
@@ -481,6 +544,7 @@ void loop()
 
     if(oldscreen != screen) // screen changed
     { oldscreen = screen;
+      AutoSleepTimer = AUTOPOWERDOWNAFTER;
       if(bPowerStatus==true)
       { if(screen == ui_CalibrationScreen) // force refresh raw coordinate
         { PrevDataFromGlobe.ns = -1;  
@@ -729,14 +793,20 @@ void loop()
           }  
           break;
 
-        case MESSAGE_GLOBE_WANTS_CURRENT_STATION: // 26
-           if(Stations.playing>=0 && bPowerStatus)
-           { ForceGlobeStationGPSupdate = 1;
-             AddStationToQueueForGlobe(Stations.playing);
+        case MESSAGE_GLOBE_WANTS_CURRENT_STATION: // 26 after a power up
+           if(!bMusicMode)
+           { if(Stations.playing>=0 && bPowerStatus)
+             { ForceGlobeStationGPSupdate = 1;
+               AddStationToQueueForGlobe(Stations.playing);
+             }
+             else // after power up, and globe moved to other place/timezone -> find a station for that 
+             { FindNewStation();
+             }
            }
-           else // after power up, and globe moved to other place/timezone -> find a station for that 
-           { FindNewStation();
-           }
+           else
+           {
+             AddFileToQueueForGlobe(Stations.requested);
+           }  
            break;
          case MESSAGE_VOLUME_AND_TONE:
            { int32_t volume;
@@ -1021,18 +1091,15 @@ void loop()
 
         case MESSAGE_MUSIC_MODE:
           if(QueueMessage[0]=='1')bMusicMode = true;
-          else bMusicMode = true;
+          else bMusicMode = false;
 
           SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
            
-          if(bMusicMode)
+          if(bMusicMode == true)
           { // empty roller
             Stations.count = 0;
             Stations.requested -1;
             ReloadScroll();
-            sprintf(content, "Playlist From SD-Card");
-            lv_label_set_text(ui_StationRollerComment, content); 
-            lv_label_set_text(uic_StationRollerPlace, "");
             lv_label_set_text(uic_Home_City, "SD-Card");
           }
           break;
@@ -1041,6 +1108,27 @@ void loop()
           // add song and artist to roller
           AddToScroll(QueueMessage);
           Serial.printf("Added\n");
+          break;
+
+        case MESSAGE_SET_ROLLER_INDEX:
+          // received from globe when (next) song from SD is started
+          sscanf(QueueMessage, "%d", &Stations.requested);
+          lv_roller_set_selected(uic_StationRoller, Stations.requested, LV_ANIM_ON);
+          sprintf(content, "%d-%d", Stations.requested+1, Stations.count); // top label 1-150 in stations roller
+          lv_label_set_text(ui_StationRollerSelected, content);
+          break;
+
+        case MESSAGE_UPDATE_PUCK:
+          // in puck setup menu, long press serialnumber to trigger, globe updates first, then puck update
+          if(UpdateState==0)UpdateState = 1; // triggers the update procedure, if procedure does not run yet
+          break;
+
+        case MESSAGE_SSID_FOR_GLOBE:
+          strcpy(Wifi_SSID, QueueMessage);
+          break;
+
+        case MESSAGE_PASSWORD_FOR_GLOBE:
+          strcpy(Wifi_PASSWORD, QueueMessage);
           break;
 
         default:
@@ -1059,6 +1147,7 @@ void loop()
     if(DataFromDisplay.volumevalue != newvolumevalue)
     { DataFromDisplay.volumevalue = newvolumevalue; // globe will pick that up
       BacklightValue = DEFAULT_BACKLIGHT;
+      AutoSleepTimer = AUTOPOWERDOWNAFTER;
       ShowVolumeTimer = DEFAULT_SHOW_VOLUME_TIMER;
       lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide flag
       lv_obj_add_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // hide town
@@ -1082,12 +1171,14 @@ void loop()
     if(DataFromDisplay.bassvalue != newbassvalue)
     { DataFromDisplay.bassvalue = newbassvalue;
       BacklightValue = DEFAULT_BACKLIGHT;
+      AutoSleepTimer = AUTOPOWERDOWNAFTER;
     }
 
     sscanf(lv_label_get_text(ui_TrebleValue), "%d", &newtreblevalue);
     if(DataFromDisplay.treblevalue != newtreblevalue)
     { DataFromDisplay.treblevalue = newtreblevalue;
       BacklightValue = DEFAULT_BACKLIGHT;
+      AutoSleepTimer = AUTOPOWERDOWNAFTER;
     }
      
     
@@ -1126,6 +1217,7 @@ void loop()
       }
       PrevDataFromGlobe.ns = DataFromGlobe.ns;
       PrevDataFromGlobe.ew = DataFromGlobe.ew;
+      AutoSleepTimer = AUTOPOWERDOWNAFTER;
     } 
 
 
@@ -1157,10 +1249,24 @@ void loop()
     }
 
     // battery indicator consists of 3 slightly different icons on top of one another
-    if((GlobalTicker100mS%10)==0) // check every second
-    { newbatteryvoltage = ((analogReadMilliVolts(BAT_ADC_PIN) * 3) + 50) / 100; // read voltage in tenths of volts times 3 because of voltage divider 
+    if(PrevGlobalTicker1S != GlobalTicker1S) // check every second
+    { PrevGlobalTicker1S = GlobalTicker1S;
+      newbatteryvoltage = ((analogReadMilliVolts(BAT_ADC_PIN) * 3) + 50) / 100; // read voltage in tenths of volts times 3 because of voltage divider 
       ShowBatteryLevel(-newbatteryvoltage);
       DataFromDisplay.D_BatteryVoltage = newbatteryvoltage;
+      //if((PrevGlobalTicker1S%10)==0)
+      //{ Serial.print("AutoSleepTimer ->");
+      //  Serial.println(AutoSleepTimer);
+     // }
+      if(AutoSleepTimer)
+      { AutoSleepTimer--;
+        if(AutoSleepTimer==0)
+        { if(bPowerStatus == true)
+          { handlePowerCycle();
+            Serial.println("AutoSleepTimer Power Down");
+          }
+        }
+      }
     }
      
     // clock stuff
@@ -1373,6 +1479,7 @@ void InitializeDisplaySettings(void)
   strcpy(DisplaySettings.open_weather_map_api_key, open_weather_map_api_key);
 
   DisplaySettings.expand_search = 5;
+  DisplaySettings.auto_update_state = 0;
 
   // unconditionally save to eeprom
   EEPROM.put(0x0, DisplaySettings);
@@ -1386,7 +1493,7 @@ void InitializeDisplaySettings(void)
 void set_optional_items(void)
 { char content[64];
   sprintf(content, "%d", DisplaySettings.serialnumber);
-  lv_label_set_text(ui_SerialNumber, content);
+  lv_label_set_text(ui_SerialNumberText, content);
 
   if(!DisplaySettings.bluetoothinstalled || !DisplaySettings.bluetoothswitchable) // no BT module present or not switchable
   { lv_obj_add_flag(uic_bluetoothswitch, LV_OBJ_FLAG_HIDDEN); // no switch

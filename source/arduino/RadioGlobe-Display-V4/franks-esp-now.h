@@ -1,13 +1,13 @@
 #pragma once
 
-#define QUEUESIZE 50
+#define QUEUESIZE 40
 #define QUEUEMESSAGELENGTH 128
 typedef struct {               
-  char     QueueMessage[QUEUESIZE][QUEUEMESSAGELENGTH];  // 50 strings of 128 each (6400 bytes) 
-  uint16_t QueueMessageType[QUEUESIZE];
-  uint16_t QueueIndexIn;
-  uint16_t QueueIndexOut;
-  uint16_t QueueCnt;
+  EXT_RAM_ATTR char     QueueMessage[QUEUESIZE][QUEUEMESSAGELENGTH];  // 50 strings of 128 each (6400 bytes) 
+  EXT_RAM_ATTR uint16_t QueueMessageType[QUEUESIZE];
+  EXT_RAM_ATTR uint16_t QueueIndexIn;
+  EXT_RAM_ATTR uint16_t QueueIndexOut;
+  EXT_RAM_ATTR uint16_t QueueCnt;
 } Queue;
 
 
@@ -75,7 +75,11 @@ const char * messagetexts[] = {
    { "PLAYLIST_SONG_ARTIST 60"},
    { "START_THIS_FILE 61"},
    { "RELOAD_SD_WITH_COUNTRY 62"},
-   { "MESSAGE_MAX 63"}
+   { "MESSAGE_START_FILE_BY_INDEX 63"},
+   { "MESSAGE_SET_ROLLER_INDEX 64"},
+   { "MESSAGE_UPDATE_GLOBE 65"},
+   { "MESSAGE_UPDATE_PUCK 66"},
+   { "MESSAGE_MAX 67"}
 };
 
 #define MESSAGE_SONG_TITLE 1
@@ -90,8 +94,8 @@ const char * messagetexts[] = {
 #define MESSAGE_TIMEZONE_NAME 10
 #define MESSAGE_THIS_IS_HOME 11
 #define MESSAGE_EX_CHANGE_RATE 12
-#define MESSAGE_13 13
-#define MESSAGE_14 14
+#define MESSAGE_SSID_FOR_GLOBE 13
+#define MESSAGE_PASSWORD_FOR_GLOBE 14
 #define MESSAGE_WIFI_STATUS 15
 #define MESSAGE_CALIBRATE_ZERO 16
 #define MESSAGE_FINDNEWSTATION 17
@@ -152,7 +156,11 @@ const char * messagetexts[] = {
 #define MESSAGE_PLAYLIST_SONG_ARTIST 60
 #define MESSAGE_START_THIS_FILE 61
 #define MESSAGE_RELOAD_SD_WITH_COUNTRY 62
-#define MESSAGE_MAX 63
+#define MESSAGE_START_FILE_BY_INDEX 63
+#define MESSAGE_SET_ROLLER_INDEX 64
+#define MESSAGE_UPDATE_GLOBE 65
+#define MESSAGE_UPDATE_PUCK 66
+#define MESSAGE_MAX 67
 
 typedef struct struct_message1 {
     int16_t  ns_cal;
@@ -212,8 +220,8 @@ struct_from_display DataForLCD;
 struct_from_globe DataFromGlobe;
 struct_from_globe PrevDataFromGlobe;
 
-Queue ToGlobe; // queue with messages for globe
-Queue FromGlobe; // queue with messages from globe
+EXT_RAM_ATTR Queue ToGlobe; // queue with messages for globe
+EXT_RAM_ATTR Queue FromGlobe; // queue with messages from globe
 
 // define your home location to set initial time zone
 #define HOME_GPS_NS 52.2540183

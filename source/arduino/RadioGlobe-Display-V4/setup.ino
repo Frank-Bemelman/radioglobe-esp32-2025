@@ -147,14 +147,14 @@ uint16_t isLongPressed(lv_event_t * e)
 
   lv_event_code_t event_code = lv_event_get_code(e);
   if(event_code == LV_EVENT_LONG_PRESSED_REPEAT) // 6
-  { Serial.printf("Eventcode = LV_EVENT_LONG_PRESSED_REPEAT\n");
+  { //Serial.printf("Eventcode = LV_EVENT_LONG_PRESSED_REPEAT\n");
     longpressed++;
   }
   if(event_code == LV_EVENT_CLICKED) // 7
-  { Serial.printf("Eventcode = LV_EVENT_CLICKED\n");
+  { //Serial.printf("Eventcode = LV_EVENT_CLICKED\n");
     longpressed = 0;
   }
-  Serial.printf("longpressed = %d\n", longpressed);
+  //Serial.printf("longpressed = %d\n", longpressed);
   return longpressed;
 }
 
@@ -170,9 +170,14 @@ void beepforMs(uint16_t ms)
 
 // handle the OLEGB buttons for secret code
 void click1(lv_event_t * e)
-{ strncpy(SecretCode, &SecretCode[1], 5); 
-  SecretCode[4] = 'O';
-  Serial.println(SecretCode);
+{ lv_event_code_t event_code = lv_event_get_code(e);
+
+  if(event_code == LV_EVENT_CLICKED) // 7
+  { strncpy(SecretCode, &SecretCode[1], 5); 
+    SecretCode[4] = 'O';
+    Serial.println(SecretCode);
+  }
+  
   if(isLongPressed(e)==5) // after typing OOOOO followed by long press O, shut down
   { if(strcmp(SecretCode, "OOOOO")==0)
     { // enter deep sleep to save battery
@@ -200,6 +205,22 @@ void click5(lv_event_t * e)
   SecretCode[4] = 'B';
   Serial.println(SecretCode);
 }
+
+void SerialNumberButton(lv_event_t * e)
+{ lv_event_code_t event_code = lv_event_get_code(e);
+
+  if(event_code == LV_EVENT_CLICKED) // 7
+  { Serial.println("SerialNumber clicked");
+  }
+  if(isLongPressed(e)==5) // after typing OOOOO followed by long press O, shut down
+  { Serial.println("SerialNumber long pressed");
+    lv_scr_load(ui_Home);
+    AddToQueueForGlobe("1", MESSAGE_UPDATE_GLOBE);
+  }
+}
+
+
+
 
 void PowerCycle(lv_event_t * e)
 { if(isLongPressed(e)==2)
@@ -244,6 +265,7 @@ void handlePowerCycle(void)
     }
     else
     { // Power on
+      AutoSleepTimer = AUTOPOWERDOWNAFTER;
       bPowerStatus = true;
       ClockBackLight = true;
       ui_object_set_themeable_style_property(uic_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_green);
@@ -464,7 +486,8 @@ void ClockHomePower(lv_event_t * e)
 }
 
 void ClockFaceClick(lv_event_t * e)
-{ if(BacklightValue==9) // auto dimmed down
+{ AutoSleepTimer = AUTOPOWERDOWNAFTER;
+  if(BacklightValue==9) // auto dimmed down
   { // just wake up backlight
     // BacklightValue = DEFAULT_BACKLIGHT;
     while(BacklightValue < DEFAULT_BACKLIGHT) // gently fade up

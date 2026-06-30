@@ -45,7 +45,7 @@ typedef struct bmpfile{                // Total: 54 + 8 + 8100 bytes
   uint8_t  pixeldata[8640];     // 180 ns entries of 360/8=45 ew bytes, round up to multiple of 4 bytes -> 48 -> 180x48 -> 8460 bytes of pixeldata
 }; 
 
-#define MAX_STATIONS 50 // must !!!! be equal to setting in globe software
+#define MAX_STATIONS 25 // must !!!! be equal to setting in globe software
 #define MAX_FAVORITES 4
 #define MAX_HOMES 1 // place where you live - used also for base currency for valuta exchange rates
 
