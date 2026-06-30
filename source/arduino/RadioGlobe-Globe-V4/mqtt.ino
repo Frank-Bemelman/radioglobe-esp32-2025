@@ -36,7 +36,11 @@ void onMqttMessage(const char* topic, const uint8_t* payload, uint16_t length)
     digitalWrite(MUTE_AMPLIFIERS, strcmp(payloadcopy, "OFF")==0 ? 1:0); // mute output works as a disable
     sprintf(message, "%d %d %d %d", GlobeSettings.ee_volume, GlobeSettings.ee_bass, GlobeSettings.ee_treble, GlobeSettings.ee_internal_speakers);
     AddToQueueForDisplay(message, MESSAGE_VOLUME_AND_TONE);
-    //AddToQueueForDisplay("?", MESSAGE_FINDNEWSTATION); // test
+  }
+  else if(strstr(topic, "GlobeBTSwitch" )!=NULL)
+  { GlobeSettings.btmodule_power_on = strcmp(payloadcopy, "OFF")==0 ? 0:1;
+    sprintf(message, "%d-%d-%d", GlobeSettings.btmodule_switchable, GlobeSettings.btmodule_power_on, GlobeSettings.btmodule_installed);
+    AddToQueueForDisplay(message, MESSAGE_DISPLAY_BT_SWITCHABLE_STATE);
   }
   else if(strstr(topic, "GlobeVolume" )!=NULL)
   { if(!IgnoreMqqtUpdates) // ignore updates that may lag the setting done by truss touch
@@ -89,6 +93,7 @@ void onMqttDisconnected() {
 }
 
 HASwitch GlobePowerSwitch("GlobePowerSwitch");
+HASwitch GlobeBTSwitch("GlobeBTSwitch");
 HANumber GlobeVolume("GlobeVolume");
 HASwitch GlobeSpeakerSwitch("GlobeSpeakerSwitch");
 HASwitch GlobePreset1("GlobePreset1");
@@ -126,7 +131,10 @@ void setupMQTT(void)
 
   GlobeSpeakerSwitch.setIcon("mdi:speaker");
   GlobeSpeakerSwitch.setName("Globe Speaker");
- 
+
+  GlobeBTSwitch.setIcon("mdi:bluetooth");
+  GlobeBTSwitch.setName("Globe BlueTooth");
+
   GlobePreset1.setIcon("mdi:radiobox-marked");
   GlobePreset1.setName("Globe Preset 1");
   GlobePreset2.setIcon("mdi:radiobox-marked");
@@ -187,6 +195,7 @@ void loopMQTT(void) {
   static char previous_powerstatus[8];
   static uint16_t previous_volume = 9999;
   static uint16_t previous_internal_speakers = 9999;
+  static uint16_t previous_btmodule_power_on = 9999;
   static unsigned int previousPresetRequestFromHA = 9999;
   char value[16];
   static char previous_station_title[256] = "";
@@ -239,6 +248,13 @@ void loopMQTT(void) {
       }
     }
 
+    { if(previous_btmodule_power_on != GlobeSettings.btmodule_power_on)
+      { previous_btmodule_power_on = GlobeSettings.btmodule_power_on;
+        GlobeBTSwitch.setState((GlobeSettings.btmodule_power_on==1));
+      }
+    }
+
+
     if(previousPresetRequestFromHA != PresetRequestFromHA)
     { previousPresetRequestFromHA = PresetRequestFromHA;
       Serial.printf("Tell HA new Preset Station is %ld\n", PresetRequestFromHA);
@@ -283,7 +299,7 @@ void loopMQTT(void) {
     if(previous_batteryvoltage != DataFromDisplay.D_BatteryVoltage)
     { previous_batteryvoltage = DataFromDisplay.D_BatteryVoltage;
       sprintf(value, "%d.%d", DataFromDisplay.D_BatteryVoltage/10, DataFromDisplay.D_BatteryVoltage%10);
-      Serial.printf("Tell HA Puck Battery level is %s\n", value);
+      //Serial.printf("Tell HA Puck Battery level is %s\n", value);
       GlobePuckBattery.setValue(value); 
     }
 

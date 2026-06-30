@@ -40,7 +40,7 @@ void CallGetTimeZone(void * pvParameters)
       DataFromGlobe.FindTimeZone = 0;
     }
     else if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_GEOLOCATION)
-    { GetGeolocationData(ns_cal_received/10, ew_cal_received/10);
+    { GetGeolocationData(ns_cal_received/10, ew_cal_received/10, false); // get for just a location
       DataFromGlobe.FindGeoLocationData = MESSAGE_GET_WEATHER_DATA; // also find weather data after this TODO -> by ns_cal_receved etc
     }
     else if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_WEATHER_DATA)
@@ -48,7 +48,7 @@ void CallGetTimeZone(void * pvParameters)
       DataFromGlobe.FindGeoLocationData = 0;
     }
     else if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_GEOLOCATION_BY_GPS)
-    { GetGeolocationData(D_GeoLocationGpsNS, D_GeoLocationGpsEW);
+    { GetGeolocationData(D_GeoLocationGpsNS, D_GeoLocationGpsEW, true); // get for a radio station
       DataFromGlobe.FindGeoLocationData = MESSAGE_GET_WEATHER_DATA_BY_GPS; // also find weather data after this
     }
     else if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_WEATHER_DATA_BY_GPS)
@@ -71,6 +71,9 @@ void ReadAS5600Encoders(void * pvParameters)
   static int16_t CurrentEW4096;
   static int16_t OldCurrentNS4096;
   static int16_t OldCurrentEW4096;
+  static int16_t NSDegLive10; // unfiltered, uncalibrated NS degrees times 10
+  static int16_t EWDegLive10; // unfiltered, uncalibrated EW degrees times 10
+
   
   static int8_t  AverageIdx = 0;
   static bool  stable = false;
@@ -80,7 +83,6 @@ void ReadAS5600Encoders(void * pvParameters)
   static uint16_t stable100ms = 0;
   static bool EncoderReliable = false;  
   static uint8_t LedAnimationBrightness = 0;
-  static uint16_t AngleMilliRadians = 0;
   
   while(1)
   { ReadEncoderTicker100mS++;
@@ -130,7 +132,7 @@ void ReadAS5600Encoders(void * pvParameters)
         if(LedAnimationBrightness)LedAnimationBrightness-=5; // brigthness dims down in roughly 2.5 seconds
       }
     }  
-    else // movement detected of NS and/or EW
+    else // NS/EW movement detected
     { stable = false;
       stable100ms = 0;
       PixelUpdate(0, 0xFFFFFF, 0x000000, 2000); // solid white to light up globe                    
@@ -141,20 +143,18 @@ void ReadAS5600Encoders(void * pvParameters)
       }
     }
     
-    // send NS postion to globe with small hysteresis
+    // send new NS postion to puck if slightly changed
     if(OldCurrentNS4096 != CurrentNS4096)
     { if(abs(((OldCurrentNS4096 - CurrentNS4096))%4096)>1)
       { OldCurrentNS4096 = CurrentNS4096;
         NSDegLive10 = (CurrentNS4096) * 3600 / 4096; // convert to degrees times 10
         if((NSDegLive10>=-900) && (NSDegLive10<=900)) 
         { DataFromGlobe.ns = NSDegLive10;
-          // roughly map angle (0-180) to radians to get color from color circle to use for led animation
-          AngleMilliRadians = 35 * ((NSDegLive10 + 900) / 10); 
         }
       }
     }
 
-    // send EW postion to globe with small hysteresis
+    // send new EW postion to puck if slightly changed
     if(OldCurrentEW4096 != CurrentEW4096)
     { if(abs(((OldCurrentEW4096 - CurrentEW4096))%4096)>1)
       { OldCurrentEW4096 = CurrentEW4096;
@@ -170,12 +170,6 @@ void ReadAS5600Encoders(void * pvParameters)
       if(stable)
       { if(bPowerStatus)Serial.println("Stable while bPowerStatus=true");
         else Serial.println("Stable while bPowerStatus=false");
-        NSDeg10 = NSDegLive10;
-        EWDeg10 = EWDegLive10;
-        //Serial.print("readAngle NS = "); Serial.print(NSDeg10/10.0);
-        //Serial.print("\tReadAGC NS = "); Serial.println(as5600_0.readAGC());
-        //Serial.print("readAngle EW = "); Serial.print(EWDeg10/10.0);
-        //Serial.print("\tReadAGC EW = "); Serial.println(as5600_1.readAGC());
         bEncoderNewPosition = true; // signal to main program to pick another station
         Serial.println("bEncoderNewPosition=true");
       }

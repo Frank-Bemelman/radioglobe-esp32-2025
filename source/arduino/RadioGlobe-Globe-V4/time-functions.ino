@@ -107,7 +107,7 @@ void GetTimeZone(float StationGpsNS, float StationGpsEW)
   
 }
 
-void GetGeolocationData(float StationGpsNS, float StationGpsEW)
+void GetGeolocationData(float StationGpsNS, float StationGpsEW, bool AskingForRadio)
 { WiFiClientSecure client;
   char   payload[512]; // 256->512
   char   shortname[128]; // 64->128
@@ -118,6 +118,7 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW)
   bool found = false;
   bool townfound = false;
   bool countryfound = false;
+  unsigned long startMs;
   
   bool print;
   //Serial.println("MFree Heap at Start  GetTimeZone()" + String(ESP.getFreeHeap()));   
@@ -142,6 +143,8 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW)
   //  as seen here https://www.geonames.org/export/web-services.html#ocean
   
   if(print)Serial.println(api_url);
+
+  startMs = millis();
   client.setInsecure();
 
   HTTPClient https;
@@ -149,6 +152,7 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW)
   https.begin(client, api_url);
   //if(print)Serial.println("HTTP Client gestart");
   int httpResponseCode = https.GET();
+  //Serial.printf("GetGeolocationData https.GET took %ldmS\n", (millis()-startMs)); // typical 821mS
   if (httpResponseCode>0) 
   { client.setTimeout(100);
     char *p;
@@ -192,11 +196,14 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW)
 
   https.end();
   client.stop(); // stop insecure client
+  Serial.printf("GetGeolocationData fetch took %ldmS found=%d\n", (millis()-startMs), found);
 
   // use this country code if we later go play music from SD
-  strcpy(CountryCodeSelectorSD, countrycode);
-  if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_GEOLOCATION_BY_GPS)AddToQueueForDisplay(payload, MESSAGE_GET_GEOLOCATION_BY_GPS);
-  else if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_GEOLOCATION)AddToQueueForDisplay(payload, MESSAGE_GET_GEOLOCATION);
+  //if(found)
+  { strcpy(CountryCodeSelectorSD, countrycode);
+    if(AskingForRadio)AddToQueueForDisplay(payload, MESSAGE_GET_GEOLOCATION_BY_GPS);
+    else AddToQueueForDisplay(payload, MESSAGE_GET_GEOLOCATION);
+  }
 
 }
 
@@ -301,7 +308,7 @@ void FetchJsonExchangeRates(void)
   int country_index;
 
   if((country_index=IsCountryCodeValid(GlobeSettings.HomeCountryCode))<0)
-  { Serial.printf("Can't get exchange rates for unknown country %s\n", GlobeSettings.HomeCountryCode);
+  { Serial.printf("Can't get exchange rates for unknown home country %s\n", GlobeSettings.HomeCountryCode);
     return;
   }
 

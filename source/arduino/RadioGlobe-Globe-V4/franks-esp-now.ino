@@ -98,8 +98,9 @@ void setup_esp_now()
   FromDisplay.QueueIndexOut = 0;
   FromDisplay.QueueCnt = 0;
 
-    // Set device as a Wi-Fi Station
-  WiFi.mode(WIFI_AP_STA);
+  // Set device as a Wi-Fi Station
+  // WiFi.mode(WIFI_AP_STA); // not good -> keeps an undesireable wifi AP active
+  WiFi.mode(WIFI_STA); // 25 MAY 26 - just a station, not an acces point
   Serial.printf("setup_esp_now() WiFi.channel() = %d\n", WiFi.channel());
 
   uint8_t primaryChan = WiFi.channel();

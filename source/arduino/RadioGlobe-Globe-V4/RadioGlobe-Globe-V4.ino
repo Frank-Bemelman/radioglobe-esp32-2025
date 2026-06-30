@@ -1,7 +1,7 @@
-#include <ESP32FtpServer.h>
+//#include <ESP32FtpServer.h>
 
 
-// in arduino library manager
+// in arduino library manager..
 // install libs as shown here https://randomnerdtutorials.com/esp32-wi-fi-manager-asyncwebserver/
 // this is for the wifi manager portal
 
@@ -14,7 +14,12 @@
 
 // TODO - turns off BT module when power off - or better not - perhaps better not - yes, better not
 
-// 19 MER 26 FEATURE Sd card connections added and tested, acces to SD card works, no functionality added though
+// 30 JUN 26 - auto update refinements
+// 27 JUN 26 - added auto update from github
+// 25 MAY 26 - in setup_esp_now() make it just a station, not an acces point
+// 24 MAY 26 Added BT switch to mqtt for HA
+// 21 MAY 26 ESP32_VS1053_Stream updated
+// 19 MRT 26 FEATURE Sd card connections added and tested, acces to SD card works, no functionality added though
 // 17 MRT 26 IMPROVED Turn of amplifiers when stream stops, or after playing a soundbite
 // 9 MRT 26 - GetGeolocationData() local arrys enlarged, was crashing on weird thai town names
 // other libraries and updates
@@ -22,8 +27,19 @@
 // reminder features 
 // 14FEB26 -> has wifi channel updated by globe wifi connection
 // 18APR26 -> added ftp server for SD card acces, see https://github.com/Annabel369/ESP32FTPServer (works but is very slow, practically not very useful) user guest, password guest
+// 25JUN26 -> added update routines 
 
 #include <Arduino.h>
+
+#define BUILD_LABEL "Globe Build"
+// make this -> Globe Build Jun 23 2026 - 21:08:50
+#define BUILD_TIMESTAMP  BUILD_LABEL " " __DATE__ " - " __TIME__
+#define BUILD_TIMESTAMP_ONLY __DATE__ " - " __TIME__
+const char build_label[] =  BUILD_LABEL;
+const char build_timestamp[] =  BUILD_TIMESTAMP;
+const char build_timestamp_only[] =  BUILD_TIMESTAMP_ONLY;
+extern uint8_t UpdateFirmware(uint8_t state); // start with 1 for a full date/time check and update
+
 #include <ArduinoJson.h>
 #include <ArduinoJson.hpp>
 #include <WiFi.h>
@@ -51,8 +67,8 @@
 // as defined in ..\secrets.h
 // char SSID [32] = "YOUR-SSID";
 // char PASSWORD[32] = "YOUR-WIFI-PASSWORD";
-// char google_api_key[] = "YOUR-API-KEY"; // free, get your own at google developer platform, used for timezone retrieval
-// char open_weather_map_api_key[] = "YOUR-API-KEY"; // free, get your own at https://openweathermap.org/api
+// char google_api_key[] = "YOUR-API-KEY"; // free, get your own at google developer platform, used for timezone retrieval, replace first 4 letters AIza in !!!!
+// to avoid a verbatim copy of api key in compiled binary 
 #include "AS5600.h"
 #include "Wire.h"
 
@@ -146,11 +162,6 @@ uint16_t Timer100msSerialCanBeOpened = 0; // set to 5 seconds after 5 taps on to
 uint16_t Timer100msSerialIsOpen = 0; // set to 30 seconds after speaker switch pressed
 uint16_t SpeakerOffAfter25mS = 0;
 
-int16_t NSDegLive10; // unfiltered, uncalibrated NS degrees times 10
-int16_t EWDegLive10; // unfiltered, uncalibrated EW degrees times 10
-int16_t NSDeg10; // uncalibrated NS degrees times 10
-int16_t EWDeg10; // uncalibrated EW degrees times 10
-
 
 char TargetUrl[QUEUEMESSAGELENGTH] = ""; // most recent url requested by display
 char ActiveUrl[QUEUEMESSAGELENGTH] = ""; // most recent url connected to
@@ -163,7 +174,7 @@ bool Tuning = false;
 #define PORTALSWITCH_PIN 20 // pushbutton located on the back, short press  opens portal to connect to smartphone and configure wifi and puck mac, long press > 3 seconds is resets,all settings
 
 #include <EEPROM.h>
-#define EEPROM_SIZE 256
+#define EEPROM_SIZE 512
 struct eepromData 
 { int16_t Offset1;
   int16_t Offset2;
@@ -203,6 +214,7 @@ char ActiveSongTitle[256] = "";
 char MetaDataSongTitle[256] = "";
 char MetaDataRadioStation[256] = "";
 
+
 void TaskTouch(void * pvParameters);
 void PixelUpdate(uint16_t mode, uint32_t color1, uint32_t color2, uint16_t msek);
 
@@ -216,11 +228,12 @@ bool bMusicModePrev = false;
 
 FtpServer ftp;
 
+extern uint16_t UpdateState;
+
 void readMacAddress()
 { esp_err_t ret = esp_wifi_get_mac(WIFI_IF_STA, GlobeMac);
-  // my test board is b4:3a:45:a5:03:10
-  Serial.print("[THIS BOARD] ESP32 Globe MAC Address: ");
-  if (ret == ESP_OK) {
+  if (ret == ESP_OK) 
+  { Serial.println(BUILD_TIMESTAMP);
     Serial.printf("%02X:%02X:%02X:%02X:%02X:%02X\n",
                   GlobeMac[0], GlobeMac[1], GlobeMac[2],
                   GlobeMac[3], GlobeMac[4], GlobeMac[5]);
@@ -233,6 +246,13 @@ void readMacAddress()
 
 void setup()
 { char message[64];
+
+  // replace !!!! characters in fetched api key (secrets.h)
+  google_api_key[0]='A';
+  google_api_key[1]='I';
+  google_api_key[2]='z';
+  google_api_key[3]='a';
+
   startMillis = millis();
 
   xTaskCreatePinnedToCore(
@@ -242,7 +262,7 @@ void setup()
                     NULL,        /* parameter of the task */
                     2,           /* priority of the task */
                     NULL,      /* Task handle to keep track of created task */
-                    1);          /* pin task to core 0 */   
+                    1);          /* pin task to core */   
   
   PixelUpdate(0, 0xFFFFFF, 0x000000, 10000); // solid white                     
 
@@ -256,6 +276,8 @@ void setup()
   pinMode(PORTALSWITCH_PIN, INPUT_PULLUP); // input to button for opening portal
 
   Serial.begin(115200);
+
+  Serial.printf("GlobeSettings size = %d bytes\n", sizeof(GlobeSettings));
 
   //Start SPI bus
   SPI.setHwCs(true);
@@ -276,13 +298,20 @@ void setup()
   // Set the codec callback
   stream.setCodecCB(codecCallBack);
   // Set the bitrate callback
-  stream.setBitrateCB(bitrateCallback);   
+  //stream.setBitrateCB(bitrateCallback);   
   // Set the station name callback
   stream.setStationCB(audio_showstation);
   // Set the stream metadata callback
   stream.setInfoCB(audio_showstreamtitle);
   // Set the EOF callback
   stream.setEofCB(audio_eof_stream);    
+
+  // Set the fail callback
+  stream.setFailCB(audio_fail);    
+
+  // Set the error callback
+  stream.setErrorCB(audio_error);    
+
 
   delay(50);
 
@@ -420,6 +449,7 @@ void setup()
 
   Serial.printf("Wifi connected to channel: %d\n", WiFi.channel());
   Serial.printf("Wifi-strenght = %d dBm\n", WiFi.RSSI());
+
   setup_esp_now();
   
   // setup MQTT for Home Assitant if configured in portal settings
@@ -431,7 +461,6 @@ void setup()
   sprintf(message, "%02X:%02X:%02X:%02X:%02X:%02X", GlobeMac[0], GlobeMac[1], GlobeMac[2], GlobeMac[3], GlobeMac[4], GlobeMac[5]);
   AddToQueueForDisplay(message, MESSAGE_GLOBE_MAC);
   sprintf(message, "%d", WiFi.channel());
-  AddToQueueForDisplay(message, MESSAGE_SET_PUCK_WIFI_CHANNEL);
 
   if(GlobeSettings.btmodule_installed == 0)Serial.println("No Bluetooth module installed");
   else Serial.println("Has Bluetooth module installed");
@@ -457,8 +486,8 @@ void setup()
   DataFromGlobe.G_Volume = GlobeSettings.ee_volume;
   AddToQueueForDisplay(message, MESSAGE_VOLUME_AND_TONE);
 
-  sprintf(message, "Globe Build %s - %s", __DATE__, __TIME__);
-  AddToQueueForDisplay(message, MESSAGE_GLOBE_BUILD_DATE_TIME);
+   
+  AddToQueueForDisplay(build_timestamp, MESSAGE_GLOBE_BUILD_DATE_TIME);
   
   PlaySoundBite((uint8_t *)mp3_startup, sizeof(mp3_startup), 0); 
 
@@ -468,11 +497,10 @@ void setup()
   GetRatesNow = true;
   bSetupCompleted = true;
   
-  //if(GlobeSettings.sdcard_present)CollectFilePathsForCountry("DE");
-  if(GlobeSettings.sdcard_present)
-  { ftp.begin("guest", "guest");
-    Serial.println("Servidor FTP ativo!");
-  }  
+  //if(GlobeSettings.sdcard_present)
+  //{ ftp.begin("guest", "guest");
+  //  Serial.println("Servidor FTP ativo!");
+  //}  
 
 }
 
@@ -494,14 +522,17 @@ void loop()
   static uint16_t connection_lost_counter;
   static char PreviousUrl[QUEUEMESSAGELENGTH] =""; // holds the url requested by display
   static bool bFirst = true;
-
-   if(GlobeSettings.sdcard_present)ftp.handleFTP();
+  
+   //if(GlobeSettings.sdcard_present)ftp.handleFTP();
   loop2(); // checks portal button
   stream.loop();
   if(bMqttActivated==1234)loopMQTT();
   //else Serial.printf("bMqttActivated ??? = %d\n", bMqttActivated);
 
   //Serial.println(touchRead(8));
+  if(UpdateState)
+  { UpdateState = UpdateFirmware(UpdateState);
+  } 
 
   if((ReadEncoderTicker100mS % 50)==0) // every 5 seconds or so
   { if(WiFi.status() != WL_CONNECTED) 
@@ -590,6 +621,7 @@ void loop()
     }
   }
   }
+
 
   
   // process messages from display
@@ -781,8 +813,8 @@ void loop()
         sprintf(message, "%d %d %d %d", GlobeSettings.ee_volume, GlobeSettings.ee_bass, GlobeSettings.ee_treble, GlobeSettings.ee_internal_speakers);
         AddToQueueForDisplay(message, MESSAGE_VOLUME_AND_TONE);
 
-        sprintf(message, "Globe Build %s - %s", __DATE__, __TIME__);
-        AddToQueueForDisplay(message, MESSAGE_GLOBE_BUILD_DATE_TIME);
+        
+        AddToQueueForDisplay(build_timestamp, MESSAGE_GLOBE_BUILD_DATE_TIME);
 
         break;
 
@@ -804,7 +836,7 @@ void loop()
         checkButton(true); // force open portal by puck
         break;
 
-      // let's play from SD card now
+      // let's play from SD card now, triggered by music button on preset screen puck
       case MESSAGE_GLOBE_PLAY_SD:
         DataFromGlobe.D_QueueStationIndex = -1; 
         strcpy(PreviousUrl, "");
@@ -824,8 +856,19 @@ void loop()
       
       case MESSAGE_RELOAD_SD_WITH_COUNTRY:
         extern char CountryCodeSelectorSD[3];
-        strcpy(CountryCodeSelectorSD, QueueMessage);
+        strcpy(CountryCodeSelectorSD, QueueMessage); // will trigger StartPlayFromSD(void)
         strcpy(PreviousUrl, "");
+        break;
+
+      case MESSAGE_START_FILE_BY_INDEX:
+        uint16_t idx;
+        sscanf(QueueMessage, "%d", &idx);
+        PlayFromPlaylistByIndex(idx);
+        break;
+
+      case MESSAGE_UPDATE_GLOBE:
+        // in puck setup menu, long press serialnumber to trigger
+        if(UpdateState==0)UpdateState = 1; // triggers the update procedure, if procedure does not run yet
         break;
 
       default:
@@ -1208,22 +1251,17 @@ const char * fail_texts[] = {
 // called from VS1053 driver
 void audio_eof_stream(const char* info) 
 { char message[QUEUEMESSAGELENGTH];
-  
+
   Speakers(SPEAKERS_DELAYED_OFF);
   Serial.printf("End of stream  -> %s\n", info);
 
-  
+
   DataFromGlobe.D_QueueStationIndex = -1;
 
-  sprintf(message, "Callback audio_eof_stream() with %d for -> %s", stream.connectResult(), ActiveUrl); // could  be http return code or failure enum
-    
   // only next station or file if power is on
   if(bPowerStatus == true)
   { if(!bMusicMode)
-    { if(stream.connectResult() && stream.connectResult()!=FAIL_LOOP_EOF_NO_REMAINING_BYTES)
-      { sprintf(message, "%d -> %s", stream.connectResult(), ActiveUrl); 
-        AddToQueueForDisplay(message, MESSAGE_CONNECTTOHOST_FAILURE); // let display store this number for log report
-      }  
+    {   
       AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);
       strcpy(ActiveUrl, "");
     }
@@ -1458,6 +1496,9 @@ void PlaySoundBite(uint8_t *soundbite, unsigned long long length, uint16_t volum
 void GlobePowerDown(void)
 { uint16_t restore_volume;
   bPowerStatus = false;
+  EEPROM.get(0x0, GlobeSettings); // need stored volume settings
+  Serial.printf("POWERDOWN - volume -> %d \n", GlobeSettings.ee_volume);
+  SetVolumeMapped(GlobeSettings.ee_volume); 
   stream.stopSong();
   strcpy(ActiveStationTitle, "");
   strcpy(ActiveSongTitle, "");
@@ -1482,6 +1523,7 @@ void GlobePowerUp(void)
   // tell display what our stored values are for volume and tone control
   sprintf(message, "%d %d %d %d", GlobeSettings.ee_volume, GlobeSettings.ee_bass, GlobeSettings.ee_treble, GlobeSettings.ee_internal_speakers);
   AddToQueueForDisplay(message, MESSAGE_VOLUME_AND_TONE);
+  AddToQueueForDisplay(build_timestamp, MESSAGE_GLOBE_BUILD_DATE_TIME);
   
   SetVolumeMapped(GlobeSettings.ee_volume); 
   AddToQueueForDisplay("Globe Just Booted", MESSAGE_GLOBE_WANTS_CURRENT_STATION);
@@ -1504,6 +1546,7 @@ uint32_t PlayWhile(uint8_t *soundbite, unsigned long long length, bool playwhile
    static uint32_t snippets_to_play;
    static uint32_t snippet = 0;
    static bool oldplaywhile = 0;
+   unsigned long snippetMs;
 
    Serial.printf("oldplaywhile =%d playwhile = %d\n", (int)oldplaywhile, (int)playwhile);
 
@@ -1526,10 +1569,11 @@ uint32_t PlayWhile(uint8_t *soundbite, unsigned long long length, bool playwhile
    if(snippet <= snippets_to_play)
    { SetVolumeMapped(DataFromDisplay.volumevalue); 
      if(snippet < snippets_to_play) // full size snippets
-     { Serial.println(millis());
-       Serial.printf("snippet = %ld\n", snippet);
+     { Serial.printf("snippet = %ld\n", snippet);
        if(GlobeSettings.ee_internal_speakers)Speakers(SPEAKERS_ON);
+       snippetMs = millis();
        chunkplayer.playChunk(&soundbite[(snippet * SNIPLENGHT)], SNIPLENGHT); 
+       Serial.println(millis() - snippetMs);
        Speakers(SPEAKERS_DELAYED_OFF);
        snippet++;
      }
@@ -1624,9 +1668,20 @@ void codecCallBack(const char *codec)
     SetVolumeMapped(DataFromDisplay.volumevalue); // will also enable amplifiers
 }
 
+
 // Called when bitrate is detected (cbr) and changes (vbr)
 void bitrateCallback(uint32_t bitrate)
 { Serial.printf("bitrate: %lu kbps\n", bitrate);
+}
+
+// called from VS1053 driver
+void audio_fail(void) 
+{ Serial.printf("Decoder failed to sync\n");
+}  
+
+// called from VS1053 driver
+void audio_error(const char *error) 
+{ Serial.printf("Error from VS1053 -> %s\n", error);
 }
 
 

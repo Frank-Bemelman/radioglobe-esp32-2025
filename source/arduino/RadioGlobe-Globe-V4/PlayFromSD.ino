@@ -3,25 +3,17 @@
 // there are max 254 countries
 // array with countries 2 letter codes for which a folder exists on the SD card
 #define MAXCOUNTRIES 254
-// max 25 tracks to fill the playlist with
-#define MAXSINGLETRACKS 10
-#define MAXALBUMSTRACKS 15
 #define MAXTRACKPATHLEN 256
-#define MAXSONGTRACKS 100
+// max 25 tracks to fill the playlist with
+#define MAXSONGTRACKS 25
 
 
 char CountryCodeSelectorSD[3];
 char StartPathSD[256];
-int16_t SingleTracksIdx;
-int16_t ArtistFoldersIdx;
-char SingleTracks[100][64]; // in a country folder
-char ArtistFolders[100][32]; // in a country folder
 char Playlist[MAXSONGTRACKS][MAXTRACKPATHLEN];
 
 uint16_t PlaylistTracks = 0;
-uint16_t firstTrackInRoller = 0;
-uint16_t totalTracksInRoller = 0;
-uint16_t playTracksInRoller = 0;
+uint16_t TrackFromPlayListToPlay = 0;
 
 
 
@@ -85,39 +77,44 @@ void StartPlayFromSD(void)
 
 
 void PlaySomethingFromSD(void)
-{ uint16_t idx;
-  char *p;
+{ char *p;
 
-  playTracksInRoller %= totalTracksInRoller;
-  idx = firstTrackInRoller + playTracksInRoller++;
+  TrackFromPlayListToPlay %= PlaylistTracks;
   
-  Serial.printf("Play from SD Playlist -> %s\n", Playlist[idx]);
+  Serial.printf("Play idx %d\n", TrackFromPlayListToPlay);
+  Serial.printf("Play from SD Playlist -> %s\n", Playlist[TrackFromPlayListToPlay]);
 
-  SetVolumeMapped(0);
+  PlayFromPlaylistByIndex(TrackFromPlayListToPlay);
+  Serial.printf("PlaySomethingFromSD - Done\n");
+}
 
-  if(stream.isRunning())
-  { stream.stopSong(); // stop whatever stream or file was playing
-    // chunkplayer.switchToMp3Mode();
-  }  
+void PlayFromPlaylistByIndex(uint16_t idx)
+{ char message[16];
+  if(idx < PlaylistTracks)
+  {
+    SetVolumeMapped(0);
 
-  stream.connectToFile(SD, Playlist[idx]); // play it
-
-  if(stream.isRunning())
-  { // wait short time with volume 0 to avoid audible clicks/snippets between station switching
-    // currentMillis = millis();
-    // while (millis() - currentMillis < 250)
-    // { stream.loop();
-    // }    
-    // get songname from entire filepath
-    char *p;
-    char *q;
-    if((p=strrchr(Playlist[idx], '/'))!= NULL)
-    { strcpy(ActiveSongTitle, p+1);
-      if((q=strrchr(ActiveSongTitle, '.'))!= NULL)*q=0; // remove file extension
-      AddToQueueForDisplay(ActiveSongTitle, MESSAGE_SONG_TITLE);
+    if(stream.isRunning())
+    { stream.stopSong(); // stop whatever stream or file was playing
     }  
-  }
-  Serial.printf("Done\n");
+
+    stream.connectToFile(SD, Playlist[idx]); // play it
+
+    if(stream.isRunning())
+    { char *p;
+      char *q;
+      if((p=strrchr(Playlist[idx], '/'))!= NULL)
+      { strcpy(ActiveSongTitle, p+1);
+        if((q=strrchr(ActiveSongTitle, '.'))!= NULL)*q=0; // remove file extension
+        AddToQueueForDisplay(ActiveSongTitle, MESSAGE_SONG_TITLE);
+        sprintf(message, "%d", idx);
+        AddToQueueForDisplay(message, MESSAGE_SET_ROLLER_INDEX); // adjust roller on puck
+      }
+    }
+
+    TrackFromPlayListToPlay = idx+1; // prepare for next song
+
+  }      
 }
 
 
@@ -127,18 +124,20 @@ void CollectFilePathsForCountry(char *countrycode)
 { if(strlen(countrycode))sprintf(StartPathSD, "/GLOBEMUSIC/%s", countrycode);
   else strcpy(StartPathSD, "/GLOBEMUSIC/JUKEBOX");
 
-//  File root = SD.open(StartPathSD);
-//  if (!root) 
-//  { Serial.printf("Failed to open StartPathSD directory -> %s\n", StartPathSD);
-//    strcpy(StartPathSD, "/GLOBEMUSIC/JUKEBOX");
-//  }
+  // use alternative jukebox path if no directories for this country exists
+  File root = SD.open(StartPathSD);
+  if (!root) 
+  { Serial.printf("Failed to open StartPathSD directory -> %s\n", StartPathSD);
+    strcpy(StartPathSD, "/GLOBEMUSIC/JUKEBOX");
+  }
   
   Serial.printf("Go get the tracks for %s\n", StartPathSD);
   // from this start path, dive in and collect max 25 random music files, dive in subdirectories if need be
   PlaylistTracks = 0; 
-  playTracksInRoller = 0;
+  TrackFromPlayListToPlay = 0; // always start at top of list
   DirNested = 0;
-  CollectTracksPaths(StartPathSD);
+  CollectTracksPaths(StartPathSD); // collect MAXSONGTRACKS (or possibly less) tracks
+  ShuffleTracks();
   SendTracksToPuck();
   
 }
@@ -218,9 +217,6 @@ void CollectTracksPaths(char *path)
      
         sprintf(ScrollToAdd, "%s/%s", path, &txtline[2]);
         strcpy(Playlist[PlaylistTracks++], ScrollToAdd);
-//        if(strlen(ScrollToAdd)<=QUEUEMESSAGELENGTH)
-//        { AddToQueueForDisplay(ScrollToAdd, MESSAGE_PLAYLIST_SONG_ARTIST);
-//        }
       }
       else break;
     }
@@ -245,31 +241,37 @@ void CollectTracksPaths(char *path)
   }
 }  
 
+void ShuffleTracks(void)
+{ uint16_t idx;
+  uint16_t sourceidx;
+  char tracktoswap[MAXTRACKPATHLEN];
+  if(PlaylistTracks<2)return; // nothing to shuffle
+  // shuffle the list, start with last track and swap with a another random track
+  idx = PlaylistTracks-1;
+  Serial.printf("Shuffle %d tracks\n", PlaylistTracks);
+  while(idx)
+  { strcpy(tracktoswap, Playlist[idx]);
+    sourceidx = random(0, idx);
+    strcpy(Playlist[idx], Playlist[sourceidx]);
+    strcpy(Playlist[sourceidx], tracktoswap);
+    Serial.printf("Swapped idx %d and %d\n", idx, sourceidx);
+    idx--;
+  }
+}
+
 
 void SendTracksToPuck(void)
-{ // add 25 songs at random
-  uint16_t startidx;
-  startidx = random(0, PlaylistTracks);
-  uint16_t formaxsongs = 0;
-
-  totalTracksInRoller = MIN(25, PlaylistTracks);
-  startidx = random(0, totalTracksInRoller);
-  firstTrackInRoller = startidx;
-  
-  if(PlaylistTracks) // could be zero, for directory only containing subdirectories
-  { while(1)
-    { if(strlen(Playlist[startidx]) < QUEUEMESSAGELENGTH)
-      { Serial.printf("Filepath Send To Puck -> %s\n", Playlist[startidx]);
-        AddToQueueForDisplay(Playlist[startidx], MESSAGE_PLAYLIST_SONG_ARTIST);
-        formaxsongs++;
-      }
-      else
-      { Serial.printf("Filepath Too long -> %s\n", Playlist[startidx]);
-      }
-      startidx++;
-      startidx %= PlaylistTracks;
-      if(formaxsongs>=MIN(25, PlaylistTracks))break;
-    }  
+{ // max 25 songs send to puck
+  uint16_t idx = 0;
+  while(idx<PlaylistTracks)
+  { if(strlen(Playlist[idx]) < QUEUEMESSAGELENGTH)
+    { Serial.printf("Track %d Filepath Send To Puck -> %s\n", idx, Playlist[idx]);
+      AddToQueueForDisplay(Playlist[idx], MESSAGE_PLAYLIST_SONG_ARTIST);
+    }
+    else
+    { Serial.printf("Filepath Too long -> %s\n", Playlist[idx]);
+    }
+    idx++;
   }
 }
 
