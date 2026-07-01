@@ -130,6 +130,8 @@ void ReadAS5600Encoders(void * pvParameters)
       if(EncoderReliable && (stable100ms>5))
       { stable = true;
         if(LedAnimationBrightness)LedAnimationBrightness-=5; // brigthness dims down in roughly 2.5 seconds
+        //stream.forceVolume(0);
+        //Speakers(SPEAKERS_OFF);
       }
     }  
     else // NS/EW movement detected
@@ -167,6 +169,8 @@ void ReadAS5600Encoders(void * pvParameters)
 
     if(EncoderReliable && (stable_changed != stable))
     { stable_changed = stable;
+      stream.forceVolume(0); // whatever is playing - mute it
+
       if(stable)
       { if(bPowerStatus)Serial.println("Stable while bPowerStatus=true");
         else Serial.println("Stable while bPowerStatus=false");
