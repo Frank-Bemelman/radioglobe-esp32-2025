@@ -695,13 +695,31 @@ void loop()
           DataFromDisplay.D_QueueStationIndex = -1;
           Stations.playing = -1;
           if(DataFromGlobe.D_QueueMessageCount<10) // don't waste time logging when behind schedule
-          { sscanf(QueueMessage, "%d", &stream_connecttohost_result);
-            SD_MMC.end(); //??
-            if(SD_MMC.begin("/sdcard", true, false))
-            { sprintf(logfile, "/badstations-%d.txt", stream_connecttohost_result);
-              AppendBadStationToFile(SD_MMC, logfile, QueueMessage);
+          { SD_MMC.end(); //?? just to be sure
+            if(SD_MMC.begin("/sdcard", true, false)) // we have a card 
+            { // response is like "error  -> url"
+              // reported error message will be used as filename
+              char filename[QUEUEMESSAGELENGTH];
+              strcpy(filename, QueueMessage);
+              char *p;
+              if((p=strstr(filename, " -> "))!=0)
+              { *p=0;
+                //Serial.printf("MESSAGE_CONNECTTOHOST_FAILURE filename part is <%s>\n", filename);
+                // reported error message will be used as filename, must sanize first
+                const char *illegal_chars = " \\/:*?\"<>|";
+                p = filename;
+                while (*p)
+                { if (strchr(illegal_chars, *p) != NULL) *p = '_'; // Replace with a safe character
+                  p++;
+                }
+                //Serial.printf("MESSAGE_CONNECTTOHOST_FAILURE sanitized filename will be <%s>\n", filename);
+                sprintf(logfile, "/ERR-%s.txt", filename);
+                //Serial.printf("MESSAGE_CONNECTTOHOST_FAILURE full filename will be <%s>\n", logfile);
+                AppendBadStationToFile(SD_MMC, logfile, QueueMessage);
+                SD_MMC.end();
+              }
               SD_MMC.end();
-            }
+            }  
           }    
           break; 
 
