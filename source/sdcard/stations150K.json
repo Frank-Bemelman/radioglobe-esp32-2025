@@ -1086,10 +1086,6 @@
         "url": "https://cloudstream2036.conectarhosting.com/8346/stream"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -2258,10 +2254,6 @@
         "url": "https://radiostream.interven.ca/listen/hesperides/radio.mp3"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -3382,10 +3374,6 @@
         "url": "http://live4.radyotvonline.com:9450/;"
       },
       {
-        "name": "Gnl Fm 97.3",
-        "url": "http://sunucu2.radyolarburada.com:8120/;stream.mp3"
-      },
-      {
         "name": "Hatay Radyo Akde",
         "url": "http://yayin.netyayin.net:7077/;"
       },
@@ -3484,10 +3472,6 @@
       {
         "name": "Africa Moroni Go",
         "url": "https://stream.zeno.fm/ey4xepfss0quv"
-      },
-      {
-        "name": "Rad Asuron",
-        "url": "https://stream.zeno.fm/gf5zuy1usg0uv"
       },
       {
         "name": "Rad Jangwani Fm",
@@ -4359,10 +4343,6 @@
         "url": "https://yayin2.canliyayin.org:7200/stream"
       },
       {
-        "name": "Gnl Fm 97.3",
-        "url": "http://sunucu2.radyolarburada.com:8120/;stream.mp3"
-      },
-      {
         "name": "Cumhuriyet Niver",
         "url": "https://ip1.ozelip.com/8046/stream"
       },
@@ -4642,10 +4622,6 @@
       "e": 22.9796
     },
     "urls": [
-      {
-        "name": "Adelin Fm 107.3",
-        "url": "https://cast.magicstreams.gr/sc/radioadelin/stream"
-      },
       {
         "name": "Ert Chania",
         "url": "https://radiostreaming.ert.gr/ert-chania"
@@ -4937,10 +4913,6 @@
       {
         "name": "Rad Voice Bamban",
         "url": "https://stream.zeno.fm/h5dhgypsasquv"
-      },
-      {
-        "name": "Radyo Natin 104.",
-        "url": "https://cast.bntworxtv.com:8060/radio.mp3"
       },
       {
         "name": "98.3 Love Rad Da",
@@ -7943,10 +7915,6 @@
         "url": "https://servercloudim3dia.im3dia.com:8001/esradioalbacete.mp3"
       },
       {
-        "name": "One Fm 88.7",
-        "url": "https://azura.streamingradio.online/radio/8050/onefm.mp3"
-      },
-      {
         "name": "Rad Albacete Cad",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_ALBACETE.mp3"
       },
@@ -7957,10 +7925,6 @@
       {
         "name": "Rad Chinchilla",
         "url": "http://streaming.radioalba.es:8114/stream"
-      },
-      {
-        "name": "Rad Manchuela Fm",
-        "url": "http://94.23.87.98:9225/index.html;stream.mp3"
       },
       {
         "name": "Delreino Rad",
@@ -9255,14 +9219,6 @@
         "url": "https://relay.stream.enacast-cloud.com:40241/alcanarradioHD.mp3"
       },
       {
-        "name": "Rad Rototom",
-        "url": "https://live.radio.rototom.com:8443/192.mp3"
-      },
-      {
-        "name": "La Snia Rdio",
-        "url": "https://server1.emitironline.com:9910/radio.mp3"
-      },
-      {
         "name": "Antena Caro",
         "url": "https://streaming.enacast.com/antenacaro128.mp3"
       },
@@ -9293,10 +9249,6 @@
       {
         "name": "Rad Fraga Fm 107",
         "url": "https://streaming.enacast.com/radiofraga128.mp3"
-      },
-      {
-        "name": "La Snia Rdio",
-        "url": "https://server1.emitironline.com:9910/radio.mp3"
       },
       {
         "name": "Antena Caro",
@@ -10649,10 +10601,6 @@
       {
         "name": "Ahin Fm",
         "url": "https://yayin2.canliyayin.org:7200/stream"
-      },
-      {
-        "name": "Gnl Fm 97.3",
-        "url": "http://sunucu2.radyolarburada.com:8120/;stream.mp3"
       },
       {
         "name": "Hatay Radyo Akde",
@@ -13863,10 +13811,6 @@
         "url": "https://laradiossl.online:10078/;"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -14338,10 +14282,6 @@
       "e": -47.3742
     },
     "urls": [
-      {
-        "name": "Club Regional 10",
-        "url": "http://95.154.196.37:19959/;"
-      },
       {
         "name": "Difusora Batatai",
         "url": "http://sd.dnip.com.br:9036/;"
@@ -16004,10 +15944,6 @@
         "url": "https://i.klikhost.com/8018/;super.mp3"
       },
       {
-        "name": "Rri Pro2 Fm 97.8",
-        "url": "https://stream-node1.rri.co.id/streaming/24/9024/rrimanokwaripro2.mp3"
-      },
-      {
         "name": "Rri Pro 2 Fm 96.",
         "url": "https://stream-node2.rri.co.id/streaming/15/9215/rriternatepro2.mp3"
       },
@@ -17468,10 +17404,6 @@
       {
         "name": "Manglillera 92.5",
         "url": "https://stream.zeno.fm/cretd91z1a0uv"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -21234,10 +21166,6 @@
         "url": "https://server.hoperadiovenezuela.com:8060/vieneguanare951.mp3"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -22841,10 +22769,6 @@
         "url": "https://stream.zeno.fm/jwfnfviliqvtv"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -23738,10 +23662,6 @@
       {
         "name": "Rad Hesperides F",
         "url": "https://radiostream.interven.ca/listen/hesperides/radio.mp3"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -35030,20 +34950,8 @@
         "url": "http://72.29.87.97:8038/stream.mp3/;"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -35274,10 +35182,6 @@
         "url": "https://axtran.radioca.st/stream"
       },
       {
-        "name": "Rad Valencia",
-        "url": "https://cloud-faro.beheerstream.com/proxy/radiovalenciafm?mp=/stream"
-      },
-      {
         "name": "Rad Noorderkempe",
         "url": "https://streams.movemedia.eu/noorderkempen"
       },
@@ -35324,10 +35228,6 @@
       {
         "name": "5Fm 105.4",
         "url": "https://stream.5fm.nu/5fm.mp3"
-      },
-      {
-        "name": "Rad Valencia",
-        "url": "https://cloud-faro.beheerstream.com/proxy/radiovalenciafm?mp=/stream"
       },
       {
         "name": "Rad Noorderkempe",
@@ -36749,10 +36649,6 @@
       {
         "name": "Krushi Rad",
         "url": "https://radioserver.krushiradio.lk:8000/radio.mp3"
-      },
-      {
-        "name": "Malayagam Fm",
-        "url": "https://cast5.my-control-panel.com/proxy/malayag1/stream/"
       },
       {
         "name": "Rad Lanka E Nws",
@@ -40405,10 +40301,6 @@
         "url": "https://radioserver.krushiradio.lk:8000/radio.mp3"
       },
       {
-        "name": "Malayagam Fm",
-        "url": "https://cast5.my-control-panel.com/proxy/malayag1/stream/"
-      },
-      {
         "name": "Slbc Kandurata F",
         "url": "http://220.247.227.20:8000/kandystream"
       },
@@ -40635,10 +40527,6 @@
       {
         "name": "Prime Fm 104.5",
         "url": "https://streaming.softnep.net:10910/;stream.nsv"
-      },
-      {
-        "name": "Rad Tharuhat",
-        "url": "https://stream.zeno.fm/pq0bz4vez38uv"
       },
       {
         "name": "Bhaktapur Fm 105",
@@ -41061,20 +40949,8 @@
         "url": "http://72.29.87.97:8038/stream.mp3/;"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -41177,16 +41053,8 @@
     },
     "urls": [
       {
-        "name": "Rad Cempaka Angk",
-        "url": "https://stream.pasopatiradio.com/rcabanjar"
-      },
-      {
         "name": "Suara Salira",
         "url": "https://i.klikhost.com/8286/;"
-      },
-      {
-        "name": "Citra Amilia Fm",
-        "url": "https://stream.pasopatiradio.com/citraamiliafm"
       },
       {
         "name": "Rmk 103.3 Fm",
@@ -41839,10 +41707,6 @@
     },
     "urls": [
       {
-        "name": "Rad Tharuhat",
-        "url": "https://stream.zeno.fm/pq0bz4vez38uv"
-      },
-      {
         "name": "Bhaktapur Fm 105",
         "url": "https://streaming.softnep.net:10846/;stream.nsv"
       },
@@ -42027,20 +41891,8 @@
         "url": "https://rss3.domint.net:8118/stream"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -42551,16 +42403,8 @@
         "url": "https://stm1.streaminghd.net.br:7498/;"
       },
       {
-        "name": "Paraiso Das Bela",
-        "url": "https://player.srvaudio.com.br/player-ssl/10954/;"
-      },
-      {
         "name": "Rdio Espia",
         "url": "https://live9.livemus.com.br:27230/;"
-      },
-      {
-        "name": "Rad Umari 87.5 F",
-        "url": "https://s01.transmissaodigital.com:7488/stream"
       },
       {
         "name": "Rad Muan Gospel",
@@ -42681,10 +42525,6 @@
       {
         "name": "Ven Fm 98.9",
         "url": "https://acp2.lorini.net:20210/stream"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -43375,10 +43215,6 @@
         "url": "https://usa8.fastcast4u.com/proxy/danielradio15?mp=/1"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -43905,10 +43741,6 @@
       {
         "name": "Rad Hesperides F",
         "url": "https://radiostream.interven.ca/listen/hesperides/radio.mp3"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -46335,10 +46167,6 @@
         "url": "https://stream.zeno.fm/zb2c835zahruv"
       },
       {
-        "name": "Radyo Natin Lagu",
-        "url": "https://wave.radyonatinfm.com/listen/dzva/laguna"
-      },
-      {
         "name": "Dwom-Fm 105.5",
         "url": "https://stream.zeno.fm/8f3c093bzs8uv"
       },
@@ -46349,10 +46177,6 @@
       {
         "name": "Radyo Natin Leme",
         "url": "https://xcite.radyonatinfm.com:8020/lemery"
-      },
-      {
-        "name": "Radyo Lipenio -",
-        "url": "https://stream.zeno.fm/efacsa3tnwzuv"
       }
     ]
   },
@@ -47890,10 +47714,6 @@
       "e": 121.1481
     },
     "urls": [
-      {
-        "name": "Radyo Natin 104.",
-        "url": "https://cast.bntworxtv.com:8060/radio.mp3"
-      },
       {
         "name": "Rad Voice Bayomb",
         "url": "https://stream.zeno.fm/khrz3vksasquv"
@@ -49671,10 +49491,6 @@
         "url": "https://streamingned.com:7072/;"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -50054,10 +49870,6 @@
       {
         "name": "Rad Risaala Fm 1",
         "url": "https://stream.zeno.fm/wwec0hwr0y5tv"
-      },
-      {
-        "name": "Rad Shifaa 104.7",
-        "url": "https://radio.serversom.com:1030/stream"
       }
     ]
   },
@@ -50118,14 +49930,6 @@
       {
         "name": "Nws Fm 104.9",
         "url": "https://stm25.srvaudio.com.br:11234/;/;"
-      },
-      {
-        "name": "Paraiso Das Bela",
-        "url": "https://player.srvaudio.com.br/player-ssl/10954/;"
-      },
-      {
-        "name": "Rad Umari 87.5 F",
-        "url": "https://s01.transmissaodigital.com:7488/stream"
       },
       {
         "name": "Rad Muan Gospel",
@@ -52700,10 +52504,6 @@
         "url": "https://live.dofm.ly/proxy/almunir/stream"
       },
       {
-        "name": "Adelin Fm 107.3",
-        "url": "https://cast.magicstreams.gr/sc/radioadelin/stream"
-      },
-      {
         "name": "Fm 89.8",
         "url": "https://rdst.win:48980/"
       },
@@ -52768,20 +52568,12 @@
     },
     "urls": [
       {
-        "name": "Rad Rototom",
-        "url": "https://live.radio.rototom.com:8443/192.mp3"
-      },
-      {
         "name": "Rdio Benicarl 10",
         "url": "https://streaming.enacast.com:8000/radiobenicarlo128.mp3"
       },
       {
         "name": "Alcanar Rdio Fm",
         "url": "https://relay.stream.enacast-cloud.com:40241/alcanarradioHD.mp3"
-      },
-      {
-        "name": "La Snia Rdio",
-        "url": "https://server1.emitironline.com:9910/radio.mp3"
       },
       {
         "name": "Antena Caro",
@@ -54892,10 +54684,6 @@
         "url": "http://s1.radiosnethosting.com:9906/;"
       },
       {
-        "name": "Fm De La Ciudad",
-        "url": "https://stream01.server-inside.com.ar:9658/ciudadpigue"
-      },
-      {
         "name": "Fm Cielo 93.1",
         "url": "https://streaming1.locucionar.com/proxy/fmcielo931?mp=/stream"
       },
@@ -56084,10 +55872,6 @@
     },
     "urls": [
       {
-        "name": "Rad Vrishti",
-        "url": "http://vrishti.riggrodigital.com:8078/stream/;"
-      },
-      {
         "name": "Rad Active Fm 90",
         "url": "https://stream.zeno.fm/ogoasntaulstv"
       },
@@ -56118,10 +55902,6 @@
       {
         "name": "Bhaktapur Fm 105",
         "url": "https://streaming.softnep.net:10846/;stream.nsv"
-      },
-      {
-        "name": "Rad Tharuhat",
-        "url": "https://stream.zeno.fm/pq0bz4vez38uv"
       },
       {
         "name": "Rad Sailung Fm 9",
@@ -56211,10 +55991,6 @@
       {
         "name": "Synergy Fm 91.6",
         "url": "https://live.itech.host:3880/stream"
-      },
-      {
-        "name": "Rad Tharuhat",
-        "url": "https://stream.zeno.fm/pq0bz4vez38uv"
       },
       {
         "name": "Rad Birgunj 99 F",
@@ -58667,10 +58443,6 @@
         "url": "https://streamasiacdn.atc-labs.com/radiorimjhim.aac"
       },
       {
-        "name": "Rad Tharuhat",
-        "url": "https://stream.zeno.fm/pq0bz4vez38uv"
-      },
-      {
         "name": "Bhaktapur Fm 105",
         "url": "https://streaming.softnep.net:10846/;stream.nsv"
       },
@@ -59679,10 +59451,6 @@
         "url": "https://betelgeuse.dribbcast.com/proxy/mamediarra?mp=/stream"
       },
       {
-        "name": "Urban Tamba 105.",
-        "url": "https://stream.zeno.fm/3sd452wchfhvv"
-      },
-      {
         "name": "Urban Ziguinchor",
         "url": "https://stream.zeno.fm/nsufhswchfhvv"
       },
@@ -60142,10 +59910,6 @@
       "e": -3.6808
     },
     "urls": [
-      {
-        "name": "South Devon Soun",
-        "url": "https://stream.zeno.fm/1htpr0nkns8uv"
-      },
       {
         "name": "Heart (South Dev",
         "url": "https://media-sov.musicradio.com/HeartSouthHamsMP3"
@@ -60839,20 +60603,8 @@
         "url": "https://servidor38.brlogic.com:7104/live"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -62145,10 +61897,6 @@
       {
         "name": "Rad Kankan",
         "url": "https://stream.zeno.fm/ab9q4v3mb"
-      },
-      {
-        "name": "Ecowas Rad 91.5",
-        "url": "https://stream.zeno.fm/qfptc1637reuv"
       },
       {
         "name": "Ebenezer Rad Fm",
@@ -64887,20 +64635,8 @@
         "url": "https://stream.zeno.fm/96896vu8na0uv"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -66633,10 +66369,6 @@
       {
         "name": "Rad Risaala Fm 1",
         "url": "https://stream.zeno.fm/wwec0hwr0y5tv"
-      },
-      {
-        "name": "Rad Shifaa 104.7",
-        "url": "https://radio.serversom.com:1030/stream"
       }
     ]
   },
@@ -67222,10 +66954,6 @@
       "e": 10.2993
     },
     "urls": [
-      {
-        "name": "Rad Quran",
-        "url": "http://5.135.194.225:8000/live"
-      },
       {
         "name": "Rad Rm Fm 99.8",
         "url": "https://stream.rm-fm.net/live"
@@ -68177,10 +67905,6 @@
       {
         "name": "Tsima Rad Mw 126",
         "url": "https://firstnationsmedia.stream/8024/stream"
-      },
-      {
-        "name": "Rri Pro2 Fm 97.8",
-        "url": "https://stream-node1.rri.co.id/streaming/24/9024/rrimanokwaripro2.mp3"
       },
       {
         "name": "Rri Pro2 Fm 96.8",
@@ -70613,10 +70337,6 @@
       {
         "name": "5Fm 105.4",
         "url": "https://stream.5fm.nu/5fm.mp3"
-      },
-      {
-        "name": "Rad Valencia",
-        "url": "https://cloud-faro.beheerstream.com/proxy/radiovalenciafm?mp=/stream"
       },
       {
         "name": "Rad A-Fm",
@@ -76427,10 +76147,6 @@
         "url": "https://a10.siar.us/radio/8280/radio.mp3"
       },
       {
-        "name": "Citra Amilia Fm",
-        "url": "https://stream.pasopatiradio.com/citraamiliafm"
-      },
-      {
         "name": "Rad Suara Banjar",
         "url": "https://i.klikhost.com/8102/;"
       },
@@ -76521,10 +76237,6 @@
       {
         "name": "Adventist Angels",
         "url": "https://stream.zeno.fm/0m5rnauhunhvv"
-      },
-      {
-        "name": "Nyaluo Rad",
-        "url": "http://172.105.25.197/radio/8000/radio.mp3"
       },
       {
         "name": "Kasibante Fm 88.",
@@ -76749,10 +76461,6 @@
       {
         "name": "Kokwo Rad Fm 100",
         "url": "https://stream.kokwo.co.ke/listen.mp3"
-      },
-      {
-        "name": "Nyaluo Rad",
-        "url": "http://172.105.25.197/radio/8000/radio.mp3"
       },
       {
         "name": "Imani Rad",
@@ -79688,10 +79396,6 @@
         "url": "https://streaming12.elitecomunicacion.es:8056/stream"
       },
       {
-        "name": "Campos Fm 90.6",
-        "url": "http://207.180.192.26:18022/stream"
-      },
-      {
         "name": "Global Rad Fm",
         "url": "https://stream.rcast.net/68409"
       },
@@ -79914,10 +79618,6 @@
       {
         "name": "Fe Y Alegra Mash",
         "url": "http://aler.org:8000/machiques.aac"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -81598,10 +81298,6 @@
         "url": "https://server6.globalhostla.com:9270/stream"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -82909,10 +82605,7 @@
       "e": 121.1251
     },
     "urls": [
-      {
-        "name": "Radyo Natin Lagu",
-        "url": "https://wave.radyonatinfm.com/listen/dzva/laguna"
-      },
+
       {
         "name": "Neighbor Village",
         "url": "https://stream.zeno.fm/qkye357zdnzuv"
@@ -82977,17 +82670,10 @@
         "name": "Dwom-Fm 105.5",
         "url": "https://stream.zeno.fm/8f3c093bzs8uv"
       },
-      {
-        "name": "Radyo Natin Lagu",
-        "url": "https://wave.radyonatinfm.com/listen/dzva/laguna"
-      },
+
       {
         "name": "Radyo Natin Leme",
         "url": "https://xcite.radyonatinfm.com:8020/lemery"
-      },
-      {
-        "name": "Radyo Lipenio -",
-        "url": "https://stream.zeno.fm/efacsa3tnwzuv"
       }
     ]
   },
@@ -83146,20 +82832,8 @@
     },
     "urls": [
       {
-        "name": "Radyo Natin 100.",
-        "url": "https://audio.amfm.link/radio/8000/dwrl"
-      },
-      {
         "name": "95.3 Love Rad Da",
         "url": "https://loveradiodaet.radioca.st/;"
-      },
-      {
-        "name": "Radyo Natin Guma",
-        "url": "https://stream.amfm.link:8000/dwrg"
-      },
-      {
-        "name": "Radyo Lipenio -",
-        "url": "https://stream.zeno.fm/efacsa3tnwzuv"
       }
     ]
   },
@@ -85122,10 +84796,6 @@
         "url": "https://streaming01.radiosenlinea.com.ar/8638/stream/1/"
       },
       {
-        "name": "Hts 101.7 - Xhhp",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/XHHPRFM_SC"
-      },
-      {
         "name": "Altavoz Chihuahu",
         "url": "https://s2.mexside.net/8160/stream"
       },
@@ -85406,20 +85076,8 @@
         "url": "https://stream.zeno.fm/96896vu8na0uv"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -86104,10 +85762,6 @@
       {
         "name": "Paraiso Das Bela",
         "url": "https://player.srvaudio.com.br/player-ssl/10954/;"
-      },
-      {
-        "name": "Rad Umari 87.5 F",
-        "url": "https://s01.transmissaodigital.com:7488/stream"
       },
       {
         "name": "Alpha Fm 101.7",
@@ -86984,16 +86638,8 @@
         "url": "https://cast2.rmradio.es:8053/albacete"
       },
       {
-        "name": "One Fm 88.7",
-        "url": "https://azura.streamingradio.online/radio/8050/onefm.mp3"
-      },
-      {
         "name": "Rad Reza El Rosa",
         "url": "https://stream.zeno.fm/a4r2dsxbby8uv"
-      },
-      {
-        "name": "Rad Manchuela Fm",
-        "url": "http://94.23.87.98:9225/index.html;stream.mp3"
       },
       {
         "name": "Rad La Roda 107.",
@@ -90781,10 +90427,6 @@
         "url": "https://stm6.voxhd.com.br:7288/stream"
       },
       {
-        "name": "Rad Umari 87.5 F",
-        "url": "https://s01.transmissaodigital.com:7488/stream"
-      },
-      {
         "name": "Rdio Litoral Fm",
         "url": "https://stream03.dghost.com.br:8340/stream"
       },
@@ -92175,10 +91817,6 @@
       {
         "name": "Rnv - Musical",
         "url": "http://rnv.lorini.net:29030/RNVMUSICAL"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "La Romntica 88.9",
@@ -94869,10 +94507,6 @@
         "url": "https://acp2.lorini.net:20210/stream"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -95229,10 +94863,6 @@
     },
     "urls": [
       {
-        "name": "Campos Fm 90.6",
-        "url": "http://207.180.192.26:18022/stream"
-      },
-      {
         "name": "Futuro Fm",
         "url": "https://server1.emitironline.com:8040/;"
       },
@@ -95423,10 +95053,6 @@
       {
         "name": "Caribea 94.9 Fm",
         "url": "https://server6.globalhostla.com:9212/stream"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -97035,16 +96661,8 @@
     },
     "urls": [
       {
-        "name": "Rad Manchuela Fm",
-        "url": "http://94.23.87.98:9225/index.html;stream.mp3"
-      },
-      {
         "name": "Rad Chinchilla",
         "url": "http://streaming.radioalba.es:8114/stream"
-      },
-      {
-        "name": "One Fm 88.7",
-        "url": "https://azura.streamingradio.online/radio/8050/onefm.mp3"
       },
       {
         "name": "Almansa Fm",
@@ -97667,10 +97285,6 @@
       {
         "name": "Rad Fraga Fm 107",
         "url": "https://streaming.enacast.com/radiofraga128.mp3"
-      },
-      {
-        "name": "La Snia Rdio",
-        "url": "https://server1.emitironline.com:9910/radio.mp3"
       },
       {
         "name": "Cadena 100",
@@ -98908,10 +98522,6 @@
       {
         "name": "Los40 Urban Cast",
         "url": "https://stream.radiocastellon.com/40ur"
-      },
-      {
-        "name": "Rad Rototom",
-        "url": "https://live.radio.rototom.com:8443/192.mp3"
       },
       {
         "name": "Rdio La Pobla De",
@@ -100658,18 +100268,9 @@
     },
     "urls": [
       {
-        "name": "Radyo Natin 100.",
-        "url": "https://audio.amfm.link/radio/8000/dwrl"
-      },
-      {
         "name": "95.3 Love Rad Da",
         "url": "https://loveradiodaet.radioca.st/;"
-      },
-      {
-        "name": "Radyo Natin Guma",
-        "url": "https://stream.amfm.link:8000/dwrg"
       }
-      
     ]
   },
   "Catanduva SP,BR": {
@@ -101030,10 +100631,6 @@
         "url": "https://laradiossl.online:10078/;"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -101205,10 +100802,6 @@
       {
         "name": "Rad Voice Bamban",
         "url": "https://stream.zeno.fm/h5dhgypsasquv"
-      },
-      {
-        "name": "Radyo Natin 104.",
-        "url": "https://cast.bntworxtv.com:8060/radio.mp3"
       },
       {
         "name": "Rad Voice Solano",
@@ -106131,10 +105724,6 @@
         "url": "https://live.itech.host:9442/stream"
       },
       {
-        "name": "Rad Tharuhat",
-        "url": "https://stream.zeno.fm/pq0bz4vez38uv"
-      },
-      {
         "name": "Bhaktapur Fm 105",
         "url": "https://streaming.softnep.net:10846/;stream.nsv"
       },
@@ -106252,10 +105841,6 @@
     },
     "urls": [
       {
-        "name": "Rgd Nws",
-        "url": "https://lhttp.qingting.fm/live/15318208/64k.mp3"
-      },
-      {
         "name": "Chongqing Rgd Nw",
         "url": "https://lhttp.qingting.fm/live/1498/64k.mp3"
       },
@@ -106346,10 +105931,6 @@
       {
         "name": "Gavdos Fm 88.8",
         "url": "http://sc2.streamwithq.com:8050/stream"
-      },
-      {
-        "name": "Adelin Fm 107.3",
-        "url": "https://cast.magicstreams.gr/sc/radioadelin/stream"
       },
       {
         "name": "Matzore 89.1 - U",
@@ -106797,10 +106378,6 @@
       {
         "name": "Va 97.7 Fm",
         "url": "https://streamingned.com/7182/stream"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -108709,10 +108286,6 @@
         "url": "https://stream.zeno.fm/2ntgukmg0hhvv"
       },
       {
-        "name": "Quality Mus Rdio",
-        "url": "http://163.172.198.16:8533/stream?1573934424548.mp3/;"
-      },
-      {
         "name": "Cadena 100",
         "url": "https://flucast01-o-cloud.flumotion.com/cope/cadena100.mp3"
       },
@@ -109229,22 +108802,6 @@
         "url": "https://lhttp.qingting.fm/live/5022004/64k.mp3"
       },
       {
-        "name": "Sichuan Rtv - Mi",
-        "url": "https://lhttp.qingting.fm/live/1110/64k.mp3"
-      },
-      {
-        "name": "Sichuan Rtv - Mi",
-        "url": "https://lhttp.qingting.fm/live/1115/64k.mp3"
-      },
-      {
-        "name": "Chongqing Rgd Nw",
-        "url": "https://lhttp.qingting.fm/live/1498/64k.mp3"
-      },
-      {
-        "name": "Guangxi Rgd Inte",
-        "url": "https://lhttp.qingting.fm/live/1753/64k.mp3"
-      },
-      {
         "name": "Shirley & Spinoz",
         "url": "https://s2.radio.co/sec5fa6199/listen"
       }
@@ -109320,10 +108877,6 @@
       {
         "name": "Rgd Fm 99.2",
         "url": "https://lhttp.qingting.fm/live/20489/64k.mp3"
-      },
-      {
-        "name": "1008 Fm100.8",
-        "url": "https://lhttp.qingting.fm/live/1276/64k.mp3"
       },
       {
         "name": "Fm88.7",
@@ -111655,10 +111208,6 @@
         "url": "https://stream.zeno.fm/70du6q95azzuv"
       },
       {
-        "name": "Hts 101.7 - Xhhp",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/XHHPRFM_SC"
-      },
-      {
         "name": "La Jefa Rad 96.1",
         "url": "https://dattavolt.com/8266/stream"
       },
@@ -112369,14 +111918,6 @@
       {
         "name": "Rad Helln",
         "url": "https://srv7021.dns-lcinternet.com/8006/stream"
-      },
-      {
-        "name": "One Fm 88.7",
-        "url": "https://azura.streamingradio.online/radio/8050/onefm.mp3"
-      },
-      {
-        "name": "Rad Manchuela Fm",
-        "url": "http://94.23.87.98:9225/index.html;stream.mp3"
       },
       {
         "name": "Delreino Rad",
@@ -113933,10 +113474,6 @@
       {
         "name": "Chongqing Rgd Ec",
         "url": "https://lhttp.qingting.fm/live/1499/64k.mp3"
-      },
-      {
-        "name": "Chongqing Rgd Nw",
-        "url": "https://lhttp.qingting.fm/live/1498/64k.mp3"
       },
       {
         "name": "Shirley & Spinoz",
@@ -116824,10 +116361,6 @@
         "url": "https://acp2.lorini.net:20210/stream"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -117006,10 +116539,6 @@
       {
         "name": "Halcn Stereo 104",
         "url": "https://radioenhd.com:7026/;"
-      },
-      {
-        "name": "Hts 101.7 - Xhhp",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/XHHPRFM_SC"
       },
       {
         "name": "Fm T 102.7",
@@ -123166,10 +122695,6 @@
         "url": "http://207.148.74.192:7860/stream.mp3"
       },
       {
-        "name": "Lankare Rad",
-        "url": "https://cp11.serverse.com/proxy/lankare/stream"
-      },
-      {
         "name": "Shree Fm 100.0",
         "url": "http://207.148.74.192:7860/stream2.mp3"
       },
@@ -127213,20 +126738,8 @@
         "url": "http://rgradio.net:8030/radioideal.mp3"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -129218,10 +128731,6 @@
         "url": "http://51.38.125.141:1070/enplofm"
       },
       {
-        "name": "Fm 98.7",
-        "url": "https://n03.radiojar.com/1qpu1agw4mzuv.m4a"
-      },
-      {
         "name": "Real Fm",
         "url": "https://realfm.live24.gr/realfm?.mp3"
       },
@@ -129901,10 +129410,6 @@
         "url": "https://laradiossl.online:9226/;"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -130414,10 +129919,6 @@
       {
         "name": "Fm Estilo",
         "url": "https://stream01.server-inside.com.ar:9645/fmestilodx"
-      },
-      {
-        "name": "Fm De La Ciudad",
-        "url": "https://stream01.server-inside.com.ar:9658/ciudadpigue"
       },
       {
         "name": "Maxima 92.7 Fm",
@@ -132081,10 +131582,6 @@
     },
     "urls": [
       {
-        "name": "Radyo Natin Cota",
-        "url": "https://amp.radyonatinfm.com/listen/dxtc/cotabato"
-      },
-      {
         "name": "Star Fm Cotabato",
         "url": "https://stream.zeno.fm/hf1yubc29heuv"
       },
@@ -132213,10 +131710,6 @@
       {
         "name": "Rdio Comunyx",
         "url": "https://stm1.streaminghd.net.br:7498/;"
-      },
-      {
-        "name": "Rad Umari 87.5 F",
-        "url": "https://s01.transmissaodigital.com:7488/stream"
       },
       {
         "name": "Rad Muan Gospel",
@@ -133769,10 +133262,6 @@
       {
         "name": "Xhpnav 89.7 Fm",
         "url": "https://www.sonoragrupera.mx/envivo"
-      },
-      {
-        "name": "Hts 101.7 - Xhhp",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/XHHPRFM_SC"
       },
       {
         "name": "Clsic 103.7",
@@ -135550,10 +135039,6 @@
         "url": "https://streamingned.com:7136/stream"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -136068,10 +135553,6 @@
         "url": "https://cast2.rmradio.es:8053/albacete"
       },
       {
-        "name": "Campos Fm 90.6",
-        "url": "http://207.180.192.26:18022/stream"
-      },
-      {
         "name": "Rad La Roda 107.",
         "url": "http://94.76.165.97:9830/;stream.mp3"
       },
@@ -136573,10 +136054,6 @@
         "url": "https://stream.zeno.fm/r07624xkyhhvv"
       },
       {
-        "name": "Hts 101.7 - Xhhp",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/XHHPRFM_SC"
-      },
-      {
         "name": "Rad Universidad",
         "url": "http://200.23.125.55:8000/;"
       },
@@ -136891,10 +136368,6 @@
       {
         "name": "Rad Cristiana Ev",
         "url": "https://stream.zeno.fm/jwfnfviliqvtv"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -138830,12 +138303,7 @@
       {
         "name": "Radyo Natin 100.",
         "url": "https://audio.amfm.link/radio/8000/dwrl"
-      },
-      {
-        "name": "Radyo Natin Guma",
-        "url": "https://stream.amfm.link:8000/dwrg"
       }
-      
     ]
   },
   "Daggett MI,US": {
@@ -139166,20 +138634,8 @@
         "url": "https://stream.zeno.fm/61v2cfas4tzuv"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -143225,10 +142681,6 @@
         "url": "http://streamingcwsradio20.com:9890/;"
       },
       {
-        "name": "Hts 101.7 - Xhhp",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/XHHPRFM_SC"
-      },
-      {
         "name": "La Jefa Rad 96.1",
         "url": "https://dattavolt.com/8266/stream"
       },
@@ -145099,10 +144551,6 @@
         "url": "https://ice66.securenetsystems.net/WPPG"
       },
       {
-        "name": "Krock 100.3 Fm",
-        "url": "http://174.76.156.13:8000/stream/1/"
-      },
-      {
         "name": "Smooth Jz 24/7",
         "url": "https://jking.cdnstream1.com/b75154_128mp3"
       },
@@ -145755,10 +145203,6 @@
         "url": "https://streaming.softnep.net:10872/stream"
       },
       {
-        "name": "Rad Tharuhat",
-        "url": "https://stream.zeno.fm/pq0bz4vez38uv"
-      },
-      {
         "name": "Bhaktapur Fm 105",
         "url": "https://streaming.softnep.net:10846/;stream.nsv"
       },
@@ -145926,10 +145370,6 @@
       {
         "name": "Rad Sugar 90.8 F",
         "url": "http://188.165.222.198:8157/stream?type=http"
-      },
-      {
-        "name": "Rad Vrishti",
-        "url": "http://vrishti.riggrodigital.com:8078/stream/;"
       },
       {
         "name": "Rad Sailung Fm 9",
@@ -147285,10 +146725,6 @@
       {
         "name": "Rad Jiida Fm 88.",
         "url": "https://stream.zeno.fm/6qyn64rr9mruv"
-      },
-      {
-        "name": "Urban Tamba 105.",
-        "url": "https://stream.zeno.fm/3sd452wchfhvv"
       },
       {
         "name": "Rad Kledu",
@@ -149897,10 +149333,6 @@
       "e": 113.7518
     },
     "urls": [
-      {
-        "name": "1008 Fm100.8",
-        "url": "https://lhttp.qingting.fm/live/1276/64k.mp3"
-      },
       {
         "name": "Fm90.7",
         "url": "https://lhttp.qingting.fm/live/5021523/64k.mp3"
@@ -153310,10 +152742,6 @@
       {
         "name": "Ahin Fm",
         "url": "https://yayin2.canliyayin.org:7200/stream"
-      },
-      {
-        "name": "Gnl Fm 97.3",
-        "url": "http://sunucu2.radyolarburada.com:8120/;stream.mp3"
       },
       {
         "name": "Hatay Radyo Akde",
@@ -158376,10 +157804,6 @@
         "url": "https://usa8.fastcast4u.com/proxy/danielradio15?mp=/1"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -159670,10 +159094,6 @@
       {
         "name": "Ifm 100.6",
         "url": "https://live.ifm.tn/radio/8000/ifmlive"
-      },
-      {
-        "name": "Rad Quran",
-        "url": "http://5.135.194.225:8000/live"
       }
     ]
   },
@@ -159758,10 +159178,6 @@
       {
         "name": "Rad Cristiana Ev",
         "url": "https://stream.zeno.fm/jwfnfviliqvtv"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -159858,10 +159274,6 @@
       {
         "name": "La Mega 102.1 Fm",
         "url": "http://ur58.lorini.net:50002/LAMEGA1021FM.aac"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -160214,10 +159626,6 @@
       {
         "name": "Manglillera 92.5",
         "url": "https://stream.zeno.fm/cretd91z1a0uv"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -160748,10 +160156,6 @@
         "url": "http://live2.rcast.net:8520/;stream.mp3"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -160894,10 +160298,6 @@
       {
         "name": "Sideral 98.9 Fm",
         "url": "https://server6.globalhostla.com:8078/stream"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -161118,10 +160518,6 @@
       {
         "name": "Ahin Fm",
         "url": "https://yayin2.canliyayin.org:7200/stream"
-      },
-      {
-        "name": "Gnl Fm 97.3",
-        "url": "http://sunucu2.radyolarburada.com:8120/;stream.mp3"
       },
       {
         "name": "Cumhuriyet Niver",
@@ -161410,10 +160806,6 @@
       {
         "name": "Nenyon Fm 104.3",
         "url": "https://stream.zeno.fm/60ykr4csvxhvv"
-      },
-      {
-        "name": "Nyaluo Rad",
-        "url": "http://172.105.25.197/radio/8000/radio.mp3"
       },
       {
         "name": "Rad 47 103.0 Fm",
@@ -168810,10 +168202,6 @@
         "url": "https://securestreams6.autopo.st:2519/wsbz"
       },
       {
-        "name": "Krock 100.3 Fm",
-        "url": "http://174.76.156.13:8000/stream/1/"
-      },
-      {
         "name": "The Buzz Montgom",
         "url": "https://ais-edge09-live365-dal02.cdnstream.com/a48548"
       },
@@ -169086,10 +168474,6 @@
         "url": "https://streaming.broadcastradio.com:10855/xpression"
       },
       {
-        "name": "South Devon Soun",
-        "url": "https://stream.zeno.fm/1htpr0nkns8uv"
-      },
-      {
         "name": "Lyme Bay Rad",
         "url": "https://streaming.radio.co/scd8e551f6/listen"
       },
@@ -169136,10 +168520,6 @@
       {
         "name": "Devonair Rad",
         "url": "https://streaming.devonairradio.com/live"
-      },
-      {
-        "name": "South Devon Soun",
-        "url": "https://stream.zeno.fm/1htpr0nkns8uv"
       },
       {
         "name": "Lyme Bay Rad",
@@ -169333,10 +168713,6 @@
       {
         "name": "Rad Fraga Fm 107",
         "url": "https://streaming.enacast.com/radiofraga128.mp3"
-      },
-      {
-        "name": "La Snia Rdio",
-        "url": "https://server1.emitironline.com:9910/radio.mp3"
       },
       {
         "name": "Antena Caro",
@@ -177954,10 +177330,6 @@
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WNCVFMAAC.aac"
       },
       {
-        "name": "Krock 100.3 Fm",
-        "url": "http://174.76.156.13:8000/stream/1/"
-      },
-      {
         "name": "Newstalk 1260 Wf",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WFTWAMAAC.aac"
       },
@@ -178473,10 +177845,6 @@
       {
         "name": "Fm95.4",
         "url": "https://lhttp.qingting.fm/live/15318698/64k.mp3"
-      },
-      {
-        "name": "Fm97.8",
-        "url": "https://lhttp.qingting.fm/live/15318679/64k.mp3"
       },
       {
         "name": "Shirley & Spinoz",
@@ -182854,10 +182222,6 @@
       {
         "name": "Ifm 100.6",
         "url": "https://live.ifm.tn/radio/8000/ifmlive"
-      },
-      {
-        "name": "Rad Quran",
-        "url": "http://5.135.194.225:8000/live"
       }
     ]
   },
@@ -183266,10 +182630,6 @@
       {
         "name": "Ifm 100.6",
         "url": "https://live.ifm.tn/radio/8000/ifmlive"
-      },
-      {
-        "name": "Rad Quran",
-        "url": "http://5.135.194.225:8000/live"
       }
     ]
   },
@@ -185065,10 +184425,6 @@
         "url": "https://radioserver.krushiradio.lk:8000/radio.mp3"
       },
       {
-        "name": "Malayagam Fm",
-        "url": "https://cast5.my-control-panel.com/proxy/malayag1/stream/"
-      },
-      {
         "name": "Rad Lanka E Nws",
         "url": "https://stream.zeno.fm/31hushvxwd0uv"
       },
@@ -186025,10 +185381,6 @@
         "url": "https://radio.saopaulo01.com.br:10765/stream"
       },
       {
-        "name": "Rad Umari 87.5 F",
-        "url": "https://s01.transmissaodigital.com:7488/stream"
-      },
-      {
         "name": "Rdio Litoral Fm",
         "url": "https://stream03.dghost.com.br:8340/stream"
       },
@@ -186742,10 +186094,6 @@
       {
         "name": "Ahin Fm",
         "url": "https://yayin2.canliyayin.org:7200/stream"
-      },
-      {
-        "name": "Gnl Fm 97.3",
-        "url": "http://sunucu2.radyolarburada.com:8120/;stream.mp3"
       },
       {
         "name": "Antakya Asya Rad",
@@ -187672,10 +187020,6 @@
         "url": "https://radio01.ferozo.com/proxy/ra01000763?mp=/stream"
       },
       {
-        "name": "Fm Utopia 105.3",
-        "url": "https://cdn.instream.audio/:9270/stream"
-      },
-      {
         "name": "Rad Joven Mendoz",
         "url": "https://sc.host-live.com/8222/stream"
       },
@@ -188055,10 +187399,7 @@
         "name": "Neighbor Village",
         "url": "https://stream.zeno.fm/qkye357zdnzuv"
       },
-      {
-        "name": "Radyo Natin Lagu",
-        "url": "https://wave.radyonatinfm.com/listen/dzva/laguna"
-      },
+
       {
         "name": "Pop Rad Philippi",
         "url": "https://popvip-gecko.radioca.st/stream"
@@ -188460,10 +187801,6 @@
       {
         "name": "Rad Universo",
         "url": "http://45.178.84.150:8000/universo.mp3"
-      },
-      {
-        "name": "Fm De La Ciudad",
-        "url": "https://stream01.server-inside.com.ar:9658/ciudadpigue"
       },
       {
         "name": "Fm Cielo 93.1",
@@ -191209,10 +190546,6 @@
         "url": "https://radiopadmabd.radioca.st/radiopadma"
       },
       {
-        "name": "Rad Vrishti",
-        "url": "http://vrishti.riggrodigital.com:8078/stream/;"
-      },
-      {
         "name": "Ankora Rad",
         "url": "https://stream.zeno.fm/xush70b1cbruv"
       }
@@ -191653,10 +190986,6 @@
       {
         "name": "4U Rad Fm 93.1",
         "url": "https://netradio.live24.gr/4uradio931"
-      },
-      {
-        "name": "Fm 98.7",
-        "url": "https://n03.radiojar.com/1qpu1agw4mzuv.m4a"
       },
       {
         "name": "Kastoriafm 91,5",
@@ -194000,10 +193329,6 @@
         "url": "https://yayin2.canliyayin.org:7200/stream"
       },
       {
-        "name": "Gnl Fm 97.3",
-        "url": "http://sunucu2.radyolarburada.com:8120/;stream.mp3"
-      },
-      {
         "name": "Cumhuriyet Niver",
         "url": "https://ip1.ozelip.com/8046/stream"
       },
@@ -194662,10 +193987,6 @@
       {
         "name": "Rad Badal",
         "url": "https://listen.openstream.co/6654/;stream.mp3"
-      },
-      {
-        "name": "Rad Tharuhat",
-        "url": "https://stream.zeno.fm/pq0bz4vez38uv"
       },
       {
         "name": "Synergy Fm 91.6",
@@ -200910,10 +200231,6 @@
         "url": "https://streamingned.com:7072/;"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -201964,10 +201281,6 @@
         "url": "https://radiostream.interven.ca/listen/hesperides/radio.mp3"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -202026,10 +201339,6 @@
       {
         "name": "Fm100.5",
         "url": "https://lhttp.qingting.fm/live/1263/64k.mp3"
-      },
-      {
-        "name": "1008 Fm100.8",
-        "url": "https://lhttp.qingting.fm/live/1276/64k.mp3"
       },
       {
         "name": "Fm90.7",
@@ -203051,10 +202360,6 @@
         "url": "https://streamingned.com:7136/stream"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -203341,10 +202646,6 @@
         "url": "http://aler.org:8000/elnula.aac"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -203629,10 +202930,6 @@
         "url": "https://stream.zeno.fm/bm6u4qh1trhvv"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -203892,10 +203189,6 @@
       {
         "name": "Rad Cristiana Ev",
         "url": "https://stream.zeno.fm/jwfnfviliqvtv"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -204220,10 +203513,6 @@
       {
         "name": "Urban Dakar 97.1",
         "url": "https://stream.zeno.fm/0yd19f2chfhvv"
-      },
-      {
-        "name": "Urban Kaolack 98",
-        "url": "https://stream.zeno.fm/gfu2dq2chfhvv"
       },
       {
         "name": "Rad Keur Massar",
@@ -204765,10 +204054,6 @@
         "url": "https://s6.voscast.com:10819/stream"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -205106,25 +204391,10 @@
       "e": 122.1065
     },
     "urls": [
-      {
-        "name": "Radyo Natin Guma",
-        "url": "https://stream.amfm.link:8000/dwrg"
-      },
-      {
-        "name": "Radyo Natin Lagu",
-        "url": "https://wave.radyonatinfm.com/listen/dzva/laguna"
-      },
-      {
-        "name": "Radyo Natin 100.",
-        "url": "https://audio.amfm.link/radio/8000/dwrl"
-      },
+
       {
         "name": "95.3 Love Rad Da",
         "url": "https://loveradiodaet.radioca.st/;"
-      },
-      {
-        "name": "Radyo Lipenio -",
-        "url": "https://stream.zeno.fm/efacsa3tnwzuv"
       }
       
     ]
@@ -205238,10 +204508,6 @@
       {
         "name": "Yahweh Rad",
         "url": "https://s3.radio.co/s22189b87c/listen"
-      },
-      {
-        "name": "Qingdao Rgd Mus",
-        "url": "https://lhttp.qingting.fm/live/1677/64k.mp3"
       },
       {
         "name": "Radio Pyongyang",
@@ -206892,10 +206158,6 @@
       {
         "name": "Fm95.4",
         "url": "https://lhttp.qingting.fm/live/15318698/64k.mp3"
-      },
-      {
-        "name": "Guangxi Voice Of",
-        "url": "https://lhttp.qingting.fm/live/1757/64k.mp3"
       },
       {
         "name": "Shirley & Spinoz",
@@ -211080,20 +210342,8 @@
         "url": "https://radio.dominiserver.com/proxy/power?mp=/stream"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -211259,10 +210509,6 @@
       "e": 80.5966
     },
     "urls": [
-      {
-        "name": "Malayagam Fm",
-        "url": "https://cast5.my-control-panel.com/proxy/malayag1/stream/"
-      },
       {
         "name": "Krushi Rad",
         "url": "https://radioserver.krushiradio.lk:8000/radio.mp3"
@@ -212655,10 +211901,6 @@
       {
         "name": "Lord Rad",
         "url": "https://lordsradio.radioca.st/;"
-      },
-      {
-        "name": "Malayagam Fm",
-        "url": "https://cast5.my-control-panel.com/proxy/malayag1/stream/"
       },
       {
         "name": "Apayy Rad Hitz",
@@ -216490,20 +215732,8 @@
         "url": "http://s3.voscast.com:9798/;"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -219459,20 +218689,12 @@
         "url": "https://stm.rthk.hk/radio3"
       },
       {
-        "name": "Talkonly",
-        "url": "http://103.11.102.62:8000/talkonly.mp3"
-      },
-      {
         "name": "Rthk Rad 4",
         "url": "https://stm.rthk.hk/radio4"
       },
       {
         "name": "Rthk Rad 5",
         "url": "https://stm1.rthk.hk/radio5"
-      },
-      {
-        "name": "1008 Fm100.8",
-        "url": "https://lhttp.qingting.fm/live/1276/64k.mp3"
       },
       {
         "name": "Fm90.7",
@@ -219769,10 +218991,6 @@
       {
         "name": "Zoe Fm",
         "url": "http://shoutcast.movemedia.be/zoe128"
-      },
-      {
-        "name": "Rad Valencia",
-        "url": "https://cloud-faro.beheerstream.com/proxy/radiovalenciafm?mp=/stream"
       },
       {
         "name": "Rtbf La 1Re",
@@ -220491,10 +219709,6 @@
       {
         "name": "The Voice",
         "url": "http://media03.uk.mystreaming.net:8081/thevoice/live128/icecast.audio"
-      },
-      {
-        "name": "South Devon Soun",
-        "url": "https://stream.zeno.fm/1htpr0nkns8uv"
       },
       {
         "name": "Heart (South Dev",
@@ -226420,10 +225634,6 @@
         "url": "https://hts04.brascast.com:8264/live"
       },
       {
-        "name": "Rad Umari 87.5 F",
-        "url": "https://s01.transmissaodigital.com:7488/stream"
-      },
-      {
         "name": "Rdio Litoral Fm",
         "url": "https://stream03.dghost.com.br:8340/stream"
       },
@@ -227528,10 +226738,6 @@
       {
         "name": "Kokwo Rad Fm 100",
         "url": "https://stream.kokwo.co.ke/listen.mp3"
-      },
-      {
-        "name": "Rad Asuron",
-        "url": "https://stream.zeno.fm/gf5zuy1usg0uv"
       },
       {
         "name": "Sifa Fm Marsabit",
@@ -230328,10 +229534,6 @@
         "url": "https://rdst.win:59400/stream"
       },
       {
-        "name": "Fm 98.7",
-        "url": "https://n03.radiojar.com/1qpu1agw4mzuv.m4a"
-      },
-      {
         "name": "Alpo Rad 94.1 Fm",
         "url": "https://cp1.sednastream.com/proxy/alporadio/stream"
       },
@@ -231727,10 +230929,6 @@
       {
         "name": "Rad Misso Catlic",
         "url": "https://stm6.voxhd.com.br:7288/stream"
-      },
-      {
-        "name": "Rad Umari 87.5 F",
-        "url": "https://s01.transmissaodigital.com:7488/stream"
       },
       {
         "name": "Alpha Fm 101.7",
@@ -234082,10 +233280,6 @@
         "url": "http://188.165.222.198:8157/stream?type=http"
       },
       {
-        "name": "Rad Vrishti",
-        "url": "http://vrishti.riggrodigital.com:8078/stream/;"
-      },
-      {
         "name": "Rad Sailung Fm 9",
         "url": "http://live.itechnepal.com:9174/stream"
       },
@@ -235664,10 +234858,6 @@
       {
         "name": "Itt Rad 90.9 Fm",
         "url": "https://stream.zeno.fm/srnxstft6rhvv"
-      },
-      {
-        "name": "Awr Zambezi",
-        "url": "https://s2.stationplaylist.com:7088/listen.aac+"
       },
       {
         "name": "Iwave Fm 90.1",
@@ -239044,10 +238234,6 @@
         "url": "https://streaming.softnep.net:10874/;stream.nsv"
       },
       {
-        "name": "Rad Tharuhat",
-        "url": "https://stream.zeno.fm/pq0bz4vez38uv"
-      },
-      {
         "name": "Bhaktapur Fm 105",
         "url": "https://streaming.softnep.net:10846/;stream.nsv"
       },
@@ -239610,10 +238796,6 @@
         "url": "http://stream.orangictech.com.np:8050/colorsfm.mp3"
       },
       {
-        "name": "Rad Tharuhat",
-        "url": "https://stream.zeno.fm/pq0bz4vez38uv"
-      },
-      {
         "name": "Bhaktapur Fm 105",
         "url": "https://streaming.softnep.net:10846/;stream.nsv"
       },
@@ -239890,20 +239072,8 @@
         "url": "http://rgradio.net:8030/radioideal.mp3"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -240863,10 +240033,6 @@
         "url": "https://firstnationsmedia.stream/8024/stream"
       },
       {
-        "name": "Rri Pro2 Fm 97.8",
-        "url": "https://stream-node1.rri.co.id/streaming/24/9024/rrimanokwaripro2.mp3"
-      },
-      {
         "name": "Rri Pro 1 Fm 95.",
         "url": "https://stream-node1.rri.co.id/streaming/36/9136/rrimeraukepro1.mp3"
       },
@@ -241485,10 +240651,6 @@
         "url": "https://rsm.my.id:8010/radio.mp3"
       },
       {
-        "name": "Rad Muria Jepara",
-        "url": "https://r1.siar.us/radio/8010/radio.mp3"
-      },
-      {
         "name": "Dna Fm Jepara",
         "url": "https://sc.dnafm.net/listen/dnafm/live"
       },
@@ -241499,10 +240661,6 @@
       {
         "name": "Suara Pati Fm 87",
         "url": "https://radiosuarapati.patikab.go.id/live"
-      },
-      {
-        "name": "Rad R2B Rembang",
-        "url": "https://i.klikhost.com/8892/;"
       },
       {
         "name": "Bassfm - Bahana",
@@ -242363,14 +241521,6 @@
       {
         "name": "Fm104.7",
         "url": "https://lhttp.qingting.fm/live/1286/64k.mp3"
-      },
-      {
-        "name": "1008 Fm100.8",
-        "url": "https://lhttp.qingting.fm/live/1276/64k.mp3"
-      },
-      {
-        "name": "Fm97.8",
-        "url": "https://lhttp.qingting.fm/live/15318679/64k.mp3"
       },
       {
         "name": "Shirley & Spinoz",
@@ -245975,10 +245125,6 @@
         "url": "https://stream.zeno.fm/ab9q4v3mb"
       },
       {
-        "name": "Ecowas Rad 91.5",
-        "url": "https://stream.zeno.fm/qfptc1637reuv"
-      },
-      {
         "name": "Kiss 104 Fm",
         "url": "https://stream.zeno.fm/jetj7igyezmtv"
       },
@@ -246301,10 +245447,6 @@
       {
         "name": "Krushi Rad",
         "url": "https://radioserver.krushiradio.lk:8000/radio.mp3"
-      },
-      {
-        "name": "Malayagam Fm",
-        "url": "https://cast5.my-control-panel.com/proxy/malayag1/stream/"
       },
       {
         "name": "Golden Maple Rad",
@@ -246746,10 +245888,6 @@
       {
         "name": "Ifm 100.6",
         "url": "https://live.ifm.tn/radio/8000/ifmlive"
-      },
-      {
-        "name": "Rad Quran",
-        "url": "http://5.135.194.225:8000/live"
       }
     ]
   },
@@ -247061,10 +246199,6 @@
         "url": "https://stream.zeno.fm/ey4xepfss0quv"
       },
       {
-        "name": "Rad Asuron",
-        "url": "https://stream.zeno.fm/gf5zuy1usg0uv"
-      },
-      {
         "name": "Rad Wang Ooh 93.",
         "url": "https://stream.zeno.fm/pnhp8go4r0mvv"
       },
@@ -247119,10 +246253,6 @@
       {
         "name": "Stournareika Fm",
         "url": "https://i8.streams.ovh/sc/radiostournareika/stream"
-      },
-      {
-        "name": "Fm 98.7",
-        "url": "https://n03.radiojar.com/1qpu1agw4mzuv.m4a"
       },
       {
         "name": "Rad Zygos 100.00",
@@ -247411,10 +246541,6 @@
       {
         "name": "Bk Rad Fm 99.3",
         "url": "https://stream.zeno.fm/4wy2yezz58quv"
-      },
-      {
-        "name": "Rad Asuron",
-        "url": "https://stream.zeno.fm/gf5zuy1usg0uv"
       },
       {
         "name": "95 Time Fm",
@@ -247806,10 +246932,6 @@
         "url": "https://stream.linkopingsnarradio.se:8005/radioprogram"
       },
       {
-        "name": "Sr P4 Stergtland",
-        "url": "https://http-live.sr.se/p4ostergotland-mp3-128"
-      },
-      {
         "name": "Rad Nybro Fm 98.",
         "url": "http://deb.patrikmalmgrenrask.se:8020/;"
       },
@@ -247872,10 +246994,6 @@
       {
         "name": "Africa Moroni Go",
         "url": "https://stream.zeno.fm/ey4xepfss0quv"
-      },
-      {
-        "name": "Rad Asuron",
-        "url": "https://stream.zeno.fm/gf5zuy1usg0uv"
       },
       {
         "name": "Rad Wang Ooh 93.",
@@ -249235,10 +248353,6 @@
       {
         "name": "Rad Faydatidiani",
         "url": "http://listen.senemultimedia.net:5526/listen/1/;"
-      },
-      {
-        "name": "Urban Kaolack 98",
-        "url": "https://stream.zeno.fm/gfu2dq2chfhvv"
       },
       {
         "name": "Porokhane Fm",
@@ -251201,10 +250315,6 @@
         "url": "https://stream.hamropatro.com/8385"
       },
       {
-        "name": "Rad Tharuhat",
-        "url": "https://stream.zeno.fm/pq0bz4vez38uv"
-      },
-      {
         "name": "Bhaktapur Fm 105",
         "url": "https://streaming.softnep.net:10846/;stream.nsv"
       },
@@ -251232,10 +250342,6 @@
       "e": 24.2807
     },
     "urls": [
-      {
-        "name": "Awr Zambezi",
-        "url": "https://s2.stationplaylist.com:7088/listen.aac+"
-      },
       {
         "name": "Jazzysoul Rad",
         "url": "http://s6.reliastream.com:8112/stream"
@@ -251974,10 +251080,6 @@
         "url": "http://sunucu2.radyolarburada.com:8095/;"
       },
       {
-        "name": "Gnl Fm 97.3",
-        "url": "http://sunucu2.radyolarburada.com:8120/;stream.mp3"
-      },
-      {
         "name": "Aksaray Fm 99.5",
         "url": "https://sssx.radyosfer.com/aksarayfm/stream//;"
       },
@@ -252466,10 +251568,6 @@
       {
         "name": "Rad Vuna 102.0 F",
         "url": "https://securestreams4.autopo.st:1646/stream.mp3/;"
-      },
-      {
-        "name": "Nyaluo Rad",
-        "url": "http://172.105.25.197/radio/8000/radio.mp3"
       },
       {
         "name": "Lubao Fm 102.2",
@@ -254098,10 +253196,6 @@
         "url": "https://stream.zeno.fm/u3dw22zst5quv"
       },
       {
-        "name": "Nyaluo Rad",
-        "url": "http://172.105.25.197/radio/8000/radio.mp3"
-      },
-      {
         "name": "Rad 47 103.0 Fm",
         "url": "https://streaming.shoutcast.com/radio-47"
       },
@@ -254356,10 +253450,6 @@
       {
         "name": "Rad Jiida Fm 88.",
         "url": "https://stream.zeno.fm/6qyn64rr9mruv"
-      },
-      {
-        "name": "Urban Tamba 105.",
-        "url": "https://stream.zeno.fm/3sd452wchfhvv"
       },
       {
         "name": "Rad Kledu",
@@ -254652,10 +253742,6 @@
       {
         "name": "Urban Dakar 97.1",
         "url": "https://stream.zeno.fm/0yd19f2chfhvv"
-      },
-      {
-        "name": "Urban Kaolack 98",
-        "url": "https://stream.zeno.fm/gfu2dq2chfhvv"
       },
       {
         "name": "S.M. Mbaye Sam W",
@@ -256034,10 +255120,6 @@
         "url": "https://yayin2.canliyayin.org:7200/stream"
       },
       {
-        "name": "Gnl Fm 97.3",
-        "url": "http://sunucu2.radyolarburada.com:8120/;stream.mp3"
-      },
-      {
         "name": "Antakya Asya Rad",
         "url": "https://sslyayin.netyayin.net/9850/;stream.nsv"
       },
@@ -256938,10 +256020,6 @@
         "url": "https://media-sov.musicradio.com/HeartSouthHamsMP3"
       },
       {
-        "name": "South Devon Soun",
-        "url": "https://stream.zeno.fm/1htpr0nkns8uv"
-      },
-      {
         "name": "Devonstream",
         "url": "https://devon.stream/live/mp3-high"
       },
@@ -257486,10 +256564,6 @@
         "url": "https://stream.zeno.fm/6qyn64rr9mruv"
       },
       {
-        "name": "Urban Tamba 105.",
-        "url": "https://stream.zeno.fm/3sd452wchfhvv"
-      },
-      {
         "name": "Rad Kledu",
         "url": "https://stream.zeno.fm/yerp85sughwtv"
       },
@@ -257676,10 +256750,6 @@
       {
         "name": "Lakhanda",
         "url": "https://cp12.serverse.com/proxy/itnfm?mp=/stream"
-      },
-      {
-        "name": "Malayagam Fm",
-        "url": "https://cast5.my-control-panel.com/proxy/malayag1/stream/"
       },
       {
         "name": "Mahima Rad",
@@ -258227,10 +257297,6 @@
         "url": "https://stream.zeno.fm/60ykr4csvxhvv"
       },
       {
-        "name": "Nyaluo Rad",
-        "url": "http://172.105.25.197/radio/8000/radio.mp3"
-      },
-      {
         "name": "Lubao Fm 102.2",
         "url": "http://41.90.240.222:88/broadwave.mp3"
       },
@@ -258419,10 +257485,6 @@
         "url": "http://s1.onweb.gr:8040/;stream"
       },
       {
-        "name": "Adelin Fm 107.3",
-        "url": "https://cast.magicstreams.gr/sc/radioadelin/stream"
-      },
-      {
         "name": "Fm 89.8",
         "url": "https://rdst.win:48980/"
       },
@@ -258578,10 +257640,6 @@
       "e": 34.768
     },
     "urls": [
-      {
-        "name": "Nyaluo Rad",
-        "url": "http://172.105.25.197/radio/8000/radio.mp3"
-      },
       {
         "name": "Mumbo Fm",
         "url": "https://usa7-vn.mixstream.net/:8004/listen.mp3"
@@ -258757,10 +257815,6 @@
       {
         "name": "Kokwo Rad Fm 100",
         "url": "https://stream.kokwo.co.ke/listen.mp3"
-      },
-      {
-        "name": "Nyaluo Rad",
-        "url": "http://172.105.25.197/radio/8000/radio.mp3"
       },
       {
         "name": "Rad 47 103.0 Fm",
@@ -262587,10 +261641,6 @@
         "url": "https://stream.zeno.fm/qe715t14gwzuv"
       },
       {
-        "name": "Rad Tharuhat",
-        "url": "https://stream.zeno.fm/pq0bz4vez38uv"
-      },
-      {
         "name": "Bhaktapur Fm 105",
         "url": "https://streaming.softnep.net:10846/;stream.nsv"
       },
@@ -262755,10 +261805,6 @@
         "url": "https://radioserver.krushiradio.lk:8000/radio.mp3"
       },
       {
-        "name": "Malayagam Fm",
-        "url": "https://cast5.my-control-panel.com/proxy/malayag1/stream/"
-      },
-      {
         "name": "Rad Lanka E Nws",
         "url": "https://stream.zeno.fm/31hushvxwd0uv"
       },
@@ -262890,10 +261936,6 @@
       {
         "name": "Lord Rad",
         "url": "https://lordsradio.radioca.st/;"
-      },
-      {
-        "name": "Malayagam Fm",
-        "url": "https://cast5.my-control-panel.com/proxy/malayag1/stream/"
       },
       {
         "name": "Mahima Rad",
@@ -264356,10 +263398,6 @@
         "url": "http://159.69.75.8:9990/;stream.mp3"
       },
       {
-        "name": "Adelin Fm 107.3",
-        "url": "https://cast.magicstreams.gr/sc/radioadelin/stream"
-      },
-      {
         "name": "Cool Fm 90.7",
         "url": "http://solid1.streamupsolutions.com:11004/;"
       },
@@ -265214,10 +264252,6 @@
       {
         "name": "Ifm 100.6",
         "url": "https://live.ifm.tn/radio/8000/ifmlive"
-      },
-      {
-        "name": "Rad Quran",
-        "url": "http://5.135.194.225:8000/live"
       }
     ]
   },
@@ -265298,10 +264332,6 @@
       {
         "name": "Ifm 100.6",
         "url": "https://live.ifm.tn/radio/8000/ifmlive"
-      },
-      {
-        "name": "Rad Quran",
-        "url": "http://5.135.194.225:8000/live"
       }
     ]
   },
@@ -265584,10 +264614,6 @@
         "url": "https://stream-node2.rri.co.id/streaming/14/9314/rrisngliatpro4.mp3"
       },
       {
-        "name": "Sisnet Rad",
-        "url": "https://i.klikhost.com/8716/stream"
-      },
-      {
         "name": "Suria Fm 101.4",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SURIA_FMAAC.aac"
       },
@@ -265626,10 +264652,6 @@
       {
         "name": "Suara Pati Fm 87",
         "url": "https://radiosuarapati.patikab.go.id/live"
-      },
-      {
-        "name": "Rad R2B Rembang",
-        "url": "https://i.klikhost.com/8892/;"
       },
       {
         "name": "Bassfm - Bahana",
@@ -266020,10 +265042,6 @@
       {
         "name": "Rad Linkping Fm",
         "url": "https://stream.linkopingsnarradio.se:8005/radioprogram"
-      },
-      {
-        "name": "Sr P4 Stergtland",
-        "url": "https://http-live.sr.se/p4ostergotland-mp3-128"
       }
     ]
   },
@@ -266166,30 +265184,6 @@
       "e": 102.8329
     },
     "urls": [
-      {
-        "name": "Yunnan Rgd Econo",
-        "url": "https://lhttp.qingting.fm/live/1927/64k.mp3"
-      },
-      {
-        "name": "Yunnan Rgd Fm",
-        "url": "https://lhttp.qingting.fm/live/20139/64k.mp3"
-      },
-      {
-        "name": "Yunnan Rgd Mus R",
-        "url": "https://lhttp.qingting.fm/live/1929/64k.mp3"
-      },
-      {
-        "name": "Yunnan Rgd Shaos",
-        "url": "https://lhttp.qingting.fm/live/1933/64k.mp3"
-      },
-      {
-        "name": "Yunnan Rgd Voice",
-        "url": "https://lhttp.qingting.fm/live/1928/64k.mp3"
-      },
-      {
-        "name": "Guangxi Rgd Inte",
-        "url": "https://lhttp.qingting.fm/live/1753/64k.mp3"
-      },
       {
         "name": "Lao National Rad",
         "url": "https://radio.lnr.org.la/fm94"
@@ -269396,10 +268390,6 @@
         "url": "https://streamingned.com:7084/stream"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -269696,10 +268686,6 @@
         "url": "https://streamingned.com:7084/stream"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -269738,10 +268724,6 @@
       {
         "name": "Caliente 105.9 F",
         "url": "https://laradiossl.online:10078/;"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -270310,10 +269292,6 @@
       {
         "name": "Wopss 90.5 Fm",
         "url": "https://stream.zeno.fm/g769fqg8e8zuv"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -271384,10 +270362,6 @@
         "url": "https://server1.emitironline.com:8040/;"
       },
       {
-        "name": "Campos Fm 90.6",
-        "url": "http://207.180.192.26:18022/stream"
-      },
-      {
         "name": "Rad Cassette Fm",
         "url": "http://ns6.emisionlocal.com:8600/live"
       },
@@ -272004,20 +270978,8 @@
         "url": "http://s3.voscast.com:9798/;"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -272151,14 +271113,6 @@
       "e": 0.2843
     },
     "urls": [
-      {
-        "name": "La Snia Rdio",
-        "url": "https://server1.emitironline.com:9910/radio.mp3"
-      },
-      {
-        "name": "Rad Rototom",
-        "url": "https://live.radio.rototom.com:8443/192.mp3"
-      },
       {
         "name": "Alcanar Rdio Fm",
         "url": "https://relay.stream.enacast-cloud.com:40241/alcanarradioHD.mp3"
@@ -272900,20 +271854,8 @@
         "url": "http://rgradio.net:8030/radioideal.mp3"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -272950,10 +271892,6 @@
       {
         "name": "P&P Sports 89.9",
         "url": "https://server6.globalhostla.com:9270/stream"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -272998,10 +271936,6 @@
       {
         "name": "Fiesta Stereo",
         "url": "http://www.colombiaemite.com:10286/;"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -275908,10 +274842,6 @@
         "url": "https://live.itech.host:1810/stream"
       },
       {
-        "name": "Rad Tharuhat",
-        "url": "https://stream.zeno.fm/pq0bz4vez38uv"
-      },
-      {
         "name": "Bhaktapur Fm 105",
         "url": "https://streaming.softnep.net:10846/;stream.nsv"
       },
@@ -275990,10 +274920,6 @@
       {
         "name": "Ujyalo Fm 90Mhz",
         "url": "https://stream.zeno.fm/wtuvp08xq1duv"
-      },
-      {
-        "name": "Rad Tharuhat",
-        "url": "https://stream.zeno.fm/pq0bz4vez38uv"
       },
       {
         "name": "Bhaktapur Fm 105",
@@ -279627,20 +278553,8 @@
         "url": "https://stream3.305stream.com/proxy/client02/stream"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -279961,10 +278875,6 @@
       {
         "name": "Lider 104.7 Fm",
         "url": "https://stream.zeno.fm/bm6u4qh1trhvv"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -282609,10 +281519,6 @@
     },
     "urls": [
       {
-        "name": "Radyo Natin Leba",
-        "url": "https://hifi.radyonatinfm.com/listen/dxlr/lebak"
-      },
-      {
         "name": "Flash Fm 107.5",
         "url": "https://stream.zeno.fm/82q9w2f8eeruv"
       },
@@ -283201,10 +282107,6 @@
       {
         "name": "Manglillera 92.5",
         "url": "https://stream.zeno.fm/cretd91z1a0uv"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -284920,10 +283822,7 @@
         "name": "Neighbor Village",
         "url": "https://stream.zeno.fm/qkye357zdnzuv"
       },
-      {
-        "name": "Radyo Natin Lagu",
-        "url": "https://wave.radyonatinfm.com/listen/dzva/laguna"
-      },
+
       {
         "name": "Pop Rad Philippi",
         "url": "https://popvip-gecko.radioca.st/stream"
@@ -286591,10 +285490,6 @@
       {
         "name": "Ifm 100.6",
         "url": "https://live.ifm.tn/radio/8000/ifmlive"
-      },
-      {
-        "name": "Rad Quran",
-        "url": "http://5.135.194.225:8000/live"
       }
     ]
   },
@@ -290628,10 +289523,6 @@
         "url": "http://stream.radio943.se:8000/stream_high"
       },
       {
-        "name": "Sr P4 Stergtland",
-        "url": "https://http-live.sr.se/p4ostergotland-mp3-128"
-      },
-      {
         "name": "Rad Nybro Fm 98.",
         "url": "http://deb.patrikmalmgrenrask.se:8020/;"
       },
@@ -290837,16 +289728,8 @@
     },
     "urls": [
       {
-        "name": "Radyo Lipenio -",
-        "url": "https://stream.zeno.fm/efacsa3tnwzuv"
-      },
-      {
         "name": "Neighbor Village",
         "url": "https://stream.zeno.fm/qkye357zdnzuv"
-      },
-      {
-        "name": "Radyo Natin Lagu",
-        "url": "https://wave.radyonatinfm.com/listen/dzva/laguna"
       },
       {
         "name": "Pop Rad",
@@ -294084,10 +292967,6 @@
         "url": "https://stream.zeno.fm/b9u3fbs4kuhvv"
       },
       {
-        "name": "Rad Asuron",
-        "url": "https://stream.zeno.fm/gf5zuy1usg0uv"
-      },
-      {
         "name": "Africa Moroni Go",
         "url": "https://stream.zeno.fm/ey4xepfss0quv"
       },
@@ -294520,20 +293399,8 @@
         "url": "https://audio.jcrdmedia.com/8006/stream"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -295758,10 +294625,6 @@
         "url": "http://radio11.plathong.net:7140/;"
       },
       {
-        "name": "Lungchang Rad",
-        "url": "https://radio11.plathong.net/8684/;stream.mp3"
-      },
-      {
         "name": "Health Rad Fm 92",
         "url": "http://radio.siamtoday.in.th:8188/;stream.mp3"
       },
@@ -296578,10 +295441,6 @@
         "url": "https://laradiossl.online:10078/;"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -297138,10 +295997,6 @@
         "url": "https://laradiossl.online:10078/;"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -297472,10 +296327,6 @@
       {
         "name": "Hubei Rgd Music",
         "url": "https://lhttp.qingting.fm/live/1289/64k.mp3"
-      },
-      {
-        "name": "Rgd Nws",
-        "url": "https://lhttp.qingting.fm/live/15318208/64k.mp3"
       },
       {
         "name": "Shirley & Spinoz",
@@ -299017,26 +297868,9 @@
     },
     "urls": [
       {
-        "name": "Radyo Natin Lucb",
-        "url": "https://link.radyonatinfm.com/listen/dwrh/lucban"
-      },
-      {
-        "name": "Radyo Natin Lagu",
-        "url": "https://wave.radyonatinfm.com/listen/dzva/laguna"
-      },
-      {
         "name": "Pop Rad",
         "url": "https://ssl.geckohost.nz/proxy/john1212?mp=/stream"
-      },
-      {
-        "name": "Radyo Natin Guma",
-        "url": "https://stream.amfm.link:8000/dwrg"
-      },
-      {
-        "name": "Radyo Lipenio -",
-        "url": "https://stream.zeno.fm/efacsa3tnwzuv"
       }
-      
     ]
   },
   "Lucca,IT": {
@@ -299197,23 +298031,11 @@
         "name": "Dwvm-Fm 103.9 Sp",
         "url": "https://stream.zeno.fm/fp689r8sty8uv"
       },
-      {
-        "name": "Radyo Natin Lagu",
-        "url": "https://wave.radyonatinfm.com/listen/dzva/laguna"
-      },
+
       {
         "name": "Pop Rad",
         "url": "https://ssl.geckohost.nz/proxy/john1212?mp=/stream"
-      },
-      {
-        "name": "Radyo Natin Guma",
-        "url": "https://stream.amfm.link:8000/dwrg"
-      },
-      {
-        "name": "Radyo Lipenio -",
-        "url": "https://stream.zeno.fm/efacsa3tnwzuv"
       }
-      
     ]
   },
   "Lucerne,CH": {
@@ -300682,10 +299504,6 @@
       {
         "name": "Jazzysoul Rad",
         "url": "http://s6.reliastream.com:8112/stream"
-      },
-      {
-        "name": "Awr Zambezi",
-        "url": "https://s2.stationplaylist.com:7088/listen.aac+"
       },
       {
         "name": "Pan African Rad",
@@ -303438,10 +302256,6 @@
         "url": "http://streaming.radiosenlinea.com.ar:8808/streaming"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -303998,10 +302812,6 @@
       {
         "name": "Rad Rimjhim 90.4",
         "url": "https://streamasiacdn.atc-labs.com/radiorimjhim.aac"
-      },
-      {
-        "name": "Rad Tharuhat",
-        "url": "https://stream.zeno.fm/pq0bz4vez38uv"
       },
       {
         "name": "Kalika Fm 95.2",
@@ -305714,10 +304524,6 @@
       {
         "name": "Ifm 100.6",
         "url": "https://live.ifm.tn/radio/8000/ifmlive"
-      },
-      {
-        "name": "Rad Quran",
-        "url": "http://5.135.194.225:8000/live"
       }
     ]
   },
@@ -306462,20 +305268,8 @@
     },
     "urls": [
       {
-        "name": "Yop Fm 90.8",
-        "url": "https://stream.zeno.fm/vihfw2w215gtv"
-      },
-      {
-        "name": "Urban Kaolack 98",
-        "url": "https://stream.zeno.fm/gfu2dq2chfhvv"
-      },
-      {
         "name": "Porokhane Fm",
         "url": "https://betelgeuse.dribbcast.com/proxy/mamediarra?mp=/stream"
-      },
-      {
-        "name": "Urban Tamba 105.",
-        "url": "https://stream.zeno.fm/3sd452wchfhvv"
       },
       {
         "name": "Rad As Samadiyya",
@@ -306734,10 +305528,6 @@
       {
         "name": "Rad Kankan",
         "url": "https://stream.zeno.fm/ab9q4v3mb"
-      },
-      {
-        "name": "Ecowas Rad 91.5",
-        "url": "https://stream.zeno.fm/qfptc1637reuv"
       },
       {
         "name": "Kiss 104 Fm",
@@ -310299,10 +309089,6 @@
     },
     "urls": [
       {
-        "name": "Sisnet Rad",
-        "url": "https://i.klikhost.com/8716/stream"
-      },
-      {
         "name": "Rad Idola 96.6Fm",
         "url": "https://stream.bskmedia.co.id/radio/8230/idola"
       },
@@ -311514,10 +310300,6 @@
         "url": "https://stream-node1.rri.co.id/streaming/24/9024/rrimanokwaripro1.mp3"
       },
       {
-        "name": "Rri Pro2 Fm 97.8",
-        "url": "https://stream-node1.rri.co.id/streaming/24/9024/rrimanokwaripro2.mp3"
-      },
-      {
         "name": "Rri Pro 2 Ambon",
         "url": "https://stream-node2.rri.co.id/streaming/15/9315/rriambonpro2.mp3"
       },
@@ -312380,20 +311162,8 @@
         "url": "https://stream.zeno.fm/t3zf1m0e32quv"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -312822,10 +311592,6 @@
         "url": "http://www.colombiaemite.com:10286/;"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -312925,10 +311691,6 @@
       {
         "name": "P&P Sports 89.9",
         "url": "https://server6.globalhostla.com:9270/stream"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -315567,10 +314329,6 @@
     },
     "urls": [
       {
-        "name": "Rad Umari 87.5 F",
-        "url": "https://s01.transmissaodigital.com:7488/stream"
-      },
-      {
         "name": "Nws Fm 104.9",
         "url": "https://stm25.srvaudio.com.br:11234/;/;"
       },
@@ -316484,14 +315242,6 @@
       {
         "name": "North Rift Rad",
         "url": "https://stream.northriftradio.fynradio.com/"
-      },
-      {
-        "name": "Rad Asuron",
-        "url": "https://stream.zeno.fm/gf5zuy1usg0uv"
-      },
-      {
-        "name": "Ggv Fm 97.1",
-        "url": "https://c16.radioboss.fm:18007/stream"
       },
       {
         "name": "Rad 47 103.0 Fm",
@@ -317932,10 +316682,6 @@
       {
         "name": "Ifm 100.6",
         "url": "https://live.ifm.tn/radio/8000/ifmlive"
-      },
-      {
-        "name": "Rad Quran",
-        "url": "http://5.135.194.225:8000/live"
       }
     ]
   },
@@ -318008,10 +316754,6 @@
       {
         "name": "La Cala Rdio Fm",
         "url": "http://lacalartv.ametllamar.cat:8000/lacalartv_128kbps"
-      },
-      {
-        "name": "La Snia Rdio",
-        "url": "https://server1.emitironline.com:9910/radio.mp3"
       },
       {
         "name": "Antena Caro",
@@ -319773,10 +318515,6 @@
         "url": "https://acp2.lorini.net:20210/stream"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -321163,10 +319901,6 @@
       {
         "name": "Rad Jiida Fm 105",
         "url": "https://stream.zeno.fm/bqhhc64d0s8uv"
-      },
-      {
-        "name": "Urban Kaolack 98",
-        "url": "https://stream.zeno.fm/gfu2dq2chfhvv"
       },
       {
         "name": "Rad Keur Massar",
@@ -323129,10 +321863,6 @@
     },
     "urls": [
       {
-        "name": "Rad Valencia",
-        "url": "https://cloud-faro.beheerstream.com/proxy/radiovalenciafm?mp=/stream"
-      },
-      {
         "name": "Rad Bahena Fm 10",
         "url": "https://stream.bahena.be/bahena.mp3"
       },
@@ -324751,10 +323481,6 @@
       {
         "name": "Ifm 100.6",
         "url": "https://live.ifm.tn/radio/8000/ifmlive"
-      },
-      {
-        "name": "Rad Quran",
-        "url": "http://5.135.194.225:8000/live"
       }
     ]
   },
@@ -325509,10 +324235,6 @@
         "url": "https://stream.zeno.fm/hsamfyrv008uv"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -326025,10 +324747,6 @@
         "url": "http://sunucu2.radyolarburada.com:8000/;stream.mp3"
       },
       {
-        "name": "Gnl Fm 97.3",
-        "url": "http://sunucu2.radyolarburada.com:8120/;stream.mp3"
-      },
-      {
         "name": "Aksaray Fm 99.5",
         "url": "https://sssx.radyosfer.com/aksarayfm/stream//;"
       },
@@ -326103,10 +324821,6 @@
       {
         "name": "Wega Fm 88.6",
         "url": "https://stream.zeno.fm/rulhszztmu8tv"
-      },
-      {
-        "name": "Ggv Fm 97.1",
-        "url": "https://c16.radioboss.fm:18007/stream"
       },
       {
         "name": "Juja Region Live",
@@ -330025,10 +328739,6 @@
         "url": "https://ice66.securenetsystems.net/WPPG"
       },
       {
-        "name": "Krock 100.3 Fm",
-        "url": "http://174.76.156.13:8000/stream/1/"
-      },
-      {
         "name": "Smooth Jz 24/7",
         "url": "https://jking.cdnstream1.com/b75154_128mp3"
       },
@@ -333802,20 +332512,8 @@
         "url": "https://stream.zeno.fm/6va2xmv8na0uv"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -334453,13 +333151,9 @@
       "e": 45.3182
     },
     "urls": [
-      {
+     {
         "name": "Rad Risaala Fm 1",
         "url": "https://stream.zeno.fm/wwec0hwr0y5tv"
-      },
-      {
-        "name": "Rad Shifaa 104.7",
-        "url": "https://radio.serversom.com:1030/stream"
       },
       {
         "name": "Hekima Fm 101.7",
@@ -335722,10 +334416,6 @@
         "url": "https://dattavolt.com/8278/stream"
       },
       {
-        "name": "Rad Corban 105.3",
-        "url": "https://stream.zeno.fm/kftkc82unv8uv"
-      },
-      {
         "name": "Rpp Noticias",
         "url": "https://mdstrm.com/audio/5fab3416b5f9ef165cfab6e9/icecast.audio?property=garden"
       },
@@ -336124,10 +334814,6 @@
       {
         "name": "Ifm 100.6",
         "url": "https://live.ifm.tn/radio/8000/ifmlive"
-      },
-      {
-        "name": "Rad Quran",
-        "url": "http://5.135.194.225:8000/live"
       }
     ]
   },
@@ -337028,10 +335714,6 @@
       {
         "name": "Voice Of Liberia",
         "url": "https://stream.zeno.fm/ptruhsxrdg8uv"
-      },
-      {
-        "name": "Ecowas Rad 91.5",
-        "url": "https://stream.zeno.fm/qfptc1637reuv"
       },
       {
         "name": "Rfdi Guine",
@@ -338294,10 +336976,6 @@
         "url": "https://streaming.evolucionstreaming.com:10826/stream"
       },
       {
-        "name": "Fm De La Ciudad",
-        "url": "https://stream01.server-inside.com.ar:9658/ciudadpigue"
-      },
-      {
         "name": "De La Costa Rad",
         "url": "https://01.solumedia.com.ar:8176/stream"
       },
@@ -338562,10 +337240,6 @@
         "url": "https://sonic.mediatelekom.net/8018/stream"
       },
       {
-        "name": "Rad Manchuela Fm",
-        "url": "http://94.23.87.98:9225/index.html;stream.mp3"
-      },
-      {
         "name": "Cadena 100",
         "url": "https://flucast01-o-cloud.flumotion.com/cope/cadena100.mp3"
       },
@@ -338718,20 +337392,8 @@
         "url": "https://stream.zeno.fm/paw21e3uk8quv"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -340862,10 +339524,6 @@
         "url": "https://chikunir.radioca.st/stream"
       },
       {
-        "name": "Awr Zambezi",
-        "url": "https://s2.stationplaylist.com:7088/listen.aac+"
-      },
-      {
         "name": "Spice Fm 91.1",
         "url": "http://live.rcast.net:8768/;stream.mp3"
       },
@@ -341200,10 +339858,6 @@
       {
         "name": "Rad Americana 95",
         "url": "https://st3.inkaniserver.net:8010/stream"
-      },
-      {
-        "name": "Rad Corban 105.3",
-        "url": "https://stream.zeno.fm/kftkc82unv8uv"
       },
       {
         "name": "Rad Galaxia Fm 9",
@@ -342352,10 +341006,6 @@
       {
         "name": "Ritmica Fm 104",
         "url": "https://streamingned.com:7072/;"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -343588,10 +342238,6 @@
       {
         "name": "Rm Rad Quintanar",
         "url": "https://cast2.rmradio.es:8053/albacete"
-      },
-      {
-        "name": "Rad Manchuela Fm",
-        "url": "http://94.23.87.98:9225/index.html;stream.mp3"
       },
       {
         "name": "Rad La Roda 107.",
@@ -345664,10 +344310,6 @@
       {
         "name": "Wopss 90.5 Fm",
         "url": "https://stream.zeno.fm/g769fqg8e8zuv"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -347754,10 +346396,6 @@
         "url": "https://securestreams4.autopo.st:1646/stream.mp3/;"
       },
       {
-        "name": "Nyaluo Rad",
-        "url": "http://172.105.25.197/radio/8000/radio.mp3"
-      },
-      {
         "name": "Rad Mbiu",
         "url": "http://dreamsiteradiocp5.com:8004/stream.mp3"
       },
@@ -348897,10 +347535,6 @@
       {
         "name": "Ifm 100.6",
         "url": "https://live.ifm.tn/radio/8000/ifmlive"
-      },
-      {
-        "name": "Rad Quran",
-        "url": "http://5.135.194.225:8000/live"
       }
     ]
   },
@@ -349275,10 +347909,6 @@
         "url": "https://listen.imjinteractive.net:8028/"
       },
       {
-        "name": "Radyo Natin 100.",
-        "url": "https://audio.amfm.link/radio/8000/dwrl"
-      },
-      {
         "name": "95.3 Love Rad Da",
         "url": "https://loveradiodaet.radioca.st/;"
       }
@@ -349448,20 +348078,8 @@
         "url": "http://audio.domiradio.com:8040/;"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -349934,10 +348552,6 @@
       {
         "name": "Nenyon Fm 104.3",
         "url": "https://stream.zeno.fm/60ykr4csvxhvv"
-      },
-      {
-        "name": "Nyaluo Rad",
-        "url": "http://172.105.25.197/radio/8000/radio.mp3"
       },
       {
         "name": "Vuuka Fm 95.4",
@@ -350512,10 +349126,6 @@
         "url": "https://lhttp.qingting.fm/live/1754/64k.mp3"
       },
       {
-        "name": "Guangxi Rgd Inte",
-        "url": "https://lhttp.qingting.fm/live/1753/64k.mp3"
-      },
-      {
         "name": "Guangxi Rgd Mus",
         "url": "https://lhttp.qingting.fm/live/4875/64k.mp3"
       },
@@ -350528,16 +349138,8 @@
         "url": "https://lhttp.qingting.fm/live/1758/64k.mp3"
       },
       {
-        "name": "Guangxi Voice Of",
-        "url": "https://lhttp.qingting.fm/live/1757/64k.mp3"
-      },
-      {
         "name": "Fm93.3",
         "url": "https://lhttp.qingting.fm/live/1283/64k.mp3"
-      },
-      {
-        "name": "Fm97.8",
-        "url": "https://lhttp.qingting.fm/live/15318679/64k.mp3"
       },
       {
         "name": "Shirley & Spinoz",
@@ -351592,10 +350194,6 @@
         "url": "https://streamasiacdn.atc-labs.com/radiovishwas.aac"
       },
       {
-        "name": "Rad Mpsc Guru",
-        "url": "http://mpscguru.riggrodigital.com:8190/stream"
-      },
-      {
         "name": "Rad Sanskrit Bha",
         "url": "https://stream.zeno.fm/m08mkwsyw8quv"
       },
@@ -351911,10 +350509,7 @@
         "name": "Neighbor Village",
         "url": "https://stream.zeno.fm/qkye357zdnzuv"
       },
-      {
-        "name": "Radyo Natin Lagu",
-        "url": "https://wave.radyonatinfm.com/listen/dzva/laguna"
-      },
+
       {
         "name": "Pop Rad Philippi",
         "url": "https://popvip-gecko.radioca.st/stream"
@@ -351942,10 +350537,6 @@
       {
         "name": "The Cross Fm",
         "url": "https://stream.radiojar.com/pwd30v5rv98uv"
-      },
-      {
-        "name": "Awr Zambezi",
-        "url": "https://s2.stationplaylist.com:7088/listen.aac+"
       },
       {
         "name": "Waterberg Wave F",
@@ -353042,10 +351633,6 @@
       {
         "name": "Mousikos Palmos",
         "url": "http://solid2.streamupsolutions.com:24977/stream"
-      },
-      {
-        "name": "Adelin Fm 107.3",
-        "url": "https://cast.magicstreams.gr/sc/radioadelin/stream"
       },
       {
         "name": "Cool Fm 90.7",
@@ -357037,10 +355624,6 @@
     },
     "urls": [
       {
-        "name": "Rad Newtown",
-        "url": "https://stream.zeno.fm/3mtdyzn6u18uv"
-      },
-      {
         "name": "Bu Rad - Barisha",
         "url": "https://stream.zeno.fm/x3wb4hevj5atv"
       },
@@ -358693,20 +357276,8 @@
         "url": "https://stream.zeno.fm/g9ckwa3dxy8uv"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -360057,10 +358628,6 @@
         "url": "http://sunucu2.radyolarburada.com:8095/;"
       },
       {
-        "name": "Gnl Fm 97.3",
-        "url": "http://sunucu2.radyolarburada.com:8120/;stream.mp3"
-      },
-      {
         "name": "Aksaray Fm 99.5",
         "url": "https://sssx.radyosfer.com/aksarayfm/stream//;"
       },
@@ -360729,10 +359296,6 @@
       {
         "name": "Ritmica Fm 104",
         "url": "https://streamingned.com:7072/;"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -362962,10 +361525,6 @@
       "e": 16.1924
     },
     "urls": [
-      {
-        "name": "Sr P4 Stergtland",
-        "url": "https://http-live.sr.se/p4ostergotland-mp3-128"
-      },
       {
         "name": "Rad Avesta 103.5",
         "url": "http://test.radioavesta.se:8000/;"
@@ -368027,10 +366586,6 @@
         "url": "https://radioserver.krushiradio.lk:8000/radio.mp3"
       },
       {
-        "name": "Malayagam Fm",
-        "url": "https://cast5.my-control-panel.com/proxy/malayag1/stream/"
-      },
-      {
         "name": "Rad Lanka E Nws",
         "url": "https://stream.zeno.fm/31hushvxwd0uv"
       },
@@ -368173,10 +366728,6 @@
       {
         "name": "Rad Linkping Fm",
         "url": "https://stream.linkopingsnarradio.se:8005/radioprogram"
-      },
-      {
-        "name": "Sr P4 Stergtland",
-        "url": "https://http-live.sr.se/p4ostergotland-mp3-128"
       },
       {
         "name": "Sr P4 Blekinge",
@@ -378671,10 +377222,6 @@
     },
     "urls": [
       {
-        "name": "Gnl Fm 97.3",
-        "url": "http://sunucu2.radyolarburada.com:8120/;stream.mp3"
-      },
-      {
         "name": "Rad Yeraz",
         "url": "https://streaming05.liveboxstream.uk/proxy/radioye3/stream"
       },
@@ -379807,10 +378354,6 @@
         "url": "https://carina.streamerr.co/stream/otjifm/stream"
       },
       {
-        "name": "Awr Zambezi",
-        "url": "https://s2.stationplaylist.com:7088/listen.aac+"
-      },
-      {
         "name": "Efm Rad Fm 91.3",
         "url": "https://s2.stationplaylist.com:7026/listen.aac"
       },
@@ -380829,10 +379372,6 @@
       {
         "name": "Rad Misso Catlic",
         "url": "https://stm6.voxhd.com.br:7288/stream"
-      },
-      {
-        "name": "Rad Umari 87.5 F",
-        "url": "https://s01.transmissaodigital.com:7488/stream"
       },
       {
         "name": "Rdio Litoral Fm",
@@ -383359,10 +381898,6 @@
         "url": "https://stream.radio.co/s7bb9c4fc8/listen"
       },
       {
-        "name": "South Devon Soun",
-        "url": "https://stream.zeno.fm/1htpr0nkns8uv"
-      },
-      {
         "name": "Heart (South Dev",
         "url": "https://media-sov.musicradio.com/HeartSouthHamsMP3"
       },
@@ -384167,10 +382702,6 @@
         "url": "http://s6.onweb.gr:8068/stream"
       },
       {
-        "name": "Adelin Fm 107.3",
-        "url": "https://cast.magicstreams.gr/sc/radioadelin/stream"
-      },
-      {
         "name": "Fm 89.8",
         "url": "https://rdst.win:48980/"
       },
@@ -384501,10 +383032,6 @@
       {
         "name": "Rri Pro 4 Fm 88.",
         "url": "https://stream-node0.rri.co.id/streaming/13/9013/rripalembangpro4.mp3"
-      },
-      {
-        "name": "Smart Fm 101.8",
-        "url": "https://cast3.asurahosting.com/proxy/radios22/stream"
       },
       {
         "name": "La Nugraha Fm 10",
@@ -386067,10 +384594,6 @@
         "url": "https://server6.globalhostla.com:9284/stream"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -387265,14 +385788,6 @@
       {
         "name": "Rri P2 Pontianak",
         "url": "https://stream-node1.rri.co.id/streaming/12/9212/rripontianakpro2.mp3"
-      },
-      {
-        "name": "Rad R2B Rembang",
-        "url": "https://i.klikhost.com/8892/;"
-      },
-      {
-        "name": "Rad Muria Jepara",
-        "url": "https://r1.siar.us/radio/8010/radio.mp3"
       }
     ]
   },
@@ -387989,10 +386504,6 @@
       {
         "name": "Radyo Natin Para",
         "url": "https://mbc.radyonatinfm.com/listen/dzvn/paracale"
-      },
-      {
-        "name": "Radyo Natin 100.",
-        "url": "https://audio.amfm.link/radio/8000/dwrl"
       },
       {
         "name": "95.3 Love Rad Da",
@@ -390139,10 +388650,6 @@
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/XHHPRFM_SC.mp3"
       },
       {
-        "name": "Hts 101.7 - Xhhp",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/XHHPRFM_SC"
-      },
-      {
         "name": "La Ke Buena 102.",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/XHRCAFM_SC"
       },
@@ -391625,10 +390132,6 @@
       {
         "name": "Rad Istana Fm 95",
         "url": "https://ssg.streamingmurah.com:8150/system/player.js"
-      },
-      {
-        "name": "Rad R2B Rembang",
-        "url": "https://i.klikhost.com/8892/;"
       },
       {
         "name": "Rad Elisa 103.9",
@@ -393427,20 +391930,8 @@
         "url": "https://stream.zeno.fm/8y1zf6sm2qzuv"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -396357,10 +394848,6 @@
       {
         "name": "Krushi Rad",
         "url": "https://radioserver.krushiradio.lk:8000/radio.mp3"
-      },
-      {
-        "name": "Malayagam Fm",
-        "url": "https://cast5.my-control-panel.com/proxy/malayag1/stream/"
       },
       {
         "name": "Rad Lanka E Nws",
@@ -401335,10 +399822,6 @@
         "url": "https://01.solumedia.com.ar:8496/stream"
       },
       {
-        "name": "Fm De La Ciudad",
-        "url": "https://stream01.server-inside.com.ar:9658/ciudadpigue"
-      },
-      {
         "name": "Fm Ciudad 89.5 L",
         "url": "https://streaming2.locucionar.com/proxy/ciudadpringles?mp=/stream"
       },
@@ -401533,10 +400016,6 @@
       {
         "name": "Urban Dakar 97.1",
         "url": "https://stream.zeno.fm/0yd19f2chfhvv"
-      },
-      {
-        "name": "Urban Kaolack 98",
-        "url": "https://stream.zeno.fm/gfu2dq2chfhvv"
       },
       {
         "name": "Rad Keur Massar",
@@ -401941,10 +400420,6 @@
       {
         "name": "Dwom-Fm 105.5",
         "url": "https://stream.zeno.fm/8f3c093bzs8uv"
-      },
-      {
-        "name": "Radyo Lipenio -",
-        "url": "https://stream.zeno.fm/efacsa3tnwzuv"
       },
       {
         "name": "105.7 Love Rad R",
@@ -407167,26 +405642,6 @@
         "url": "https://streams.radio.co/sde86bbbbf/listen"
       },
       {
-        "name": "Janner Rad",
-        "url": "https://stream.radio.co/s14d3725f1/listen"
-      },
-      {
-        "name": "Omnium Rad Cic",
-        "url": "https://stream.radio.co/s4dda84aea/listen"
-      },
-      {
-        "name": "Ptown Rad",
-        "url": "https://s2.citrus3.com:8154/stream"
-      },
-      {
-        "name": "Rad Exe Plymouth",
-        "url": "https://s4.radio.co/sd9ae042f5/listen"
-      },
-      {
-        "name": "South Devon Soun",
-        "url": "https://stream.zeno.fm/1htpr0nkns8uv"
-      },
-      {
         "name": "Ncb Rad",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SAM04AAC90_SC"
       },
@@ -411474,10 +409929,6 @@
       {
         "name": "Rad Cristiana Ev",
         "url": "https://stream.zeno.fm/jwfnfviliqvtv"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -416356,10 +414807,6 @@
     },
     "urls": [
       {
-        "name": "Comunicaciones T",
-        "url": "http://solid41.streamupsolutions.com:10054/stream"
-      },
-      {
         "name": "La Manchuela 105",
         "url": "https://cast2.rmradio.es:8053/mira"
       },
@@ -418516,10 +416963,6 @@
         "url": "https://stream.5fm.nu/5fm.mp3"
       },
       {
-        "name": "Rad Valencia",
-        "url": "https://cloud-faro.beheerstream.com/proxy/radiovalenciafm?mp=/stream"
-      },
-      {
         "name": "Podcastradio",
         "url": "https://stream.zeno.fm/h91b6ywr45quv"
       },
@@ -419904,10 +418347,6 @@
         "url": "http://s1.radiosnethosting.com:9906/;"
       },
       {
-        "name": "Fm De La Ciudad",
-        "url": "https://stream01.server-inside.com.ar:9658/ciudadpigue"
-      },
-      {
         "name": "Maxima 92.7 Fm",
         "url": "https://server.laradio.online:58709/live"
       },
@@ -420382,10 +418821,6 @@
       {
         "name": "Nareupa 99.3 Fm",
         "url": "https://usa8.fastcast4u.com/proxy/danielradio15?mp=/1"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -420976,10 +419411,6 @@
         "url": "https://radiostream.interven.ca/listen/lavozdenirgua/radio.mp3"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -421446,10 +419877,6 @@
       {
         "name": "Manglillera 92.5",
         "url": "https://stream.zeno.fm/cretd91z1a0uv"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -422004,10 +420431,6 @@
         "url": "http://aler.org:8000/cumana.aac"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -422064,20 +420487,8 @@
         "url": "https://stream3.305stream.com/proxy/client02/stream"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -423420,20 +421831,8 @@
         "url": "https://radio.dominiserver.com/proxy/power?mp=/stream"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -423750,10 +422149,6 @@
       {
         "name": "Dlcv Rad",
         "url": "https://servers58.com/proxy/dlcv/stream"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -424952,10 +423347,6 @@
         "url": "https://lhttp.qingting.fm/live/1675/64k.mp3"
       },
       {
-        "name": "Qingdao Rgd Mus",
-        "url": "https://lhttp.qingting.fm/live/1677/64k.mp3"
-      },
-      {
         "name": "Qingdao Rgd Traf",
         "url": "https://lhttp.qingting.fm/live/1676/64k.mp3"
       },
@@ -424988,16 +423379,8 @@
     },
     "urls": [
       {
-        "name": "Fm97.8",
-        "url": "https://lhttp.qingting.fm/live/15318679/64k.mp3"
-      },
-      {
         "name": "Fm88.7",
         "url": "https://lhttp.qingting.fm/live/15318668/64k.mp3"
-      },
-      {
-        "name": "1008 Fm100.8",
-        "url": "https://lhttp.qingting.fm/live/1276/64k.mp3"
       },
       {
         "name": "Fm90.7",
@@ -426452,10 +424835,6 @@
         "url": "https://radiostream.interven.ca/listen/lavozdenirgua/radio.mp3"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -427122,10 +425501,6 @@
       {
         "name": "Futuro Fm",
         "url": "https://server1.emitironline.com:8040/;"
-      },
-      {
-        "name": "Campos Fm 90.6",
-        "url": "http://207.180.192.26:18022/stream"
       },
       {
         "name": "Global Rad Fm",
@@ -429305,20 +427680,8 @@
         "url": "https://servidor38.brlogic.com:7104/live"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -430439,10 +428802,6 @@
       {
         "name": "Sabaragamuwa Rad",
         "url": "https://centova32.instainternet.com/proxy/ddtradio?mp=/stream"
-      },
-      {
-        "name": "Malayagam Fm",
-        "url": "https://cast5.my-control-panel.com/proxy/malayag1/stream/"
       },
       {
         "name": "Malwana Rad",
@@ -433501,10 +431860,6 @@
     },
     "urls": [
       {
-        "name": "Rad R2B Rembang",
-        "url": "https://i.klikhost.com/8892/;"
-      },
-      {
         "name": "Bahana 104.5 Fm",
         "url": "https://radiocast.my.id/proxy/bahanafm/live"
       },
@@ -435773,10 +434128,6 @@
         "url": "http://77.228.56.147:1152/;"
       },
       {
-        "name": "Quality Mus Rdio",
-        "url": "http://163.172.198.16:8533/stream?1573934424548.mp3/;"
-      },
-      {
         "name": "Top Mus Rad",
         "url": "https://sonic.cloudstreaming.eu/8076/stream"
       },
@@ -437599,10 +435950,6 @@
       {
         "name": "Krushi Rad",
         "url": "https://radioserver.krushiradio.lk:8000/radio.mp3"
-      },
-      {
-        "name": "Malayagam Fm",
-        "url": "https://cast5.my-control-panel.com/proxy/malayag1/stream/"
       },
       {
         "name": "Rad Lanka E Nws",
@@ -439803,10 +438150,6 @@
       {
         "name": "Rad Helln",
         "url": "https://srv7021.dns-lcinternet.com/8006/stream"
-      },
-      {
-        "name": "One Fm 88.7",
-        "url": "https://azura.streamingradio.online/radio/8050/onefm.mp3"
       },
       {
         "name": "M80 Rad Andaluci",
@@ -444409,10 +442752,6 @@
         "url": "http://lacalartv.ametllamar.cat:8000/lacalartv_128kbps"
       },
       {
-        "name": "La Snia Rdio",
-        "url": "https://server1.emitironline.com:9910/radio.mp3"
-      },
-      {
         "name": "Remember Rdio Jo",
         "url": "https://stream.idelta.es/listen/radio_joventut/stream"
       },
@@ -447253,10 +445592,6 @@
         "url": "https://stream.5fm.nu/5fm.mp3"
       },
       {
-        "name": "Rad Valencia",
-        "url": "https://cloud-faro.beheerstream.com/proxy/radiovalenciafm?mp=/stream"
-      },
-      {
         "name": "Rad Santana Bred",
         "url": "https://server5.radio-streams.net:8009/stream"
       },
@@ -449389,20 +447724,8 @@
         "url": "https://stream.zeno.fm/rsw5ssb47qruv"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -449541,20 +447864,8 @@
         "url": "http://radio.domiplay.net:9438/;"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -449947,10 +448258,6 @@
       {
         "name": "Radyo Natin Leme",
         "url": "https://xcite.radyonatinfm.com:8020/lemery"
-      },
-      {
-        "name": "Radyo Lipenio -",
-        "url": "https://stream.zeno.fm/efacsa3tnwzuv"
       }
     ]
   },
@@ -455665,20 +453972,8 @@
         "url": "http://audio.domiradio.com:8040/;"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -456687,10 +454982,6 @@
       {
         "name": "Rad Misso Catlic",
         "url": "https://stm6.voxhd.com.br:7288/stream"
-      },
-      {
-        "name": "Rad Umari 87.5 F",
-        "url": "https://s01.transmissaodigital.com:7488/stream"
       },
       {
         "name": "Alpha Fm 101.7",
@@ -459617,10 +457908,6 @@
         "url": "https://stream.zeno.fm/qkr7kw5vfkhvv"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -460725,10 +459012,6 @@
         "url": "https://cloudstream2036.conectarhosting.com/8368/stream"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -460945,20 +459228,8 @@
         "url": "http://72.29.87.97:8038/stream.mp3/;"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -461311,10 +459582,6 @@
       {
         "name": "Andes 89.3 Fm",
         "url": "https://streamingned.com:7098/;"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -461861,10 +460128,6 @@
         "url": "https://radiostream.interven.ca/listen/lavozdenirgua/radio.mp3"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -461903,10 +460166,6 @@
       {
         "name": "Magic Rad Fm 105",
         "url": "https://cloudstream2030.conectarhosting.com/8324/;"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -462273,20 +460532,8 @@
         "url": "http://audio.domiradio.com:8040/;"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -464013,10 +462260,6 @@
         "url": "http://ur58.lorini.net:50002/LAMEGA1021FM.aac"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -464497,10 +462740,6 @@
         "url": "https://streamingned.com:7098/;"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -464605,10 +462844,6 @@
         "url": "https://stream.zeno.fm/qzdu6rq1g4duv"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -464649,20 +462884,8 @@
         "url": "https://rss3.domint.net:8118/stream"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -465495,10 +463718,6 @@
       {
         "name": "Xlw 92.1",
         "url": "http://radio.solumedia.com.ar:7009/;"
-      },
-      {
-        "name": "Fm Utopia 105.3",
-        "url": "https://cdn.instream.audio/:9270/stream"
       },
       {
         "name": "Rad Mix Fm 96.7",
@@ -467545,20 +465764,8 @@
         "url": "http://178.33.135.245:13590/;"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -468113,10 +466320,6 @@
         "url": "http://streaming.radiosenlinea.com.ar:8808/streaming"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -468143,10 +466346,6 @@
       {
         "name": "Soplo De Bendici",
         "url": "https://strw3.openstream.co/1832"
-      },
-      {
-        "name": "Fm Utopia 105.3",
-        "url": "https://cdn.instream.audio/:9270/stream"
       },
       {
         "name": "Rad Mix Fm 96.7",
@@ -470633,16 +468832,8 @@
         "url": "https://radioalfacs.com/emissioogg"
       },
       {
-        "name": "Rad Rototom",
-        "url": "https://live.radio.rototom.com:8443/192.mp3"
-      },
-      {
         "name": "Alcanar Rdio Fm",
         "url": "https://relay.stream.enacast-cloud.com:40241/alcanarradioHD.mp3"
-      },
-      {
-        "name": "La Snia Rdio",
-        "url": "https://server1.emitironline.com:9910/radio.mp3"
       },
       {
         "name": "Antena Caro",
@@ -472293,10 +470484,6 @@
         "url": "https://stream.zeno.fm/g96gu1mgzhhvv"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -472325,10 +470512,6 @@
         "url": "https://laradiossl.online:10181/live/;"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -472355,10 +470538,6 @@
       {
         "name": "Alcanar Rdio Fm",
         "url": "https://relay.stream.enacast-cloud.com:40241/alcanarradioHD.mp3"
-      },
-      {
-        "name": "La Snia Rdio",
-        "url": "https://server1.emitironline.com:9910/radio.mp3"
       },
       {
         "name": "Antena Caro",
@@ -473295,10 +471474,6 @@
       {
         "name": "Futuro Fm",
         "url": "https://server1.emitironline.com:8040/;"
-      },
-      {
-        "name": "Campos Fm 90.6",
-        "url": "http://207.180.192.26:18022/stream"
       },
       {
         "name": "Global Rad Fm",
@@ -476705,20 +474880,8 @@
         "url": "http://rgradio.net:8030/radioideal.mp3"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -476739,10 +474902,6 @@
       {
         "name": "Hd4 Siempre 100.",
         "url": "https://audiostreaming.luz.network/stream/16/;?type=http&nocache=312913"
-      },
-      {
-        "name": "Hts 101.7 - Xhhp",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/XHHPRFM_SC"
       },
       {
         "name": "Hts 93.1 Fm",
@@ -477429,10 +475588,6 @@
         "url": "https://stream.zeno.fm/h5dhgypsasquv"
       },
       {
-        "name": "Radyo Natin 104.",
-        "url": "https://cast.bntworxtv.com:8060/radio.mp3"
-      },
-      {
         "name": "Yes The Best Fm",
         "url": "https://yesfmcauayan.radioca.st/;"
       },
@@ -477969,20 +476124,8 @@
         "url": "https://listen.usuarios.space/radioespacial/"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -478111,10 +476254,6 @@
       {
         "name": "Ven Fm 89.7",
         "url": "http://cp2.lorini.net:20210/stream"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -481577,10 +479716,6 @@
         "url": "https://stm6.voxhd.com.br:7288/stream"
       },
       {
-        "name": "Rad Umari 87.5 F",
-        "url": "https://s01.transmissaodigital.com:7488/stream"
-      },
-      {
         "name": "Rdio Litoral Fm",
         "url": "https://stream03.dghost.com.br:8340/stream"
       },
@@ -482595,10 +480730,6 @@
       {
         "name": "4U Rad Fm 93.1",
         "url": "https://netradio.live24.gr/4uradio931"
-      },
-      {
-        "name": "Fm 98.7",
-        "url": "https://n03.radiojar.com/1qpu1agw4mzuv.m4a"
       },
       {
         "name": "Kastoriafm 91,5",
@@ -491003,10 +489134,6 @@
       {
         "name": "Ifm 100.6",
         "url": "https://live.ifm.tn/radio/8000/ifmlive"
-      },
-      {
-        "name": "Rad Quran",
-        "url": "http://5.135.194.225:8000/live"
       }
     ]
   },
@@ -491375,14 +489502,6 @@
       {
         "name": "Fm88.7",
         "url": "https://lhttp.qingting.fm/live/15318668/64k.mp3"
-      },
-      {
-        "name": "Fm100.6",
-        "url": "https://lhttp.qingting.fm/live/5022442/64k.mp3"
-      },
-      {
-        "name": "Rgd Nws",
-        "url": "https://lhttp.qingting.fm/live/15318208/64k.mp3"
       },
       {
         "name": "Shirley & Spinoz",
@@ -492091,10 +490210,6 @@
       {
         "name": "971 Fm97.1",
         "url": "https://lhttp.qingting.fm/live/1271/64k.mp3"
-      },
-      {
-        "name": "1008 Fm100.8",
-        "url": "https://lhttp.qingting.fm/live/1276/64k.mp3"
       },
       {
         "name": "Fm90.7",
@@ -493255,10 +491370,6 @@
       {
         "name": "Sid Valley Rad",
         "url": "http://77.68.84.228:8010/;"
-      },
-      {
-        "name": "South Devon Soun",
-        "url": "https://stream.zeno.fm/1htpr0nkns8uv"
       },
       {
         "name": "Lyme Bay Rad",
@@ -496725,10 +494836,6 @@
         "url": "https://streamasiacdn.atc-labs.com/radiorimjhim.aac"
       },
       {
-        "name": "Rad Tharuhat",
-        "url": "https://stream.zeno.fm/pq0bz4vez38uv"
-      },
-      {
         "name": "Kalika Fm 95.2",
         "url": "http://kalika-stream.softnep.com:7740/;"
       },
@@ -499685,10 +497792,6 @@
         "url": "https://stream.zeno.fm/h5dhgypsasquv"
       },
       {
-        "name": "Radyo Natin 104.",
-        "url": "https://cast.bntworxtv.com:8060/radio.mp3"
-      },
-      {
         "name": "Yes The Best Fm",
         "url": "https://yesfmcauayan.radioca.st/;"
       },
@@ -501777,10 +499880,6 @@
         "url": "https://cast2.my-control-panel.com/proxy/radios14/stream"
       },
       {
-        "name": "Rri Pro2 Fm 97.8",
-        "url": "https://stream-node1.rri.co.id/streaming/24/9024/rrimanokwaripro2.mp3"
-      },
-      {
         "name": "Rri Pro 2 Fm 96.",
         "url": "https://stream-node2.rri.co.id/streaming/15/9215/rriternatepro2.mp3"
       },
@@ -502087,10 +500186,6 @@
       {
         "name": "Rad Manises 105.",
         "url": "http://77.228.56.147:1152/;"
-      },
-      {
-        "name": "Quality Mus Rdio",
-        "url": "http://163.172.198.16:8533/stream?1573934424548.mp3/;"
       },
       {
         "name": "Cadena 100",
@@ -502467,10 +500562,6 @@
       {
         "name": "Ifm 100.6",
         "url": "https://live.ifm.tn/radio/8000/ifmlive"
-      },
-      {
-        "name": "Rad Quran",
-        "url": "http://5.135.194.225:8000/live"
       }
     ]
   },
@@ -503951,10 +502042,6 @@
       {
         "name": "Politia Rad Fm 9",
         "url": "http://eco.onestreaming.com:8604/stream"
-      },
-      {
-        "name": "Adelin Fm 107.3",
-        "url": "https://cast.magicstreams.gr/sc/radioadelin/stream"
       },
       {
         "name": "Cool Fm 90.7",
@@ -508781,10 +506868,6 @@
         "url": "http://eco.onestreaming.com:8520/;"
       },
       {
-        "name": "Fm 98.7",
-        "url": "https://n03.radiojar.com/1qpu1agw4mzuv.m4a"
-      },
-      {
         "name": "Real Fm",
         "url": "https://realfm.live24.gr/realfm?.mp3"
       },
@@ -513042,10 +511125,6 @@
         "url": "https://lhttp.qingting.fm/live/275/64k.mp3"
       },
       {
-        "name": "Hubei Rgd Econom",
-        "url": "https://lhttp.qingting.fm/live/1295/64k.mp3"
-      },
-      {
         "name": "Fm107.1",
         "url": "http://211.72.65.62:8080/"
       },
@@ -513916,10 +511995,6 @@
       {
         "name": "Planet Lakonias",
         "url": "http://nemstream.ddns.net:12032/;"
-      },
-      {
-        "name": "Adelin Fm 107.3",
-        "url": "https://cast.magicstreams.gr/sc/radioadelin/stream"
       },
       {
         "name": "Cool Fm 90.7",
@@ -515212,10 +513287,6 @@
       {
         "name": "Power Jz Ilocos",
         "url": "https://stream.zeno.fm/u26mf5z3f4duv"
-      },
-      {
-        "name": "Radyo Natin 104.",
-        "url": "https://cast.bntworxtv.com:8060/radio.mp3"
       },
       {
         "name": "Yes The Best Fm",
@@ -517951,10 +516022,6 @@
     },
     "urls": [
       {
-        "name": "Urban Tamba 105.",
-        "url": "https://stream.zeno.fm/3sd452wchfhvv"
-      },
-      {
         "name": "Rdio Sol Mansi 9",
         "url": "https://stream4.xdevel.com/audio0s976407-1191/stream/icecast.audio"
       },
@@ -520051,10 +518118,6 @@
         "url": "https://server1.emitironline.com:8040/;"
       },
       {
-        "name": "Campos Fm 90.6",
-        "url": "http://207.180.192.26:18022/stream"
-      },
-      {
         "name": "Global Rad Fm",
         "url": "https://stream.rcast.net/68409"
       },
@@ -520749,10 +518812,6 @@
       {
         "name": "Adventist Angels",
         "url": "https://stream.zeno.fm/0m5rnauhunhvv"
-      },
-      {
-        "name": "Nyaluo Rad",
-        "url": "http://172.105.25.197/radio/8000/radio.mp3"
       },
       {
         "name": "Sidai Fm",
@@ -521569,10 +519628,6 @@
       {
         "name": "Ifm 100.6",
         "url": "https://live.ifm.tn/radio/8000/ifmlive"
-      },
-      {
-        "name": "Rad Quran",
-        "url": "http://5.135.194.225:8000/live"
       }
     ]
   },
@@ -525397,10 +523452,6 @@
       {
         "name": "Omroep Drimmelen",
         "url": "https://redbeemedia.streamabc.net/redbm-omroepdrimmelen-mp3-192-8985506"
-      },
-      {
-        "name": "Rad Valencia",
-        "url": "https://cloud-faro.beheerstream.com/proxy/radiovalenciafm?mp=/stream"
       },
       {
         "name": "Rad A-Fm",
@@ -530851,10 +528902,6 @@
         "url": "https://streamingned.com:7072/;"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -534748,10 +532795,6 @@
         "url": "https://www.ital-corner.org/radio/8000/radio.mp3?ver=3473"
       },
       {
-        "name": "South Devon Soun",
-        "url": "https://stream.zeno.fm/1htpr0nkns8uv"
-      },
-      {
         "name": "Heart (South Dev",
         "url": "https://media-sov.musicradio.com/HeartSouthHamsMP3"
       },
@@ -536032,10 +534075,6 @@
         "url": "http://lacalartv.ametllamar.cat:8000/lacalartv_128kbps"
       },
       {
-        "name": "La Snia Rdio",
-        "url": "https://server1.emitironline.com:9910/radio.mp3"
-      },
-      {
         "name": "Antena Caro",
         "url": "https://streaming.enacast.com/antenacaro128.mp3"
       },
@@ -536190,10 +534229,6 @@
       {
         "name": "Soundart Rad",
         "url": "https://radio.canstream.co.uk:9134/live.mp3"
-      },
-      {
-        "name": "South Devon Soun",
-        "url": "https://stream.zeno.fm/1htpr0nkns8uv"
       },
       {
         "name": "Heart (South Dev",
@@ -537266,10 +535301,6 @@
       {
         "name": "Rad Linkping Fm",
         "url": "https://stream.linkopingsnarradio.se:8005/radioprogram"
-      },
-      {
-        "name": "Sr P4 Stergtland",
-        "url": "https://http-live.sr.se/p4ostergotland-mp3-128"
       },
       {
         "name": "Sr P4 Rebro",
@@ -540816,10 +538847,6 @@
         "url": "https://stream.zeno.fm/g769fqg8e8zuv"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -541456,10 +539483,6 @@
         "url": "https://usa8.fastcast4u.com/proxy/danielradio15?mp=/1"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Rad America Fm 9",
         "url": "https://transmision.raenlinea.com:8087/RA909FM"
       },
@@ -541790,10 +539813,6 @@
       {
         "name": "Cuyun 106.5 Fm",
         "url": "https://stream.zeno.fm/xag8wa3c4v8uv"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -543151,10 +541170,6 @@
       {
         "name": "Rad Sfax Fm 106.",
         "url": "http://rtstream.tanitweb.com/sfax"
-      },
-      {
-        "name": "Rad Quran",
-        "url": "http://5.135.194.225:8000/live"
       }
     ]
   },
@@ -543749,10 +541764,6 @@
     },
     "urls": [
       {
-        "name": "Quality Mus Rdio",
-        "url": "http://163.172.198.16:8533/stream?1573934424548.mp3/;"
-      },
-      {
         "name": "Rdio Sol Albal 9",
         "url": "https://stream.mediasector.es/listen/radiosol_albal/radiosolalbal.mp3"
       },
@@ -543959,10 +541970,6 @@
       {
         "name": "P&P Sports 89.9",
         "url": "https://server6.globalhostla.com:9270/stream"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -546851,10 +544858,6 @@
       {
         "name": "Alcanar Rdio Fm",
         "url": "https://relay.stream.enacast-cloud.com:40241/alcanarradioHD.mp3"
-      },
-      {
-        "name": "La Snia Rdio",
-        "url": "https://server1.emitironline.com:9910/radio.mp3"
       },
       {
         "name": "Antena Caro",
@@ -551385,16 +549388,8 @@
         "url": "http://streaming.radioalba.es:8114/stream"
       },
       {
-        "name": "One Fm 88.7",
-        "url": "https://azura.streamingradio.online/radio/8050/onefm.mp3"
-      },
-      {
         "name": "Rm Rad Fm 107.2",
         "url": "https://cast2.rmradio.es:8053/campillo"
-      },
-      {
-        "name": "Rad Manchuela Fm",
-        "url": "http://94.23.87.98:9225/index.html;stream.mp3"
       },
       {
         "name": "Rad La Roda 107.",
@@ -552181,10 +550176,6 @@
         "url": "https://cloudstream2036.conectarhosting.com/8368/stream"
       },
       {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
-      },
-      {
         "name": "Audaz Fm 94.5",
         "url": "https://servers58.com/proxy/audaz?mp=/stream"
       }
@@ -552311,10 +550302,6 @@
       {
         "name": "Nareupa 99.3 Fm",
         "url": "https://usa8.fastcast4u.com/proxy/danielradio15?mp=/1"
-      },
-      {
-        "name": "Unin Rad 90.3 Fm",
-        "url": "https://acp4.lorini.net/proxy/ur2080?mp=/stream"
       },
       {
         "name": "Rad America Fm 9",
@@ -556441,10 +554428,6 @@
         "url": "https://betelgeuse.dribbcast.com/proxy/mamediarra?mp=/stream"
       },
       {
-        "name": "Urban Tamba 105.",
-        "url": "https://stream.zeno.fm/3sd452wchfhvv"
-      },
-      {
         "name": "Sud Fm 98.5",
         "url": "https://stream.zeno.fm/rq40edfn3reuv"
       },
@@ -559317,20 +557300,8 @@
         "url": "https://stream.zeno.fm/96896vu8na0uv"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -559597,10 +557568,6 @@
         "url": "http://s6.reliastream.com:8112/stream"
       },
       {
-        "name": "Awr Zambezi",
-        "url": "https://s2.stationplaylist.com:7088/listen.aac+"
-      },
-      {
         "name": "Spice Fm 91.1",
         "url": "http://live.rcast.net:8768/;stream.mp3"
       },
@@ -559643,10 +557610,6 @@
       {
         "name": "Radyo Natin Leme",
         "url": "https://xcite.radyonatinfm.com:8020/lemery"
-      },
-      {
-        "name": "Radyo Lipenio -",
-        "url": "https://stream.zeno.fm/efacsa3tnwzuv"
       },
       {
         "name": "Love Rad Lucena",
@@ -560903,10 +558866,6 @@
       {
         "name": "Paraiso Das Bela",
         "url": "https://player.srvaudio.com.br/player-ssl/10954/;"
-      },
-      {
-        "name": "Rad Umari 87.5 F",
-        "url": "https://s01.transmissaodigital.com:7488/stream"
       },
       {
         "name": "Alpha Fm 101.7",
@@ -562805,10 +560764,6 @@
         "url": "https://radios.solumedia.com:6620/stream"
       },
       {
-        "name": "Fm Utopia 105.3",
-        "url": "https://cdn.instream.audio/:9270/stream"
-      },
-      {
         "name": "Rad Mix Fm 96.7",
         "url": "https://masservidor.net/8402/stream"
       },
@@ -563441,20 +561396,8 @@
         "url": "https://stream2.305stream.com/proxy/client041?mp=/stream"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -563717,20 +561660,8 @@
         "url": "https://servidor38.brlogic.com:7104/live"
       },
       {
-        "name": "Zol 106.5 Fm",
-        "url": "https://rss3.domint.net:8010/stream"
-      },
-      {
-        "name": "Z 101 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/Z101FM.mp3"
-      },
-      {
         "name": "Rad Cima 100.5 F",
         "url": "https://mars.streamerr.co/8196/stream"
-      },
-      {
-        "name": "Trespatines Rad",
-        "url": "http://149.56.155.73:8095/;stream.mp3"
       },
       {
         "name": "Ritmo 96",
@@ -564711,10 +562642,6 @@
       {
         "name": "Rm Rad Quintanar",
         "url": "https://cast2.rmradio.es:8053/albacete"
-      },
-      {
-        "name": "Rad Manchuela Fm",
-        "url": "http://94.23.87.98:9225/index.html;stream.mp3"
       },
       {
         "name": "Rad La Roda 107.",
@@ -566299,10 +564226,6 @@
       {
         "name": "Alcanar Rdio Fm",
         "url": "https://relay.stream.enacast-cloud.com:40241/alcanarradioHD.mp3"
-      },
-      {
-        "name": "La Snia Rdio",
-        "url": "https://server1.emitironline.com:9910/radio.mp3"
       },
       {
         "name": "Antena Caro",
@@ -570331,10 +568254,6 @@
       {
         "name": "Clubalicious Rad",
         "url": "https://www.radioking.com/play/deejay-2"
-      },
-      {
-        "name": "Sr P4 Stergtland",
-        "url": "https://http-live.sr.se/p4ostergotland-mp3-128"
       }
     ]
   },
@@ -572173,28 +570092,12 @@
     },
     "urls": [
       {
-        "name": "Rri Pro 1 Fm 97.",
-        "url": "https://stream-node1.rri.co.id/streaming/24/9224/rriwamenapro1.mp3"
-      },
-      {
-        "name": "Rri Pro 2 Fm 96.",
-        "url": "https://stream-node1.rri.co.id/streaming/24/9224/rriwamenapro2.mp3"
-      },
-      {
         "name": "8Ear",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/8EARAAC.aac"
       },
       {
         "name": "Tsima Rad Mw 126",
         "url": "https://firstnationsmedia.stream/8024/stream"
-      },
-      {
-        "name": "Rri Pro2 Fm 97.8",
-        "url": "https://stream-node1.rri.co.id/streaming/24/9024/rrimanokwaripro2.mp3"
-      },
-      {
-        "name": "Rri Pro2 Fm 96.8",
-        "url": "https://stream-node1.rri.co.id/streaming/36/9136/rrimeraukepro2.mp3"
       }
     ]
   },
@@ -573819,22 +571722,6 @@
       {
         "name": "Jazzire",
         "url": "https://visual.shoutca.st/stream/jazzeire/stream"
-      },
-      {
-        "name": "Mixlive Bass Stn",
-        "url": "http://2.58.194.54:8846/bass-station-dnb/;"
-      },
-      {
-        "name": "Mixlive Chillout",
-        "url": "http://2.58.194.54:8840/;chillout-essentials"
-      },
-      {
-        "name": "Mixlive House &",
-        "url": "http://2.58.194.54:8894/;house-techno-classics"
-      },
-      {
-        "name": "Mixlive Minimal",
-        "url": "http://2.58.194.54:8858/;minimal-techno"
       },
       {
         "name": "Noughty Beats",
@@ -578517,10 +576404,6 @@
         "url": "https://firstnationsmedia.stream/8024/stream"
       },
       {
-        "name": "Rri Pro2 Fm 97.8",
-        "url": "https://stream-node1.rri.co.id/streaming/24/9024/rrimanokwaripro2.mp3"
-      },
-      {
         "name": "Rri Pro2 Fm 96.8",
         "url": "https://stream-node1.rri.co.id/streaming/36/9136/rrimeraukepro2.mp3"
       },
@@ -582161,10 +580044,6 @@
         "url": "https://s2.radio.co/sc93b4c6aa/listen"
       },
       {
-        "name": "Awr Zambezi",
-        "url": "https://s2.stationplaylist.com:7088/listen.aac+"
-      },
-      {
         "name": "West Coast Fm 10",
         "url": "https://s4.myradiostream.com:7648/;"
       },
@@ -585737,14 +583616,6 @@
         "url": "https://lhttp.qingting.fm/live/1289/64k.mp3"
       },
       {
-        "name": "Hubei Rgd Econom",
-        "url": "https://lhttp.qingting.fm/live/1295/64k.mp3"
-      },
-      {
-        "name": "Rgd Nws",
-        "url": "https://lhttp.qingting.fm/live/15318208/64k.mp3"
-      },
-      {
         "name": "Emergency Rad 10",
         "url": "https://lhttp.qingting.fm/live/21269/64k.mp3"
       },
@@ -587361,16 +585232,8 @@
     },
     "urls": [
       {
-        "name": "1008 Fm100.8",
-        "url": "https://lhttp.qingting.fm/live/1276/64k.mp3"
-      },
-      {
         "name": "Fm93.3",
         "url": "https://lhttp.qingting.fm/live/1283/64k.mp3"
-      },
-      {
-        "name": "Fm97.8",
-        "url": "https://lhttp.qingting.fm/live/15318679/64k.mp3"
       },
       {
         "name": "Shirley & Spinoz",
@@ -588520,10 +586383,6 @@
       "e": 33.3669
     },
     "urls": [
-      {
-        "name": "Avtoradio",
-        "url": "http://31.131.72.42:555/radio"
-      },
       {
         "name": "Fm 104.4",
         "url": "https://stream.topradio.in.ua/topradio.mp3"
@@ -589857,10 +587716,6 @@
         "url": "https://lhttp.qingting.fm/live/1303/64k.mp3"
       },
       {
-        "name": "Rgd Nws",
-        "url": "https://lhttp.qingting.fm/live/15318208/64k.mp3"
-      },
-      {
         "name": "Emergency Rad 10",
         "url": "https://lhttp.qingting.fm/live/21269/64k.mp3"
       },
@@ -590099,10 +587954,6 @@
       {
         "name": "Fm96.4",
         "url": "https://lhttp.qingting.fm/live/5022441/64k.mp3"
-      },
-      {
-        "name": "1008 Fm100.8",
-        "url": "https://lhttp.qingting.fm/live/1276/64k.mp3"
       },
       {
         "name": "Fm93.3",
@@ -592981,18 +590832,6 @@
         "url": "https://lhttp.qingting.fm/live/5022463/64k.mp3"
       },
       {
-        "name": "Hubei Rgd Econom",
-        "url": "https://lhttp.qingting.fm/live/1295/64k.mp3"
-      },
-      {
-        "name": "Qingdao Rgd Mus",
-        "url": "https://lhttp.qingting.fm/live/1677/64k.mp3"
-      },
-      {
-        "name": "Rgd Nws",
-        "url": "https://lhttp.qingting.fm/live/15318208/64k.mp3"
-      },
-      {
         "name": "Shirley & Spinoz",
         "url": "https://s2.radio.co/sec5fa6199/listen"
       }
@@ -593011,10 +590850,6 @@
       {
         "name": "888 Fm88.8",
         "url": "https://lhttp.qingting.fm/live/1278/64k.mp3"
-      },
-      {
-        "name": "1008 Fm100.8",
-        "url": "https://lhttp.qingting.fm/live/1276/64k.mp3"
       },
       {
         "name": "Fm105.7",
@@ -593283,10 +591118,6 @@
       {
         "name": "Rdio Sol Mansi 9",
         "url": "https://stream4.xdevel.com/audio0s976407-1191/stream/icecast.audio"
-      },
-      {
-        "name": "Urban Kaolack 98",
-        "url": "https://stream.zeno.fm/gfu2dq2chfhvv"
       },
       {
         "name": "Porokhane Fm",
