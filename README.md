@@ -3,13 +3,13 @@
 # radioglobe-esp32-2025
 Radio Globe using ESP32 and Waveshare round touch LCD 2.1 inch
 
-UPDATE 1-JUL-2026 - New stations150K.json file for the puck SD card. When you replace it, remove the N and S folder and update the database, in puck menu.
-UPDATE 1-JUL-2026 - Added the ESP32_VS1053_Stream library files in the Arduino RADIOGLOBE-GLOBE project folder - these are slightly modified
-UPDATE 30-JUN-2026 - Added auto update feature -> long press serial number in setup menu for auto update globe and puck
-UPDATE 24-MRT-2026 - Added lots of features, worldmap, clock, weather status, currency exchange
+UPDATE 1-JUL-2026 - New stations150K.json file for the puck SD card. When you replace it, remove the N and S folder and update the database, in puck menu.<br>
+UPDATE 1-JUL-2026 - Added the ESP32_VS1053_Stream library files in the Arduino RADIOGLOBE-GLOBE project folder - these are slightly modified<br>
+UPDATE 30-JUN-2026 - Added auto update feature -> long press serial number in setup menu for auto update globe and puck<br>
+UPDATE 24-MRT-2026 - Added lots of features, worldmap, clock, weather status, currency exchange<br>
 UPDATE 15-JULY-2025 Lots of improvements made. Most stations now play without issues. Happy with the result.<br> 
 UPDATE 6-JULY-2025 It actually works! Performance is improved, few bugs, some extras. <br>
-UPDATE 1-JULY-2025 It actually works! Performance is perhaps not perfect but certainly acceptable.
+UPDATE 1-JULY-2025 It actually works! Performance is perhaps not perfect but certainly acceptable.<br>
 
 Not a small project, will take a lot of your time and possibly quite some frustration along the way. Just a gentle warning.
 
