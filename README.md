@@ -3,6 +3,8 @@
 # radioglobe-esp32-2025
 Radio Globe using ESP32 and Waveshare round touch LCD 2.1 inch
 
+UPDATE 1-JUL-2026 - New stations150K.json file for the puck SD card. When you replace it, remove the N and S folder and update the database, in puck menu.
+UPDATE 1-JUL-2026 - Added the ESP32_VS1053_Stream library files in the Arduino RADIOGLOBE-GLOBE project folder - these are slightly modified
 UPDATE 30-JUN-2026 - Added auto update feature -> long press serial number in setup menu for auto update globe and puck
 UPDATE 24-MRT-2026 - Added lots of features, worldmap, clock, weather status, currency exchange
 UPDATE 15-JULY-2025 Lots of improvements made. Most stations now play without issues. Happy with the result.<br> 
@@ -28,7 +30,7 @@ It communicates with the Globe's ESP32, using ESPNOW. It receives the exact coor
 as the globes you can buy aren't very accurate. It sends the remapped coordinates back to the globe. Together with the
 remapped coordinates, it sends a radiostation url. The urls are stored on a micro SD card. 
 
-There are two directories with source files. One for the globe and one for the display. It is all based on Arduino IDE 2.3.6 
+There are two directories with source files. One for the globe and one for the display. It is all based on Arduino IDE 2.3.10
 
 Essential hardware for the globe:<br/>
 ESP32S3-N16R8 
@@ -48,6 +50,7 @@ MicroSD card -> I used a 32GB one<br/>
 4) Get an API key at Google Developer platform, for the TimeZone API and Geo Geocoding API, both use the same API key. It is used to find the right timezone for the clock, and also to get the right two-letter country code to be able to display the right country flag. It is a bit of hassle, but very worthwhile. And it is free.
 
 I don't plan to give a step-by-step instruction here. That is too much effort and I don't know if there is a lot of interrest in this project. But if you start with it, just ask. In which case I may elaborate a bit more.
+
 
 Cheers,
 Frank
