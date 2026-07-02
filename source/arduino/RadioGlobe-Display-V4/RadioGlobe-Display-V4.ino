@@ -369,9 +369,9 @@ void setup()
   sprintf(content, "Puck Mac %02X:%02X:%02X:%02X:%02X:%02X", PuckMac[0], PuckMac[1], PuckMac[2], PuckMac[3], PuckMac[4], PuckMac[5]);
   Serial.println(content);
   lv_label_set_text(ui_PuckMac, content);
-  sprintf(content, "Globe Mac %02X:%02X:%02X:%02X:%02X:%02X", DisplaySettings.globemac[0], DisplaySettings.globemac[1], DisplaySettings.globemac[2], DisplaySettings.globemac[3], DisplaySettings.globemac[4], DisplaySettings.globemac[5]);
-  Serial.println(content);
-  lv_label_set_text(ui_GlobeMac, content);
+  //sprintf(content, "Globe Mac %02X:%02X:%02X:%02X:%02X:%02X", DisplaySettings.globemac[0], DisplaySettings.globemac[1], DisplaySettings.globemac[2], DisplaySettings.globemac[3], DisplaySettings.globemac[4], DisplaySettings.globemac[5]);
+  //Serial.println(content);
+  //lv_label_set_text(ui_GlobeMac, content);
   lv_label_set_text(ui_PuckBuild, build_timestamp);
 
   ShowWeatherData(false);
@@ -714,6 +714,10 @@ void loop()
           break;
       
         case MESSAGE_GLOBE_IP:  
+          // display on setup screen
+          Serial.printf("New Globe IP Adress received from Globe = %s\n", QueueMessage);
+          sprintf(content, "Globe IP Address %s", QueueMessage);
+          lv_label_set_text(ui_GlobeMac, content);
           break;
 
         case MESSAGE_CONNECTTOHOST_FAILURE:
