@@ -716,7 +716,7 @@ void loop()
         case MESSAGE_GLOBE_IP:  
           // display on setup screen
           Serial.printf("New Globe IP Adress received from Globe = %s\n", QueueMessage);
-          sprintf(content, "Globe IP Address %s", QueueMessage);
+          sprintf(content, "Globe FTP Address %s", QueueMessage);
           lv_label_set_text(ui_GlobeMac, content);
           break;
 

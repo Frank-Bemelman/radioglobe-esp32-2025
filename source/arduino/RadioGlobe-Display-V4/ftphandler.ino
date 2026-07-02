@@ -20,6 +20,7 @@ uint16_t HandleFtpBootState(uint16_t FtpBootState)
         break;
 
       case 1:
+        esp_now_deinit();
         if(!SD_MMC.begin("/sdcard", true, false))
         { lv_label_set_text(ui_TextSecretCodeToUnlock, "NO SD CARD");
           delay(100);
@@ -96,6 +97,7 @@ uint16_t HandleFtpBootState(uint16_t FtpBootState)
         delay(2000);
         WiFi.disconnect();
         SD_MMC.end();
+        setup_esp_now();
         FtpBootState++;
         return FtpBootState;
         break;
