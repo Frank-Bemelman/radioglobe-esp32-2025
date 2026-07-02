@@ -3,6 +3,7 @@
 # radioglobe-esp32-2025
 Radio Globe using ESP32 and Waveshare round touch LCD 2.1 inch
 
+UPDATE 1-JUL-2026 - Added ftp servers for globe and puck. On the puck, activate it with secret code BOBOB in setup menu. 
 UPDATE 1-JUL-2026 - New stations150K.json file for the puck SD card. When you replace it, remove the N and S folder and update the database, in puck menu.<br>
 UPDATE 1-JUL-2026 - Added the ESP32_VS1053_Stream library files in the Arduino RADIOGLOBE-GLOBE project folder - these are slightly modified<br>
 UPDATE 30-JUN-2026 - Added auto update feature -> long press serial number in setup menu for auto update globe and puck<br>
