@@ -1,6 +1,3 @@
-//#include <ESP32FtpServer.h>
-
-
 // in arduino library manager..
 // install libs as shown here https://randomnerdtutorials.com/esp32-wi-fi-manager-asyncwebserver/
 // this is for the wifi manager portal
@@ -54,10 +51,7 @@ extern uint8_t UpdateFirmware(uint8_t state); // start with 1 for a full date/ti
 // #define VS1053_CONNECT_TIMEOUT_MS 5000 // FB was 500 FB
 // #define VS1053_CONNECT_TIMEOUT_MS_SSL 5000 // FB was 1000
 #include "franks-esp-now.h"
-#include "countrycodes.h" // in this project
-
-//#include "mp3_sound_winxpstart.h"
-//#include "mp3_sound_winxpshutdown.h"
+#include "countrycodes.h" 
 #include "mp3_startup.h"
 #include "mp3_shutdown.h"
 #include "mp3_voice_prompts.h"
@@ -501,10 +495,11 @@ void setup()
   GetRatesNow = true;
   bSetupCompleted = true;
   
-  //if(GlobeSettings.sdcard_present)
-  //{ ftp.begin("guest", "guest");
-  //  Serial.println("Servidor FTP ativo!");
-  //}  
+  if(GlobeSettings.sdcard_present)
+  { ftp.begin("guest", "guest");
+    Serial.println("FTP gestart!");
+    Serial.println(WiFi.localIP());
+  }  
 
 }
 
@@ -527,7 +522,7 @@ void loop()
   static char PreviousUrl[QUEUEMESSAGELENGTH] =""; // holds the url requested by display
   static bool bFirst = true;
   
-   //if(GlobeSettings.sdcard_present)ftp.handleFTP();
+   if(GlobeSettings.sdcard_present)ftp.handleFTP();
   loop2(); // checks portal button
   stream.loop();
   if(bMqttActivated==1234)loopMQTT();
