@@ -1495,6 +1495,7 @@ void GlobePowerUp(void)
   sprintf(message, "%d %d %d %d", GlobeSettings.ee_volume, GlobeSettings.ee_bass, GlobeSettings.ee_treble, GlobeSettings.ee_internal_speakers);
   AddToQueueForDisplay(message, MESSAGE_VOLUME_AND_TONE);
   AddToQueueForDisplay(build_timestamp, MESSAGE_GLOBE_BUILD_DATE_TIME);
+  AddToQueueForDisplay(WiFi.localIP().toString().c_str(), MESSAGE_GLOBE_IP);
   
   SetVolumeMapped(GlobeSettings.ee_volume); 
   AddToQueueForDisplay("Globe Just Booted", MESSAGE_GLOBE_WANTS_CURRENT_STATION);
