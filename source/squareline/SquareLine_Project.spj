@@ -15274,6 +15274,14 @@
                 "nid": 10,
                 "strtype": "OBJECT/Name",
                 "strval": "HomeButton4",
+                "childs": [
+                  {
+                    "nid": 15,
+                    "strtype": "_codename/Codename",
+                    "strval": "HomeButton4",
+                    "InheritedType": 10
+                  }
+                ],
                 "InheritedType": 10
               },
               {
@@ -33262,7 +33270,7 @@
   },
   "animations": [],
   "selected_theme": "Default",
-  "selected_screen": "GUID66168283-85903S339114170",
+  "selected_screen": "GUID95506921-983425S468264160",
   "info": {
     "name": "SquareLine_Project.spj",
     "depth": 1,
@@ -33291,7 +33299,7 @@
     "separate_screen_save": false,
     "hierarchy_state_save": false,
     "reverse_event_order": false,
-    "backup_cnt": 374,
+    "backup_cnt": 375,
     "autosave_cnt": 0,
     "group_color_cnt": 11,
     "imagebytearrayprefix": "",
