@@ -11,6 +11,7 @@ lv_obj_t * uic_GlobeBuild;
 lv_obj_t * uic_PuckBuild;
 lv_obj_t * uic_GlobeMac;
 lv_obj_t * uic_PuckMac;
+lv_obj_t * uic_HomeButton4;
 lv_obj_t * uic_pass1;
 lv_obj_t * uic_PasswordScreen;
 lv_obj_t * ui_PasswordScreen = NULL;
@@ -380,6 +381,7 @@ void ui_PasswordScreen_screen_init(void)
     lv_obj_add_event_cb(ui_SerialNumberButton, ui_event_SerialNumberButton, LV_EVENT_ALL, NULL);
     uic_PasswordScreen = ui_PasswordScreen;
     uic_pass1 = ui_pass1;
+    uic_HomeButton4 = ui_HomeButton4;
     uic_PuckMac = ui_PuckMac;
     uic_GlobeMac = ui_GlobeMac;
     uic_PuckBuild = ui_PuckBuild;
@@ -402,6 +404,7 @@ void ui_PasswordScreen_screen_destroy(void)
     ui_pass3 = NULL;
     ui_pass4 = NULL;
     ui_pass5 = NULL;
+    uic_HomeButton4 = NULL;
     ui_HomeButton4 = NULL;
     ui_CharG = NULL;
     ui_CharL = NULL;

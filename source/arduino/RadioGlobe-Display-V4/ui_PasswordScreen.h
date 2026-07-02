@@ -43,6 +43,7 @@ extern lv_obj_t * ui_SerialNumberText;
 // CUSTOM VARIABLES
 extern lv_obj_t * uic_PasswordScreen;
 extern lv_obj_t * uic_pass1;
+extern lv_obj_t * uic_HomeButton4;
 extern lv_obj_t * uic_PuckMac;
 extern lv_obj_t * uic_GlobeMac;
 extern lv_obj_t * uic_PuckBuild;

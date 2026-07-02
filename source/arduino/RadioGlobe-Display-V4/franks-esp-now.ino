@@ -219,6 +219,7 @@ bool setup_esp_add_peer(void)
 bool Q_filling = 0;
 bool Q_sending = 0;
 
+// check if stuff to send
 void loop_esp_now() {
   // we get called here from the main loop
 

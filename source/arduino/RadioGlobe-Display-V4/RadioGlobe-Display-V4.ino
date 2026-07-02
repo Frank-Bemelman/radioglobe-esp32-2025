@@ -81,7 +81,6 @@ extern char Wifi_PASSWORD[];
 #include "ui.h"
 #include "ui_additional_widgets.h"
 
-// esp now
 #include <WiFi.h>
 #include <esp_wifi.h>
 #include <WiFiClient.h>
@@ -127,6 +126,15 @@ bool bMusicMode = false;
 bool bMusicModePrev = false;
 bool ScrollNeedsReload = false;
 
+// FTP stuff
+#define STORAGE_TYPE STORAGE_SD_MMC
+#define DEFAULT_STORAGE_TYPE_ESP32 STORAGE_SD_MMC
+#define DEFAULT_FTP_SERVER_NETWORK_TYPE_ESP32 		NETWORK_ESP32
+#define FTP_SERVER_NETWORK_TYPE DEFAULT_FTP_SERVER_NETWORK_TYPE_ESP32
+#include <SimpleFTPServer.h>
+extern FtpServer ftp;
+extern bool bFtpActive;
+extern uint16_t FtpBootState;
 extern uint16_t UpdateState;
 
 void readMacAddress()
@@ -150,6 +158,7 @@ uint32_t GlobalTicker100mS = 0;
 uint32_t GlobalTicker1S = 0;
 uint32_t PrevGlobalTicker1S = 0;
 char SecretCode[6] = "12345";  
+char PrevSecretCode[6] = "-----";  
 uint16_t CalibrationModeLatLong = 0;
 #define CALMODE_NS   0x01
 #define CALMODE_EW   0x02
@@ -406,6 +415,12 @@ void setup()
   sprintf(content, "%f-%f", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
   AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION_BY_GPS);
   AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_BY_GPS);
+
+  //if(DisplaySettings.sdcard_present)
+  //{ ftp.begin("guest", "guest");
+  //  Serial.println("FTP gestart!");
+  //  Serial.println(WiFi.localIP());
+  //}  
 }
 
 bool bDatabaseScreenUpdate = false;
@@ -463,7 +478,15 @@ void loop()
 
 
   Lvgl_Loop();
+  if(bFtpActive)
+  { if(DisplaySettings.sdcard_present)ftp.handleFTP();
+  }
+
   loop_esp_now(); // send volume & other stuff to globe
+  
+  if(FtpBootState)
+  { FtpBootState = HandleFtpBootState(FtpBootState);
+  }
 
   if(UpdateState)
   { UpdateState = UpdateFirmware(UpdateState);
@@ -561,12 +584,14 @@ void loop()
         bInfoScreen = false;
         bDatabaseScreenUpdate = false;
         if(OldDisplaySettings.expand_search != DisplaySettings.expand_search)SaveDisplaySettingsToEeprom();
+        // keep the code for 1 re-enter setup
+        // if(strcmp(SecretCode, "GLOBE")!=0)strcpy(SecretCode,"12345");
       }
       monitor_update();
     }
 
     // process one or more queued messages from globe
-    while(FromGlobe.QueueIndexIn != FromGlobe.QueueIndexOut) // we have to catch up with new messages
+    while((FromGlobe.QueueIndexIn != FromGlobe.QueueIndexOut) && !bFtpActive) // we have to catch up with new messages
     { Serial.printf("FromGlobe.QueueIndexIn = %d FromGlobe.QueueIndexOut = %d\n", FromGlobe.QueueIndexIn, FromGlobe.QueueIndexOut);
       Serial.printf("Messages from globe pending %d\n", FromGlobe.QueueCnt);
       DataFromDisplay.G_QueueSerialNumber = DataFromGlobe.G_QueueSerialNumber; 
@@ -1254,15 +1279,28 @@ void loop()
     // Serial.println(content);
     // }
 
-
-    if(screen == uic_PasswordScreen)
-    { if(strcmp(SecretCode, "GLOBE")!=0)
+    if(strcmp(PrevSecretCode, SecretCode)!=0)
+    //if(screen == uic_PasswordScreen)
+    { strcpy(PrevSecretCode, SecretCode);
+      if(strcmp(SecretCode, "GLOBE")==0)
       { lv_label_set_recolor(ui_lockstatus, true);
-        lv_label_set_text(ui_lockstatus, "#FF0000 LOCKED#");
+        lv_label_set_text(ui_lockstatus, "#00FF00 UNLOCKED#");
+        lv_obj_clear_flag(ui_HomeButton4, LV_OBJ_FLAG_HIDDEN); // show home icon
+      }
+      else if(strcmp(SecretCode, "BOBOB")==0)
+      { if(DisplaySettings.sdcard_present)
+        { lv_label_set_recolor(ui_lockstatus, true);
+          lv_label_set_text(ui_lockstatus, "#0000FF FTP ACTIVE#");
+          lv_obj_add_flag(ui_HomeButton4, LV_OBJ_FLAG_HIDDEN); // hide home button
+          FtpBootState = 1; // launch the FTP server 
+        }  
       }
       else
       { lv_label_set_recolor(ui_lockstatus, true);
-        lv_label_set_text(ui_lockstatus, "#00FF00 UNLOCKED#");
+        lv_label_set_text(ui_lockstatus, "#FF0000 LOCKED#");
+        // todo show home button
+        lv_obj_clear_flag(ui_HomeButton4, LV_OBJ_FLAG_HIDDEN); // show home icon
+        if(bFtpActive)FtpBootState = 6;
       }
     }
 
