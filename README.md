@@ -3,14 +3,16 @@
 # radioglobe-esp32-2025
 Radio Globe using ESP32 and Waveshare round touch LCD 2.1 inch
 
-UPDATE 1-JUL-2026 - Added ftp servers for globe and puck. On the puck, activate it with secret code BOBOB in setup menu. 
-UPDATE 1-JUL-2026 - New stations150K.json file for the puck SD card. When you replace it, remove the N and S folder and update the database, in puck menu.<br>
-UPDATE 1-JUL-2026 - Added the ESP32_VS1053_Stream library files in the Arduino RADIOGLOBE-GLOBE project folder - these are slightly modified<br>
-UPDATE 30-JUN-2026 - Added auto update feature -> long press serial number in setup menu for auto update globe and puck<br>
-UPDATE 24-MRT-2026 - Added lots of features, worldmap, clock, weather status, currency exchange<br>
-UPDATE 15-JULY-2025 Lots of improvements made. Most stations now play without issues. Happy with the result.<br> 
-UPDATE 6-JULY-2025 It actually works! Performance is improved, few bugs, some extras. <br>
-UPDATE 1-JULY-2025 It actually works! Performance is perhaps not perfect but certainly acceptable.<br>
+UPDATE 1-JUL-2026<br>
+Added ftp servers for globe and puck. On the puck, activate it with secret code BOBOB in setup menu. Use Filezilla, plain FTP, user globe password globe, transfer settings default, limit max connections 1.<br><br>
+UPDATE 1-JUL-2026<br>
+New stations150K.json file for the puck SD card. When you replace it, remove the N and S folder and update the database, in puck menu.<br><br>
+UPDATE 1-JUL-2026<br>Added the ESP32_VS1053_Stream library files in the Arduino RADIOGLOBE-GLOBE project folder - these are slightly modified<br><br>
+UPDATE 30-JUN-2026<br>Added auto update feature -> long press serial number in setup menu for auto update globe and puck<br><br>
+UPDATE 24-MRT-2026<br>Added lots of features, worldmap, clock, weather status, currency exchange<br><br>
+UPDATE 15-JULY-2025<br>Lots of improvements made. Most stations now play without issues. Happy with the result.<br><br>
+UPDATE 6-JULY-2025<br>It actually works! Performance is improved, few bugs, some extras. <br><br>
+UPDATE 1-JULY-2025<br>It actually works! Performance is perhaps not perfect but certainly acceptable.<br><br>
 
 Not a small project, will take a lot of your time and possibly quite some frustration along the way. Just a gentle warning.
 
