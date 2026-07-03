@@ -890,6 +890,9 @@ void loop()
     Speakers(SPEAKERS_DELAYED_OFF);
     DataFromGlobe.D_QueueStationIndex = -1;
     strcpy(ActiveUrl, "");
+    AddToQueueForDisplay("", MESSAGE_STATION_NAME); // remove 'station name'
+    AddToQueueForDisplay("EXPLORING", MESSAGE_STATUS_LINE); // remove 'station name'
+    AddToQueueForDisplay("", MESSAGE_SONG_TITLE); // remove 'song title'
     
   }
   

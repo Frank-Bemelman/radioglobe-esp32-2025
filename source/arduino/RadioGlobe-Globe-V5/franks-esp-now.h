@@ -16,7 +16,7 @@ typedef struct {
 const char * messagetexts[] = {
    { "UNSUPPORTED MESSAGE"},
    { "SONG_TITLE 1"},
-   { "ARTIST 2"},
+   { "STATUS_LINE 2"},
    { "ALBUM 3"},
    { "GENRE 4"},
    { "STATION_NAME 5"},
@@ -86,7 +86,7 @@ const char * messagetexts[] = {
 
 
 #define MESSAGE_SONG_TITLE 1
-#define MESSAGE_ARTIST 2
+#define MESSAGE_STATUS_LINE 2
 #define MESSAGE_ALBUM 3
 #define MESSAGE_NOP 4
 #define MESSAGE_STATION_NAME 5

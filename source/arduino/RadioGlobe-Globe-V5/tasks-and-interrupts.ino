@@ -179,8 +179,8 @@ void ReadAS5600Encoders(void * pvParameters)
       }
       else
       { bEncoderKillStation = true;
-        AddToQueueForDisplay("", MESSAGE_STATION_NAME); // remove 'station name'
-        AddToQueueForDisplay("", MESSAGE_SONG_TITLE); // remove 'now playing title'
+        //AddToQueueForDisplay("", MESSAGE_STATION_NAME); // remove 'station name'
+        //AddToQueueForDisplay("", MESSAGE_SONG_TITLE); // remove 'song title'
       }  
     }
 
