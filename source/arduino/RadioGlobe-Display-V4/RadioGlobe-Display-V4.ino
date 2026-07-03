@@ -131,7 +131,7 @@ bool ScrollNeedsReload = false;
 #define DEFAULT_STORAGE_TYPE_ESP32 STORAGE_SD_MMC
 #define DEFAULT_FTP_SERVER_NETWORK_TYPE_ESP32 		NETWORK_ESP32
 #define FTP_SERVER_NETWORK_TYPE DEFAULT_FTP_SERVER_NETWORK_TYPE_ESP32
-#include <SimpleFTPServer.h>
+#include "SimpleFTPServer.h"
 extern FtpServer ftp;
 extern bool bFtpActive;
 extern uint16_t FtpBootState;

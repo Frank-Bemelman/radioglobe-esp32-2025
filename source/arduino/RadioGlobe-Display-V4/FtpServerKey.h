@@ -136,7 +136,7 @@ https://github.com/arduino-libraries/Ethernet/issues/88
   // exhausting RAM. Users can still override these by defining FTP_BUF_SIZE
   // before including this header.
   #if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)      // lots of RAM, faster I/O
-    #define FTP_BUF_SIZE 2048
+    #define FTP_BUF_SIZE 8192                            // FB was 2048 changed to 8192 
   #elif defined(ESP8266) || defined(ARDUINO_ARCH_ESP8266) // less RAM than ESP32
     #define FTP_BUF_SIZE 1024
   #elif defined(__AVR__)                                  // classic AVR (Uno, Nano)

@@ -2257,9 +2257,10 @@ int32_t FtpServer::readChar()
     DEBUG_PRINT( c );
 
     // replace single quote (') with slash to normalize path separators
-    if( c == '\'' ) {
-      c = '/';
-    }
+    // FB verijderd, want die gaat mis met filenamen als Gordon's Bay_ZA.txt
+    //if( c == '\'' ) {
+    //  c = '/';
+    //}
     if( c != '\r' ){
       if( c != '\n' )
       {
@@ -2314,7 +2315,7 @@ int32_t FtpServer::readChar()
 }
 
 bool FtpServer::haveParameter()
-{
+{ Serial.printf("parameter=<%s>", parameter);
   if( parameter != nullptr && strlen( parameter ) > 0 )
     return true;
   client.println(F("501 No file name") );
@@ -2405,9 +2406,11 @@ int utf8_strlen(const String& str)
 //    true, if done
 
 bool FtpServer::makePath( char * fullName, char * param )
-{
+{ //Serial.printf("fullName=<%s>\n", fullName); // FB test
   if( param == nullptr )
     param = parameter;
+  //Serial.printf("param=<%s>\n", param);
+  //Serial.printf("FTP_BUF_SIZE= %d\n", FTP_BUF_SIZE); 
     
   // Root or empty?
   if( strcmp( param, "/" ) == 0 || strlen( param ) == 0 )
@@ -2495,6 +2498,7 @@ bool FtpServer::makePath( char * fullName, char * param )
   if( strlen( fullName ) >= FTP_CWD_SIZE )
   {
     client.println(F("500 Command line too long"));
+
     return false;
   }
 
