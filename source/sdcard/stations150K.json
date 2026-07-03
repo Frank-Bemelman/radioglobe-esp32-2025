@@ -50541,14 +50541,6 @@
       }
     ]
   },
-  "Belgaum,IN": {
-    "coords": {
-      "n": 15.8497,
-      "e": 74.4977
-    },
-    "urls": [
-    ]
-  },
   "Belgorod,RU": {
     "coords": {
       "n": 50.5997,
@@ -57657,10 +57649,6 @@
       {
         "name": "Cadena Ser Castr",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_CASTRO_URDIALES.mp3"
-      },
-      {
-        "name": "Mi 97.5 Fm",
-        "url": "https://radioserver11.profesionalhosting.com/proxy/alettwge?mp=/stream"
       },
       {
         "name": "Vinilo Fm 87.7",
@@ -99600,10 +99588,6 @@
       {
         "name": "Rad Espinosa Mer",
         "url": "https://srv7021.dns-lcinternet.com/8072/stream"
-      },
-      {
-        "name": "Mi 97.5 Fm",
-        "url": "https://radioserver11.profesionalhosting.com/proxy/alettwge?mp=/stream"
       },
       {
         "name": "Vinilo Fm 87.7",
@@ -153897,10 +153881,6 @@
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_EIBAR.mp3"
       },
       {
-        "name": "Mi 97.5 Fm",
-        "url": "https://radioserver11.profesionalhosting.com/proxy/alettwge?mp=/stream"
-      },
-      {
         "name": "Vinilo Fm 87.7",
         "url": "https://radio.vinilofm.es/radio/8000/bizkaia.mp3"
       },
@@ -157490,10 +157470,6 @@
       {
         "name": "Durango Irratia",
         "url": "https://durangoirratia.streaming-pro.com:6006/durangoirratia.mp3"
-      },
-      {
-        "name": "Mi 97.5 Fm",
-        "url": "https://radioserver11.profesionalhosting.com/proxy/alettwge?mp=/stream"
       },
       {
         "name": "Ataria Irratia",
@@ -183400,10 +183376,6 @@
     },
     "urls": [
       {
-        "name": "Mi 97.5 Fm",
-        "url": "https://radioserver11.profesionalhosting.com/proxy/alettwge?mp=/stream"
-      },
-      {
         "name": "Soft Rad",
         "url": "https://listen.openstream.co/6263/audio/;"
       },
@@ -189387,10 +189359,6 @@
       {
         "name": "Cadena Ser Castr",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_CASTRO_URDIALES.mp3"
-      },
-      {
-        "name": "Mi 97.5 Fm",
-        "url": "https://radioserver11.profesionalhosting.com/proxy/alettwge?mp=/stream"
       },
       {
         "name": "Cadena 100",
@@ -208996,10 +208964,6 @@
       {
         "name": "Arrate Irratia",
         "url": "http://5.135.155.232:8002/stream"
-      },
-      {
-        "name": "Mi 97.5 Fm",
-        "url": "https://radioserver11.profesionalhosting.com/proxy/alettwge?mp=/stream"
       },
       {
         "name": "Cadena 100",
@@ -279625,10 +279589,6 @@
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_CASTRO_URDIALES.mp3"
       },
       {
-        "name": "Mi 97.5 Fm",
-        "url": "https://radioserver11.profesionalhosting.com/proxy/alettwge?mp=/stream"
-      },
-      {
         "name": "Cadena 100",
         "url": "https://flucast01-o-cloud.flumotion.com/cope/cadena100.mp3"
       },
@@ -287296,14 +287256,6 @@
         "name": "Koko Lp Rad 96.3",
         "url": "http://s2.yesstreaming.net:7031/stream"
       }
-    ]
-  },
-  "Libreville,GA": {
-    "coords": {
-      "n": 0.4162,
-      "e": 9.4673
-    },
-    "urls": [
     ]
   },
   "Lichinga,MZ": {
@@ -330563,10 +330515,6 @@
         "url": "https://durangoirratia.streaming-pro.com:6006/durangoirratia.mp3"
       },
       {
-        "name": "Mi 97.5 Fm",
-        "url": "https://radioserver11.profesionalhosting.com/proxy/alettwge?mp=/stream"
-      },
-      {
         "name": "Cadena 100",
         "url": "https://flucast01-o-cloud.flumotion.com/cope/cadena100.mp3"
       },
@@ -373230,10 +373178,6 @@
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_EIBAR.mp3"
       },
       {
-        "name": "Mi 97.5 Fm",
-        "url": "https://radioserver11.profesionalhosting.com/proxy/alettwge?mp=/stream"
-      },
-      {
         "name": "Cadena 100",
         "url": "https://flucast01-o-cloud.flumotion.com/cope/cadena100.mp3"
       },
@@ -413341,10 +413285,6 @@
       {
         "name": "Castro Punto Rad",
         "url": "https://server8.emitironline.com:10891/;"
-      },
-      {
-        "name": "Mi 97.5 Fm",
-        "url": "https://radioserver11.profesionalhosting.com/proxy/alettwge?mp=/stream"
       },
       {
         "name": "Cadena 100",
@@ -476906,10 +476846,6 @@
       {
         "name": "Castro Punto Rad",
         "url": "https://server8.emitironline.com:10891/;"
-      },
-      {
-        "name": "Mi 97.5 Fm",
-        "url": "https://radioserver11.profesionalhosting.com/proxy/alettwge?mp=/stream"
       },
       {
         "name": "Vinilo Fm 87.7",
