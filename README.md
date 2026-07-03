@@ -7,7 +7,7 @@ UPDATE 3-JUL-2026<br>Fixed a FTP bug that refused to work with filenames contain
 UPDATE 2-JUL-2026<br>
 Added ftp servers for globe and puck. On the puck, activate it with secret code BOBOB in setup menu. Use Filezilla, plain FTP, user globe password globe, transfer settings default, limit max connections 1.<br><br>
 UPDATE 1-JUL-2026<br>
-New stations150K.json file for the puck SD card. When you replace it, remove the N and S folder and update the database, in puck menu.<br><br>
+New stations150K.json file for the puck SD card. After you replace it, rebuild the database, in puck menu.<br><br>
 UPDATE 1-JUL-2026<br>Added the ESP32_VS1053_Stream library files in the Arduino RADIOGLOBE-GLOBE project folder - these are slightly modified<br><br>
 UPDATE 30-JUN-2026<br>Added auto update feature -> long press serial number in setup menu for auto update globe and puck<br><br>
 UPDATE 24-MRT-2026<br>Added lots of features, worldmap, clock, weather status, currency exchange<br><br>
