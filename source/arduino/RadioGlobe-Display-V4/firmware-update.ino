@@ -74,7 +74,7 @@ uint8_t UpdateFirmware(uint8_t state)
        }
        else
        { Serial.printf("Updater: NO wifi\n");
-         lv_label_set_text(ui_Station_Title, "No Wifi Connection - QUIT");
+         lv_label_set_text(ui_Station_Title, "No Wifi Connection - STOPPED");
          Lvgl_Loop();
          delay(2000);
          lv_label_set_text(ui_Station_Name, "");
@@ -94,35 +94,44 @@ uint8_t UpdateFirmware(uint8_t state)
        break;
 
      case 2:
-       lv_label_set_text(ui_Station_Title, "Downloading New Puck Firmware...");
+       lv_label_set_text(ui_Station_Title, "Downloading New Puck Firmware..");
        Lvgl_Loop();
        delay(2000);
        state++;
-     
-       //return 0; // quit for now
        break;
+
      case 3:
-       lv_label_set_text(ui_Station_Title, "Update Puck ESP32 Processor");
+       lv_label_set_text(ui_Station_Title, "Update Puck ESP32 Processor..");
        Lvgl_Loop();
        loop_esp_now(); // last round
        delay(1000);
-       Serial.printf("Backlight Off\n");
-       Set_Backlight(0); // screen goes bonkers while updating flash - no need to upset ourselves with that
+       BacklightValue = 0; // screen goes bonkers while updating flash - no need to upset ourselves with that
+       Set_Backlight(BacklightValue); // screen goes bonkers while updating flash - no need to upset ourselves with that
+       Serial.printf("Backlight Off during firmware flash\n");
+       delay(500);
+       state++;
+       break;
+
+     case 4:
+       BacklightValue = 0; // screen goes bonkers while updating flash - no need to upset ourselves with that
+       Set_Backlight(BacklightValue); // screen goes bonkers while updating flash - no need to upset ourselves with that
+       delay(500);
+       state++;
+       break;
+
+     case 5:
        // reboot included when succes
        if(!startVolledigeOtaDownload("github.com", "/Frank-Bemelman/radioglobe-esp32-2025/releases/download/RadioGlobe-Firmware/RadioGlobe-Display.bin"))
-       { Set_Backlight(DEFAULT_BACKLIGHT); 
-         lv_label_set_text(ui_Station_Title, "Update Puck ESP32 Failed!");
+       { BacklightValue = DEFAULT_BACKLIGHT;
+         lv_label_set_text(ui_Station_Title, "Update Puck Failed!");
        }
-       return 0;
        state++;
        break;
-     case 4:
+
+     case 6:
        state++;
        break;
-     case 5:
-       state++;
-       break;
-     
+       
      case 10:
        return 0;
        break;
@@ -154,22 +163,13 @@ void StartWifi(void)
   }
   Serial.println("");
   Serial.println(WiFi.localIP());
-
   
-  //ssl_client.setClient(&base_client);
-  // 4. Schakel certificaatcontrole uit (bespaart direct RAM)
-  //ssl_client.setInsecure(); 
-
-  //ssl_client.setBufferSizes(2048, 512); 
-
   delay(10);
   Serial.print("Vrij RAM geheugen : ");
   Serial.println(ESP.getFreeHeap());
   Serial.printf("Totale PSRAM: %d bytes\n", ESP.getPsramSize());
   Serial.printf("Vrije PSRAM: %d bytes\n", ESP.getFreePsram());
   Serial.printf("Grootste vrije aaneengesloten blok RAM is: %d bytes\n", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL));
-
-
 }
 
 

@@ -20,7 +20,7 @@ uint16_t HandleFtpBootState(uint16_t FtpBootState)
         break;
 
       case 1:
-        esp_now_deinit();
+        //esp_now_deinit();
         if(!SD_MMC.begin("/sdcard", true, false))
         { lv_label_set_text(ui_TextSecretCodeToUnlock, "NO SD CARD");
           delay(100);
@@ -38,6 +38,7 @@ uint16_t HandleFtpBootState(uint16_t FtpBootState)
         lv_label_set_text(ui_TextSecretCodeToUnlock, "FTP SERVER STARTING");
         Lvgl_Loop();
         delay(2000);
+        Serial.printf("SSID=%s PW=%s\n", Wifi_SSID, Wifi_PASSWORD);
         if(strlen(Wifi_SSID))StartWifi();
         else 
         { lv_label_set_text(ui_TextSecretCodeToUnlock, "NO WIFI CREDENTIALS");
@@ -76,7 +77,7 @@ uint16_t HandleFtpBootState(uint16_t FtpBootState)
       case 4: // FTP START
         SD_MMC.begin("/sdcard", true, false);
         Serial.printf("HandleFtpBootState %d\n", FtpBootState);
-        ftp.begin("guest", "guest");
+        ftp.begin("globe", "globe");
         Serial.println("FTP gestart!");
         bFtpActive = true;
         myIP = WiFi.localIP();
@@ -97,7 +98,6 @@ uint16_t HandleFtpBootState(uint16_t FtpBootState)
         delay(2000);
         WiFi.disconnect();
         SD_MMC.end();
-        setup_esp_now();
         FtpBootState++;
         return FtpBootState;
         break;
@@ -105,6 +105,7 @@ uint16_t HandleFtpBootState(uint16_t FtpBootState)
       case 10: // closing everything, back to normal
         Serial.printf("HandleFtpBootState %d\n", FtpBootState);
         lv_label_set_text(ui_TextSecretCodeToUnlock, "SECRET CODE TO UNLOCK");
+        //setup_esp_now();
         bFtpActive = false;
         FtpBootState = 0;
         return FtpBootState;

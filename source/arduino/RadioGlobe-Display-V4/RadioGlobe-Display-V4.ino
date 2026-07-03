@@ -216,19 +216,21 @@ void Driver_Loop(void *parameter)
     // auto dim backlight and gyro test every second
     if((GlobalTicker100mS % 10)==0)
     { GlobalTicker1S++;
-      getGyroscope();
-      uint16_t motion = abs((int)Gyro.x) + abs((int)Gyro.y) + abs((int)Gyro.z); 
-      //Serial.printf("x%f - y%f - z%f\n", Gyro.x, Gyro.y, Gyro.z);
-      //Serial.printf("motion is %d\n", motion);
-      //Serial.printf("motion %d freeze %d backlightvalue %d\n", motion, freeze, backlightvalue);
-      if(motion>30)
-      { BacklightValue = DEFAULT_BACKLIGHT;
-        AutoSleepTimer = AUTOPOWERDOWNAFTER;
-        ClockBackLight = true;
-        if(bPowerStatus)
-        { HoldBacklight = DEFAULT_HOLD_BACKLIGHT; // give our beloved user 60 seconds of full brightness before it starts fading again
+      if(UpdateState==0) // update process may turn off the backlight - don't wake it on by accident
+      { getGyroscope();
+        uint16_t motion = abs((int)Gyro.x) + abs((int)Gyro.y) + abs((int)Gyro.z); 
+        //Serial.printf("x%f - y%f - z%f\n", Gyro.x, Gyro.y, Gyro.z);
+        //Serial.printf("motion is %d\n", motion);
+        //Serial.printf("motion %d freeze %d backlightvalue %d\n", motion, freeze, backlightvalue);
+        if(motion>30)
+        { BacklightValue = DEFAULT_BACKLIGHT;
+          AutoSleepTimer = AUTOPOWERDOWNAFTER;
+          ClockBackLight = true;
+          if(bPowerStatus)
+          { HoldBacklight = DEFAULT_HOLD_BACKLIGHT; // give our beloved user 60 seconds of full brightness before it starts fading again
+          }
         }
-      }    
+      }      
 
             
       if(HoldBacklight>0)
@@ -742,7 +744,7 @@ void loop()
                   p++;
                 }
                 //Serial.printf("MESSAGE_CONNECTTOHOST_FAILURE sanitized filename will be <%s>\n", filename);
-                sprintf(logfile, "/ERR-%s.txt", filename);
+                sprintf(logfile, "/ERR-%s.log", filename);
                 //Serial.printf("MESSAGE_CONNECTTOHOST_FAILURE full filename will be <%s>\n", logfile);
                 AppendBadStationToFile(SD_MMC, logfile, QueueMessage);
                 SD_MMC.end();
@@ -768,7 +770,7 @@ void loop()
             { SD_MMC.end(); //??
               if(SD_MMC.begin("/sdcard", true, false))
               { if(QueueMessageType == MESSAGE_DEAD_STATION)
-                { sprintf(logfile, "/badstations-%d.txt", stream_connecttohost_result);
+                { sprintf(logfile, "/badstations-%d.log", stream_connecttohost_result);
                   AppendBadStationToFile(SD_MMC, logfile, QueueMessage);
                 }
                 if(QueueMessageType == MESSAGE_AUDIO_EOF_STREAM)AppendBadStationToFile(SD_MMC, "/audio-eof-stream.txt", QueueMessage);
@@ -939,7 +941,7 @@ void loop()
                     Serial.printf("Problem with Stations.requested = %d\n", Stations.requested);
                     SD_MMC.end(); //??
                     if(SD_MMC.begin("/sdcard", true, false))
-                    { strcpy(logfile, "/database-error.txt");
+                    { strcpy(logfile, "/database-error.log");
                       AppendBadStationToFile(SD_MMC, logfile, QueueMessage);
                       sprintf(content, "Error in Database - countrycode %s should be %s", Stations.StationNUG[Stations.requested].countrycode, countrycode);
                       AppendBadStationToFile(SD_MMC, logfile, content);
@@ -1179,7 +1181,7 @@ void loop()
           break;
 
         default:
-          Serial.printf("Unsupported message type %d from globe: >%s<\n", QueueMessageType, QueueMessage);  
+          Serial.printf("Unsupported message %d from globe: >%s<\n", QueueMessageType, QueueMessage);  
           break;
       }
 
@@ -1252,7 +1254,7 @@ void loop()
     // new uncalibrated encoder position arrived, remap to calibrated
     if(((PrevDataFromGlobe.ns !=  DataFromGlobe.ns) || (PrevDataFromGlobe.ew !=  DataFromGlobe.ew)) && DataFromGlobe.G_EncoderReliable)
     { //Serial.println("Update coordinates on lcd!");
-      BacklightValue = DEFAULT_BACKLIGHT;
+      if(UpdateState==0)BacklightValue = DEFAULT_BACKLIGHT; // do not wake up backlight when update might happen
       remap_ns_ew(DataFromGlobe.ns, DataFromGlobe.ew); 
       if(screen == ui_CalibrationScreenAdvanced)
       { GetFormattedLocation(content, "G", CalibrationModeLatLong);

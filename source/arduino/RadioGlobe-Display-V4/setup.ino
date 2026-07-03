@@ -62,6 +62,7 @@ void SetupEnter(lv_event_t * e)
   { lv_scr_load(ui_PasswordScreen);
     return;
   }
+  strcpy(SecretCode, "12345"); // relock again
   // activate 1st Setup Screen
   if(Stations.requested<MAX_STATIONS+MAX_FAVORITES)
   { // show current flag and text 
@@ -214,6 +215,7 @@ void SerialNumberButton(lv_event_t * e)
   }
   if(isLongPressed(e)==5) // after typing OOOOO followed by long press O, shut down
   { Serial.println("SerialNumber long pressed");
+    beepforMs(1000);
     lv_scr_load(ui_Home);
     AddToQueueForGlobe("1", MESSAGE_UPDATE_GLOBE);
   }
