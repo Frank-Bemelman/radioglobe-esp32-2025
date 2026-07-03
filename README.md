@@ -3,7 +3,7 @@
 # radioglobe-esp32-2025
 Radio Globe using ESP32 and Waveshare round touch LCD 2.1 inch
 
-UPDATE 1-JUL-2026<br>
+UPDATE 2-JUL-2026<br>
 Added ftp servers for globe and puck. On the puck, activate it with secret code BOBOB in setup menu. Use Filezilla, plain FTP, user globe password globe, transfer settings default, limit max connections 1.<br><br>
 UPDATE 1-JUL-2026<br>
 New stations150K.json file for the puck SD card. When you replace it, remove the N and S folder and update the database, in puck menu.<br><br>
