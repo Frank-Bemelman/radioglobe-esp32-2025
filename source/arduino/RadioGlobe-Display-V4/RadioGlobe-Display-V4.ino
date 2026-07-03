@@ -609,7 +609,8 @@ void loop()
           if(strlen(QueueMessage)>0)RemoveUTF8Unprintables(QueueMessage);
           lv_label_set_text(ui_Station_Title, QueueMessage);
           break;
-        case MESSAGE_ARTIST: // 2
+        case MESSAGE_STATUS_LINE: // 2
+          lv_label_set_text(ui_Status_Line, QueueMessage);
           break;
         case MESSAGE_ALBUM:
           break;
@@ -688,8 +689,10 @@ void loop()
                 //lv_obj_add_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide country name 
                 //lv_obj_add_flag(uic_Clock_Country, LV_OBJ_FLAG_HIDDEN); // hide country name 
                 ShowWeatherData(false); // hide weather info
-                //lv_label_set_text(ui_Station_Name, "Searching..."); // pointless, searching goes to quick to notice
-                lv_label_set_text(ui_Station_Title, "");
+                //lv_label_set_text(ui_Station_Name, ""); // already done by globe signalling globe movement
+                lv_label_set_text(ui_Status_Line, "SEARCHING");
+                //lv_label_set_text(ui_Station_Title, ""); // already done by globe signalling globe movement
+                Lvgl_Loop();  
                 lv_scr_load(ui_Home);
                 Lvgl_Loop();  
                 FindNewStation();
@@ -794,11 +797,11 @@ void loop()
             lv_label_set_text(ui_Home_City, "");
           }
           else
-          { sprintf(content, "%s - Skipped", Stations.StationNUG[Stations.requested].name);
-            lv_label_set_text(ui_Station_Name, content); 
+          { lv_label_set_text(ui_Status_Line, "SKIPPED");
+            sprintf(content, "%s - Skipped", Stations.StationNUG[Stations.requested].name);
             lv_label_set_text(ui_StationRollerComment, content); 
             Lvgl_Loop(); // update screen
-            //delay(300); // so we can actually notice the text change on the screen
+            delay(250); // so we can actually notice the text change on the screen
             if(Stations.connect_attempts<(2 * Stations.count) && Stations.count>0) // loop through all stations twice
             { Stations.requested++;
               Stations.requested %= Stations.count; // funny, this can crash as a division by zero, added protection to the if-condition above
@@ -814,7 +817,8 @@ void loop()
             } 
             else 
             { // no 'next' station
-              lv_label_set_text(ui_Station_Name, "No Next Stations Found"); 
+              lv_label_set_text(ui_Station_Name, ""); 
+              lv_label_set_text(ui_Status_Line, "NO MORE STATIONS");
               lv_label_set_text(ui_StationRollerComment, content); 
             }  
           }
@@ -826,7 +830,7 @@ void loop()
           // update leds on preset screen
           bMusicMode = false;
           if(Stations.requested<MAX_STATIONS+MAX_FAVORITES)
-          { 
+          { lv_label_set_text(ui_Status_Line, "NOW PLAYING");
             sprintf(content, "%s - Connected", Stations.StationNUG[Stations.requested].name);
             Stations.playing = Stations.requested;
             lv_label_set_text(ui_StationRollerComment, content); 

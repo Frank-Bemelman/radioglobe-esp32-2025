@@ -22,6 +22,7 @@ lv_obj_t * uic_SettingButton;
 lv_obj_t * uic_VolumeArc;
 lv_obj_t * uic_VolumeValue;
 lv_obj_t * uic_Station_Title;
+lv_obj_t * uic_Status_Line;
 lv_obj_t * uic_Station_Name;
 lv_obj_t * uic_Time_Zone;
 lv_obj_t * uic_Local_Time;
@@ -33,7 +34,7 @@ lv_obj_t * ui_Local_Time = NULL;
 lv_obj_t * ui_Time_Zone = NULL;
 lv_obj_t * ui_Text_Radio_Globe = NULL;
 lv_obj_t * ui_Station_Name = NULL;
-lv_obj_t * ui_Text_Now_Playing = NULL;
+lv_obj_t * ui_Status_Line = NULL;
 lv_obj_t * ui_Station_Title = NULL;
 lv_obj_t * ui_VolumeValue = NULL;
 lv_obj_t * ui_VolumeArc = NULL;
@@ -241,16 +242,16 @@ void ui_Home_screen_init(void)
     lv_obj_set_style_text_align(ui_Station_Name, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_Station_Name, &ui_font_font1, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Text_Now_Playing = lv_label_create(ui_Home);
-    lv_obj_set_width(ui_Text_Now_Playing, LV_SIZE_CONTENT);   /// 150
-    lv_obj_set_height(ui_Text_Now_Playing, LV_SIZE_CONTENT);    /// 50
-    lv_obj_set_x(ui_Text_Now_Playing, 0);
-    lv_obj_set_y(ui_Text_Now_Playing, -49);
-    lv_obj_set_align(ui_Text_Now_Playing, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Text_Now_Playing, "NOW PLAYING");
-    lv_obj_set_style_text_color(ui_Text_Now_Playing, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_Text_Now_Playing, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_align(ui_Text_Now_Playing, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_Status_Line = lv_label_create(ui_Home);
+    lv_obj_set_width(ui_Status_Line, LV_SIZE_CONTENT);   /// 150
+    lv_obj_set_height(ui_Status_Line, LV_SIZE_CONTENT);    /// 50
+    lv_obj_set_x(ui_Status_Line, 0);
+    lv_obj_set_y(ui_Status_Line, -49);
+    lv_obj_set_align(ui_Status_Line, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Status_Line, "NOW PLAYING");
+    lv_obj_set_style_text_color(ui_Status_Line, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_Status_Line, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_Status_Line, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Station_Title = lv_label_create(ui_Home);
     lv_obj_set_width(ui_Station_Title, 420);
@@ -502,6 +503,7 @@ void ui_Home_screen_init(void)
     uic_Local_Time = ui_Local_Time;
     uic_Time_Zone = ui_Time_Zone;
     uic_Station_Name = ui_Station_Name;
+    uic_Status_Line = ui_Status_Line;
     uic_Station_Title = ui_Station_Title;
     uic_VolumeValue = ui_VolumeValue;
     uic_VolumeArc = ui_VolumeArc;
@@ -538,7 +540,8 @@ void ui_Home_screen_destroy(void)
     ui_Text_Radio_Globe = NULL;
     uic_Station_Name = NULL;
     ui_Station_Name = NULL;
-    ui_Text_Now_Playing = NULL;
+    uic_Status_Line = NULL;
+    ui_Status_Line = NULL;
     uic_Station_Title = NULL;
     ui_Station_Title = NULL;
     uic_VolumeValue = NULL;

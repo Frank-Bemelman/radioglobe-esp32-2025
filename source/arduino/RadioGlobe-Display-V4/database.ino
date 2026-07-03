@@ -186,6 +186,10 @@ void ReadDatabase(fs::FS &fs, char *filename)
             { strcpy(outputfilename, p+1);
               if((p=strchr(outputfilename, '\"')) != NULL)*p=0;
               if((p=strchr(outputfilename, ',')) != NULL)*p='_';
+              // seen a city, country entry like this "Biel/Bienne,CH": {
+              // which causes havoc when filesystem sees this as a directory path
+              // fix by replacing the / for a -
+              if((p=strchr(outputfilename, '/')) != NULL)*p='-';
               strcat(outputfilename, ".txt");
               Serial.println(outputfilename);
             }
@@ -919,6 +923,7 @@ void AddStationToQueueForGlobe(int16_t station)
     sprintf(message, "%f-%f", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
 
     lv_label_set_text(ui_Station_Name, Stations.StationNUG[station].name);
+    lv_label_set_text(ui_Status_Line, "CONNECTING");
     lv_label_set_text(ui_Station_Title, "");
 
     // check if gps position is a new one
