@@ -184,7 +184,7 @@ void ReadAS5600Encoders(void * pvParameters)
       }  
     }
 
-    if(((ReadEncoderTicker100mS % 1) == 0) && (Tuning == false))loop_esp_now();
+    if(((ReadEncoderTicker100mS % 1) == 0) && !Tuning)loop_esp_now();
     checkSpeakerToggleButton();
     //Serial.println("EFree Heap B4 we continue " + String(ESP.getFreeHeap()));  
 
@@ -193,7 +193,6 @@ void ReadAS5600Encoders(void * pvParameters)
     if((ReadEncoderTicker100mS % 3000)==0) // check every 5 minutes if battery needs recharge
     // if((ReadEncoderTicker100mS % 100)==0) // check every 10 seconds (testing) if battery needs recharge
     { if((DataFromDisplay.D_BatteryVoltage > 30) && (DataFromDisplay.D_BatteryVoltage < 36)) // valid reading but below 3.6 volt
-      //if((DataFromDisplay.D_BatteryVoltage > 30) && (DataFromDisplay.D_BatteryVoltage < 50)) // force test
       { // Serial.printf("DataFromDisplay.D_BatteryVoltage = %d\n", DataFromDisplay.D_BatteryVoltage);
         PlaySoundBite((uint8_t *)mp3_please_recharge, sizeof(mp3_please_recharge), 0);
       }

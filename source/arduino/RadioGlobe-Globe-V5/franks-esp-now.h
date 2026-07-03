@@ -88,7 +88,7 @@ const char * messagetexts[] = {
 #define MESSAGE_SONG_TITLE 1
 #define MESSAGE_ARTIST 2
 #define MESSAGE_ALBUM 3
-#define MESSAGE_GENRE 4
+#define MESSAGE_NOP 4
 #define MESSAGE_STATION_NAME 5
 #define MESSAGE_DESCRIPTION 6
 #define MESSAGE_OPEN_WEATHER_MAP_API_KEY 7

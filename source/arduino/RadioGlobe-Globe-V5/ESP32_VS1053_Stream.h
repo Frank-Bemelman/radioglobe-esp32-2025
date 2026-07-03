@@ -174,6 +174,7 @@ private:
     uint32_t _bitrate = 0;
 
     size_t _fileLastWAVByte();
+    size_t _fileLastMP3Byte();
 
     size_t _bufferIndex = 0;
     size_t _bufferFill = 0;

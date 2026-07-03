@@ -970,10 +970,12 @@ bool ESP32_VS1053_Stream::connectToFile(fs::FS &fs, const char *filename, const 
     const char *ext = strrchr(filename, '.');
     if (ext && strcasecmp(ext, ".wav") == 0)
         _remainingBytes = _fileLastWAVByte() - offset;
+    else if (ext && strcasecmp(ext, ".mp3") == 0)
+        _remainingBytes = _fileLastMP3Byte() - offset;    
     else
         _remainingBytes = _file.size() - offset;
 
-    _file.seek(offset);
+    //_file.seek(offset);
     if (strcmp(filename, _url))
     {
         _vs1053->stopSong();
@@ -1026,6 +1028,32 @@ size_t ESP32_VS1053_Stream::_fileLastWAVByte()
     // fallback if not found
     return _file.size();
 }
+
+size_t ESP32_VS1053_Stream::_fileLastMP3Byte()
+{ uint8_t ID3v2_header[10];
+  size_t  ID3v2_size = 0;
+
+   if (_file.read(ID3v2_header, 10) == 10)
+   { if(memcmp(ID3v2_header, "ID3", 3 )==0)
+     { Serial.printf("ID3v2_header[9] -> %02X\n", ID3v2_header[9]);
+       ID3v2_size |= (size_t)ID3v2_header[9];
+       Serial.printf("ID3v2_header[8] -> %02X\n", ID3v2_header[8]);
+       ID3v2_size |= (size_t)ID3v2_header[8] << 7;
+       Serial.printf("ID3v2_header[7] -> %02X\n", ID3v2_header[7]);
+       ID3v2_size |= (size_t)ID3v2_header[7] << 14;
+       Serial.printf("ID3v2_header[6] -> %02X\n", ID3v2_header[6]);
+       ID3v2_size |= (size_t)ID3v2_header[6] << 21;
+
+       _file.seek(ID3v2_size + 10);
+       Serial.printf("_file.position() -> %08X\n", _file.position());
+     }  
+     
+     return _file.size() - _file.position();   
+   }
+   // fallback if not found
+   _file.seek(0);
+   return _file.size();
+ }
 
 void ESP32_VS1053_Stream::_handleLocalFile()
 {

@@ -174,7 +174,8 @@ void loop_esp_now() {
     }
     else // keep sending last one, if changed with perhaps updated coordinates
     { if(memcmp(&PrevDataFromGlobe, &DataFromGlobe,sizeof(PrevDataFromGlobe)) != 0)
-      { esp_err_t result = esp_now_send(PuckMac, (uint8_t *) &DataFromGlobe, sizeof(DataFromGlobe));
+      { DataFromGlobe.G_QueueMessageType = MESSAGE_NOP; // puck rebooting could pick last send message -> double puck in a row update seen
+        esp_err_t result = esp_now_send(PuckMac, (uint8_t *) &DataFromGlobe, sizeof(DataFromGlobe));
         // Serial.printf("Stuff (usually coordinates or rssi changed) send\n");
         memcpy(&PrevDataFromGlobe, &DataFromGlobe, sizeof(PrevDataFromGlobe));
       }  

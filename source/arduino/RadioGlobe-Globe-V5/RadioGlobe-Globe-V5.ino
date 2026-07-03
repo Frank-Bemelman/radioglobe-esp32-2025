@@ -40,7 +40,8 @@ extern uint8_t UpdateFirmware(uint8_t state); // start with 1 for a full date/ti
 #include <ArduinoJson.h>
 #include <ArduinoJson.hpp>
 #include <WiFi.h>
-#include "ESP32FtpServer.h"
+//#include "ESP32FtpServer.h"
+#include "SimpleFTPServer.h"
 #include <esp_wifi.h>
 #include <WiFiClient.h>
 //#include <ESP32_VS1053_Stream_V4.h>  // https://github.com/CelliesProjects/ESP32_VS1053_Stream
@@ -109,18 +110,12 @@ Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 // brown GND (pin 6 SD module)
 // red +3V3 (pin 1 SD module)
 
+
+
 SPIClass *hspi = NULL;
 
-
-
 ESP32_VS1053_Stream stream;
-//VS1053 chunkplayer(VS1053_CS, VS1053_DCS, VS1053_DREQ);
-
-// AS5600 encoders esp32-wroom-32 pin arrangement
-//const int SCL_1 = 33; // &wire as5600_0 grey
-//const int SDA_1 = 32; // &wire as5600_0 brown
-//const int SCL_2 = 26; // &wire as5600_1 grey
-//const int SDA_2 = 25; // &wire as5600_1 brown
+//VS1053 chunkplayer(VS1053_CS, VS1053_DCS, VS1053_DREQ); // made a playChunk member in ESP32_VS1053_Stream library
 
 // AS5600 encoders esp32-S3-N16R8 pin arrangement
 const int SCL_1 = 4; // &wire as5600_1 grey NS LAT
@@ -132,9 +127,6 @@ const int SDA_2 = 7; // &wire as5600_2 brown EW LON
 #define SPEAKERS_OFF 0
 #define SPEAKERS_ON 1
 #define SPEAKERS_DELAYED_OFF 3
-
-uint16_t VolumeSoundBiteValue;
-
 
 AS5600 as5600_1(&Wire); // NS LAT Encoder
 AS5600 as5600_2(&Wire1); // EW LON Encoder
@@ -156,7 +148,6 @@ bool bEncoderKillStation = false;
 uint16_t Timer100msSerialCanBeOpened = 0; // set to 5 seconds after 5 taps on touch
 uint16_t Timer100msSerialIsOpen = 0; // set to 30 seconds after speaker switch pressed
 uint16_t SpeakerOffAfter25mS = 0;
-
 
 char TargetUrl[QUEUEMESSAGELENGTH] = ""; // most recent url requested by display
 char ActiveUrl[QUEUEMESSAGELENGTH] = ""; // most recent url connected to
@@ -496,7 +487,7 @@ void setup()
   bSetupCompleted = true;
   
   if(GlobeSettings.sdcard_present)
-  { ftp.begin("guest", "guest");
+  { ftp.begin("globe", "globe");
     Serial.println("FTP gestart!");
     Serial.println(WiFi.localIP());
   }  
@@ -1496,6 +1487,8 @@ void GlobePowerUp(void)
   AddToQueueForDisplay(message, MESSAGE_VOLUME_AND_TONE);
   AddToQueueForDisplay(build_timestamp, MESSAGE_GLOBE_BUILD_DATE_TIME);
   AddToQueueForDisplay(WiFi.localIP().toString().c_str(), MESSAGE_GLOBE_IP);
+  AddToQueueForDisplay(GlobeSettings.ssid, MESSAGE_SSID_FOR_GLOBE);
+  AddToQueueForDisplay(GlobeSettings.password, MESSAGE_PASSWORD_FOR_GLOBE);
   
   SetVolumeMapped(GlobeSettings.ee_volume); 
   AddToQueueForDisplay("Globe Just Booted", MESSAGE_GLOBE_WANTS_CURRENT_STATION);
@@ -1637,9 +1630,8 @@ void Speakers(uint8_t mode)
 
 // Called when codec is detected
 void codecCallback(const char *codec)
-{
-    Serial.printf("codec: %s\n", codec);
-    SetVolumeMapped(DataFromDisplay.volumevalue); // will also enable amplifiers
+{ Serial.printf("codec: %s\n", codec);
+  SetVolumeMapped(DataFromDisplay.volumevalue); // will also enable amplifiers
 }
 
 
