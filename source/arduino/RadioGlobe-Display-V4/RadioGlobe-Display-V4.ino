@@ -30,7 +30,7 @@
 // coredump, data, coredump,0xFF0000,0x10000,
 
 
-// update and features added
+// 29 JUN 26 -> update and FTP features added
 // 29 MAY 26 -> Only find and collect stations from one country
 // 17 MAR 26 -> Added speaker off icon, during volume value shown, in case speakers are off
 // 15 MAR 26 -> EXPERIMENT LVGL_Driver.cpp line 101 -> commented taskdelay again, maybe not neccesairy, eeprom screen glitch fix attempt
@@ -243,12 +243,12 @@ void Driver_Loop(void *parameter)
       if(ShowVolumeTimer)
       { ShowVolumeTimer--; // once timed out, flag will be shown again
         if(!ShowVolumeTimer && DataFromDisplay.volumevalue)
-        { lv_obj_add_state(uic_VolumeValue, LV_STATE_DISABLED); // away with volume level
-          lv_obj_add_flag(uic_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN); // away with speaker icon
-          lv_obj_add_flag(uic_mainscreen_speakeron, LV_OBJ_FLAG_HIDDEN); // away with speaker icon
-          lv_obj_clear_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // show country flag again
-          lv_obj_clear_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // show city name again
-          lv_obj_clear_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // show country name again
+        { lv_obj_add_state(ui_VolumeValue, LV_STATE_DISABLED); // away with volume level
+          lv_obj_add_flag(ui_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN); // away with speaker icon
+          lv_obj_add_flag(ui_mainscreen_speakeron, LV_OBJ_FLAG_HIDDEN); // away with speaker icon
+          lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // show country flag again
+          lv_obj_clear_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); // show city name again
+          lv_obj_clear_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN); // show country name again
           ShowBatteryLevel(false); // hide battery level status
           ShowWeatherData(true); // show weather status again
         }  
@@ -288,7 +288,7 @@ void monitor_update(void)
   if(previous_free_size != mon_p.free_size)
   { previous_free_size = mon_p.free_size;
     sprintf(buf, "%.1f%%", (float)mon_p.free_size * 100.0f / mon_p.total_size);
-    lv_label_set_text(uic_MemoryUsage, buf);
+    lv_label_set_text(ui_MemoryUsage, buf);
   }
 }
     
@@ -335,16 +335,42 @@ void setup()
 
   ui_additional_text_init(); // manual creation of simple items that didn't fit in the max 150 objects of Squareline Studio
 
-  lv_obj_add_flag(ui_Power_Off_Icon, LV_OBJ_FLAG_HIDDEN);
-  lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide country flag until new country code is received
-  lv_obj_add_flag(uic_Database_Flag, LV_OBJ_FLAG_HIDDEN); // hide country flag until new country code is received
-  lv_obj_add_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // hide city name until new country code is received
-  lv_obj_add_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide country name until new country code is received
+  lv_obj_add_flag(ui_Home_Power_Off_Icon, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide country flag until new country code is received
+  lv_obj_add_flag(ui_Database_Flag, LV_OBJ_FLAG_HIDDEN); // hide country flag until new country code is received
+  lv_obj_add_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); // hide city name until new country code is received
+  lv_obj_add_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide country name until new country code is received
   lv_label_set_text(ui_Home_City, "");
   lv_label_set_text(ui_Home_Country, "");
   ShowWeatherData(false); // hide weather info
-  if(DisplaySettings.sdcard_present==1)lv_obj_clear_flag(uic_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
-  else lv_obj_add_flag(uic_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
+  if(DisplaySettings.sdcard_present==1)lv_obj_clear_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
+  else lv_obj_add_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
+
+
+  // give flag and power button on clock face a much larger click area
+  lv_obj_t * invisible_hitbox = lv_obj_create(ui_ClockScreen); 
+  lv_obj_set_size(invisible_hitbox, 140, 140); 
+  lv_obj_align_to(invisible_hitbox, ui_Clock_Power_Off_Icon, LV_ALIGN_CENTER, 0, 0);
+  lv_obj_set_style_bg_opa(invisible_hitbox, LV_OPA_0, LV_PART_MAIN);
+  lv_obj_set_style_border_width(invisible_hitbox, 0, LV_PART_MAIN);
+  lv_obj_set_style_shadow_width(invisible_hitbox, 0, LV_PART_MAIN);
+  lv_obj_add_flag(invisible_hitbox, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_clear_flag(invisible_hitbox, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_add_event_cb(invisible_hitbox, ui_event_Clock_Power_Off_Icon, LV_EVENT_CLICKED, NULL);
+  lv_obj_clear_flag(ui_Clock_Power_Off_Icon, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_t * invisible_hitbox2 = lv_obj_create(ui_ClockScreen); 
+  lv_obj_set_size(invisible_hitbox2, 150, 150); 
+  lv_obj_align_to(invisible_hitbox2, ui_ClockFlag, LV_ALIGN_CENTER, 0, 0);
+  lv_obj_set_style_bg_opa(invisible_hitbox2, LV_OPA_0, LV_PART_MAIN);
+  lv_obj_set_style_border_width(invisible_hitbox2, 0, LV_PART_MAIN);
+  lv_obj_set_style_shadow_width(invisible_hitbox2, 0, LV_PART_MAIN);
+  lv_obj_add_flag(invisible_hitbox2, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_clear_flag(invisible_hitbox2, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_add_event_cb(invisible_hitbox2, ui_event_ClockFlag, LV_EVENT_CLICKED, NULL);
+  lv_obj_clear_flag(ui_ClockFlag, LV_OBJ_FLAG_CLICKABLE);
+
+
+  
 
   Lvgl_Loop();
 
@@ -360,7 +386,7 @@ void setup()
 
   // show used wifi channel in preset screen
   sprintf(content, "CH-%d", DisplaySettings.wifichannel);
-  lv_label_set_text(uic_GlobeText, content);
+  lv_label_set_text(ui_GlobeText, content);
 
   //lv_mem_init(); ??? crashes everything
   monitor_update(); // memory percentage
@@ -676,7 +702,7 @@ void loop()
            if((screen != ui_CalibrationScreen) && (screen != ui_CalibrationScreenAdvanced))
           { // if in tone controle screen or preset screen, jump back to home screen
             if((screen != ui_DatabaseScreen) || (bInfoScreen==true))
-            { if(screen==ui_Power) // clock screen
+            { if(screen==ui_ClockScreen) // clock screen
               { Serial.printf("Clock screen, find new station for flag and time update \n");
                 ClockHomeTime = false;
                 FindNewStation();
@@ -684,10 +710,10 @@ void loop()
               }
               else if(bPowerStatus == true)
               { // hide all info stuff until new station is requested after search
-                //lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide flag 
-                //lv_obj_add_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // hide city name 
-                //lv_obj_add_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide country name 
-                //lv_obj_add_flag(uic_Clock_Country, LV_OBJ_FLAG_HIDDEN); // hide country name 
+                //lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide flag 
+                //lv_obj_add_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); // hide city name 
+                //lv_obj_add_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide country name 
+                //lv_obj_add_flag(ui_Clock_Country, LV_OBJ_FLAG_HIDDEN); // hide country name 
                 ShowWeatherData(false); // hide weather info
                 //lv_label_set_text(ui_Station_Name, ""); // already done by globe signalling globe movement
                 lv_label_set_text(ui_Status_Line, "SEARCHING");
@@ -808,7 +834,7 @@ void loop()
               Serial.printf("Stations.count =%d\n", Stations.count);  
               if(Stations.requested < Stations.count) // until the end of the list, or else we are done
               { Serial.printf("Stations.requested =%d: >%s<\n", Stations.requested, Stations.StationNUG[Stations.requested].name);  
-                lv_roller_set_selected(uic_StationRoller, Stations.requested, LV_ANIM_ON);
+                lv_roller_set_selected(ui_StationRoller, Stations.requested, LV_ANIM_ON);
                 sprintf(content, "%d-%d", Stations.requested+1, Stations.count); // top label 1-150 in stations roller
                 lv_label_set_text(ui_StationRollerSelected, content);
                 lv_label_set_text(ui_StationRollerComment, Stations.StationNUG[Stations.requested].name); 
@@ -868,35 +894,35 @@ void loop()
              int32_t internalspeaker;
              sscanf(QueueMessage, "%ld %ld %ld %ld", &volume, &bass, &treble, &internalspeaker);
              // sync controls to that
-             lv_arc_set_value(uic_VolumeArc, volume);
-             lv_arc_set_value(uic_BassArc, bass);
-             lv_arc_set_value(uic_TrebleArc, treble);
+             lv_arc_set_value(ui_VolumeArc, volume);
+             lv_arc_set_value(ui_BassArc, bass);
+             lv_arc_set_value(ui_TrebleArc, treble);
              if(internalspeaker == 1)
-             { lv_obj_add_state(uic_InternalSpeaker, LV_STATE_CHECKED);
-               lv_obj_add_flag(uic_speakeroff, LV_OBJ_FLAG_HIDDEN); 
-               lv_obj_clear_flag(uic_speakeron, LV_OBJ_FLAG_HIDDEN);
+             { lv_obj_add_state(ui_InternalSpeaker, LV_STATE_CHECKED);
+               lv_obj_add_flag(ui_speakeroff, LV_OBJ_FLAG_HIDDEN); 
+               lv_obj_clear_flag(ui_speakeron, LV_OBJ_FLAG_HIDDEN);
                DataFromDisplay.internalspeakeron = 1;
                if(ShowVolumeTimer)
-               { lv_obj_add_flag(uic_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN); 
-                 //lv_obj_clear_flag(uic_mainscreen_speakeron, LV_OBJ_FLAG_HIDDEN);
+               { lv_obj_add_flag(ui_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN); 
+                 //lv_obj_clear_flag(ui_mainscreen_speakeron, LV_OBJ_FLAG_HIDDEN);
                }  
              } 
              else
-             { lv_obj_clear_state(uic_InternalSpeaker, LV_STATE_CHECKED); 
-               lv_obj_add_flag(uic_speakeron, LV_OBJ_FLAG_HIDDEN); 
-               lv_obj_clear_flag(uic_speakeroff, LV_OBJ_FLAG_HIDDEN);
+             { lv_obj_clear_state(ui_InternalSpeaker, LV_STATE_CHECKED); 
+               lv_obj_add_flag(ui_speakeron, LV_OBJ_FLAG_HIDDEN); 
+               lv_obj_clear_flag(ui_speakeroff, LV_OBJ_FLAG_HIDDEN);
                DataFromDisplay.internalspeakeron = 0;
                if(ShowVolumeTimer)
-               { //lv_obj_add_flag(uic_mainscreen_speakeron, LV_OBJ_FLAG_HIDDEN); 
-                 lv_obj_clear_flag(uic_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN);
+               { //lv_obj_add_flag(ui_mainscreen_speakeron, LV_OBJ_FLAG_HIDDEN); 
+                 lv_obj_clear_flag(ui_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN);
                }  
              }
              sprintf(content, "%ld", volume);
-             lv_label_set_text(uic_VolumeValue, content); 
+             lv_label_set_text(ui_VolumeValue, content); 
              sprintf(content, "%ld", bass);
-             lv_label_set_text(uic_BassValue, content); 
+             lv_label_set_text(ui_BassValue, content); 
              sprintf(content, "%ld", treble);
-             lv_label_set_text(uic_TrebleValue, content); 
+             lv_label_set_text(ui_TrebleValue, content); 
              AddToQueueForGlobe("VOLUME AND TONE SET AS REQUESTED", MESSAGE_VOLUME_AND_TONE);
            }
            break;
@@ -973,20 +999,20 @@ void loop()
             { Serial.printf("Called from radioglobe-display.ino line 785\n");
               SetFlag(countrycode);
               lv_event_send(ui_Home_Flag, LV_EVENT_REFRESH, NULL);
-              lv_obj_clear_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // show flag 
-              lv_label_set_text(uic_Home_Country, AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
-              lv_obj_clear_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
-              lv_label_set_text(uic_Clock_Country, AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
-              lv_obj_clear_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
+              lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // show flag 
+              lv_label_set_text(ui_Home_Country, AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
+              lv_obj_clear_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
+              lv_label_set_text(ui_Clock_Country, AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
+              lv_obj_clear_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
               sprintf(content, "%s  -  %s", Stations.StationNUG[Stations.requested].town, AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
-              lv_label_set_text(uic_StationRollerPlace, content);
+              lv_label_set_text(ui_StationRollerPlace, content);
               // on setup screen
-              lv_label_set_text(uic_YouLiveHere, AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
+              lv_label_set_text(ui_YouLiveHere, AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
               
               if(strcmp(town, "???")==NULL)
               { sprintf(content, "%s", AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
                 Serial.printf("content1 = <%s>\n", content);
-                lv_label_set_text(uic_Home_City, "");
+                lv_label_set_text(ui_Home_City, "");
                 // on map
                 sprintf(content,"Greetings From  %s", AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
                 lv_label_set_text(ui_Database_Town_Name, content);
@@ -1002,17 +1028,17 @@ void loop()
                 else sprintf(content, "%s", AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
                 Serial.printf("content2 = <%s>\n", content);
                 Serial.printf("content2 = <%s>\n", town);
-                lv_label_set_text(uic_Home_City, town);
+                lv_label_set_text(ui_Home_City, town);
               }
-              lv_label_set_text(uic_StationRollerPlace, content);
+              lv_label_set_text(ui_StationRollerPlace, content);
               AddToQueueForGlobe(countrycode, MESSAGE_EX_CHANGE_RATE);
               lv_label_set_text(ui_Database_Progress, ""); // erase now, will be refreshed when globe answers 
             }
             else
             { sprintf(content, "Countrycode %s Not In List", QueueMessage);
-              lv_label_set_text(uic_Home_Country, content);
+              lv_label_set_text(ui_Home_Country, content);
               sprintf(content, "%s", Stations.StationNUG[Stations.requested].town);
-              lv_label_set_text(uic_StationRollerPlace, content);
+              lv_label_set_text(ui_StationRollerPlace, content);
             }
           }  
           break;
@@ -1045,8 +1071,8 @@ void loop()
           break;
 
         case MESSAGE_MQTT_STATUS:
-          if(strcmp(QueueMessage, "ON")==0)lv_obj_clear_flag(uic_ledmqtt, LV_OBJ_FLAG_HIDDEN);
-          else lv_obj_add_flag(uic_ledmqtt, LV_OBJ_FLAG_HIDDEN);
+          if(strcmp(QueueMessage, "ON")==0)lv_obj_clear_flag(ui_ledmqtt, LV_OBJ_FLAG_HIDDEN);
+          else lv_obj_add_flag(ui_ledmqtt, LV_OBJ_FLAG_HIDDEN);
           break;
 
         case MESSAGE_DISPLAY_BT_SWITCHABLE_STATE:
@@ -1138,8 +1164,8 @@ void loop()
         case MESSAGE_GLOBE_HAS_SD:
           sscanf(QueueMessage, "%d", &DisplaySettings.sdcard_present);
           if(OldDisplaySettings.sdcard_present != DisplaySettings.sdcard_present)SaveDisplaySettingsToEeprom();
-          if(DisplaySettings.sdcard_present==1)lv_obj_clear_flag(uic_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
-          else lv_obj_add_flag(uic_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
+          if(DisplaySettings.sdcard_present==1)lv_obj_clear_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
+          else lv_obj_add_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
           break;
 
         case MESSAGE_MUSIC_MODE:
@@ -1153,7 +1179,7 @@ void loop()
             Stations.count = 0;
             Stations.requested -1;
             ReloadScroll();
-            lv_label_set_text(uic_Home_City, "SD-Card");
+            lv_label_set_text(ui_Home_City, "SD-Card");
           }
           break;
 
@@ -1166,7 +1192,7 @@ void loop()
         case MESSAGE_SET_ROLLER_INDEX:
           // received from globe when (next) song from SD is started
           sscanf(QueueMessage, "%d", &Stations.requested);
-          lv_roller_set_selected(uic_StationRoller, Stations.requested, LV_ANIM_ON);
+          lv_roller_set_selected(ui_StationRoller, Stations.requested, LV_ANIM_ON);
           sprintf(content, "%d-%d", Stations.requested+1, Stations.count); // top label 1-150 in stations roller
           lv_label_set_text(ui_StationRollerSelected, content);
           break;
@@ -1202,21 +1228,21 @@ void loop()
       BacklightValue = DEFAULT_BACKLIGHT;
       AutoSleepTimer = AUTOPOWERDOWNAFTER;
       ShowVolumeTimer = DEFAULT_SHOW_VOLUME_TIMER;
-      lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide flag
-      lv_obj_add_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // hide town
-      lv_obj_add_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide country name
+      lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide flag
+      lv_obj_add_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); // hide town
+      lv_obj_add_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide country name
       ShowWeatherData(false); // hide weather status
       ShowBatteryLevel(true); // show battery level
       if(newvolumevalue) // and show it
-      { lv_obj_add_flag(uic_Power_Off_Icon, LV_OBJ_FLAG_HIDDEN); // hide power off icon
+      { lv_obj_add_flag(ui_Home_Power_Off_Icon, LV_OBJ_FLAG_HIDDEN); // hide power off icon
         lv_obj_clear_state(ui_VolumeValue, LV_STATE_DISABLED); // show volume value
-        if(DataFromDisplay.internalspeakeron == 1)lv_obj_add_flag(uic_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN); 
-        else lv_obj_clear_flag(uic_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN);
+        if(DataFromDisplay.internalspeakeron == 1)lv_obj_add_flag(ui_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN); 
+        else lv_obj_clear_flag(ui_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN);
       }
       else // hide volume value
-      { lv_obj_add_state(uic_VolumeValue, LV_STATE_DISABLED); // hide volume value
-        lv_obj_add_flag(uic_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN); // hide speaker-off symbol
-        lv_obj_clear_flag(uic_Power_Off_Icon, LV_OBJ_FLAG_HIDDEN); // show power off icon
+      { lv_obj_add_state(ui_VolumeValue, LV_STATE_DISABLED); // hide volume value
+        lv_obj_add_flag(ui_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN); // hide speaker-off symbol
+        lv_obj_clear_flag(ui_Home_Power_Off_Icon, LV_OBJ_FLAG_HIDDEN); // show power off icon
       }
     }
 
@@ -1251,7 +1277,7 @@ void loop()
          DataForLCD.ew_cal = DataFromDisplay.ew_cal;
       }
       else  if(screen == ui_DatabaseScreen) 
-      { lv_obj_set_pos(uic_MapCursor, (int)DataFromDisplay.ew_cal/10 - 16, -(int)DataFromDisplay.ns_cal/10); // moved 16 to left, dot is painted left-top corner?
+      { lv_obj_set_pos(ui_MapCursor, (int)DataFromDisplay.ew_cal/10 - 16, -(int)DataFromDisplay.ns_cal/10); // moved 16 to left, dot is painted left-top corner?
       }
     }
 
@@ -1277,7 +1303,7 @@ void loop()
     if(PrevDataFromGlobe.G_rssi_globe !=  DataFromGlobe.G_rssi_globe)
     { PrevDataFromGlobe.G_rssi_globe =  DataFromGlobe.G_rssi_globe; 
       sprintf(content, "%d dB", DataFromGlobe.G_rssi_globe); 
-      lv_label_set_text(uic_GlobeRSSI, content); // update wifi strength on MY FAVORITES screen
+      lv_label_set_text(ui_GlobeRSSI, content); // update wifi strength on MY FAVORITES screen
     }
 
     // puck_rssi = WiFi.RSSI();
@@ -1290,7 +1316,7 @@ void loop()
     // }
 
     if(strcmp(PrevSecretCode, SecretCode)!=0)
-    //if(screen == uic_PasswordScreen)
+    //if(screen == ui_PasswordScreen)
     { strcpy(PrevSecretCode, SecretCode);
       if(strcmp(SecretCode, "GLOBE")==0)
       { lv_label_set_recolor(ui_lockstatus, true);
@@ -1348,7 +1374,7 @@ void loop()
       //  //SecondStartMs = millis(); // uncomment for smooth movement
       //}
        
-      if(screen == ui_Power) // we are on clock screen
+      if(screen == ui_ClockScreen) // we are on clock screen
       { // uncomment for smooth movement
         //ClockMillisLapse = millis() - SecondStartMs;
         //ClockMillisLapse %= 1000;
@@ -1415,7 +1441,7 @@ void loop()
     if(old_mqtt_truss_volume != mqtt_truss_volume)
     { old_mqtt_truss_volume = mqtt_truss_volume;
       //Serial.printf("mqtt_truss_volume = %d\n", mqtt_truss_volume);
-      lv_arc_set_value(uic_VolumeArc, mqtt_truss_volume);
+      lv_arc_set_value(ui_VolumeArc, mqtt_truss_volume);
       sprintf(content, "%d", mqtt_truss_volume);
       lv_label_set_text(ui_VolumeValue, content);
     }
@@ -1562,33 +1588,33 @@ void set_optional_items(void)
   lv_label_set_text(ui_SerialNumberText, content);
 
   if(!DisplaySettings.bluetoothinstalled || !DisplaySettings.bluetoothswitchable) // no BT module present or not switchable
-  { lv_obj_add_flag(uic_bluetoothswitch, LV_OBJ_FLAG_HIDDEN); // no switch
-    lv_obj_add_flag(uic_bluetoothon, LV_OBJ_FLAG_HIDDEN); // no bt icons
-    lv_obj_add_flag(uic_bluetoothoff, LV_OBJ_FLAG_HIDDEN); // no bt icons
+  { lv_obj_add_flag(ui_bluetoothswitch, LV_OBJ_FLAG_HIDDEN); // no switch
+    lv_obj_add_flag(ui_bluetoothon, LV_OBJ_FLAG_HIDDEN); // no bt icons
+    lv_obj_add_flag(ui_bluetoothoff, LV_OBJ_FLAG_HIDDEN); // no bt icons
   }  
   else
   { if(DisplaySettings.bluetoothswitchable) // do we have a switch
     { Serial.printf("is bluetoothswitchable\n");
-      lv_obj_clear_flag(uic_bluetoothswitch, LV_OBJ_FLAG_HIDDEN); // show switch
+      lv_obj_clear_flag(ui_bluetoothswitch, LV_OBJ_FLAG_HIDDEN); // show switch
       if(DisplaySettings.btmodule_power_on) // powered on
       { Serial.printf("bt is powered on\n");
         DataFromDisplay.btmodule_power_on = 1;
-        lv_obj_add_state(uic_bluetoothswitch, LV_STATE_CHECKED); // set switch in on position
-        lv_obj_add_flag(uic_bluetoothoff, LV_OBJ_FLAG_HIDDEN); 
-        lv_obj_clear_flag(uic_bluetoothon, LV_OBJ_FLAG_HIDDEN); // show BT on icon
+        lv_obj_add_state(ui_bluetoothswitch, LV_STATE_CHECKED); // set switch in on position
+        lv_obj_add_flag(ui_bluetoothoff, LV_OBJ_FLAG_HIDDEN); 
+        lv_obj_clear_flag(ui_bluetoothon, LV_OBJ_FLAG_HIDDEN); // show BT on icon
       }
       else // BT powered off
       { Serial.printf("bt is powered off\n");
         DataFromDisplay.btmodule_power_on = 0;
-        lv_obj_clear_state(uic_bluetoothswitch, LV_STATE_CHECKED); // set switch in off position
-        lv_obj_add_flag(uic_bluetoothon, LV_OBJ_FLAG_HIDDEN); 
-        lv_obj_clear_flag(uic_bluetoothoff, LV_OBJ_FLAG_HIDDEN); // show BT on icon
+        lv_obj_clear_state(ui_bluetoothswitch, LV_STATE_CHECKED); // set switch in off position
+        lv_obj_add_flag(ui_bluetoothon, LV_OBJ_FLAG_HIDDEN); 
+        lv_obj_clear_flag(ui_bluetoothoff, LV_OBJ_FLAG_HIDDEN); // show BT on icon
       }
     }  
     else // not switchable, hide switch, no icons
-    { lv_obj_add_flag(uic_bluetoothswitch, LV_OBJ_FLAG_HIDDEN);
-      lv_obj_add_flag(uic_bluetoothoff, LV_OBJ_FLAG_HIDDEN);
-      lv_obj_add_flag(uic_bluetoothon, LV_OBJ_FLAG_HIDDEN);
+    { lv_obj_add_flag(ui_bluetoothswitch, LV_OBJ_FLAG_HIDDEN);
+      lv_obj_add_flag(ui_bluetoothoff, LV_OBJ_FLAG_HIDDEN);
+      lv_obj_add_flag(ui_bluetoothon, LV_OBJ_FLAG_HIDDEN);
     }
   }  
 }

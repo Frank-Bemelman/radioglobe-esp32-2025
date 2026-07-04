@@ -237,12 +237,12 @@ void handlePowerCycle(void)
     if(bPowerStatus == true)
     { // Power off
       bPowerStatus = false;
-      ui_object_set_themeable_style_property(uic_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_red);
-      ui_object_set_themeable_style_property(uic_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_red);
-      lv_obj_invalidate(uic_Power_Off_Icon);
-      ui_object_set_themeable_style_property(uic_Big_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_red);
-      ui_object_set_themeable_style_property(uic_Big_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_red);
-      lv_obj_invalidate(uic_Big_Power_Off_Icon);
+      ui_object_set_themeable_style_property(ui_Home_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_red);
+      ui_object_set_themeable_style_property(ui_Home_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_red);
+      lv_obj_invalidate(ui_Home_Power_Off_Icon);
+      ui_object_set_themeable_style_property(uic_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_red);
+      ui_object_set_themeable_style_property(uic_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_red);
+      lv_obj_invalidate(uic_Clock_Power_Off_Icon);
       lv_refr_now(NULL);
       Lvgl_Loop();  
 
@@ -256,7 +256,7 @@ void handlePowerCycle(void)
       delay(100);
       SetClockHands();
       ClockBackLight = true;
-      lv_scr_load(ui_Power);
+      lv_scr_load(ui_ClockScreen);
       lv_refr_now(NULL);
       Lvgl_Loop();  
       //BacklightValue = DEFAULT_BACKLIGHT;
@@ -270,12 +270,12 @@ void handlePowerCycle(void)
       AutoSleepTimer = AUTOPOWERDOWNAFTER;
       bPowerStatus = true;
       ClockBackLight = true;
-      ui_object_set_themeable_style_property(uic_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_green);
-      ui_object_set_themeable_style_property(uic_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_green);
-      lv_obj_invalidate(uic_Power_Off_Icon);
-      ui_object_set_themeable_style_property(uic_Big_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_green);
-      ui_object_set_themeable_style_property(uic_Big_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_green);
-      lv_obj_invalidate(uic_Big_Power_Off_Icon);
+      ui_object_set_themeable_style_property(ui_Home_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_green);
+      ui_object_set_themeable_style_property(ui_Home_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_green);
+      lv_obj_invalidate(ui_Home_Power_Off_Icon);
+      ui_object_set_themeable_style_property(uic_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_green);
+      ui_object_set_themeable_style_property(uic_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_green);
+      lv_obj_invalidate(uic_Clock_Power_Off_Icon);
       lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN);
       lv_refr_now(NULL);
       Lvgl_Loop();  
@@ -439,14 +439,14 @@ void SwitchToClock(lv_event_t * e)
 { char content[64];
   beepforMs(50);
   // set icon to home icon
-  lv_img_set_src(ui_Big_Power_Off_Icon, &ui_img_home_png);
-  ui_object_set_themeable_style_property(ui_Big_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
+  lv_img_set_src(ui_Clock_Power_Off_Icon, &ui_img_home_png);
+  ui_object_set_themeable_style_property(ui_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
                                            _ui_theme_color_turquoise);
-  ui_object_set_themeable_style_property(ui_Big_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
+  ui_object_set_themeable_style_property(ui_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
                                            _ui_theme_alpha_turquoise);
 
   ClockHomeTime = false; // to sync the clocks Flag toggle state 
-  lv_scr_load(ui_Power);
+  lv_scr_load(ui_ClockScreen);
 }
 
 // clicking home or power icon on clock face
@@ -464,19 +464,15 @@ void ClockHomePower(lv_event_t * e)
     }
     
     lv_scr_load(ui_Home);
-    lv_img_set_src(ui_Big_Power_Off_Icon, &ui_img_power75x75_png); // icon on clock face
-    //ui_object_set_themeable_style_property(ui_Big_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
-    //                                       _ui_theme_color_red);
-    //ui_object_set_themeable_style_property(ui_Big_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
-    //                                       _ui_theme_alpha_red);
+    lv_img_set_src(ui_Clock_Power_Off_Icon, &ui_img_power75x75_png); // icon on clock face
   }
   else
   { //Serial.printf("Clock Home/Power clicked while power is off\n");
     bPowerStatus = true;
     ClockBackLight = true;
-    ui_object_set_themeable_style_property(ui_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_green);
-    ui_object_set_themeable_style_property(ui_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_green);
-    lv_obj_invalidate(ui_Power_Off_Icon);
+    ui_object_set_themeable_style_property(ui_Home_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_green);
+    ui_object_set_themeable_style_property(ui_Home_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_green);
+    lv_obj_invalidate(ui_Home_Power_Off_Icon);
     lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN);
     lv_refr_now(NULL);
     Lvgl_Loop();  

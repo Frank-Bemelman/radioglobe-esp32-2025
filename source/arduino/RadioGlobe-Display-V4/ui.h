@@ -38,7 +38,7 @@ extern "C" {
 #include "ui_Favorites.h"
 #include "ui_ToneControlScreen.h"
 #include "ui_CalibrationScreenAdvanced.h"
-#include "ui_Power.h"
+#include "ui_ClockScreen.h"
 
 ///////////////////// VARIABLES ////////////////////
 

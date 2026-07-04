@@ -13,7 +13,7 @@ lv_obj_t * uic_Weather_Icon;
 lv_obj_t * uic_Home_Country;
 lv_obj_t * uic_Home_City;
 lv_obj_t * uic_Home_Flag;
-lv_obj_t * uic_Power_Off_Icon;
+lv_obj_t * uic_Home_Power_Off_Icon;
 lv_obj_t * uic_BatteryVoltage;
 lv_obj_t * uic_Battery_Icon_High;
 lv_obj_t * uic_Battery_Icon_Medium;
@@ -43,7 +43,7 @@ lv_obj_t * ui_Battery_Icon_Low = NULL;
 lv_obj_t * ui_Battery_Icon_Medium = NULL;
 lv_obj_t * ui_Battery_Icon_High = NULL;
 lv_obj_t * ui_BatteryVoltage = NULL;
-lv_obj_t * ui_Power_Off_Icon = NULL;
+lv_obj_t * ui_Home_Power_Off_Icon = NULL;
 lv_obj_t * ui_Home_Flag = NULL;
 lv_obj_t * ui_Home_City = NULL;
 lv_obj_t * ui_Home_Country = NULL;
@@ -111,7 +111,7 @@ void ui_event_SettingButton(lv_event_t * e)
     }
 }
 
-void ui_event_Power_Off_Icon(lv_event_t * e)
+void ui_event_Home_Power_Off_Icon(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
 
@@ -370,19 +370,19 @@ void ui_Home_screen_init(void)
                       LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
     lv_obj_set_style_text_align(ui_BatteryVoltage, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Power_Off_Icon = lv_img_create(ui_Home);
-    lv_img_set_src(ui_Power_Off_Icon, &ui_img_power75x75_png);
-    lv_obj_set_width(ui_Power_Off_Icon, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Power_Off_Icon, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Power_Off_Icon, 0);
-    lv_obj_set_y(ui_Power_Off_Icon, 108);
-    lv_obj_set_align(ui_Power_Off_Icon, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_Power_Off_Icon, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
-    lv_obj_clear_flag(ui_Power_Off_Icon, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    ui_object_set_themeable_style_property(ui_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
+    ui_Home_Power_Off_Icon = lv_img_create(ui_Home);
+    lv_img_set_src(ui_Home_Power_Off_Icon, &ui_img_power75x75_png);
+    lv_obj_set_width(ui_Home_Power_Off_Icon, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Home_Power_Off_Icon, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Home_Power_Off_Icon, 0);
+    lv_obj_set_y(ui_Home_Power_Off_Icon, 108);
+    lv_obj_set_align(ui_Home_Power_Off_Icon, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_Home_Power_Off_Icon, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_clear_flag(ui_Home_Power_Off_Icon, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_object_set_themeable_style_property(ui_Home_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
                                            _ui_theme_color_green);
-    ui_object_set_themeable_style_property(ui_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
-                                           _ui_theme_alpha_green);
+    ui_object_set_themeable_style_property(ui_Home_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT,
+                                           LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_green);
 
     ui_Home_Flag = lv_img_create(ui_Home);
     lv_img_set_src(ui_Home_Flag, &ui_img_xx_png);
@@ -494,7 +494,7 @@ void ui_Home_screen_init(void)
     lv_obj_add_event_cb(ui_Text_Radio_Globe, ui_event_Text_Radio_Globe, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_VolumeArc, ui_event_VolumeArc, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_SettingButton, ui_event_SettingButton, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_Power_Off_Icon, ui_event_Power_Off_Icon, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_Home_Power_Off_Icon, ui_event_Home_Power_Off_Icon, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_Home_Flag, ui_event_Home_Flag, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_arrowleft, ui_event_arrowleft, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_arrowright, ui_event_arrowright, LV_EVENT_ALL, NULL);
@@ -512,7 +512,7 @@ void ui_Home_screen_init(void)
     uic_Battery_Icon_Medium = ui_Battery_Icon_Medium;
     uic_Battery_Icon_High = ui_Battery_Icon_High;
     uic_BatteryVoltage = ui_BatteryVoltage;
-    uic_Power_Off_Icon = ui_Power_Off_Icon;
+    uic_Home_Power_Off_Icon = ui_Home_Power_Off_Icon;
     uic_Home_Flag = ui_Home_Flag;
     uic_Home_City = ui_Home_City;
     uic_Home_Country = ui_Home_Country;
@@ -558,8 +558,8 @@ void ui_Home_screen_destroy(void)
     ui_Battery_Icon_High = NULL;
     uic_BatteryVoltage = NULL;
     ui_BatteryVoltage = NULL;
-    uic_Power_Off_Icon = NULL;
-    ui_Power_Off_Icon = NULL;
+    uic_Home_Power_Off_Icon = NULL;
+    ui_Home_Power_Off_Icon = NULL;
     uic_Home_Flag = NULL;
     ui_Home_Flag = NULL;
     uic_Home_City = NULL;

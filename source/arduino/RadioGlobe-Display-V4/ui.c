@@ -42,7 +42,7 @@ void ui_init(void)
     ui_Favorites_screen_init();
     ui_ToneControlScreen_screen_init();
     ui_CalibrationScreenAdvanced_screen_init();
-    ui_Power_screen_init();
+    ui_ClockScreen_screen_init();
     ui____initial_actions0 = lv_obj_create(NULL);
     lv_disp_load_scr(ui_Home);
 }
@@ -58,5 +58,5 @@ void ui_destroy(void)
     ui_Favorites_screen_destroy();
     ui_ToneControlScreen_screen_destroy();
     ui_CalibrationScreenAdvanced_screen_destroy();
-    ui_Power_screen_destroy();
+    ui_ClockScreen_screen_destroy();
 }

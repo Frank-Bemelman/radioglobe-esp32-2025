@@ -51,7 +51,8 @@ uint8_t UpdateFirmware(uint8_t state)
        break;
 
      case 1:
-       lv_label_set_text(ui_Station_Name, "UPDATING PUCK");
+       lv_label_set_text(ui_Station_Name, "Updating Puck");
+       lv_label_set_text(ui_Status_Line, "RESTART MAY TAKE 3 MINUTES");
        lv_label_set_text(ui_Station_Title, "Checking For New Puck Firmware");
        Lvgl_Loop();
        delay(2000);
@@ -62,6 +63,7 @@ uint8_t UpdateFirmware(uint8_t state)
          Lvgl_Loop();
          delay(2000);
          lv_label_set_text(ui_Station_Name, "");
+         lv_label_set_text(ui_Status_Line, "");
          lv_label_set_text(ui_Station_Title, "");
          return 0;
        } 
@@ -75,6 +77,7 @@ uint8_t UpdateFirmware(uint8_t state)
        else
        { Serial.printf("Updater: NO wifi\n");
          lv_label_set_text(ui_Station_Title, "No Wifi Connection - STOPPED");
+         lv_label_set_text(ui_Status_Line, "");
          Lvgl_Loop();
          delay(2000);
          lv_label_set_text(ui_Station_Name, "");
@@ -84,6 +87,7 @@ uint8_t UpdateFirmware(uint8_t state)
 
        if(!checkFirmwareVersie("github.com", "/Frank-Bemelman/radioglobe-esp32-2025/releases/download/RadioGlobe-Firmware/RadioGlobe-Display.bin"))
        { lv_label_set_text(ui_Station_Title, "Puck Firmware Is The Latest");
+         lv_label_set_text(ui_Status_Line, "");
          Lvgl_Loop();
          delay(2000);
          lv_label_set_text(ui_Station_Name, "");
@@ -123,7 +127,8 @@ uint8_t UpdateFirmware(uint8_t state)
        // reboot included when succes
        if(!startVolledigeOtaDownload("github.com", "/Frank-Bemelman/radioglobe-esp32-2025/releases/download/RadioGlobe-Firmware/RadioGlobe-Display.bin"))
        { BacklightValue = DEFAULT_BACKLIGHT;
-         lv_label_set_text(ui_Station_Title, "Update Puck Failed!");
+         lv_label_set_text(ui_Status_Line, "");
+         lv_label_set_text(ui_Station_Title, "Update Puck Failed!!");
        }
        state++;
        break;
