@@ -1,6 +1,6 @@
 Latest version has an easier auto update function. Go into settings on the puck, long press the serial number and it will upgrade
 both globe and puck, using the bin files from the release. First the globe upgrades automatically, then the puck will upgrade also.
-The puck display goes black during the upgrade, or may act funny, but just hang in there for a few minutes - it will reboot after a few minutes.
+The puck display goes black during the upgrade, just hang in there for a few minutes - it will reboot after a few minutes.
 
 If your version does not have the auto-update yet, it takes a bit more work.
 
