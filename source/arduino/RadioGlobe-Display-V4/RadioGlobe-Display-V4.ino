@@ -17,6 +17,11 @@
 // 14APR2026 Boards Manager (back to 3.3.7, Waveshare ESP32-S3-Touch-LCD-2.1) (seems to give gfixedsplay luminance)brightness
 // 14APR2026 Boards Manager (back to 3.3.7, ESP32S3 Dev Module 16MB 4MB app (custom partition) PSRAM OPI)) 
 
+
+// 4 JUN 26 -> changed lcd driver frequency from 16Mhz to 14Mhz (hope it fixes the odd screen glithtes) in Display_7701.h
+// 4 JUN 26 -> greater click area around flag and power icon on clock face
+// 29 JUN 26 -> update and FTP features added
+
 // 28 JUN 26 Changed to custom partition table 4MB APP0 / 4MB APP1 / 8MB FFAT
 // had to increase as 3MB was too small for the github download feature, went from 98% to 103% -> compiler now reports as 19% from 16MB but we need to stay below 25% (4MB)
 // stored in project folder as partitions.csv
@@ -29,8 +34,6 @@
 // ffat,     data, fat,     0x810000,0x7E0000,
 // coredump, data, coredump,0xFF0000,0x10000,
 
-
-// 29 JUN 26 -> update and FTP features added
 // 29 MAY 26 -> Only find and collect stations from one country
 // 17 MAR 26 -> Added speaker off icon, during volume value shown, in case speakers are off
 // 15 MAR 26 -> EXPERIMENT LVGL_Driver.cpp line 101 -> commented taskdelay again, maybe not neccesairy, eeprom screen glitch fix attempt
@@ -638,9 +641,21 @@ void loop()
         case MESSAGE_STATUS_LINE: // 2
           lv_label_set_text(ui_Status_Line, QueueMessage);
           break;
-        case MESSAGE_ALBUM:
+        case MESSAGE_GLOBE_UPDATE_AVAILABLE:
+          if(QueueMessage[0]=='1')
+          { ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_red);
+            ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_red);
+            lv_obj_set_style_bg_color(ui_SerialNumberButton, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_opa(ui_SerialNumberButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+          }
+          else
+          { ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_turquoise);
+            ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_turquoise);
+            lv_obj_set_style_bg_color(ui_SerialNumberButton, lv_color_hex(0x404040), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_opa(ui_SerialNumberButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+          }
           break;
-        case MESSAGE_GENRE:
+        case MESSAGE_NOP:
           break;
         case MESSAGE_STATION_NAME:
           Serial.printf("case MESSAGE_STATION_NAME: %s\n", QueueMessage);
@@ -744,12 +759,6 @@ void loop()
           }
           break;
       
-        case MESSAGE_GLOBE_IP:  
-          // display on setup screen
-          Serial.printf("New Globe IP Adress received from Globe = %s\n", QueueMessage);
-          sprintf(content, "Globe FTP Address %s", QueueMessage);
-          lv_label_set_text(ui_GlobeMac, content);
-          break;
 
         case MESSAGE_CONNECTTOHOST_FAILURE:
           DataFromDisplay.D_QueueStationIndex = -1;
@@ -1209,6 +1218,19 @@ void loop()
         case MESSAGE_PASSWORD_FOR_GLOBE:
           strcpy(Wifi_PASSWORD, QueueMessage);
           break;
+
+        case MESSAGE_GLOBE_IP:  
+          // display on setup screen
+          Serial.printf("New Globe IP Adress received from Globe = %s\n", QueueMessage);
+          sprintf(content, "Globe FTP/IP Address %s", QueueMessage);
+          lv_label_set_text(ui_GlobeMac, content);
+          break;
+
+        case MESSAGE_GLOBE_HOSTNAME:
+          // display on setup screen
+          Serial.printf("New Hostname receivedAdress received from Globe = %s\n", QueueMessage);
+          sprintf(content, "Globe Website %s", QueueMessage);
+          lv_label_set_text(ui_GlobeMac, content);
 
         default:
           Serial.printf("Unsupported message %d from globe: >%s<\n", QueueMessageType, QueueMessage);  

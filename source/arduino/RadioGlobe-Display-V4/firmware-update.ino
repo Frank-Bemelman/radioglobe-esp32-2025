@@ -65,6 +65,10 @@ uint8_t UpdateFirmware(uint8_t state)
          lv_label_set_text(ui_Station_Name, "");
          lv_label_set_text(ui_Status_Line, "");
          lv_label_set_text(ui_Station_Title, "");
+         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_turquoise);
+         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_turquoise);
+         lv_obj_set_style_bg_color(ui_SerialNumberButton, lv_color_hex(0x404040), LV_PART_MAIN | LV_STATE_DEFAULT);
+         lv_obj_set_style_bg_opa(ui_SerialNumberButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
          return 0;
        } 
 
@@ -82,6 +86,10 @@ uint8_t UpdateFirmware(uint8_t state)
          delay(2000);
          lv_label_set_text(ui_Station_Name, "");
          lv_label_set_text(ui_Station_Title, "");
+         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_turquoise);
+         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_turquoise);
+         lv_obj_set_style_bg_color(ui_SerialNumberButton, lv_color_hex(0x404040), LV_PART_MAIN | LV_STATE_DEFAULT);
+         lv_obj_set_style_bg_opa(ui_SerialNumberButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);         
          return 0;
        }
 
@@ -92,6 +100,10 @@ uint8_t UpdateFirmware(uint8_t state)
          delay(2000);
          lv_label_set_text(ui_Station_Name, "");
          lv_label_set_text(ui_Station_Title, "");
+         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_turquoise);
+         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_turquoise);
+         lv_obj_set_style_bg_color(ui_SerialNumberButton, lv_color_hex(0x404040), LV_PART_MAIN | LV_STATE_DEFAULT);
+         lv_obj_set_style_bg_opa(ui_SerialNumberButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);         
          return 0;
        } 
        state++;
@@ -129,6 +141,10 @@ uint8_t UpdateFirmware(uint8_t state)
        { BacklightValue = DEFAULT_BACKLIGHT;
          lv_label_set_text(ui_Status_Line, "");
          lv_label_set_text(ui_Station_Title, "Update Puck Failed!!");
+         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_turquoise);
+         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_turquoise);
+         lv_obj_set_style_bg_color(ui_SerialNumberButton, lv_color_hex(0x404040), LV_PART_MAIN | LV_STATE_DEFAULT);
+         lv_obj_set_style_bg_opa(ui_SerialNumberButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);         
        }
        state++;
        break;
