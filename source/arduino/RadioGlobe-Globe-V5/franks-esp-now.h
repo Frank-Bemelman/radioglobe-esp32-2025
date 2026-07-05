@@ -17,8 +17,8 @@ const char * messagetexts[] = {
    { "UNSUPPORTED MESSAGE"},
    { "SONG_TITLE 1"},
    { "STATUS_LINE 2"},
-   { "ALBUM 3"},
-   { "GENRE 4"},
+   { "GLOBE UPDATE AVAILABLE 3"},
+   { "NOP"},
    { "STATION_NAME 5"},
    { "DESCRIPTION 6"},
    { "OPEN_WEATHER_MAP_API_KEY 7"},
@@ -81,13 +81,14 @@ const char * messagetexts[] = {
    { "MESSAGE_SET_ROLLER_INDEX 64"},
    { "MESSAGE_UPDATE_GLOBE 65"},
    { "MESSAGE_UPDATE_PUCK 66"},
-   { "MESSAGE_MAX 67"}
+   { "MESSAGE_GLOBE_HOSTNAME 67"},
+   { "MESSAGE_MAX 68"}
  };
 
 
 #define MESSAGE_SONG_TITLE 1
 #define MESSAGE_STATUS_LINE 2
-#define MESSAGE_ALBUM 3
+#define MESSAGE_GLOBE_UPDATE_AVAILABLE 3
 #define MESSAGE_NOP 4
 #define MESSAGE_STATION_NAME 5
 #define MESSAGE_DESCRIPTION 6
@@ -155,7 +156,8 @@ const char * messagetexts[] = {
 #define MESSAGE_SET_ROLLER_INDEX 64
 #define MESSAGE_UPDATE_GLOBE 65
 #define MESSAGE_UPDATE_PUCK 66
-#define MESSAGE_MAX 67
+#define MESSAGE_GLOBE_HOSTNAME 67
+#define MESSAGE_MAX 68
 
 #define MESSAGE_URL_HTTP_400_BAD_REQUEST 400
 #define MESSAGE_URL_HTTP_403_REFUSED 403

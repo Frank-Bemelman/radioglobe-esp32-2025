@@ -37,9 +37,15 @@ void PlayComplete(char* soundfile)
   }  
 }
 
+extern bool CheckForNewGlobeUpdate(void)
+{ char GithubTimeStamp[32];
+  if(!GetTimeStampGitHubReleaseV2(file_url, GithubTimeStamp))return false;
+  if(!CheckIfNewer(GithubTimeStamp, build_timestamp_only))return false;
+  return true;
+}
 
 uint8_t UpdateFirmware(uint8_t state)
-{ char GithubTimeStamp[32];
+{ static char GithubTimeStamp[32];
   File file;
 
   while(true)
@@ -51,7 +57,8 @@ uint8_t UpdateFirmware(uint8_t state)
 
      case 1:
        //GetTimeStampGitHubReleaseV2(file_url, GithubTimeStamp)
-       AddToQueueForDisplay("UPDATING GLOBE", MESSAGE_STATION_NAME);
+       AddToQueueForDisplay("Updating Globe", MESSAGE_STATION_NAME);
+       AddToQueueForDisplay("MAY TAKE A MINUTE", MESSAGE_STATUS_LINE);
        AddToQueueForDisplay("Checking For New Firmware", MESSAGE_SONG_TITLE);
        AddToQueueForDisplay(GlobeSettings.ssid , MESSAGE_SSID_FOR_GLOBE);
        AddToQueueForDisplay(GlobeSettings.password, MESSAGE_PASSWORD_FOR_GLOBE);
@@ -76,6 +83,7 @@ uint8_t UpdateFirmware(uint8_t state)
        { Serial.printf("Updater: Github %s is older than running version %s - quit update!\n", GithubTimeStamp, build_timestamp_only);
          AddToQueueForDisplay("Globe Firmware Is The Latest", MESSAGE_SONG_TITLE);
          delay(1000);
+         AddToQueueForDisplay("", MESSAGE_STATUS_LINE);
          AddToQueueForDisplay("", MESSAGE_UPDATE_PUCK);
          return 0;
        }
@@ -99,6 +107,7 @@ uint8_t UpdateFirmware(uint8_t state)
        if(!DownloadGithubFile(file_url))
        { AddToQueueForDisplay("Globe Firmware Download Failed", MESSAGE_SONG_TITLE);
          delay(1000);
+         AddToQueueForDisplay("", MESSAGE_STATUS_LINE);
          AddToQueueForDisplay("", MESSAGE_UPDATE_PUCK);
          return 0;
        }        
@@ -123,6 +132,7 @@ uint8_t UpdateFirmware(uint8_t state)
        if(!UpdateFromSD(file_url))
        { AddToQueueForDisplay("Update Globe ESP32 Failed", MESSAGE_SONG_TITLE);
          delay(1000);
+         AddToQueueForDisplay("", MESSAGE_STATUS_LINE);
          AddToQueueForDisplay("", MESSAGE_UPDATE_PUCK);
          return 0;
        }        

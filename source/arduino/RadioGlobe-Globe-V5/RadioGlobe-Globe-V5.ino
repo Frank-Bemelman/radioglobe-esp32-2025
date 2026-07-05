@@ -36,9 +36,12 @@ const char build_label[] =  BUILD_LABEL;
 const char build_timestamp[] =  BUILD_TIMESTAMP;
 const char build_timestamp_only[] =  BUILD_TIMESTAMP_ONLY;
 extern uint8_t UpdateFirmware(uint8_t state); // start with 1 for a full date/time check and update
+extern bool CheckForNewGlobeUpdate(void);
+bool UpdateAvailable = false;
 
 #include <ArduinoJson.h>
 #include <ArduinoJson.hpp>
+#include <ESPmDNS.h>
 #include <WiFi.h>
 //#include "ESP32FtpServer.h"
 #include "SimpleFTPServer.h"
@@ -218,6 +221,8 @@ FtpServer ftp;
 extern uint16_t UpdateState;
 
 const char* VS1053_connectResult;
+
+extern void setupwebserver(void);
 
 void readMacAddress()
 { esp_err_t ret = esp_wifi_get_mac(WIFI_IF_STA, GlobeMac);
@@ -486,12 +491,27 @@ void setup()
   GetRatesNow = true;
   bSetupCompleted = true;
   
+  Serial.printf("Started with Hostname %s\n", WiFi.getHostname()); 
+  sprintf(message, "%s", WiFi.getHostname());
+  if(!MDNS.begin(message))
+  { Serial.printf("MDNS setup of %s.local failed!\n", message);
+  }
+  else Serial.printf("MDNS setup of %s.local succes!\n", message);
+    
+
   if(GlobeSettings.sdcard_present)
   { ftp.begin("globe", "globe");
     Serial.println("FTP gestart!");
     Serial.println(WiFi.localIP());
   }  
 
+  setupwebserver();
+  
+  sprintf(message, "%s.local", WiFi.getHostname());
+  AddToQueueForDisplay(message, MESSAGE_GLOBE_HOSTNAME);
+  // end of setup
+  GetRatesNow = true;
+  bSetupCompleted = true;
 }
 
 
@@ -1115,7 +1135,10 @@ void SetVolumeMapped(uint16_t volume)
 
 void audio_showstation(const char* info) 
 { char *p;
+  int cnt;
   char stationname[256];
+  char filtered[256];
+  char output[256];
   // Serial.printf("Station: %s\n", info);
   // filter crap station naming, stick with our own name from the datebase
   if((p=strchr(info, '-')) !=0) *p=0; // split idotic long names that combine station & content 
@@ -1132,14 +1155,31 @@ void audio_showstation(const char* info)
   strcpy(stationname, info); // keep a local copy to mess around with
   ReplaceHtmlEntities(stationname);
   //convertToExtAscii(stationname);
+  //UTF8ToExtAscii(stationname);
 
-  strcpy(ActiveStationTitle, stationname);
-  AddToQueueForDisplay(ActiveStationTitle, MESSAGE_STATION_NAME);
+  //filter_utf8_to_extended_ascii(stationname, filtered);
+  //filter_string_for_display(stationname, filtered);
+  cnt = filter_string_v3(stationname, filtered);
+
+  
+  Serial.printf("STATION <%s> %d <%s>\n", MetaDataSongTitle, cnt, filtered );
+  
+  if(cnt==0) // readable text, not Thai, Arabic etc.
+  { strcpy(ActiveStationTitle, stationname);
+    AddToQueueForDisplay(ActiveStationTitle, MESSAGE_STATION_NAME);
+  }
+  else
+  { // keep the name as set by the database
+  }
+
   
 }
 
 void audio_showstreamtitle(const char* info) 
-{ char *p;
+{ char filtered[256];
+  char output[256];
+  int cnt;
+  char *p;
 
   strcpy(MetaDataSongTitle, info); // keep a local copy to mess around with
 
@@ -1159,6 +1199,16 @@ void audio_showstreamtitle(const char* info)
   //convertToExtAscii(MetaDataSongTitle);
 
   //UTF8ToExtAscii(MetaDataSongTitle);
+
+  ///filter_utf8_to_extended_ascii(MetaDataSongTitle, filtered);
+  //filter_string_for_display(MetaDataSongTitle, filtered);
+  cnt = filter_string_v3(MetaDataSongTitle, filtered);
+
+  Serial.printf("SONGTITLE <%s> %d <%s>\n", MetaDataSongTitle, cnt, filtered );
+
+  // replace if not printable text, like Thai, Arabic etc.
+  if(cnt>0)strcpy(MetaDataSongTitle, "Mystery Song");
+
   if(strcmp(ActiveSongTitle, MetaDataSongTitle)!=0) // new one, send it to puck
   { strcpy(ActiveSongTitle, MetaDataSongTitle);
     AddToQueueForDisplay(ActiveSongTitle, MESSAGE_SONG_TITLE);
@@ -1477,6 +1527,10 @@ void GlobePowerDown(void)
   Serial.printf("POWERDOWN completed\n");
 
   digitalWrite(BT_POWER_PIN, LOW); // turn off BT module
+
+  UpdateAvailable = CheckForNewGlobeUpdate();
+  if(UpdateAvailable)AddToQueueForDisplay("1", MESSAGE_GLOBE_UPDATE_AVAILABLE);
+  else AddToQueueForDisplay("0", MESSAGE_GLOBE_UPDATE_AVAILABLE);
 }
 
 void GlobePowerUp(void)
@@ -1490,6 +1544,7 @@ void GlobePowerUp(void)
   AddToQueueForDisplay(message, MESSAGE_VOLUME_AND_TONE);
   AddToQueueForDisplay(build_timestamp, MESSAGE_GLOBE_BUILD_DATE_TIME);
   AddToQueueForDisplay(WiFi.localIP().toString().c_str(), MESSAGE_GLOBE_IP);
+  AddToQueueForDisplay(WiFi.getHostname(), MESSAGE_GLOBE_HOSTNAME);
   AddToQueueForDisplay(GlobeSettings.ssid, MESSAGE_SSID_FOR_GLOBE);
   AddToQueueForDisplay(GlobeSettings.password, MESSAGE_PASSWORD_FOR_GLOBE);
   
@@ -1653,6 +1708,83 @@ void audio_error(const char *error)
 { Serial.printf("Error from VS1053 -> %s\n", error);
   VS1053_connectResult = error;
 }
+
+#include <stdio.h>
+#include <string.h>
+
+int filter_string_v3(const char *source, char *destination) {
+    int i = 0;
+    int j = 0;
+    int skipped_count = 0;
+    int high_ascii_count = 0;
+
+    // EERSTE PAS: Tel hoeveel Extended ASCII-tekens er in de GEHELE string staan.
+    // Westerse zinnen hebben er zelden meer dan 2. Thaise mojibake heeft er tientallen.
+    while (source[i] != '\0') {
+        unsigned char c = (unsigned char)source[i];
+        
+        // Skip UTF-8 patronen eerst bij het tellen om valse positieven te voorkomen
+        if ((c & 0xE0) == 0xC0) { i += 2; continue; }
+        else if ((c & 0xF0) == 0xE0) { i += 3; continue; }
+        else if ((c & 0xF8) == 0xF0) { i += 4; continue; }
+
+        if (c > 127) {
+            high_ascii_count++;
+        }
+        i++;
+    }
+
+    // TWEEDE PAS: Daadwerkelijk filteren en kopiëren
+    i = 0;
+    while (source[i] != '\0') {
+        unsigned char c = (unsigned char)source[i];
+
+        // 1. Skip geldige UTF-8 multi-byte (zoals Cyrillisch)
+        if ((c & 0xE0) == 0xC0) { i += 2; skipped_count++; continue; }
+        else if ((c & 0xF0) == 0xE0) { i += 3; skipped_count++; continue; }
+        else if ((c & 0xF8) == 0xF0) { i += 4; skipped_count++; continue; }
+
+        // 2. Beordeel losse Extended ASCII bytes
+        if (c > 127) {
+            // Als er in totaal te veel Extended ASCII bytes in de zin staan, 
+            // is het Thaise mojibake -> Altijd skippen!
+            if (high_ascii_count > 2) {
+                i++;
+                skipped_count++;
+                continue;
+            }
+        }
+
+        // 3. Veilige ASCII of legitiem westerse Extended ASCII kopiëren
+        destination[j++] = source[i++];
+    }
+    destination[j] = '\0';
+
+    return skipped_count;
+}
+
+int xxxxtest() {
+    //  problematische string met de spaties ertussen
+    const char *thai_input = "SONG_TITLE 1 >ËÅÍ¡ (Fools) - àºÅ ÊØ¾Å<";
+    char thai_output[100];
+    int thai_skipped = filter_string_v3(thai_input, thai_output);
+
+    printf("[Thais Test met Spaties]\n");
+    printf("Resultaat:      \"%s\"\n", thai_output); // Verwacht: "SONG_TITLE 1 > (Fools) -  <"
+    printf("Letters geskipt: %d\n\n", thai_skipped);
+
+    // Controleer of westerse zinnen nog steeds onveranderd blijven
+    const char *western_input = "Café met Señor en Zürich";
+    char western_output[100];
+    int western_skipped = filter_string_v3(western_input, western_output);
+
+    printf("[Westers Extended ASCII Test]\n");
+    printf("Resultaat:      \"%s\"\n", western_output); // Verwacht: "Café met Señor en Zürich"
+    printf("Letters geskipt: %d\n", western_skipped);   // Verwacht: 0
+
+    return 0;
+}
+
 
 
 

@@ -22,11 +22,11 @@ void AutoConnectSetup(void)
 { char content[64]; 
   Serial.println("AutoConnectSetup() Starting");
 
-  WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP  
-  //Serial.begin(115200);
-  Serial.setDebugOutput(true);  
-  delay(3000);
- 
+  CreateHostName();
+
+  WiFi.mode(WIFI_MODE_NULL); 
+  delay(100);
+
   pinMode(PORTALSWITCH_PIN, INPUT_PULLUP); // input to button for opening portal
   
   //wm.resetSettings(); // wipe settings - for test purposes 
@@ -96,12 +96,13 @@ void AutoConnectSetup(void)
   
 
   
-  //  uint32_t id = WIFI_getChipId(); // partial mac address
-  //  sprintf(hostname, "RADIOGLOBE-%08lX", id);
-  // get mac address of ESP32 and reverse bytes to get them in the right order
-
-  CreateHostName();
   wm.setHostname(HostName); 
+  Serial.printf("Hostname set at %s\n",HostName);
+
+  
+  WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP  
+  Serial.setDebugOutput(true);  
+  delay(500);
   
 }
 
@@ -111,7 +112,8 @@ void CreateHostName(void)
   EfuseMac = (EfuseMac & 0x0000FFFF0000FFFF) << 16 | (EfuseMac & 0xFFFF0000FFFF0000) >> 16;
   EfuseMac = (EfuseMac & 0x00FF00FF00FF00FF) << 8  | (EfuseMac & 0xFF00FF00FF00FF00) >> 8;
   EfuseMac = EfuseMac >> 16;
-  sprintf(HostName, "RADIOGLOBE-%12llX-%02d", EfuseMac, GlobeSettings.serialnumber);
+  //sprintf(HostName, "RADIOGLOBE-%12llX-%02d", EfuseMac, GlobeSettings.serialnumber);
+  sprintf(HostName, "radioglobe-%02d", GlobeSettings.serialnumber); // easier to remember
 }
 
 
