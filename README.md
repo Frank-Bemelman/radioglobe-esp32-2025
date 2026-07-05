@@ -3,7 +3,7 @@
 # radioglobe-esp32-2025
 Radio Globe using ESP32 and Waveshare round touch LCD 2.1 inch
 
-UPDATE 5-JUL-2026<br>Added a Globe webserver to make it easier to add/delete music MP3 files. Use your webbrowser to go to radioglobe-XX.local where XX is the serialnumber of the globe.<br><br>
+UPDATE 5-JUL-2026<br>Added a Globe webserver to make it easier to add/delete music MP3 files. Navigate to radioglobe-XX.local where XX is the serialnumber of the globe.<br><br>
 UPDATE 3-JUL-2026<br>Fixed a FTP bug as it refused to work with filenames containing single quotes<br><br>
 UPDATE 2-JUL-2026<br>
 Added ftp servers for globe and puck. On the puck, activate it with secret code BOBOB in setup menu. Use Filezilla, plain FTP, user globe password globe, transfer settings default, limit max connections 1.<br><br>
