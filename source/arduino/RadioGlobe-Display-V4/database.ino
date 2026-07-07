@@ -701,25 +701,49 @@ static uint32_t currentMillis;
 
 
 void RadioGlobeClick(lv_event_t * e)
-{ if(!bMusicMode)
-  { if(Stations.count == 0)
-    { SetFlag("xxxx");
-      lv_obj_add_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // hide city name until new country code is received
-      lv_obj_add_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide country name until new country code is received
+{ int16_t clicktime;
+  lv_event_code_t event_code = lv_event_get_code(e);
 
-      //lv_label_set_text(ui_Station_Name, "Searching..."); // pointless, searching goes so fast you won't see this
-      lv_label_set_text(ui_Station_Title, "");
-      Lvgl_Loop();  
-      FindNewStation();
+  clicktime = isLongPressedV2(e);
+  Serial.printf("RadioGlobeClick() clicktime = %d\n", clicktime);
+  
+  if(clicktime==0) // normal click
+  { if(!bMusicMode)
+    { Serial.printf("!bMusicMode RadioGlobeClick() Stations.count = %d\n", Stations.count);
+      if(Stations.count == 0)
+      { SetFlag("xxxx");
+        lv_obj_add_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // hide city name until new country code is received
+        lv_obj_add_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide country name until new country code is received
+
+        //lv_label_set_text(ui_Station_Name, "Searching..."); // pointless, searching goes so fast you won't see this
+        lv_label_set_text(ui_Station_Title, "");
+        Lvgl_Loop();  
+        FindNewStation();
+        ReloadScroll();
+      }
+    }
+    else
+    { Serial.printf("bMusicMode RadioGlobeClick() Stations.count = %d\n", Stations.count);
       ReloadScroll();
     }
+    lv_scr_load(ui_StationSelectScreen);
+    startMillis = millis(); 
+    Serial.printf("RadioGlobeClick() return\n");
+  }  
+
+  if(clicktime==5) // long press
+  { Serial.printf("RadioGlobeClick LV_EVENT_LONG_PRESSED_REPEAT \n");
+    
+    if(!bMusicMode)
+    { Serial.printf("!bMusicMode RadioGlobeClick LV_EVENT_LONG_PRESSED_REPEAT \n");
+      beepforMs(50);
+      //if(isLongPressed(e)==5)
+      { SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
+        AddToQueueForGlobe("", MESSAGE_GLOBE_PLAY_SD);
+      }  
+    }  
   }
-  else
-  { ReloadScroll();
-  }
-  lv_scr_load(ui_StationSelectScreen);
-  startMillis = millis(); 
-  Serial.printf("RadioGlobeClick() return\n");
+  
 }
 
 void ReloadScroll(void)

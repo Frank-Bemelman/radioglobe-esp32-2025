@@ -18,8 +18,8 @@
 // 14APR2026 Boards Manager (back to 3.3.7, ESP32S3 Dev Module 16MB 4MB app (custom partition) PSRAM OPI)) 
 
 
-// 4 JUN 26 -> changed lcd driver frequency from 16Mhz to 14Mhz (hope it fixes the odd screen glithtes) in Display_7701.h
-// 4 JUN 26 -> greater click area around flag and power icon on clock face
+// 4 JUL 26 -> changed lcd driver frequency from 16Mhz to 14Mhz (hope it fixes the odd screen glithtes) in Display_7701.h
+// 4 JUL 26 -> greater click area around flag and power icon on clock face
 // 29 JUN 26 -> update and FTP features added
 
 // 28 JUN 26 Changed to custom partition table 4MB APP0 / 4MB APP1 / 8MB FFAT
@@ -47,6 +47,7 @@
 // 11 MAR 26 -> BUG improved roller setting in calibration menu
 // 14 FEB 26 -> FEATURE now has wifi channel updated by globe wifi connection
 // LVGL_Driver.cpp line 101 -> eeprom screen glitch fix attempt
+#define LCD_DIAMETER_2P1
 
 #define MBEDTLS_SSL_MAX_CONTENT_LEN 4096
 
@@ -510,7 +511,7 @@ void loop()
 
   Lvgl_Loop();
   if(bFtpActive)
-  { if(DisplaySettings.sdcard_present)ftp.handleFTP();
+  { ftp.handleFTP();
   }
 
   loop_esp_now(); // send volume & other stuff to globe
@@ -659,16 +660,18 @@ void loop()
           break;
         case MESSAGE_STATION_NAME:
           Serial.printf("case MESSAGE_STATION_NAME: %s\n", QueueMessage);
-          if(strlen(QueueMessage))
-          { if(strlen(QueueMessage)>31)break;
-            if(strlen(QueueMessage)<3)break;
-          }  
+          //if(strlen(QueueMessage))
+          //{ if(strlen(QueueMessage)>31)break;
+          //  if(strlen(QueueMessage)<3)break;
+          //}  
           lv_label_set_text(ui_Station_Name, QueueMessage);
           // rename in scroller if it makes sense
-          if(!bMusicMode)
-          { if(Stations.requested<MAX_STATIONS)
-            { strcpy(Stations.StationNUG[Stations.requested].name, QueueMessage);
-              ReloadScroll();
+          if(strlen(QueueMessage)>=3 && strlen(QueueMessage)<=32)
+          { if(!bMusicMode)
+            { if(Stations.requested<MAX_STATIONS)
+              { strcpy(Stations.StationNUG[Stations.requested].name, QueueMessage);
+                ReloadScroll();
+              }  
             }
           }  
           // else it is a station from the preset (1000 or more)  
@@ -871,11 +874,11 @@ void loop()
             lv_label_set_text(ui_StationRollerComment, content); 
              if(Stations.requested<MAX_STATIONS) // not a preset but from the list of available stations
             { if(Stations.connect_attempts>0)Stations.connect_attempts--;
-              Serial.printf("(GLOBE SAYS): Station Playing %s\n", Stations.StationNUG[Stations.requested].name);
+              Serial.printf("(GLOBE SAYS): Station Connected %s\n", Stations.StationNUG[Stations.requested].name);
               SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
             }
             else
-            { Serial.printf("(GLOBE SAYS): Preset Playing %s\n", Stations.StationNUG[Stations.requested].name);
+            { Serial.printf("(GLOBE SAYS): Preset Connected %s\n", Stations.StationNUG[Stations.requested].name);
               SetLed(Stations.requested-MAX_STATIONS, UI_THEME_COLOR_GREEN);
             }
           }  
@@ -1346,12 +1349,10 @@ void loop()
         lv_obj_clear_flag(ui_HomeButton4, LV_OBJ_FLAG_HIDDEN); // show home icon
       }
       else if(strcmp(SecretCode, "BOBOB")==0)
-      { if(DisplaySettings.sdcard_present)
-        { lv_label_set_recolor(ui_lockstatus, true);
-          lv_label_set_text(ui_lockstatus, "#0000FF FTP ACTIVE#");
-          lv_obj_add_flag(ui_HomeButton4, LV_OBJ_FLAG_HIDDEN); // hide home button
-          FtpBootState = 1; // launch the FTP server 
-        }  
+      {  lv_label_set_recolor(ui_lockstatus, true);
+         lv_label_set_text(ui_lockstatus, "#0000FF FTP ACTIVE#");
+         lv_obj_add_flag(ui_HomeButton4, LV_OBJ_FLAG_HIDDEN); // hide home button
+         FtpBootState = 1; // launch the FTP server 
       }
       else
       { lv_label_set_recolor(ui_lockstatus, true);
@@ -1802,4 +1803,42 @@ bool LoadEepromFromFile(void)
   return result;
 }
 
+void setup2() {
+  Serial.begin(115200);
+  delay(1000);
+  
+  Serial.println("Start handmatige 2.8C I2C bypass...");
+  
+  // Start de schone bus
+  Wire.begin(15, 7, 100000);
+  delay(100);
+
+  // Praat rechtstreeks met de TCA9554 expander (adres 0x20) via standaard Arduino code
+  Wire.beginTransmission(0x20);
+  Wire.write(0x03); // Configuratie register
+  Wire.write(0x00); // Zet alle 8 pinnen op OUTPUT
+  uint8_t error = Wire.endTransmission();
+
+  if (error == 0) {
+    Serial.println("Succes! De EXIO chip reageert perfect via de kale bypass.");
+    
+    // Handmatige reset van het ST7701 scherm via expander pin 1
+    Wire.beginTransmission(0x20);
+    Wire.write(0x01); // Output register
+    Wire.write(0xFD); // Pin 1 LAAG (Reset active)
+    Wire.endTransmission();
+    delay(50);
+    
+    Wire.beginTransmission(0x20);
+    Wire.write(0x01);
+    Wire.write(0xFF); // Pin 1 HOOG (Reset release)
+    Wire.endTransmission();
+    
+    // Zet de backlight aan op de fysieke GPIO 6
+    pinMode(6, OUTPUT);
+    digitalWrite(6, HIGH);
+  } else {
+    Serial.printf("Bypass faalde met Arduino foutcode: %d\n", error);
+  }
+}
 

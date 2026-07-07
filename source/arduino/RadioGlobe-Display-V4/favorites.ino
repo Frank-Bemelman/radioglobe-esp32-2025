@@ -87,7 +87,19 @@ void station1234(lv_event_t * e, uint16_t station)
   { if(longpressed==0)
     { if(strlen(Stations.StationNUG[station+MAX_STATIONS].url)>0) // only respond to loaded buttons
       { Serial.printf("Favorites Select station %s under Preset %d\n", Stations.StationNUG[station+MAX_STATIONS].name, station);
+        if(bMusicMode)
+        { Stations.count = 0; // forces a station search FindNewStation(); and ReloadScroll(); if RADIO GLOBE is tapped
+          Serial.printf("bMusicMode1 Favorites Select station resets tations.count %d\n", Stations.count);
+        }
+        else Serial.printf("!bMusicMode1 Favorites Select station reset stations.count %d\n", Stations.count);
         AddStationToQueueForGlobe(station+MAX_STATIONS); // presets come just after the regular list of stations
+        
+        if(bMusicMode)
+        { Stations.count = 0; // forces a station search FindNewStation(); and ReloadScroll(); if RADIO GLOBE is tapped
+          Serial.printf("bMusicMode2 Favorites Select station reset stations.count %d\n", Stations.count);
+        }
+        else Serial.printf("!bMusicMode2 Favorites Select station reset stations.count %d\n", Stations.count);
+        
         lv_label_set_text(ui_Station_Name, Stations.StationNUG[station+MAX_STATIONS].name);
         if(station==0)
         { lv_label_set_text(ui_StationPresetName1, Stations.StationNUG[0+MAX_STATIONS].name); 
