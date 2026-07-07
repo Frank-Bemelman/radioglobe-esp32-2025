@@ -96,6 +96,12 @@ const char *ssid = "YourSSID";
 const char *password = "YourWiFiPassword";
 AsyncWebServer server(80);
 
+void killwebserver(void) 
+{ server.end();
+  DEBUG_SERIAL.println("Web server stopped");
+}
+
+
 void setupwebserver(void) {
     // Initialize SPIFFS (Change to other types as needed, Valid types: FS_SD_CARD, FS_SPIFFS, FS_LITTLEFS, FS_FATFS )
     if (!fileManager.begin()) {

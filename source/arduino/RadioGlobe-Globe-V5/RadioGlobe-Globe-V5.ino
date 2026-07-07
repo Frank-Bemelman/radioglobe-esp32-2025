@@ -1,4 +1,4 @@
-// in arduino library manager..
+// in arduino library manager...
 // install libs as shown here https://randomnerdtutorials.com/esp32-wi-fi-manager-asyncwebserver/
 // this is for the wifi manager portal
 
@@ -505,7 +505,7 @@ void setup()
     Serial.println(WiFi.localIP());
   }  
 
-  setupwebserver();
+ // setupwebserver();
   
   sprintf(message, "%s.local", WiFi.getHostname());
   AddToQueueForDisplay(message, MESSAGE_GLOBE_HOSTNAME);
@@ -635,7 +635,6 @@ void loop()
 
   
   // process messages from display
-  // if(DataFromGlobe.D_QueueSerialNumber != DataFromDisplay.D_QueueSerialNumber) // not yet acknowlegded and processed
   while(FromDisplay.QueueIndexIn != FromDisplay.QueueIndexOut) // we have to catch up with new messages
   {  Serial.printf("FromDisplay.QueueIndexIn = %d FromDisplay.QueueIndexOut = %d\n", FromDisplay.QueueIndexIn, FromDisplay.QueueIndexOut);
      Serial.printf("Messages from display pending %d\n", FromDisplay.QueueCnt);
@@ -650,7 +649,6 @@ void loop()
 
 
      // and now take care of it
-     //switch(DataFromDisplay.D_QueueMessageType)
      switch(QueueMessageType)
      { case MESSAGE_OPEN_WEATHER_MAP_API_KEY:
          Serial.println(QueueMessage);
@@ -729,7 +727,7 @@ void loop()
          }
 
          if((strcmp(PreviousUrl, QueueMessage) == NULL) && stream.isRunning())
-         { // already conmected PLAYING
+         { // already connected PLAYING
            Serial.printf("ALREADY CONNECTED TO STATION: %s\n", QueueMessage);  
            AddToQueueForDisplay(TargetUrl, MESSAGE_STATION_CONNECTED);
            break;
@@ -749,7 +747,7 @@ void loop()
          else PresetRequestFromHA = 0;       
         
 
-         // quick & dirty, but maybe too dirty, as not all https urls are http appraocheable (HTTP error 400)
+         // quick & dirty, but maybe too dirty, as not all (but most do) https urls are http approacheable (Http create error)
          // but we also catch the 400 and do a retry on https in that case 
          // so, always try http first, remove the 's' from https
          if(TargetUrl[4]=='s')strcpy(&TargetUrl[4], &TargetUrl[5]);  
@@ -826,10 +824,7 @@ void loop()
         EEPROM.get(0x0, GlobeSettings);
         sprintf(message, "%d %d %d %d", GlobeSettings.ee_volume, GlobeSettings.ee_bass, GlobeSettings.ee_treble, GlobeSettings.ee_internal_speakers);
         AddToQueueForDisplay(message, MESSAGE_VOLUME_AND_TONE);
-
-        
         AddToQueueForDisplay(build_timestamp, MESSAGE_GLOBE_BUILD_DATE_TIME);
-
         break;
 
       case MESSAGE_STORE_VOLUME_AND_TONE:
@@ -865,7 +860,6 @@ void loop()
         Speakers(SPEAKERS_ON);
         SetVolumeMapped(DataFromDisplay.volumevalue); 
         stream.connectToFile(SD, QueueMessage); // play it 
-//        stream.connectToFile(SD, "/GLOBEMUSIC/JUKEBOX/D04-Gloria Estefan-Higher.mp3"); // play it 
         break;
       
       case MESSAGE_RELOAD_SD_WITH_COUNTRY:
@@ -912,8 +906,7 @@ void loop()
     strcpy(ActiveUrl, "");
     AddToQueueForDisplay("", MESSAGE_STATION_NAME); // remove 'station name'
     AddToQueueForDisplay("EXPLORING", MESSAGE_STATUS_LINE); // remove 'station name'
-    AddToQueueForDisplay("", MESSAGE_SONG_TITLE); // remove 'song title'
-    
+    AddToQueueForDisplay("", MESSAGE_SONG_TITLE); // remove 'song title'    
   }
   
 
@@ -1006,7 +999,7 @@ bool StartNewStation(void)
     AddToQueueForDisplay("0", MESSAGE_MUSIC_MODE);
   }  
 
-  PixelUpdate(0, 0xFF00FF, 0x000000, 5000); // solid purple
+  PixelUpdate(0, 0xFF00FF, 0x000000, 10000); // solid purple
 
   Serial.printf("StartNewStation with %s\n", TargetUrl);
   SetVolumeMapped(0);
@@ -1067,17 +1060,7 @@ bool StartNewStation(void)
   //  stream.connecttofile(SD, "/GLOBEMUSIC/JUKEBOX//G03 Master KG-Jerusalema.mp3"); // works also 
 
   if(stream.isRunning()) 
-  { 
-
-    // wait short time with volume 0 to avoid audible clicks/snippets between station switching
-//    currentMillis = millis();
-//    while (millis() - currentMillis < 250)
-//    { stream.loop();
-//    }
-
-//    SetVolumeMapped(DataFromDisplay.volumevalue); // will also enable amplifiers
-
-    currentMillis = millis();
+  { currentMillis = millis();
     ConnectedInMillis = currentMillis - lapMillis;
     Serial.printf("Succesfully connected: %s -> time elapsed = %ld\n", TargetUrl, ConnectedInMillis);
     return_result = 1;
@@ -1100,8 +1083,7 @@ void SetVolumeMapped(uint16_t volume)
   static uint8_t New_vs1053vol;
 
   New_vs1053vol = map(volume, 0, 100, 60, 100); // range is 128db - more practical useable volume range of VS1053 is 68-100, 100-> 0dB and 68 being very quiet -40db
-//  if(volume==0)New_vs1053vol=0;
-  
+ 
   Serial.printf("New_vs1053vol (mapped parameter) = %d - Actual_vs1053vol = %d\n", New_vs1053vol, Actual_vs1053vol);
 
   if(bSetupCompleted)
@@ -1139,30 +1121,28 @@ void audio_showstation(const char* info)
   char stationname[256];
   char filtered[256];
   char output[256];
-  // Serial.printf("Station: %s\n", info);
-  // filter crap station naming, stick with our own name from the datebase
-  if((p=strchr(info, '-')) !=0) *p=0; // split idotic long names that combine station & content 
-  if(strlen(info)>30)return; // ignore ridiculous long names 
-  if(strcasecmp(info, "no name")==0)return; // ignore meaningless names
-  if(strcasecmp(info, "my station name")==0)return; // ignore meaningless names
-  if(strcasecmp(info, "this is my server name")==0)return; // ignore meaningless names
-  if(strcasecmp(info, "untitled")==0)return; // ignore meaningless names
-  if(strcasecmp(info, "unnamed Server")==0)return; // ignore meaningless names
-  if(strcasecmp(info, "offline")==0)return; // ignore meaningless names
-  if(strcasecmp(info, "stream")==0)return; // ignore meaningless names
-  if(strlen(info)<2)return; // ignore meaningless names
-  
+
   strcpy(stationname, info); // keep a local copy to mess around with
+  Serial.printf("Station: %s\n", stationname);
+  // filter crap station naming, stick with our own name from the datebase
+  if((p=strchr(stationname, '-')) !=0) *p=0; // split idotic long names that combine station & content 
+  if(strcasecmp(stationname, "no name")==0)return; // ignore meaningless names
+  if(strcasecmp(stationname, "my station name")==0)return; // ignore meaningless names
+  if(strcasecmp(stationname, "this is my server name")==0)return; // ignore meaningless names
+  if(strcasecmp(stationname, "untitled")==0)return; // ignore meaningless names
+  if(strcasecmp(stationname, "unnamed Server")==0)return; // ignore meaningless names
+  if(strcasecmp(stationname, "offline")==0)return; // ignore meaningless names
+  if(strcasecmp(stationname, "stream")==0)return; // ignore meaningless names
+  if(strlen(stationname)<2)return; // ignore meaningless names
+  if(strncmp(stationname, "Streaming by", 12) == 0) memmove(stationname, stationname + 12, strlen(stationname + 12) + 1); // remove nonsense
+
   ReplaceHtmlEntities(stationname);
-  //convertToExtAscii(stationname);
-  //UTF8ToExtAscii(stationname);
+  UTF8ToExtAscii(stationname);
+  clean_spaces(MetaDataSongTitle);
 
-  //filter_utf8_to_extended_ascii(stationname, filtered);
-  //filter_string_for_display(stationname, filtered);
   cnt = filter_string_v3(stationname, filtered);
-
   
-  Serial.printf("STATION <%s> %d <%s>\n", MetaDataSongTitle, cnt, filtered );
+  Serial.printf("STATION <%s> filtered:%d <%s>\n", info, cnt, filtered );
   
   if(cnt==0) // readable text, not Thai, Arabic etc.
   { strcpy(ActiveStationTitle, stationname);
@@ -1188,79 +1168,28 @@ void audio_showstreamtitle(const char* info)
   //strcpy(MetaDataSongTitle, "358. L'Heure de la délivrance du 06-08-21 L'offrande sacrificielle. PES. mp3"); //é = 65-cc-81 (65-e combined with cc-81 accent)
   //strcpy(MetaDataSongTitle, "358. L'Heure de la délivrance du 06-08-21 L'offrande sacrificielle. PES. mp3"); // é = c3-ag -> e9
   
-  // Serial.printf("Stream title: %s\n", ReceivedSongTitle);
+  // Serial.printf("Stream title: %s\n", MetaDataSongTitle);
   // filter known crap messages
   if(strcasecmp(MetaDataSongTitle, "Now Playing info goes here")==0)return;
-  if(strcmp(MetaDataSongTitle, " - ")==0)return;
+  //if(strcmp(MetaDataSongTitle, " - ")==0)return;
   if(strcasecmp(MetaDataSongTitle, "adbreak")==0)return; // ignore meaningless names
-
+  if(strcasecmp(MetaDataSongTitle, "Unknown")==0)return; 
+  if(strcasecmp(MetaDataSongTitle, "adinsert")==0)return; // ignore meaningless names
 
   ReplaceHtmlEntities(MetaDataSongTitle);
-  //convertToExtAscii(MetaDataSongTitle);
+  UTF8ToExtAscii(MetaDataSongTitle); // better?
+  clean_spaces(MetaDataSongTitle);
 
-  //UTF8ToExtAscii(MetaDataSongTitle);
-
-  ///filter_utf8_to_extended_ascii(MetaDataSongTitle, filtered);
-  //filter_string_for_display(MetaDataSongTitle, filtered);
   cnt = filter_string_v3(MetaDataSongTitle, filtered);
-
   Serial.printf("SONGTITLE <%s> %d <%s>\n", MetaDataSongTitle, cnt, filtered );
-
   // replace if not printable text, like Thai, Arabic etc.
-  if(cnt>0)strcpy(MetaDataSongTitle, "Mystery Song");
-
+  if(cnt>0)strcpy(MetaDataSongTitle, "Mystery Content");
   if(strcmp(ActiveSongTitle, MetaDataSongTitle)!=0) // new one, send it to puck
   { strcpy(ActiveSongTitle, MetaDataSongTitle);
     AddToQueueForDisplay(ActiveSongTitle, MESSAGE_SONG_TITLE);
   }  
 }
 
-
-#define FAIL_INVALID_URL 1000
-#define FAIL_INVALID_URL_LENGTH 1001
-#define FAIL_HTTP_CLIENT_CREATE 1002
-#define FAIL_HTTP_ESC_URL_BUFFER 1003
-#define FAIL_CONNECT_FAILED 1004
-#define FAIL_PLAYLIST_CANT_REDIRECT 1005
-#define FAIL_NO_STREAM_HANDLE 1006
-#define FAIL_PLAYLIST_NO_DATA 1007
-#define FAIL_PLAYLIST_NO_URL 1008
-#define FAIL_CANT_REDIRECT 1009
-#define FAIL_NO_LOCATION_HEADER 1010
-#define FAIL_LOOP_NO_HTTP_CLIENT 1011
-#define FAIL_LOOP_HTTP_DISCONNECT 1012
-#define FAIL_LOOP_CONNECTION_LOST 1013
-#define FAIL_LOOP_STREAM_TIMEOUT 1014
-#define FAIL_LOOP_EOF_NO_REMAINING_BYTES 1015
-#define FAIL_LOOP_NO_FILE 1016
-#define FAIL_LOOP_END_OF_FILE 1017
-#define FAIL_LOOP_FILE_READ_FAIL 1018
-#define FAIL_LOOP_BUFFER_EMPTY 1019
-
-
-// results/problems as text
-const char * fail_texts[] = {
-   { "FAIL_INVALID_URL 1000"},
-   { "FAIL_INVALID_URL_LENGTH 1001"},
-   { "FAIL_HTTP_CLIENT_CREATE 1002"},
-   { "FAIL_HTTP_ESC_URL_BUFFER 1003"},
-   { "FAIL_CONNECT_FAILED 1004"},
-   { "FAIL_PLAYLIST_CANT_REDIRECT 1005"},
-   { "FAIL_NO_STREAM_HANDLE 1006"},
-   { "FAIL_PLAYLIST_NO_DATA 1007"},
-   { "FAIL_PLAYLIST_NO_URL 1008"},
-   { "FAIL_CANT_REDIRECT 1009"},
-   { "FAIL_NO_LOCATION_HEADER 1010"},
-   { "FAIL_LOOP_NO_HTTP_CLIENT 1011"},
-   { "FAIL_LOOP_HTTP_DISCONNECT 1012"},
-   { "FAIL_LOOP_CONNECTION_LOST 1013"},
-   { "FAIL_LOOP_STREAM_TIMEOUT 1014"},
-   { "FAIL_LOOP_EOF_NO_REMAINING_BYTES 1015"},
-   { "FAIL_LOOP_NO_FILE 1016"},
-   { "FAIL_LOOP_END_OF_FILE 1017"},
-   { "FAIL_LOOP_FILE_READ_FAIL 1018"},
-   { "FAIL_LOOP_BUFFER_EMPTY 1019"}
-};
 
 
 // called from VS1053 driver
@@ -1286,137 +1215,127 @@ void audio_eof_stream(const char* info)
   }    
 }
 
-void ReplaceHtmlEntities(char *name)
-{ char *p, *s;
-  int escapeArrayLen = 0;
-  
-  if((p=strchr(name, '&')) ==0) return; // no business here
-  if((p=strstr(name, " & ")) != NULL) return; // no business here
 
-  static const struct {
-    const char* encodedEntity;
-    const char decodedChar;
-  } entityToChars[] = {
-        {"&lt;", '<'},
-        {"&gt;", '>'},
-        {"&amp;", '&'},
-        {"&quot;", '"'},
-        {"&#", '*'},
-  };
 
-  escapeArrayLen = sizeof(entityToChars) / sizeof(entityToChars[0]);
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 
-  for(int j = 0; j < escapeArrayLen; j++)
-  { if((p=strstr(name, entityToChars[j].encodedEntity))!=NULL)
-    { // got one
-      if(*(p+1) == '#') // ascii value follows
-      { *p = ((*(p+2)-'0')*10) + (*(p+3)-'0'); // get the decimal 2-digit value after &#
-        s = p + 5;
-        while(*s)*++p=*s++;
-        return;
-      }
-      else // one of the descriptional ones
-      { *p = entityToChars[j].decodedChar;
-        s = p + strlen(entityToChars[j].encodedEntity);
-        while(*s)*++p=*s++;
-        return;
-      }  
-    }
-  }
-  Serial.printf("Unsupported html character name %s\n", name);
-}
+void clean_spaces(char *str) 
+{   int i = 0;
+    int j = 0;
+    int in_space = 0;
 
-void convertToExtAscii(char *target)
-{ char *p;
-  char *p2;
-  p = target;
-  p2 = target;
-  while (*p)
-  { if (*p == 0xc2)
-    { p++; *p2++ = *p;
-    }
-    else if (*p == 0xc3)
-    { p++; *p2++ = *p + (0xC0 - 0x80);
-    }
-    else *p2++ = *p;
-    p++;
-  }
-  *p2 = 0;
-}
-
-//https://nl.wikipedia.org/wiki/UTF-8
-
-void UTF8ToExtAscii(char *target)
-{ char *p;
-  char *p2;
-  char c;
-  uint16_t len;
-  p = target;
-
-  //strcpy(p, "VĚRA MARTINOVÁ - JEZDEC Z NEZNÁMA");
-  //strcpy(p, "218.ÃÑ¡àÃÒäÁèà¡èÒàÅÂ - äÁèÁÕàËµØ¼Å - ã¤ÃÊÑ¡¤¹");
-
-  len = strlen(p);
-  Serial.printf("UTF8ToExtAscii() %s -> %d bytes\n", p, len);
-  while(*p!=0)
-  { again:
-    //while(1)
-    len = strlen(p);
-    //Serial.printf("len=%d\n", len);
-    if(len==0)break;
-
-    { if(len>3)
-      { if( ((*(p+0) & 0b11111000) == 0b11110000) && ((*(p+1) & 0b11000000) == 0b10000000) && ((*(p+2) & 0b11000000) == 0b10000000) && ((*(p+3) & 0b11000000) == 0b10000000) )
-        { // U+010000..U+10FFFF skip this, can't print that at all
-          memmove(p, p+4, len-3);
-          //Serial.printf("4:%s\n", p);
-          goto again;
+    while (str[i] != '\0') 
+    { // check for newlines and white space
+      if (str[i] == '\n' || str[i] == '\r' || str[i] == ' ') 
+      { if (!in_space) 
+        { str[j++] = ' '; // replace whitespace
+          in_space = 1;   
         }
+      } 
+      else 
+      { str[j++] = str[i];  
+        in_space = 0;     
+      }
+      i++;
+    }
+    str[j] = '\0'; 
+}
+
+void ReplaceHtmlEntities(char *name) {
+  char *p = name;
+  
+  // Find the next occurrence of an ampersand
+  while ((p = strchr(p, '&')) != NULL) {
+    
+    // Check for NUMERIC entities (starts with &#)
+    if (strncmp(p, "&#", 2) == 0) {
+      int val = 0;
+      int charsRead = 0;
+      
+      // Handle hexadecimal values (e.g., &#x20;)
+      if (*(p + 2) == 'x' || *(p + 2) == 'X') {
+        sscanf(p + 3, "%x;%n", &val, &charsRead);
+        if (charsRead > 0) charsRead += 3; // Account for the "&#x" prefix
+      } 
+      // Handle decimal values (e.g., &#32;)
+      else {
+        sscanf(p + 2, "%d;%n", &val, &charsRead);
+        if (charsRead > 0) charsRead += 2; // Account for the "&#" prefix
       }
       
-
-      if(len>2) 
-      { if( ((*(p+0) & 0b11110000) == 0b11100000) && ((*(p+1) & 0b11000000) == 0b10000000) && ((*(p+2) & 0b11000000) == 0b10000000) )
-        { // U+0800..U+D7FF en U+E000..U+FFFF skip this, can't print that at all
-          memmove(p, p+3, len-2);
-          //Serial.printf("3:%s (%d)\n", p, len);
-          goto again;
-        }
+      // If parsing succeeded and the value fits inside a standard ASCII char
+      if (charsRead > 0 && val > 0 && val <= 255) {
+        *p = (char)val; // Overwrite '&' with the converted byte
+        // Shift the rest of the string to the left (including the null terminator)
+        memmove(p + 1, p + charsRead, strlen(p + charsRead) + 1);
+        continue; // Keep processing from the same position
       }
-
-      if(len>1000) 
-      { Serial.printf("len>1A:%s = %02X\n", p, *p);
-        Serial.printf("len>1B:%s = %02X\n", p, *(p+1));
-        if ( ((*(p+0) & 0b11100000) == 0b11000000) && ((*(p+1) & 0b11000000) == 0b10000000) )
-        { // U+0080..U+07FF 110bbbaa 10aaaaaa
-          //Serial.printf("len>1C:%s = %02X\n", p, *(p+1));
-
-          if( (*(p+0) & 0b00011100) ) // > 0xff skip this, can't print that at all
-          { memmove(p, p+2, len-1);
-            //Serial.printf("2:%s\n", p);
-            goto again;
-          }
-          else // U+0080..U+00FF 110bbbaa 10aaaaaa
-          { c = (*(p+0)<<6) | (*(p+1)& 0b00111111);  
-            memmove(p, p+1, len);
-            *p = c;
-            //Serial.printf("1:%s = %02X\n", p, *p);
-            //Serial.printf("char %c\n", *p);
-            
-            p++;
-            goto again;
-          }
-        }
+    }
+    
+    // Check for TEXT-based named entities (e.g., &amp;, &lt;)
+    bool found = false;
+    static const struct { const char* enc; const char dec; } entities[] = {
+      {"&lt;", '<'}, {"&gt;", '>'}, {"&amp;", '&'}, {"&quot;", '"'}, {"&apos;", '\''}
+    };
+    
+    // FIXED: Rewritten with != to prevent the markdown HTML rendering bug
+    unsigned int totalEntities = sizeof(entities) / sizeof(entities[0]);
+    for (unsigned int j = 0; j != totalEntities; j++) {
+      int len = strlen(entities[j].enc);
+      if (strncmp(p, entities[j].enc, len) == 0) {
+        *p = entities[j].dec; // Overwrite '&' with the decoded character
+        // Shift the rest of the string to the left (including the null terminator)
+        memmove(p + 1, p + len, strlen(p + len) + 1);
+        found = true;
+        break;
       }
-      // U+0000..U+007F // do nothing
-      //Serial.printf("Single:%s = %02X\n", p, *p) ;
-      p++;
+    }
+    
+    // If no known entity was matched (like a lone "Piet & Kees"), skip this ampersand
+    if (!found) {
+      p++; 
     }
   }
+}
 
-  p = target;
-  len = strlen(p);
-  Serial.printf("UTF8-decoded -> %s -> %d bytes\n", p, len);
+
+void UTF8ToExtAscii(char *target) {
+    char *p = target;   // Read pointer
+    char *p2 = target;  // Write pointer
+
+    while (*p) {
+        // 4-byte UTF-8 sequence (e.g., Emojis) -> Completely skip all 4 bytes
+        if ((*p & 0xF8) == 0xF0) {
+            p += 4;
+        }
+        // 3-byte UTF-8 sequence (e.g., Special symbols, Asian characters) -> Skip
+        else if ((*p & 0xF0) == 0xE0) {
+            // OPTIONAL: Catch the Euro sign (€ = E2 82 AC) if your display supports it
+            if ((unsigned char)*p == 0xE2 && (unsigned char)*(p+1) == 0x82 && (unsigned char)*(p+2) == 0xAC) {
+                *p2++ = 0x80; // Adjust 0x80 to match your specific display's Euro symbol code
+            }
+            p += 3;
+        }
+        // 2-byte UTF-8 sequence (e.g., Western European accents like é, ö, ß, °)
+        else if ((*p & 0xE0) == 0xC0) {
+            // Extract the actual numerical Unicode value using bitwise operations
+            uint16_t unicode = ((*p & 0x1F) << 6) | (*(p + 1) & 0x3F);
+            
+            // If it fits into standard Extended ASCII, write it down
+            if (unicode <= 0xFF) {
+                *p2++ = (char)unicode; 
+            } // If it's outside Latin-1 (e.g., Polish/Czech), it gets safely ignored
+            
+            p += 2;
+        }
+        // Standard 1-byte ASCII (0 to 127) -> Copy 1-to-1
+        else {
+            *p2++ = *p++;
+        }
+    }
+    *p2 = '\0'; // Properly close the shortened string with a null terminator
 }
 
 
@@ -1518,9 +1437,9 @@ void GlobePowerDown(void)
   strcpy(ActiveStationTitle, "");
   strcpy(ActiveSongTitle, "");
   AddToQueueForDisplay(ActiveStationTitle, MESSAGE_STATION_NAME);
+  AddToQueueForDisplay("", MESSAGE_STATUS_LINE);
   AddToQueueForDisplay(ActiveSongTitle, MESSAGE_SONG_TITLE);
   loopMQTT();
-  delay(500); // really?? can't remember
   DataFromGlobe.D_QueueStationIndex = -1;
   
   PlaySoundBite((uint8_t *)mp3_shutdown, sizeof(mp3_shutdown), 0); 
@@ -1528,6 +1447,7 @@ void GlobePowerDown(void)
 
   digitalWrite(BT_POWER_PIN, LOW); // turn off BT module
 
+  // tell puck that a globe update is available
   UpdateAvailable = CheckForNewGlobeUpdate();
   if(UpdateAvailable)AddToQueueForDisplay("1", MESSAGE_GLOBE_UPDATE_AVAILABLE);
   else AddToQueueForDisplay("0", MESSAGE_GLOBE_UPDATE_AVAILABLE);
@@ -1535,16 +1455,16 @@ void GlobePowerDown(void)
 
 void GlobePowerUp(void)
 { char message[QUEUEMESSAGELENGTH]; 
-
   bPowerStatus = true;
+
   EEPROM.get(0x0, GlobeSettings); // need stored volume settings
-  Serial.printf("POWERUP - volume -> %d \n", GlobeSettings.ee_volume);
   // tell display what our stored values are for volume and tone control
   sprintf(message, "%d %d %d %d", GlobeSettings.ee_volume, GlobeSettings.ee_bass, GlobeSettings.ee_treble, GlobeSettings.ee_internal_speakers);
   AddToQueueForDisplay(message, MESSAGE_VOLUME_AND_TONE);
   AddToQueueForDisplay(build_timestamp, MESSAGE_GLOBE_BUILD_DATE_TIME);
   AddToQueueForDisplay(WiFi.localIP().toString().c_str(), MESSAGE_GLOBE_IP);
-  AddToQueueForDisplay(WiFi.getHostname(), MESSAGE_GLOBE_HOSTNAME);
+  sprintf(message, "%s.local", WiFi.getHostname());
+  AddToQueueForDisplay(message, MESSAGE_GLOBE_HOSTNAME);
   AddToQueueForDisplay(GlobeSettings.ssid, MESSAGE_SSID_FOR_GLOBE);
   AddToQueueForDisplay(GlobeSettings.password, MESSAGE_PASSWORD_FOR_GLOBE);
   

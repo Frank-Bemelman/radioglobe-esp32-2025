@@ -160,6 +160,7 @@ void AutoConnect(void)
   } 
 }
 
+extern void killwebserver(void); 
 void checkButton(bool force)
 { String ssid;
   String password;
@@ -184,6 +185,7 @@ void checkButton(bool force)
         ESP.restart();
       }
       
+      killwebserver(); 
       // start portal w delay
       Serial.println("checkButton() - Starting config portal");
       wm.setConfigPortalTimeout(120);
