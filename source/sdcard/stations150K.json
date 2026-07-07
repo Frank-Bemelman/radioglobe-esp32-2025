@@ -4791,10 +4791,6 @@
         "url": "https://sc2.streamwithq.com:2000/stream/sykologos"
       },
       {
-        "name": "Rad Floga",
-        "url": "https://stream.zeno.fm/db030tgtf48uv"
-      },
-      {
         "name": "Real Fm",
         "url": "https://realfm.live24.gr/realfm?.mp3"
       },
@@ -9399,10 +9395,6 @@
         "url": "https://server1.emitironline.com:8040/;"
       },
       {
-        "name": "Global Rad Fm",
-        "url": "https://stream.rcast.net/68409"
-      },
-      {
         "name": "Locaptiva Rad Fm",
         "url": "https://pr1cen101.emisionlocal.com/proxy/locactivaradio?mp=/stream"
       },
@@ -13581,10 +13573,6 @@
       {
         "name": "Beleixe Irratia",
         "url": "http://server8.20comunicacion.com:8016/;stream.nsv;audio.mp3"
-      },
-      {
-        "name": "Arrate Irratia",
-        "url": "http://5.135.155.232:8002/stream"
       },
       {
         "name": "Cope Tierra Este",
@@ -30305,10 +30293,6 @@
         "url": "http://server8.20comunicacion.com:8016/;stream.nsv;audio.mp3"
       },
       {
-        "name": "Arrate Irratia",
-        "url": "http://5.135.155.232:8002/stream"
-      },
-      {
         "name": "Cope Tierra Este",
         "url": "https://server1.emitironline.com:9866/radio"
       },
@@ -35670,15 +35654,6 @@
     },
     "urls": [
       {
-        "name": "91.9 Love Rad Ba",
-        "url": "https://loveradiobacolod.radioca.st/;"
-      },
-      {
-        "name": "Kissfm 102.7",
-        "url": "https://stream.zeno.fm/gdh4m7vsebruv"
-      },
-      
-      {
         "name": "Win Rad 91.5 Fm",
         "url": "https://stream.zeno.fm/2ss1hgnu6hhvv"
       },
@@ -37817,19 +37792,6 @@
         "name": "Sta Fm 91.9",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/2STAAAC.aac"
       }
-    ]
-  },
-  "Bais City,PH": {
-    "coords": {
-      "n": 9.5916,
-      "e": 123.1212
-    },
-    "urls": [
-      {
-        "name": "Star Fm Dipolog",
-        "url": "https://stream.zeno.fm/4r47vh2nz9duv"
-      }
-      
     ]
   },
   "Bakar,HR": {
@@ -40697,24 +40659,12 @@
         "url": "https://lnwradio.hostsevenplus.com/9622/audio.php"
       },
       {
-        "name": "Fmone 103.5",
-        "url": "https://cdn-th2.livestreaming.in.th/shoutcast/8835"
-      },
-      {
-        "name": "Js100 Traffic Ra",
-        "url": "http://112.121.151.133:8184/;stream/1"
-      },
-      {
         "name": "Looktungnetwork",
         "url": "http://media.login.in.th:8200/;stream.mp3"
       },
       {
         "name": "Nbt Fm 95.5 Rad",
         "url": "http://media.login.in.th:8435/;"
-      },
-      {
-        "name": ".. Am 747 Khz",
-        "url": "http://radio.servradio.com:9368/;"
       },
       {
         "name": "Coolfahrenheit F",
@@ -40727,10 +40677,6 @@
       {
         "name": "Efm",
         "url": "https://atimeonline2.smartclick.co.th/efm"
-      },
-      {
-        "name": "Eazy Fm 105.5",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/EAZYFM_1055AAC.aac"
       },
       {
         "name": "..Fm106",
@@ -46471,24 +46417,12 @@
     },
     "urls": [
       {
-        "name": "Cntry 101 - Wble",
-        "url": "https://ice41.securenetsystems.net/WBLE"
-      },
-      {
-        "name": "The Rebel 95.3 -",
+        "name": "The Rebel 95.3",
         "url": "https://ice7.securenetsystems.net/WEBL"
       },
       {
         "name": "Xrds.Fm",
         "url": "http://us1.internet-radio.com:8321/stream/;"
-      },
-      {
-        "name": "Wymx 99.1 Fm The",
-        "url": "http://18.234.154.142/telesouth-wymxfmaac-imc1?session-id=9635152a6097a3acf00171db2d5b1170"
-      },
-      {
-        "name": "Wurc Fm 88.1",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WURCFM.mp3"
       },
       {
         "name": "Q107.5 - Whbq-Fm",
@@ -55132,10 +55066,6 @@
         "url": "https://prod-100-24-6-34.amperwave.net/bigriver-wqltfmaac-ibc1"
       },
       {
-        "name": "Wurc Fm 88.1",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WURCFM.mp3"
-      },
-      {
         "name": "Metal Devastatio",
         "url": "https://c13.radioboss.fm:18099/stream"
       },
@@ -57611,10 +57541,6 @@
         "url": "https://punkirratia.net:8443/punk"
       },
       {
-        "name": "Rad Aljalia",
-        "url": "https://rocket.streamradio.fr:8060/stream"
-      },
-      {
         "name": "Rad Euskadi",
         "url": "http://mp3-eitb.stream.flumotion.com/eitb/radioeuskadi.mp3"
       },
@@ -57641,10 +57567,6 @@
       {
         "name": "Durango Irratia",
         "url": "https://durangoirratia.streaming-pro.com:6006/durangoirratia.mp3"
-      },
-      {
-        "name": "Arrate Irratia",
-        "url": "http://5.135.155.232:8002/stream"
       },
       {
         "name": "Cadena Ser Castr",
@@ -75635,10 +75557,6 @@
     },
     "urls": [
       {
-        "name": "Radyo Natin Buga",
-        "url": "https://net.radyonatinfm.com/listen/dybg/bugasong"
-      },
-      {
         "name": "Star Fm Iloilo 9",
         "url": "https://stream.zeno.fm/t9tm8gm29heuv"
       },
@@ -79382,10 +79300,6 @@
       {
         "name": "Rad Consuegra Fm",
         "url": "https://streaming12.elitecomunicacion.es:8056/stream"
-      },
-      {
-        "name": "Global Rad Fm",
-        "url": "https://stream.rcast.net/68409"
       },
       {
         "name": "Cadena Ser - Rad",
@@ -90800,10 +90714,6 @@
         "url": "https://ice.wbcengineering.com:8106/stream"
       },
       {
-        "name": "Krcu Fm 90.9",
-        "url": "http://krculive.semo.edu:8000/128k"
-      },
-      {
         "name": "Semo Espn 92.9 F",
         "url": "https://ice23.securenetsystems.net/KGIR"
       },
@@ -92433,10 +92343,6 @@
         "url": "http://peridot.streamguys.com:5230/wsiu-hd1"
       },
       {
-        "name": "Krcu Fm 90.9",
-        "url": "http://krculive.semo.edu:8000/128k"
-      },
-      {
         "name": "Wdlj Fm 97.5 The",
         "url": "http://67.43.117.185:8080/stream.mp3"
       },
@@ -92551,22 +92457,6 @@
       {
         "name": "Alpha Fm 101.7",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/RADIO_ALPHAFMAAC.aac"
-      }
-    ]
-  },
-  "Carcar City,PH": {
-    "coords": {
-      "n": 10.1151,
-      "e": 123.64
-    },
-    "urls": [
-      {
-        "name": "91.9 Love Rad Ba",
-        "url": "https://loveradiobacolod.radioca.st/;"
-      },
-      {
-        "name": "Kissfm 102.7",
-        "url": "https://stream.zeno.fm/gdh4m7vsebruv"
       }
     ]
   },
@@ -94857,10 +94747,6 @@
       {
         "name": "Cope Cuenca",
         "url": "https://wecast05-h-cloud.flumotion.com/copesedes/cuenca.mp3"
-      },
-      {
-        "name": "Global Rad Fm",
-        "url": "https://stream.rcast.net/68409"
       },
       {
         "name": "Cadena Ser - Rad",
@@ -101842,10 +101728,6 @@
         "url": "https://de3.amfmph.com:8128/stream"
       },
       {
-        "name": "91.9 Love Rad Ba",
-        "url": "https://loveradiobacolod.radioca.st/;"
-      },
-      {
         "name": "Landmark Rad 106",
         "url": "https://stream.radiojar.com/8bfc8a9t3gruv"
       }
@@ -105915,10 +105797,6 @@
       {
         "name": "Gavdos Fm 88.8",
         "url": "http://sc2.streamwithq.com:8050/stream"
-      },
-      {
-        "name": "Matzore 89.1 - U",
-        "url": "https://rs.radio.uoc.gr:8001/matzore_64.ogg"
       },
       {
         "name": "Traffic Fm 91.8",
@@ -118190,24 +118068,12 @@
         "url": "http://us1.internet-radio.com:8321/stream/;"
       },
       {
-        "name": "Cntry 101 - Wble",
-        "url": "https://ice41.securenetsystems.net/WBLE"
-      },
-      {
-        "name": "The Rebel 95.3 -",
+        "name": "The Rebel 95.3",
         "url": "https://ice7.securenetsystems.net/WEBL"
       },
       {
         "name": "Wddt Online Rad",
         "url": "https://ais-edge08-live365-dal02.cdnstream.com/a40850"
-      },
-      {
-        "name": "Wymx 99.1 Fm The",
-        "url": "http://18.234.154.142/telesouth-wymxfmaac-imc1?session-id=9635152a6097a3acf00171db2d5b1170"
-      },
-      {
-        "name": "Wurc Fm 88.1",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WURCFM.mp3"
       },
       {
         "name": "Smooth Jz 24/7",
@@ -118816,11 +118682,7 @@
         "url": "http://dsuradio.deltastate.edu:8000/stream"
       },
       {
-        "name": "Cntry 101 - Wble",
-        "url": "https://ice41.securenetsystems.net/WBLE"
-      },
-      {
-        "name": "The Rebel 95.3 -",
+        "name": "The Rebel 95.3",
         "url": "https://ice7.securenetsystems.net/WEBL"
       },
       {
@@ -118830,10 +118692,6 @@
       {
         "name": "Wddt Online Rad",
         "url": "https://ais-edge08-live365-dal02.cdnstream.com/a40850"
-      },
-      {
-        "name": "Wymx 99.1 Fm The",
-        "url": "http://18.234.154.142/telesouth-wymxfmaac-imc1?session-id=9635152a6097a3acf00171db2d5b1170"
       },
       {
         "name": "Smooth Jz 24/7",
@@ -121539,24 +121397,12 @@
     },
     "urls": [
       {
-        "name": "The Rebel 95.3 -",
+        "name": "The Rebel 95.3",
         "url": "https://ice7.securenetsystems.net/WEBL"
-      },
-      {
-        "name": "Cntry 101 - Wble",
-        "url": "https://ice41.securenetsystems.net/WBLE"
       },
       {
         "name": "Xrds.Fm",
         "url": "http://us1.internet-radio.com:8321/stream/;"
-      },
-      {
-        "name": "Wymx 99.1 Fm The",
-        "url": "http://18.234.154.142/telesouth-wymxfmaac-imc1?session-id=9635152a6097a3acf00171db2d5b1170"
-      },
-      {
-        "name": "Wurc Fm 88.1",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WURCFM.mp3"
       },
       {
         "name": "Kflo 102.9 Fm",
@@ -126826,10 +126672,6 @@
         "url": "https://server1.emitironline.com:8040/;"
       },
       {
-        "name": "Global Rad Fm",
-        "url": "https://stream.rcast.net/68409"
-      },
-      {
         "name": "Onda Mancha Fm",
         "url": "http://5.135.183.124:8071/stream"
       },
@@ -129282,20 +129124,12 @@
     },
     "urls": [
       {
-        "name": "Kbkg-Fm",
-        "url": "https://s5.radio.co/s853d9671d/listen"
-      },
-      {
         "name": "Kbta Fm 99.5 You",
         "url": "https://us2.maindigitalstream.com/ssl/KBTA"
       },
       {
         "name": "Mountain Tk 97.1",
         "url": "https://ice6.securenetsystems.net/KJMT"
-      },
-      {
-        "name": "Krcu Fm 90.9",
-        "url": "http://krculive.semo.edu:8000/128k"
       },
       {
         "name": "Clsic Kymo",
@@ -140367,10 +140201,6 @@
       "e": 123.8234
     },
     "urls": [
-      {
-        "name": "91.9 Love Rad Ba",
-        "url": "https://loveradiobacolod.radioca.st/;"
-      },
       {
         "name": "96.9 Easy Rk Cag",
         "url": ""
@@ -157456,10 +157286,6 @@
     },
     "urls": [
       {
-        "name": "Arrate Irratia",
-        "url": "http://5.135.155.232:8002/stream"
-      },
-      {
         "name": "Rad Eibar Cadena",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_EIBAR.mp3"
       },
@@ -160082,10 +159908,6 @@
       {
         "name": "Rad Madrid Sierr",
         "url": "https://streaming12.elitecomunicacion.es:8070/stream?type=.mp3/;"
-      },
-      {
-        "name": "Rad Val De Santo",
-        "url": "http://antares.dribbcast.com:5045/stream"
       },
       {
         "name": "Cadena 100",
@@ -196368,10 +196190,6 @@
     },
     "urls": [
       {
-        "name": "Wtip",
-        "url": "https://wtip.broadcasttool.stream/stream"
-      },
-      {
         "name": "Cfqk - Energy Fm",
         "url": "https://cfqk.streamon.fm/CFQK-32k.aac?starttime=1537904819"
       },
@@ -198646,28 +198464,16 @@
     },
     "urls": [
       {
-        "name": "Wymx 99.1 Fm The",
-        "url": "http://18.234.154.142/telesouth-wymxfmaac-imc1?session-id=9635152a6097a3acf00171db2d5b1170"
-      },
-      {
         "name": "Power Of The Cro",
         "url": "https://usa19.fastcast4u.com/powerofthecross"
       },
       {
-        "name": "Cntry 101 - Wble",
-        "url": "https://ice41.securenetsystems.net/WBLE"
-      },
-      {
-        "name": "The Rebel 95.3 -",
+        "name": "The Rebel 95.3",
         "url": "https://ice7.securenetsystems.net/WEBL"
       },
       {
         "name": "Xrds.Fm",
         "url": "http://us1.internet-radio.com:8321/stream/;"
-      },
-      {
-        "name": "Wurc Fm 88.1",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WURCFM.mp3"
       },
       {
         "name": "Breezy 101",
@@ -207737,23 +207543,6 @@
       }
     ]
   },
-  "Hamtic,PH": {
-    "coords": {
-      "n": 10.6519,
-      "e": 122.0156
-    },
-    "urls": [
-      {
-        "name": "Kissfm 102.7",
-        "url": "https://stream.zeno.fm/gdh4m7vsebruv"
-      },
-      {
-        "name": "Radyo Todo Aklan",
-        "url": "https://s23.myradiostream.com/:12170/;"
-      }
-      
-    ]
-  },
   "Hana HI,US": {
     "coords": {
       "n": 20.7575,
@@ -208960,10 +208749,6 @@
       {
         "name": "Durango Irratia",
         "url": "https://durangoirratia.streaming-pro.com:6006/durangoirratia.mp3"
-      },
-      {
-        "name": "Arrate Irratia",
-        "url": "http://5.135.155.232:8002/stream"
       },
       {
         "name": "Cadena 100",
@@ -218041,24 +217826,12 @@
     },
     "urls": [
       {
-        "name": "Wurc Fm 88.1",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WURCFM.mp3"
-      },
-      {
         "name": "Truth For The Wo",
         "url": "https://ais-edge09-live365-dal02.cdnstream.com/a21389"
       },
       {
-        "name": "Cntry 101 - Wble",
-        "url": "https://ice41.securenetsystems.net/WBLE"
-      },
-      {
-        "name": "The Rebel 95.3 -",
+        "name": "The Rebel 95.3",
         "url": "https://ice7.securenetsystems.net/WEBL"
-      },
-      {
-        "name": "Wymx 99.1 Fm The",
-        "url": "http://18.234.154.142/telesouth-wymxfmaac-imc1?session-id=9635152a6097a3acf00171db2d5b1170"
       },
       {
         "name": "Wnws Fm 101.5 Ne",
@@ -225300,10 +225073,6 @@
         "url": "http://s7.onweb.gr:8044/;stream"
       },
       {
-        "name": "Matzore 89.1 - U",
-        "url": "https://rs.radio.uoc.gr:8001/matzore_64.ogg"
-      },
-      {
         "name": "Lato 103.3 Fm",
         "url": "https://stream.latofm.gr/latofm"
       },
@@ -227292,20 +227061,12 @@
     },
     "urls": [
       {
-        "name": "Aksyon Rad Iloil",
-        "url": "https://sg-icecast.eradioportal.com:8443/akyson_iloilo"
-      },
-      {
         "name": "Bombo Radyo Iloi",
         "url": "https://stream.zeno.fm/fak4mwd4vrquv"
       },
       {
         "name": "Easyrock Fm 92.3",
         "url": "https://easyrockiloilo.radioca.st/;"
-      },
-      {
-        "name": "Kissfm 102.7",
-        "url": "https://stream.zeno.fm/gdh4m7vsebruv"
       },
       {
         "name": "Rmn - Dyri",
@@ -231062,10 +230823,6 @@
       {
         "name": "Wojb Fm 89.9",
         "url": "https://stream.pacificaservice.org:9000/wojb"
-      },
-      {
-        "name": "Wtip",
-        "url": "https://wtip.broadcasttool.stream/stream"
       },
       {
         "name": "Bluejay 96.3 Wjm",
@@ -235210,10 +234967,6 @@
         "url": "http://server8.20comunicacion.com:8016/;stream.nsv;audio.mp3"
       },
       {
-        "name": "Arrate Irratia",
-        "url": "http://5.135.155.232:8002/stream"
-      },
-      {
         "name": "Zintzilik Irrati",
         "url": "https://aizu.maritxusarea.eus/listen/zintzilik_irratia/radio.mp3"
       },
@@ -237073,10 +236826,6 @@
       {
         "name": "Truth For The Wo",
         "url": "https://ais-edge09-live365-dal02.cdnstream.com/a21389"
-      },
-      {
-        "name": "Wurc Fm 88.1",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WURCFM.mp3"
       },
       {
         "name": "Wkms Hd-1 Fm 91.",
@@ -242933,12 +242682,8 @@
         "url": "https://us2.maindigitalstream.com/ssl/KBTA"
       },
       {
-        "name": "The Rebel 95.3 -",
+        "name": "The Rebel 95.3",
         "url": "https://ice7.securenetsystems.net/WEBL"
-      },
-      {
-        "name": "Kbkg-Fm",
-        "url": "https://s5.radio.co/s853d9671d/listen"
       },
       {
         "name": "Scm Rad",
@@ -246599,10 +246344,6 @@
         "url": "https://stream.zeno.fm/ehadmxe0xy5tv"
       },
       {
-        "name": "Radyo Todo Aklan",
-        "url": "https://s23.myradiostream.com/:12170/;"
-      },
-      {
         "name": "100.1 Love Rad K",
         "url": "https://loveradiokalibo.radioca.st/;"
       },
@@ -246618,7 +246359,6 @@
         "name": "Radyo Natin Madr",
         "url": "https://tx.radyonatinfm.com/listen/dyee/madridejos"
       }
-      
     ]
   },
   "Kalimnos,GR": {
@@ -247475,10 +247215,6 @@
       "e": 99.5227
     },
     "urls": [
-      {
-        "name": "Health Rad Fm 92",
-        "url": "http://radio.siamtoday.in.th:8188/;stream.mp3"
-      },
       {
         "name": "Lela 101 Fm Onai",
         "url": "https://plus.onair.network:8170/my"
@@ -248987,10 +248723,6 @@
       {
         "name": "Dpsd Student Rad",
         "url": "http://radio.myaegean.gr:8000/dpsdradio.mp3"
-      },
-      {
-        "name": "Rad Floga",
-        "url": "https://stream.zeno.fm/db030tgtf48uv"
       },
       {
         "name": "Kimolos Fm 106",
@@ -254372,10 +254104,6 @@
         "url": "http://radio1.serverradio.net:8592/live/;"
       },
       {
-        "name": "Lao National Rad",
-        "url": "https://radio.lnr.org.la/am"
-      },
-      {
         "name": "Fm 90.9 104.25 J",
         "url": "https://radio14.plathong.net/7120/;stream.mp3"
       },
@@ -255670,10 +255398,6 @@
       {
         "name": "Dpsd Student Rad",
         "url": "http://radio.myaegean.gr:8000/dpsdradio.mp3"
-      },
-      {
-        "name": "Rad Floga",
-        "url": "https://stream.zeno.fm/db030tgtf48uv"
       },
       {
         "name": "Nissos Rad",
@@ -261212,10 +260936,6 @@
         "url": "https://ice-1.streamhoster.com/lv_wfs_043--broadcast1"
       },
       {
-        "name": "Wymx 99.1 Fm The",
-        "url": "http://18.234.154.142/telesouth-wymxfmaac-imc1?session-id=9635152a6097a3acf00171db2d5b1170"
-      },
-      {
         "name": "Wmpn-Fm Mus Rad",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WMPNFM_56.mp3"
       },
@@ -263941,10 +263661,6 @@
       "e": 100.0639
     },
     "urls": [
-      {
-        "name": "Health Rad Fm 92",
-        "url": "http://radio.siamtoday.in.th:8188/;stream.mp3"
-      },
       {
         "name": "City Life Fm",
         "url": "https://radio14.plathong.net/8076/;stream.mp3"
@@ -270310,10 +270026,6 @@
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/RAC_1.mp3"
       },
       {
-        "name": "Global Rad Fm",
-        "url": "https://stream.rcast.net/68409"
-      },
-      {
         "name": "Play Fm (La Manc",
         "url": "https://antares.dribbcast.com/proxy/playfmlamancha?mp=/stream"
       },
@@ -271308,10 +271020,6 @@
       {
         "name": "Rad Consuegra Fm",
         "url": "https://streaming12.elitecomunicacion.es:8056/stream"
-      },
-      {
-        "name": "Global Rad Fm",
-        "url": "https://stream.rcast.net/68409"
       },
       {
         "name": "Onda Mancha Fm",
@@ -278675,10 +278383,6 @@
       {
         "name": "Futuro Fm",
         "url": "https://server1.emitironline.com:8040/;"
-      },
-      {
-        "name": "Global Rad Fm",
-        "url": "https://stream.rcast.net/68409"
       },
       {
         "name": "Rad Surco",
@@ -293311,10 +293015,6 @@
         "url": "http://radio1.serverradio.net:8592/live/;"
       },
       {
-        "name": "Health Rad Fm 92",
-        "url": "http://radio.siamtoday.in.th:8188/;stream.mp3"
-      },
-      {
         "name": "City Life Fm",
         "url": "https://radio14.plathong.net/8076/;stream.mp3"
       }
@@ -294575,10 +294275,6 @@
       {
         "name": "Link 95.5",
         "url": "http://radio11.plathong.net:7140/;"
-      },
-      {
-        "name": "Health Rad Fm 92",
-        "url": "http://radio.siamtoday.in.th:8188/;stream.mp3"
       },
       {
         "name": "City Life Fm",
@@ -303288,10 +302984,6 @@
         "url": "https://tx.radyonatinfm.com/listen/dyee/madridejos"
       },
       {
-        "name": "91.9 Love Rad Ba",
-        "url": "https://loveradiobacolod.radioca.st/;"
-      },
-      {
         "name": "Tingug Sa Sugbo",
         "url": "https://sugbo-iradioph.radioca.st/;"
       },
@@ -306368,10 +306060,6 @@
       {
         "name": "Yes! Fm Boracay",
         "url": "https://yesfmboracay.radioca.st/;"
-      },
-      {
-        "name": "Kissfm 102.7",
-        "url": "https://stream.zeno.fm/gdh4m7vsebruv"
       },
       {
         "name": "Radyo Todo Aklan",
@@ -311016,10 +310704,6 @@
       {
         "name": "Rad Consuegra Fm",
         "url": "https://streaming12.elitecomunicacion.es:8056/stream"
-      },
-      {
-        "name": "Global Rad Fm",
-        "url": "https://stream.rcast.net/68409"
       },
       {
         "name": "Rad Surco",
@@ -322859,24 +322543,12 @@
         "url": "https://studio28.radiolize.com/radio/8110/radio.mp3"
       },
       {
-        "name": "Cntry 101 - Wble",
-        "url": "https://ice41.securenetsystems.net/WBLE"
-      },
-      {
-        "name": "The Rebel 95.3 -",
+        "name": "The Rebel 95.3",
         "url": "https://ice7.securenetsystems.net/WEBL"
-      },
-      {
-        "name": "Kbkg-Fm",
-        "url": "https://s5.radio.co/s853d9671d/listen"
       },
       {
         "name": "Xrds.Fm",
         "url": "http://us1.internet-radio.com:8321/stream/;"
-      },
-      {
-        "name": "Wurc Fm 88.1",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WURCFM.mp3"
       },
       {
         "name": "Smooth Jz 24/7",
@@ -348098,10 +347770,6 @@
     },
     "urls": [
       {
-        "name": "Fm96.75 Youth Fm",
-        "url": "http://live3.smartbomb.co.th:9074/;stream.mp3"
-      },
-      {
         "name": "Rad Rad Fm 89.5",
         "url": "http://radio1.serverradio.net:8592/live/;"
       },
@@ -348262,10 +347930,6 @@
     },
     "urls": [
       {
-        "name": ".3 Am 1008 Khz",
-        "url": "https://radio14.plathong.net/7252/;stream.mp3?type=http"
-      },
-      {
         "name": "City Life Fm",
         "url": "https://radio14.plathong.net/8076/;stream.mp3"
       }
@@ -348277,10 +347941,6 @@
       "e": 100.12
     },
     "urls": [
-      {
-        "name": "Health Rad Fm 92",
-        "url": "http://radio.siamtoday.in.th:8188/;stream.mp3"
-      },
       {
         "name": "Link 95.5",
         "url": "http://radio11.plathong.net:7140/;"
@@ -351205,10 +350865,6 @@
       {
         "name": "Dpsd Student Rad",
         "url": "http://radio.myaegean.gr:8000/dpsdradio.mp3"
-      },
-      {
-        "name": "Rad Floga",
-        "url": "https://stream.zeno.fm/db030tgtf48uv"
       },
       {
         "name": "Nissos Rad",
@@ -370718,14 +370374,6 @@
         "url": "http://chrishoward.gtrwireless.com:8000/WMFHLP"
       },
       {
-        "name": "Wymx 99.1 Fm The",
-        "url": "http://18.234.154.142/telesouth-wymxfmaac-imc1?session-id=9635152a6097a3acf00171db2d5b1170"
-      },
-      {
-        "name": "Wurc Fm 88.1",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WURCFM.mp3"
-      },
-      {
         "name": "Wgtc Rad 97.2 Fm",
         "url": "https://media.eastms.edu:8088/stream1"
       },
@@ -373656,10 +373304,6 @@
       {
         "name": "Wolv 97.7 Fm",
         "url": "https://ice10.securenetsystems.net/WOLV"
-      },
-      {
-        "name": "Wtip",
-        "url": "https://wtip.broadcasttool.stream/stream"
       },
       {
         "name": "Smooth Jz 24/7",
@@ -388494,10 +388138,6 @@
         "url": "http://radio.myaegean.gr:8000/dpsdradio.mp3"
       },
       {
-        "name": "Rad Floga",
-        "url": "https://stream.zeno.fm/db030tgtf48uv"
-      },
-      {
         "name": "Nissos Rad",
         "url": "https://nissosradio.radioca.st/live"
       },
@@ -398316,10 +397956,6 @@
       {
         "name": ".. 8 1170 Am",
         "url": "http://rcp2.plathong.net:9916/;"
-      },
-      {
-        "name": "Health Rad Fm 92",
-        "url": "http://radio.siamtoday.in.th:8188/;stream.mp3"
       },
       {
         "name": "Love Fm 107",
@@ -409347,10 +408983,6 @@
         "url": "https://stream.pacificaservice.org:9000/wdbx"
       },
       {
-        "name": "Kbkg-Fm",
-        "url": "https://s5.radio.co/s853d9671d/listen"
-      },
-      {
         "name": "Clsic Kymo",
         "url": "https://ice23.securenetsystems.net/KYMO"
       },
@@ -413277,10 +412909,6 @@
       {
         "name": "Durango Irratia",
         "url": "https://durangoirratia.streaming-pro.com:6006/durangoirratia.mp3"
-      },
-      {
-        "name": "Arrate Irratia",
-        "url": "http://5.135.155.232:8002/stream"
       },
       {
         "name": "Castro Punto Rad",
@@ -425443,10 +425071,6 @@
         "url": "https://server1.emitironline.com:8040/;"
       },
       {
-        "name": "Global Rad Fm",
-        "url": "https://stream.rcast.net/68409"
-      },
-      {
         "name": "Rad Cassette Fm",
         "url": "http://ns6.emisionlocal.com:8600/live"
       },
@@ -432992,10 +432616,6 @@
         "url": "https://hotsoft.net.gr:9105/"
       },
       {
-        "name": "Matzore 89.1 - U",
-        "url": "https://rs.radio.uoc.gr:8001/matzore_64.ogg"
-      },
-      {
         "name": "Lato 103.3 Fm",
         "url": "https://stream.latofm.gr/latofm"
       },
@@ -438228,16 +437848,8 @@
         "url": "https://ais-edge09-live365-dal02.cdnstream.com/a21389"
       },
       {
-        "name": "Cntry 101 - Wble",
-        "url": "https://ice41.securenetsystems.net/WBLE"
-      },
-      {
-        "name": "The Rebel 95.3 -",
+        "name": "The Rebel 95.3",
         "url": "https://ice7.securenetsystems.net/WEBL"
-      },
-      {
-        "name": "Wurc Fm 88.1",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WURCFM.mp3"
       },
       {
         "name": "Metal Devastatio",
@@ -471416,10 +471028,6 @@
         "url": "https://server1.emitironline.com:8040/;"
       },
       {
-        "name": "Global Rad Fm",
-        "url": "https://stream.rcast.net/68409"
-      },
-      {
         "name": "Rad Cigea Fm 98.",
         "url": "https://cervera.eldialdigital.com:25171/stream"
       },
@@ -476642,10 +476250,6 @@
       {
         "name": "Aigaio Live 95.8",
         "url": "https://stream.radiojar.com/nkqh9th47vzuv"
-      },
-      {
-        "name": "Rad Floga",
-        "url": "https://stream.zeno.fm/db030tgtf48uv"
       },
       {
         "name": "Folegandros Rad",
@@ -494164,10 +493768,6 @@
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WUSZFMAAC.aac"
       },
       {
-        "name": "Wtip",
-        "url": "https://wtip.broadcasttool.stream/stream"
-      },
-      {
         "name": "Cfrb 1010 Am Tor",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/CFRBAMAAC.aac"
       }
@@ -494464,10 +494064,6 @@
         "url": "http://eco.onestreaming.com:8576/stream/;"
       },
       {
-        "name": "Matzore 89.1 - U",
-        "url": "https://rs.radio.uoc.gr:8001/matzore_64.ogg"
-      },
-      {
         "name": "104.4 Fm Rad",
         "url": "https://10440fm.live24.gr/10440fm"
       },
@@ -494478,10 +494074,6 @@
       {
         "name": "Rad Sykologos",
         "url": "https://sc2.streamwithq.com:2000/stream/sykologos"
-      },
-      {
-        "name": "Rad Floga",
-        "url": "https://stream.zeno.fm/db030tgtf48uv"
       },
       {
         "name": "Real Fm",
@@ -504596,10 +504188,6 @@
         "url": "http://chrishoward.gtrwireless.com:8000/WMFHLP"
       },
       {
-        "name": "Wymx 99.1 Fm The",
-        "url": "http://18.234.154.142/telesouth-wymxfmaac-imc1?session-id=9635152a6097a3acf00171db2d5b1170"
-      },
-      {
         "name": "Cruisin 98 - Wko",
         "url": "https://ice10.securenetsystems.net/WKOZ"
       },
@@ -508976,10 +508564,6 @@
     },
     "urls": [
       {
-        "name": "Health Rad Fm 92",
-        "url": "http://radio.siamtoday.in.th:8188/;stream.mp3"
-      },
-      {
         "name": "Hitz Fm Exclusiv",
         "url": "https://radio10.plathong.net/7292/;"
       },
@@ -510509,10 +510093,6 @@
     },
     "urls": [
       {
-        "name": "Fm 104.75 Non Sa",
-        "url": "http://radio.esanradio.net:8426/;"
-      },
-      {
         "name": "Fm 90.9 104.25 J",
         "url": "https://radio14.plathong.net/7120/;stream.mp3"
       },
@@ -511975,10 +511555,6 @@
       {
         "name": "Rad Sykologos",
         "url": "https://sc2.streamwithq.com:2000/stream/sykologos"
-      },
-      {
-        "name": "Matzore 89.1 - U",
-        "url": "https://rs.radio.uoc.gr:8001/matzore_64.ogg"
       },
       {
         "name": "104.4 Fm Rad",
@@ -518052,10 +517628,6 @@
       {
         "name": "Futuro Fm",
         "url": "https://server1.emitironline.com:8040/;"
-      },
-      {
-        "name": "Global Rad Fm",
-        "url": "https://stream.rcast.net/68409"
       },
       {
         "name": "Rad Cigea Fm 98.",
@@ -524790,10 +524362,6 @@
         "url": "https://ice6.securenetsystems.net/KJMT"
       },
       {
-        "name": "Kbkg-Fm",
-        "url": "https://s5.radio.co/s853d9671d/listen"
-      },
-      {
         "name": "Kffb Fm 106.1",
         "url": "https://us2.maindigitalstream.com/ssl/KFFB"
       },
@@ -525273,10 +524841,6 @@
       "e": 25.4324
     },
     "urls": [
-      {
-        "name": "Rad Floga",
-        "url": "https://stream.zeno.fm/db030tgtf48uv"
-      },
       {
         "name": "Radioactive 91.3",
         "url": "https://streamyourdream.org:8050/radioactive"
@@ -526840,10 +526404,6 @@
       {
         "name": "Wolv 97.7 Fm",
         "url": "https://ice10.securenetsystems.net/WOLV"
-      },
-      {
-        "name": "Wtip",
-        "url": "https://wtip.broadcasttool.stream/stream"
       },
       {
         "name": "Wjms Am 590",
@@ -529110,14 +528670,6 @@
         "url": "https://ice3.securenetsystems.net/WCBL"
       },
       {
-        "name": "Krcu Fm 90.9",
-        "url": "http://krculive.semo.edu:8000/128k"
-      },
-      {
-        "name": "Kbkg-Fm",
-        "url": "https://s5.radio.co/s853d9671d/listen"
-      },
-      {
         "name": "Clsic Kymo",
         "url": "https://ice23.securenetsystems.net/KYMO"
       },
@@ -530859,10 +530411,6 @@
         "url": "https://sonic.mediatelekom.net/9980/stream"
       },
       {
-        "name": "Rad Val De Santo",
-        "url": "http://antares.dribbcast.com:5045/stream"
-      },
-      {
         "name": "Unika Fm",
         "url": "https://n03.radiojar.com/7qyvpnex9vzuv"
       },
@@ -531617,10 +531165,6 @@
       {
         "name": "Cadena Ser Alcza",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_ALCAZAR.mp3"
-      },
-      {
-        "name": "Global Rad Fm",
-        "url": "https://stream.rcast.net/68409"
       },
       {
         "name": "Rad Cassette Fm",
@@ -541416,10 +540960,6 @@
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WMXUFMAAC.aac"
       },
       {
-        "name": "Wurc Fm 88.1",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WURCFM.mp3"
-      },
-      {
         "name": "Wgtc Rad 97.2 Fm",
         "url": "https://media.eastms.edu:8088/stream1"
       },
@@ -542642,10 +542182,6 @@
       {
         "name": "Rad Usa 99.9 Wus",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WUSZFMAAC.aac"
-      },
-      {
-        "name": "Wtip",
-        "url": "https://wtip.broadcasttool.stream/stream"
       },
       {
         "name": "Kaxe Fm 91.7 Nor",
@@ -546124,24 +545660,12 @@
         "url": "http://130.74.34.21:8000/listen"
       },
       {
-        "name": "Cntry 101 - Wble",
-        "url": "https://ice41.securenetsystems.net/WBLE"
-      },
-      {
-        "name": "The Rebel 95.3 -",
+        "name": "The Rebel 95.3",
         "url": "https://ice7.securenetsystems.net/WEBL"
       },
       {
         "name": "Xrds.Fm",
         "url": "http://us1.internet-radio.com:8321/stream/;"
-      },
-      {
-        "name": "Wymx 99.1 Fm The",
-        "url": "http://18.234.154.142/telesouth-wymxfmaac-imc1?session-id=9635152a6097a3acf00171db2d5b1170"
-      },
-      {
-        "name": "Wurc Fm 88.1",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WURCFM.mp3"
       },
       {
         "name": "Smooth Jz 24/7",
@@ -548000,10 +547524,6 @@
         "url": "https://radio12.plathong.net/8206/;stream.mp3"
       },
       {
-        "name": "Health Rad Fm 92",
-        "url": "http://radio.siamtoday.in.th:8188/;stream.mp3"
-      },
-      {
         "name": "Link 95.5",
         "url": "http://radio11.plathong.net:7140/;"
       },
@@ -549203,10 +548723,6 @@
       "e": -4.327
     },
     "urls": [
-      {
-        "name": "Rad Val De Santo",
-        "url": "http://antares.dribbcast.com:5045/stream"
-      },
       {
         "name": "La Jungla Rad",
         "url": "https://streaming12.elitecomunicacion.es:8626/stream"
@@ -558496,10 +558012,6 @@
         "url": "https://radio.lnr.org.la/fm94"
       },
       {
-        "name": "Lao National Rad",
-        "url": "https://radio.lnr.org.la/am"
-      },
-      {
         "name": "Buengkan Radio",
         "url": "https://c16.radioboss.fm:8332/stream"
       },
@@ -562106,10 +561618,6 @@
       {
         "name": "Futuro Fm",
         "url": "https://server1.emitironline.com:8040/;"
-      },
-      {
-        "name": "Global Rad Fm",
-        "url": "https://stream.rcast.net/68409"
       },
       {
         "name": "Cadena 100",
@@ -568558,10 +568066,6 @@
       {
         "name": "1449Am Rta3",
         "url": "http://ohmi-design.com:9114/;"
-      },
-      {
-        "name": "Health Rad Fm 92",
-        "url": "http://radio.siamtoday.in.th:8188/;stream.mp3"
       },
       {
         "name": "Link 95.5",
@@ -575150,10 +574654,6 @@
       {
         "name": "Mountain Tk 97.1",
         "url": "https://ice6.securenetsystems.net/KJMT"
-      },
-      {
-        "name": "Kbkg-Fm",
-        "url": "https://s5.radio.co/s853d9671d/listen"
       },
       {
         "name": "Kffb Fm 106.1",
@@ -585196,10 +584696,6 @@
         "url": "https://cast3.my-control-panel.com/proxy/starfmky/stream"
       },
       {
-        "name": "Health Rad Fm 92",
-        "url": "http://radio.siamtoday.in.th:8188/;stream.mp3"
-      },
-      {
         "name": "Lela 101 Fm Onai",
         "url": "https://plus.onair.network:8170/my"
       },
@@ -585622,10 +585118,6 @@
       {
         "name": "Wddt Online Rad",
         "url": "https://ais-edge08-live365-dal02.cdnstream.com/a40850"
-      },
-      {
-        "name": "Wymx 99.1 Fm The",
-        "url": "http://18.234.154.142/telesouth-wymxfmaac-imc1?session-id=9635152a6097a3acf00171db2d5b1170"
       },
       {
         "name": "Wmpn-Fm Mus Rad",
