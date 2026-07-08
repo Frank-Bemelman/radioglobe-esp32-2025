@@ -21,6 +21,12 @@ uint16_t TrackFromPlayListToPlay = 0;
 bool CheckSD(void)
 { if (!SD.begin(SD_CS, *hspi, 40000000)) // 40000000 works and so does 80000000, no difference though
   { Serial.println("[ERROR] No SD card present");
+    if(GlobeSettings.sdcard_present == 1)
+    { // wrong in config
+      GlobeSettings.sdcard_present = 0;
+      EEPROM.put(0x0, GlobeSettings);
+      EEPROM.commit();
+    }
     return false;
   } 
   else 
@@ -29,6 +35,12 @@ bool CheckSD(void)
     Serial.print("[INFO] Capacity SD: ");
     Serial.print(SD.cardSize() / (1024 * 1024));
     Serial.println("MB");
+    if(GlobeSettings.sdcard_present == 0)
+    { // wrong in config
+      GlobeSettings.sdcard_present = 1;
+      EEPROM.put(0x0, GlobeSettings);
+      EEPROM.commit();
+    }
     return true;
   }
 }
@@ -38,6 +50,12 @@ bool CheckSD(void)
 void StartPlayFromSD(void)
 { static char PrevCountryCodeSelectorSD[3] = "";
   Serial.println("Play from SD as requested by puck ");
+
+  if(GlobeSettings.sdcard_present == 0)
+  { Serial.printf("StartPlayFromSD() -> GlobeSettings.sdcard_present indicates No SD card!!!\n");
+    return;
+  }
+  else Serial.printf("StartPlayFromSD() -> Let's go!\n");
 
   // force a reload from SD
   if(strcmp(PrevCountryCodeSelectorSD, CountryCodeSelectorSD) !=NULL)
@@ -66,9 +84,7 @@ void StartPlayFromSD(void)
     AddToQueueForDisplay(ActiveStationTitle, MESSAGE_STATION_NAME);
     DataFromGlobe.D_QueueStationIndex = -1; // forget radiostation playing
     PlaylistTracks=0;
-    if(GlobeSettings.sdcard_present)CollectFilePathsForCountry(CountryCodeSelectorSD);
-    else Serial.printf("No SD card???\n");
-    
+    CollectFilePathsForCountry(CountryCodeSelectorSD);
   }
 
  

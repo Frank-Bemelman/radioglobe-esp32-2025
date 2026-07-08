@@ -326,8 +326,7 @@ void setup()
   // start SD card
   hspi = new SPIClass (HSPI);
   hspi->begin(SD_CLK, SD_MISO, SD_MOSI, SD_CS);
-  if(CheckSD())GlobeSettings.sdcard_present = 1;
-  else GlobeSettings.sdcard_present = 0;
+  CheckSD(); // also updates GlobeSettings.sdcard_present and eeprom update if need be
 
   if(GlobeSettings.btmodule_power_on) digitalWrite(BT_POWER_PIN, HIGH);  // turn on
   else digitalWrite(BT_POWER_PIN, LOW);  // turn off
@@ -499,7 +498,7 @@ void setup()
   else Serial.printf("MDNS setup of %s.local succes!\n", message);
     
 
-  if(GlobeSettings.sdcard_present)
+  if(GlobeSettings.sdcard_present == 1)
   { ftp.begin("globe", "globe");
     Serial.println("FTP gestart!");
     Serial.println(WiFi.localIP());
@@ -533,7 +532,9 @@ void loop()
   static char PreviousUrl[QUEUEMESSAGELENGTH] =""; // holds the url requested by display
   static bool bFirst = true;
   
-   if(GlobeSettings.sdcard_present)ftp.handleFTP();
+   if(GlobeSettings.sdcard_present == 1)ftp.handleFTP();
+   else   Serial.printf("GlobeSettings.sdcard_present = %d\n", GlobeSettings.sdcard_present);
+
   loop2(); // checks portal button
   stream.loop();
   if(bMqttActivated==1234)loopMQTT();
@@ -1135,6 +1136,7 @@ void audio_showstation(const char* info)
   if(strcasecmp(stationname, "stream")==0)return; // ignore meaningless names
   if(strlen(stationname)<2)return; // ignore meaningless names
   if(strncmp(stationname, "Streaming by", 12) == 0) memmove(stationname, stationname + 12, strlen(stationname + 12) + 1); // remove nonsense
+  if(strncmp(stationname, "Radio Station Name:", 19) == 0) memmove(stationname, stationname + 19, strlen(stationname + 19) + 1); // remove nonsense
 
   ReplaceHtmlEntities(stationname);
   UTF8ToExtAscii(stationname);

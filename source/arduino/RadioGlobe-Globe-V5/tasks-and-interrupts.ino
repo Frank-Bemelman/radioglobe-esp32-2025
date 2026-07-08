@@ -127,7 +127,7 @@ void ReadAS5600Encoders(void * pvParameters)
     if((abs(NSFilteredRAW - AverageNS[(AverageIdx-1)%4])<8) && (abs(EWFilteredRAW - AverageEW[(AverageIdx-1)%4])<8))
     { // pretty stable
       if(stable100ms<10000)stable100ms++;
-      if(EncoderReliable && (stable100ms>5))
+      if(EncoderReliable && (stable100ms>9))
       { stable = true;
         if(LedAnimationBrightness)LedAnimationBrightness-=5; // brigthness dims down in roughly 2.5 seconds
         //stream.forceVolume(0);
