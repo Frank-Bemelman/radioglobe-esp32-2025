@@ -705,11 +705,11 @@ void RadioGlobeClick(lv_event_t * e)
   lv_event_code_t event_code = lv_event_get_code(e);
 
   clicktime = isLongPressedV2(e);
-  Serial.printf("RadioGlobeClick() clicktime = %d\n", clicktime);
+  //Serial.printf("RadioGlobeClick() clicktime = %d\n", clicktime);
   
   if(clicktime==0) // normal click
   { if(!bMusicMode)
-    { Serial.printf("!bMusicMode RadioGlobeClick() Stations.count = %d\n", Stations.count);
+    { //Serial.printf("!bMusicMode RadioGlobeClick() Stations.count = %d\n", Stations.count);
       if(Stations.count == 0)
       { SetFlag("xxxx");
         lv_obj_add_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // hide city name until new country code is received
@@ -723,27 +723,35 @@ void RadioGlobeClick(lv_event_t * e)
       }
     }
     else
-    { Serial.printf("bMusicMode RadioGlobeClick() Stations.count = %d\n", Stations.count);
+    { //Serial.printf("bMusicMode RadioGlobeClick() Stations.count = %d\n", Stations.count);
       ReloadScroll();
     }
+    beepforMs(50);
     lv_scr_load(ui_StationSelectScreen);
     startMillis = millis(); 
     Serial.printf("RadioGlobeClick() return\n");
   }  
 
-  if(clicktime==5) // long press
-  { Serial.printf("RadioGlobeClick LV_EVENT_LONG_PRESSED_REPEAT \n");
-    
+  if(clicktime==5) // long press, toggle between radio/music mode
+  { //Serial.printf("RadioGlobeClick clicktime==5 LV_EVENT_LONG_PRESSED_REPEAT \n");
     if(!bMusicMode)
-    { Serial.printf("!bMusicMode RadioGlobeClick LV_EVENT_LONG_PRESSED_REPEAT \n");
-      beepforMs(50);
-      //if(isLongPressed(e)==5)
-      { SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
-        AddToQueueForGlobe("", MESSAGE_GLOBE_PLAY_SD);
+    { if(DisplaySettings.sdcard_present==1) // only provide this functionality if globe has an SD card
+      { //Serial.printf("Radio -> Music Mode LV_EVENT_LONG_PRESSED_REPEAT \n");
+        beepforMs(50);
+        SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
+        AddToQueueForGlobe("", MESSAGE_GLOBE_PLAY_SD); // instructs the globe to prepare a list of songs from the SD card
+        bMusicMode = true;
       }  
-    }  
+    } 
+    else
+    { // back to radio
+      //Serial.printf("Music -> Radio Mode LV_EVENT_LONG_PRESSED_REPEAT \n");
+      beepforMs(50);
+      bMusicMode = false;
+      FindNewStation();
+      ReloadScroll();
+    } 
   }
-  
 }
 
 void ReloadScroll(void)
@@ -861,27 +869,64 @@ void StationScroll(lv_event_t * e)
 uint16_t AddToScroll(char * songartist)
 { char *p;
   char *q;
+  uint16_t len;
 
   if(Stations.count >= 25)return Stations.count;
   //Serial.printf("songartist -> %s\n", songartist);
 
   strcpy(Stations.StationNUG[Stations.count].url, songartist);
-  // get song name from url
-  if((p=strrchr(songartist, '/'))!= NULL)
-  { if((q=strrchr(songartist, '.'))!= NULL)*q=0;
-    Serial.printf("songartist has / -> %s\n", songartist);
-    //Serial.printf("songartist without / and without ext / -> %s count = %d\n", p+1, Stations.count);
-    // example  /GLOBEMUSIC/HT/Emeline_Michel/Emeline_Michel_-_Reine_De_Coeur_-_2008/08_Yon_Ti_Mo.mp3
-    p++; // skip the '/'
 
-    if(isdigit(*p) && isdigit(*(p+1)) && *(p+2)==' ')p+=3; // skip the track number if part of songname
-    else if( isalpha(*p) && isdigit(*(p+1)) && isdigit(*(p+2)) && *(p+3)=='-')p+=4; // skip the track number of jukebox files
-    RemoveUTF8Unprintables(p); // converts to extended ascii where possible (todo make font table extended too)
-    strcpy(Stations.StationNUG[Stations.count].name, p);
-  } 
-  else
-  { strcpy(Stations.StationNUG[Stations.count].name, "NULL");
+  // get filename part from url
+  // example  /GLOBEMUSIC/HT/Emeline_Michel/Emeline_Michel_-_Reine_De_Coeur_-_2008/08_Yon_Ti_Mo.mp3
+  if((q=strrchr(songartist, '.'))!= NULL)*q=0; // first, terminate at .mp3
+
+  if((p=strrchr(songartist, '/'))!= NULL) // last '/' in string
+  { p++; // skip the '/'
+    Serial.printf("songartist has / -> %s\n", p);
   }
+  else p = songartist; // start at begin again
+  
+  // now we have the filename without extension 
+  // replace underscores with spaces
+  for (int i = 0; p[i] != '\0'; i++) 
+  { if (p[i] == '_')  p[i] = ' ';
+  }
+  Serial.printf("songartist without underscores -> %s\n", p);
+
+  if(isdigit(*p) && isdigit(*(p+1)) && *(p+2)==' ')p+=3; // skip the track number if part of songname
+  else if( isalpha(*p) && isdigit(*(p+1)) && isdigit(*(p+2)) && *(p+3)=='-')p+=4; // skip the track number of jukebox files
+  RemoveUTF8Unprintables(p); // converts to extended ascii where possible (todo make font table extended too)
+
+  // if too long, mayby splice if it is artis - songtitle format
+  if(strlen(p)>20)
+  { if((q = strchr(p, '-')) != NULL)
+    { q++;
+      len = strlen(q);
+      memmove(p, q, len);
+      p[len]=0;
+    }
+  }
+  Serial.printf("songartist split at >-< -> %s\n", p);
+  // remove leading spaces just in case
+  // todo
+  q = p;
+  while(*q != 0 && *q == ' ')q++;
+  if(q != p)memmove(p, q, strlen(q) + 1);
+
+  // if still too long, mayby end at full word and add three dots
+  while((len = strlen(p))>20)
+  { if((q=strrchr(p, ' '))!= NULL) // last space in string
+    { strcpy(q, "...");
+      Serial.printf("shortened %s len was %d\n", p, len);
+    }
+    else break;
+  }
+
+  Serial.printf("songartist ended with dots if too long %s\n", p);
+
+
+  strcpy(Stations.StationNUG[Stations.count].name, p);
+
   Stations.count++;
   ScrollNeedsReload = true;
   return Stations.count;
