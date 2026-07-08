@@ -732,16 +732,14 @@ void RadioGlobeClick(lv_event_t * e)
     Serial.printf("RadioGlobeClick() return\n");
   }  
 
-  if(clicktime==5) // long press, toggle between radio/music mode
+  if(clicktime==5 && DisplaySettings.globe_has_sdcard==1 ) // long press, toggle between radio/music mode
   { //Serial.printf("RadioGlobeClick clicktime==5 LV_EVENT_LONG_PRESSED_REPEAT \n");
     if(!bMusicMode)
-    { if(DisplaySettings.sdcard_present==1) // only provide this functionality if globe has an SD card
-      { //Serial.printf("Radio -> Music Mode LV_EVENT_LONG_PRESSED_REPEAT \n");
-        beepforMs(50);
-        SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
-        AddToQueueForGlobe("", MESSAGE_GLOBE_PLAY_SD); // instructs the globe to prepare a list of songs from the SD card
-        bMusicMode = true;
-      }  
+    { //Serial.printf("Radio -> Music Mode LV_EVENT_LONG_PRESSED_REPEAT \n");
+      beepforMs(50);
+      SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
+      AddToQueueForGlobe("", MESSAGE_GLOBE_PLAY_SD); // instructs the globe to prepare a list of songs from the SD card
+      bMusicMode = true;
     } 
     else
     { // back to radio
@@ -895,9 +893,11 @@ uint16_t AddToScroll(char * songartist)
 
   if(isdigit(*p) && isdigit(*(p+1)) && *(p+2)==' ')p+=3; // skip the track number if part of songname
   else if( isalpha(*p) && isdigit(*(p+1)) && isdigit(*(p+2)) && *(p+3)=='-')p+=4; // skip the track number of jukebox files
+  else if( isdigit(*p) && isdigit(*(p+1)) && isalpha(*(p+2)))p+=2; // skip numbers as 07A
+  
   RemoveUTF8Unprintables(p); // converts to extended ascii where possible (todo make font table extended too)
 
-  // if too long, mayby splice if it is artis - songtitle format
+  // if too long, maybe splice if it is format artist - songtitle format
   if(strlen(p)>20)
   { if((q = strchr(p, '-')) != NULL)
     { q++;
