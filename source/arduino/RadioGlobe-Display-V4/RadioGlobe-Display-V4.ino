@@ -186,7 +186,8 @@ EXT_RAM_ATTR calibrations_arraybin def_cal;
 uint16_t CalToIndexNS;
 uint16_t CalToIndexEW;
 bool bPowerStatus = true;
-#define AUTOPOWERDOWNAFTER 8 * 3600; // auto power after 12HR 
+#define AUTOPOWERDOWNAFTER 8 * 3600; // auto power after 8 hour
+//#define AUTOPOWERDOWNAFTER 10 * 60; // auto power after 10 minutes, for test
 uint32_t AutoSleepTimer = AUTOPOWERDOWNAFTER;
 
 #define DEFAULT_BACKLIGHT 75
@@ -1363,12 +1364,30 @@ void loop()
       newbatteryvoltage = ((analogReadMilliVolts(BAT_ADC_PIN) * 3) + 50) / 100; // read voltage in tenths of volts times 3 because of voltage divider 
       ShowBatteryLevel(-newbatteryvoltage);
       DataFromDisplay.D_BatteryVoltage = newbatteryvoltage;
-      if((PrevGlobalTicker1S%30)==0)
-      { Serial.print("AutoSleepTimer ->");
-        Serial.println(AutoSleepTimer);
-      }
+      //if((PrevGlobalTicker1S%30)==0)
+      //if((PrevGlobalTicker1S%1)==0)
+      //{ Serial.print("AutoSleepTimer ->");
+      //  Serial.println(AutoSleepTimer);
+      //}
       if(AutoSleepTimer)
       { AutoSleepTimer--;
+        if(AutoSleepTimer<DataFromDisplay.volumevalue)
+        { // lower the volume slowly when approaching power down 
+          sscanf(lv_label_get_text(ui_VolumeValue), "%d", &newvolumevalue);
+          if(newvolumevalue>1)
+          { newvolumevalue--;
+            sprintf(content, "%ld", newvolumevalue);
+            lv_label_set_text(ui_VolumeValue, content);
+            lv_arc_set_value(ui_VolumeArc, newvolumevalue);
+            DataFromDisplay.volumevalue = newvolumevalue;
+          }
+        }
+        else if(DataFromDisplay.volumevalue <2)
+        { // faster shutdown when user set the volume low already, 5 minutes
+          if(AutoSleepTimer>300)
+          { AutoSleepTimer=300;
+          }
+        }
         if(AutoSleepTimer==0)
         { if(bPowerStatus == true)
           { handlePowerCycle();

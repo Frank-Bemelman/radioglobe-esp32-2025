@@ -151,7 +151,7 @@ uint16_t isLongPressed(lv_event_t * e)
   { //Serial.printf("Eventcode = LV_EVENT_LONG_PRESSED_REPEAT\n");
     longpressed++;
   }
-  if(event_code == LV_EVENT_CLICKED) // 7
+  else if(event_code == LV_EVENT_CLICKED) // 7
   { //Serial.printf("Eventcode = LV_EVENT_CLICKED\n");
     longpressed = 0;
   }
@@ -232,7 +232,7 @@ void PowerCycle(lv_event_t * e)
 }
 
 void handlePowerCycle(void)
-{ beepforMs(50);
+{ if(AutoSleepTimer)beepforMs(50); // don't beep if we arrive here by countdown of AutoSleepTimer, do it all silente
     
     if(bPowerStatus == true)
     { // Power off
@@ -247,7 +247,9 @@ void handlePowerCycle(void)
       Lvgl_Loop();  
 
       
-      AddToQueueForGlobe("OFF", MESSAGE_POWERDOWN);
+      if(AutoSleepTimer) AddToQueueForGlobe("OFF", MESSAGE_POWERDOWN); // initiated by user
+      else AddToQueueForGlobe("OFF", MESSAGE_SILENT_POWER_DOWN); // intiated by countdown of AutoSleepTimer
+      
       // power down, backlight down
       while(BacklightValue)
       { Set_Backlight(--BacklightValue);    
@@ -654,7 +656,6 @@ void ShowBatteryLevel(int newbatteryvoltage) // 0 -> hide, >=1 -> show, negative
 
 
 // put the globe in 'play from SD' mode
-
 void GlobePlaySD(lv_event_t * e)
 { char content[128];
   lv_event_code_t event_code = lv_event_get_code(e);
@@ -671,8 +672,27 @@ void GlobePlaySD(lv_event_t * e)
   }  
 }
 
+// returns higher value when longer pressed
+int16_t isLongPressedV2(lv_event_t * e)
+{ static int16_t longpressed=0;
 
-
+  lv_event_code_t event_code = lv_event_get_code(e);
+  if(event_code == LV_EVENT_LONG_PRESSED_REPEAT) // 6
+  { if(longpressed<0)longpressed=0;
+    if(longpressed<1000)longpressed++;
+    //Serial.printf("isLongPressedV2 Eventcode = LV_EVENT_LONG_PRESSED_REPEAT %d\n", longpressed);
+    return longpressed;  
+  }
+  else if(event_code == LV_EVENT_CLICKED) // 7
+  { //Serial.printf("isLongPressedV2 Eventcode = LV_EVENT_CLICKED %d\n",longpressed);
+    if(longpressed>0)longpressed = -1;
+    else longpressed = 0;
+    //Serial.printf("isLongPressedV2 Eventcode = LV_EVENT_CLICKED %d\n",longpressed);
+    return longpressed;  
+  }
+  //Serial.printf("longpressed = %d\n", longpressed);
+  return longpressed;
+}
 
 
 
