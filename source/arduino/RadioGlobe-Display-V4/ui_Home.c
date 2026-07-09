@@ -87,7 +87,9 @@ void ui_event_Text_Radio_Globe(lv_event_t * e)
 
     if(event_code == LV_EVENT_CLICKED) {
         RadioGlobeClick(e);
-        beep(e);
+    }
+    if(event_code == LV_EVENT_LONG_PRESSED_REPEAT) {
+        RadioGlobeClick(e);
     }
 }
 
@@ -184,13 +186,13 @@ void ui_Home_screen_init(void)
     lv_obj_set_style_text_font(ui_HomeGps, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Local_Time = lv_label_create(ui_Home);
-    lv_obj_set_width(ui_Local_Time, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_width(ui_Local_Time, 125);
     lv_obj_set_height(ui_Local_Time, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_Local_Time, 0);
     lv_obj_set_y(ui_Local_Time, -189);
     lv_obj_set_align(ui_Local_Time, LV_ALIGN_CENTER);
     lv_label_set_long_mode(ui_Local_Time, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_label_set_text(ui_Local_Time, "STATION TIME  19:21");
+    lv_label_set_text(ui_Local_Time, "19:21");
     lv_obj_add_flag(ui_Local_Time, LV_OBJ_FLAG_CLICKABLE);     /// Flags
     ui_object_set_themeable_style_property(ui_Local_Time, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_COLOR,
                                            _ui_theme_color_turquoise);
@@ -200,12 +202,12 @@ void ui_Home_screen_init(void)
     lv_obj_set_style_text_font(ui_Local_Time, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Time_Zone = lv_label_create(ui_Home);
-    lv_obj_set_width(ui_Time_Zone, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_width(ui_Time_Zone, 283);
     lv_obj_set_height(ui_Time_Zone, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_Time_Zone, 0);
     lv_obj_set_y(ui_Time_Zone, -166);
     lv_obj_set_align(ui_Time_Zone, LV_ALIGN_CENTER);
-    lv_label_set_long_mode(ui_Time_Zone, LV_LABEL_LONG_CLIP);
+    lv_label_set_long_mode(ui_Time_Zone, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_label_set_text(ui_Time_Zone, "TIME ZONE");
     lv_obj_add_flag(ui_Time_Zone, LV_OBJ_FLAG_CLICKABLE);     /// Flags
     ui_object_set_themeable_style_property(ui_Time_Zone, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_COLOR,
@@ -243,11 +245,12 @@ void ui_Home_screen_init(void)
     lv_obj_set_style_text_font(ui_Station_Name, &ui_font_font1, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Status_Line = lv_label_create(ui_Home);
-    lv_obj_set_width(ui_Status_Line, LV_SIZE_CONTENT);   /// 150
-    lv_obj_set_height(ui_Status_Line, LV_SIZE_CONTENT);    /// 50
+    lv_obj_set_width(ui_Status_Line, 421);
+    lv_obj_set_height(ui_Status_Line, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_Status_Line, 0);
     lv_obj_set_y(ui_Status_Line, -49);
     lv_obj_set_align(ui_Status_Line, LV_ALIGN_CENTER);
+    lv_label_set_long_mode(ui_Status_Line, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_label_set_text(ui_Status_Line, "NOW PLAYING");
     lv_obj_set_style_text_color(ui_Status_Line, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Status_Line, 255, LV_PART_MAIN | LV_STATE_DEFAULT);

@@ -1,5 +1,5 @@
 
-// Using LVGL with Arduino requires some extra steps:
+// Using LVGL with Arduino requires some extra steps :
 // Be sure to read the docs here: https://docs.lvgl.io/master/get-started/platforms/arduino.html  */
 // #include "lv_conf.h" (root lib folder)
 // #include "lvgl.h" (loaded elsewere)
@@ -114,7 +114,7 @@ struct eepromData
   char google_api_key[64];
   char open_weather_map_api_key[64];
   uint16_t expand_search; // number of degrees to look around for a station
-  uint16_t sdcard_present;
+  uint16_t globe_has_sdcard;
   uint16_t auto_update_state = 0;
   
   char spare_data[];
@@ -347,7 +347,7 @@ void setup()
   lv_label_set_text(ui_Home_City, "");
   lv_label_set_text(ui_Home_Country, "");
   ShowWeatherData(false); // hide weather info
-  if(DisplaySettings.sdcard_present==1)lv_obj_clear_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
+  if(DisplaySettings.globe_has_sdcard==1)lv_obj_clear_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
   else lv_obj_add_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
 
 
@@ -448,7 +448,7 @@ void setup()
   AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION_BY_GPS);
   AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_BY_GPS);
 
-  //if(DisplaySettings.sdcard_present)
+  //if(DisplaySettings.globe_has_sdcard)
   //{ ftp.begin("guest", "guest");
   //  Serial.println("FTP gestart!");
   //  Serial.println(WiFi.localIP());
@@ -616,16 +616,14 @@ void loop()
         bInfoScreen = false;
         bDatabaseScreenUpdate = false;
         if(OldDisplaySettings.expand_search != DisplaySettings.expand_search)SaveDisplaySettingsToEeprom();
-        // keep the code for 1 re-enter setup
-        // if(strcmp(SecretCode, "GLOBE")!=0)strcpy(SecretCode,"12345");
       }
       monitor_update();
     }
 
     // process one or more queued messages from globe
     while((FromGlobe.QueueIndexIn != FromGlobe.QueueIndexOut) && !bFtpActive) // we have to catch up with new messages
-    { Serial.printf("FromGlobe.QueueIndexIn = %d FromGlobe.QueueIndexOut = %d\n", FromGlobe.QueueIndexIn, FromGlobe.QueueIndexOut);
-      Serial.printf("Messages from globe pending %d\n", FromGlobe.QueueCnt);
+    { //Serial.printf("FromGlobe.QueueIndexIn = %d FromGlobe.QueueIndexOut = %d\n", FromGlobe.QueueIndexIn, FromGlobe.QueueIndexOut);
+      //Serial.printf("Messages from globe pending %d\n", FromGlobe.QueueCnt);
       DataFromDisplay.G_QueueSerialNumber = DataFromGlobe.G_QueueSerialNumber; 
        // copy the essential message info into a more readable variable
       QueueMessageType = FromGlobe.QueueMessageType[FromGlobe.QueueIndexOut];
@@ -648,6 +646,7 @@ void loop()
             ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_red);
             lv_obj_set_style_bg_color(ui_SerialNumberButton, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_bg_opa(ui_SerialNumberButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_label_set_text(ui_TextSecretCodeToUnlock, "LONG PRESS ^ TO UPDATE");
           }
           else
           { ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_turquoise);
@@ -681,23 +680,25 @@ void loop()
         case MESSAGE_GOOGLE_API_KEY:
           break;
         case MESSAGE_TIMEZONE_ID:
-          AllUpperCase(QueueMessage);
-          lv_label_set_text(ui_Time_Zone, QueueMessage);
-          datetime.month = DataFromGlobe.timeinfo.tm_mon;
-          datetime.day = DataFromGlobe.timeinfo.tm_mday;
-          datetime.dotw = DataFromGlobe.timeinfo.tm_wday;
-          datetime.hour = DataFromGlobe.timeinfo.tm_hour; // + (timeinfo.tm_isdst>0)?1:0;
-          datetime.minute = DataFromGlobe.timeinfo.tm_min;
-          datetime.second = DataFromGlobe.timeinfo.tm_sec;
-          datetime.year = DataFromGlobe.timeinfo.tm_year;
-          PCF85063_Set_All(datetime);
-          // also set system wide clock as well, to get the right times and dates on files created 
-          now = mktime(&DataFromGlobe.timeinfo); // get it in epoch seconds 
-          // Serial.printf("NEW GLOBE EPOCH UTC SECONDS = %ld\n", (long)now);
-          settimeofday((const timeval *) &now, NULL);
-          strcpy(timezonename, QueueMessage);
-          sprintf(content, "%s\n%s %d-%s-%d\n%s",  timezonename, weekdays[datetime.dotw], (size_t)datetime.day, monthnames[datetime.month],  (size_t)datetime.year%100, partofday[datetime.hour/6]);
-          lv_label_set_text(ui_Time_Zone_Clock, content); // on clock screen
+          if(strlen(QueueMessage))
+          { AllUpperCase(QueueMessage);
+            lv_label_set_text(ui_Time_Zone, QueueMessage);
+            datetime.month = DataFromGlobe.timeinfo.tm_mon;
+            datetime.day = DataFromGlobe.timeinfo.tm_mday;
+            datetime.dotw = DataFromGlobe.timeinfo.tm_wday;
+            datetime.hour = DataFromGlobe.timeinfo.tm_hour; // + (timeinfo.tm_isdst>0)?1:0;
+            datetime.minute = DataFromGlobe.timeinfo.tm_min;
+            datetime.second = DataFromGlobe.timeinfo.tm_sec;
+            datetime.year = DataFromGlobe.timeinfo.tm_year;
+            PCF85063_Set_All(datetime);
+            // also set system wide clock as well, to get the right times and dates on files created 
+            now = mktime(&DataFromGlobe.timeinfo); // get it in epoch seconds 
+            // Serial.printf("NEW GLOBE EPOCH UTC SECONDS = %ld\n", (long)now);
+            settimeofday((const timeval *) &now, NULL);
+            strcpy(timezonename, QueueMessage);
+            sprintf(content, "%s\n%s %d-%s-%d\n%s",  timezonename, weekdays[datetime.dotw], (size_t)datetime.day, monthnames[datetime.month],  (size_t)datetime.year%100, partofday[datetime.hour/6]);
+            lv_label_set_text(ui_Time_Zone_Clock, content); // on clock screen
+          }  
           break;
            
         case MESSAGE_TIMEZONE_NAME:
@@ -734,7 +735,7 @@ void loop()
                 //lv_obj_add_flag(ui_Clock_Country, LV_OBJ_FLAG_HIDDEN); // hide country name 
                 ShowWeatherData(false); // hide weather info
                 //lv_label_set_text(ui_Station_Name, ""); // already done by globe signalling globe movement
-                lv_label_set_text(ui_Status_Line, "SEARCHING");
+                lv_label_set_text(ui_Status_Line, "");
                 //lv_label_set_text(ui_Station_Title, ""); // already done by globe signalling globe movement
                 Lvgl_Loop();  
                 lv_scr_load(ui_Home);
@@ -796,7 +797,6 @@ void loop()
           break; 
 
 
-        case MESSAGE_DEAD_STATION:
         case MESSAGE_AUDIO_EOF_STREAM:
           if(!bMusicMode)
           { //lv_label_set_text(ui_StationRollerComment, "");
@@ -810,11 +810,7 @@ void loop()
             if(DataFromGlobe.D_QueueMessageCount<10) // don't waste time logging when behind schedule
             { SD_MMC.end(); //??
               if(SD_MMC.begin("/sdcard", true, false))
-              { if(QueueMessageType == MESSAGE_DEAD_STATION)
-                { sprintf(logfile, "/badstations-%d.log", stream_connecttohost_result);
-                  AppendBadStationToFile(SD_MMC, logfile, QueueMessage);
-                }
-                if(QueueMessageType == MESSAGE_AUDIO_EOF_STREAM)AppendBadStationToFile(SD_MMC, "/audio-eof-stream.txt", QueueMessage);
+              { AppendBadStationToFile(SD_MMC, "/audio-eof-stream.txt", QueueMessage);
                 SD_MMC.end();
               }  
             }    
@@ -985,7 +981,7 @@ void loop()
                     if(SD_MMC.begin("/sdcard", true, false))
                     { strcpy(logfile, "/database-error.log");
                       AppendBadStationToFile(SD_MMC, logfile, QueueMessage);
-                      sprintf(content, "Error in Database - countrycode %s should be %s", Stations.StationNUG[Stations.requested].countrycode, countrycode);
+                      sprintf(content, "Error in Database - requested countrycode %s should be %s", Stations.StationNUG[Stations.requested].countrycode, countrycode);
                       AppendBadStationToFile(SD_MMC, logfile, content);
                       Serial.println(content);
                       sprintf(content, "                  - gps_ns = %f gps_ew = %f", Stations.StationNUG[Stations.requested].gps_ns, Stations.StationNUG[Stations.requested].gps_ew);
@@ -1174,9 +1170,9 @@ void loop()
           break;
 
         case MESSAGE_GLOBE_HAS_SD:
-          sscanf(QueueMessage, "%d", &DisplaySettings.sdcard_present);
-          if(OldDisplaySettings.sdcard_present != DisplaySettings.sdcard_present)SaveDisplaySettingsToEeprom();
-          if(DisplaySettings.sdcard_present==1)lv_obj_clear_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
+          sscanf(QueueMessage, "%d", &DisplaySettings.globe_has_sdcard);
+          if(OldDisplaySettings.globe_has_sdcard != DisplaySettings.globe_has_sdcard)SaveDisplaySettingsToEeprom();
+          if(DisplaySettings.globe_has_sdcard==1)lv_obj_clear_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
           else lv_obj_add_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
           break;
 
@@ -1234,6 +1230,7 @@ void loop()
           Serial.printf("New Hostname receivedAdress received from Globe = %s\n", QueueMessage);
           sprintf(content, "Globe Website %s", QueueMessage);
           lv_label_set_text(ui_GlobeMac, content);
+          break;
 
         default:
           Serial.printf("Unsupported message %d from globe: >%s<\n", QueueMessageType, QueueMessage);  
@@ -1275,14 +1272,12 @@ void loop()
     if(DataFromDisplay.bassvalue != newbassvalue)
     { DataFromDisplay.bassvalue = newbassvalue;
       BacklightValue = DEFAULT_BACKLIGHT;
-      AutoSleepTimer = AUTOPOWERDOWNAFTER;
     }
 
     sscanf(lv_label_get_text(ui_TrebleValue), "%d", &newtreblevalue);
     if(DataFromDisplay.treblevalue != newtreblevalue)
     { DataFromDisplay.treblevalue = newtreblevalue;
       BacklightValue = DEFAULT_BACKLIGHT;
-      AutoSleepTimer = AUTOPOWERDOWNAFTER;
     }
      
     
@@ -1321,7 +1316,6 @@ void loop()
       }
       PrevDataFromGlobe.ns = DataFromGlobe.ns;
       PrevDataFromGlobe.ew = DataFromGlobe.ew;
-      AutoSleepTimer = AUTOPOWERDOWNAFTER;
     } 
 
 
@@ -1369,10 +1363,10 @@ void loop()
       newbatteryvoltage = ((analogReadMilliVolts(BAT_ADC_PIN) * 3) + 50) / 100; // read voltage in tenths of volts times 3 because of voltage divider 
       ShowBatteryLevel(-newbatteryvoltage);
       DataFromDisplay.D_BatteryVoltage = newbatteryvoltage;
-      //if((PrevGlobalTicker1S%10)==0)
-      //{ Serial.print("AutoSleepTimer ->");
-      //  Serial.println(AutoSleepTimer);
-     // }
+      if((PrevGlobalTicker1S%30)==0)
+      { Serial.print("AutoSleepTimer ->");
+        Serial.println(AutoSleepTimer);
+      }
       if(AutoSleepTimer)
       { AutoSleepTimer--;
         if(AutoSleepTimer==0)
@@ -1444,7 +1438,7 @@ void loop()
     }  
      
 
-    // let's do a flashing semicolon between hours an minutes of clock
+    // let's do a flashing semicolon between hours an minutes of clock HH:MM
     if(screen == ui_Home) 
     { static uint32_t PrevTicker;
       if(PrevTicker != GlobalTicker100mS)
@@ -1480,7 +1474,9 @@ void loop()
 
     if(bMusicModePrev != bMusicMode)
     { bMusicModePrev = bMusicMode;
-      if(bMusicMode)lv_label_set_text(ui_Text_Radio_Globe, "MUSIC GLOBE");
+      if(bMusicMode)
+      { lv_label_set_text(ui_Text_Radio_Globe, "MUSIC GLOBE");
+      }  
       else lv_label_set_text(ui_Text_Radio_Globe, "RADIO GLOBE");
     } 
   }

@@ -367,7 +367,7 @@ void ui_PasswordScreen_screen_init(void)
     lv_obj_set_width(ui_SerialNumberText, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_SerialNumberText, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_SerialNumberText, 0);
-    lv_obj_set_y(ui_SerialNumberText, -190);
+    lv_obj_set_y(ui_SerialNumberText, -192);
     lv_obj_set_align(ui_SerialNumberText, LV_ALIGN_CENTER);
     lv_label_set_text(ui_SerialNumberText, "00");
     lv_obj_set_style_text_font(ui_SerialNumberText, &lv_font_montserrat_32, LV_PART_MAIN | LV_STATE_DEFAULT);

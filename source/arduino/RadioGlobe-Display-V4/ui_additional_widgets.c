@@ -175,7 +175,7 @@ void ui_additional_text_init(void)
   lv_obj_set_width(ui_ToneControlInstruction, LV_SIZE_CONTENT);   /// 327
   lv_obj_set_height(ui_ToneControlInstruction, LV_SIZE_CONTENT);    /// 1
   lv_obj_set_x(ui_ToneControlInstruction, 0);
-  lv_obj_set_y(ui_ToneControlInstruction, -110);
+  lv_obj_set_y(ui_ToneControlInstruction, -125);
   lv_obj_set_align(ui_ToneControlInstruction, LV_ALIGN_CENTER);
   lv_label_set_long_mode(ui_ToneControlInstruction, LV_LABEL_LONG_SCROLL_CIRCULAR);
   lv_label_set_text(ui_ToneControlInstruction, "Long Press Button To Save");
@@ -197,7 +197,7 @@ void ui_additional_text_init(void)
   lv_obj_set_width(ui_Text_Bass, LV_SIZE_CONTENT);   /// 1
   lv_obj_set_height(ui_Text_Bass, LV_SIZE_CONTENT);    /// 1
   lv_obj_set_x(ui_Text_Bass, -120);
-  lv_obj_set_y(ui_Text_Bass, 100);
+  lv_obj_set_y(ui_Text_Bass, 25);
   lv_obj_set_align(ui_Text_Bass, LV_ALIGN_CENTER);
   lv_label_set_text(ui_Text_Bass, "BASS");
   lv_obj_set_style_text_color(ui_Text_Bass, lv_color_hex(0xCCCCCC), LV_PART_MAIN | LV_STATE_DEFAULT);

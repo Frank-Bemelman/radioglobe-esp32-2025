@@ -20,8 +20,6 @@ extern lv_obj_t * ui_BassValue;
 extern void ui_event_TrebleArc(lv_event_t * e);
 extern lv_obj_t * ui_TrebleArc;
 extern lv_obj_t * ui_TrebleValue;
-extern void ui_event_HomeButton7(lv_event_t * e);
-extern lv_obj_t * ui_HomeButton7;
 extern lv_obj_t * ui_Text_Treble;
 extern void ui_event_SaveToneVol(lv_event_t * e);
 extern lv_obj_t * ui_SaveToneVol;
@@ -30,12 +28,13 @@ extern void ui_event_InternalSpeaker(lv_event_t * e);
 extern lv_obj_t * ui_InternalSpeaker;
 extern void ui_event_bluetoothswitch(lv_event_t * e);
 extern lv_obj_t * ui_bluetoothswitch;
-extern lv_obj_t * ui_Label1;
-extern lv_obj_t * ui_ledmqtt;
 extern lv_obj_t * ui_speakeron;
 extern lv_obj_t * ui_speakeroff;
 extern lv_obj_t * ui_bluetoothon;
 extern lv_obj_t * ui_bluetoothoff;
+extern void ui_event_HomeButton7(lv_event_t * e);
+extern lv_obj_t * ui_HomeButton7;
+extern lv_obj_t * ui_ledmqtt;
 // CUSTOM VARIABLES
 extern lv_obj_t * uic_ToneControlScreen;
 extern lv_obj_t * uic_BassArc;
@@ -47,11 +46,11 @@ extern lv_obj_t * uic_SaveToneVol;
 extern lv_obj_t * uic_SaveToneVolText;
 extern lv_obj_t * uic_InternalSpeaker;
 extern lv_obj_t * uic_bluetoothswitch;
-extern lv_obj_t * uic_ledmqtt;
 extern lv_obj_t * uic_speakeron;
 extern lv_obj_t * uic_speakeroff;
 extern lv_obj_t * uic_bluetoothon;
 extern lv_obj_t * uic_bluetoothoff;
+extern lv_obj_t * uic_ledmqtt;
 
 #ifdef __cplusplus
 } /*extern "C"*/

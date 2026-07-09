@@ -5,11 +5,11 @@
 
 #include "ui.h"
 
+lv_obj_t * uic_ledmqtt;
 lv_obj_t * uic_bluetoothoff;
 lv_obj_t * uic_bluetoothon;
 lv_obj_t * uic_speakeroff;
 lv_obj_t * uic_speakeron;
-lv_obj_t * uic_ledmqtt;
 lv_obj_t * uic_bluetoothswitch;
 lv_obj_t * uic_InternalSpeaker;
 lv_obj_t * uic_SaveToneVolText;
@@ -25,18 +25,17 @@ lv_obj_t * ui_BassArc = NULL;
 lv_obj_t * ui_BassValue = NULL;
 lv_obj_t * ui_TrebleArc = NULL;
 lv_obj_t * ui_TrebleValue = NULL;
-lv_obj_t * ui_HomeButton7 = NULL;
 lv_obj_t * ui_Text_Treble = NULL;
 lv_obj_t * ui_SaveToneVol = NULL;
 lv_obj_t * ui_SaveToneVolText = NULL;
 lv_obj_t * ui_InternalSpeaker = NULL;
 lv_obj_t * ui_bluetoothswitch = NULL;
-lv_obj_t * ui_Label1 = NULL;
-lv_obj_t * ui_ledmqtt = NULL;
 lv_obj_t * ui_speakeron = NULL;
 lv_obj_t * ui_speakeroff = NULL;
 lv_obj_t * ui_bluetoothon = NULL;
 lv_obj_t * ui_bluetoothoff = NULL;
+lv_obj_t * ui_HomeButton7 = NULL;
+lv_obj_t * ui_ledmqtt = NULL;
 // event funtions
 void ui_event_BassArc(lv_event_t * e)
 {
@@ -55,16 +54,6 @@ void ui_event_TrebleArc(lv_event_t * e)
 
     if(event_code == LV_EVENT_VALUE_CHANGED) {
         _ui_arc_set_text_value(ui_TrebleValue, target, "", "");
-    }
-}
-
-void ui_event_HomeButton7(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-    if(event_code == LV_EVENT_CLICKED) {
-        _ui_screen_change(&ui_Home, LV_SCR_LOAD_ANIM_NONE, 500, 0, &ui_Home_screen_init);
-        beep(e);
     }
 }
 
@@ -100,6 +89,16 @@ void ui_event_bluetoothswitch(lv_event_t * e)
     }
 }
 
+void ui_event_HomeButton7(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_CLICKED) {
+        _ui_screen_change(&ui_Home, LV_SCR_LOAD_ANIM_NONE, 500, 0, &ui_Home_screen_init);
+        beep(e);
+    }
+}
+
 // build funtions
 
 void ui_ToneControlScreen_screen_init(void)
@@ -111,7 +110,7 @@ void ui_ToneControlScreen_screen_init(void)
     lv_obj_set_width(ui_BassArc, 200);
     lv_obj_set_height(ui_BassArc, 200);
     lv_obj_set_x(ui_BassArc, -120);
-    lv_obj_set_y(ui_BassArc, 30);
+    lv_obj_set_y(ui_BassArc, 0);
     lv_obj_set_align(ui_BassArc, LV_ALIGN_CENTER);
     lv_arc_set_value(ui_BassArc, 50);
 
@@ -125,7 +124,7 @@ void ui_ToneControlScreen_screen_init(void)
     lv_obj_set_width(ui_BassValue, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_BassValue, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_BassValue, -120);
-    lv_obj_set_y(ui_BassValue, 30);
+    lv_obj_set_y(ui_BassValue, -15);
     lv_obj_set_align(ui_BassValue, LV_ALIGN_CENTER);
     lv_label_set_text(ui_BassValue, "50");
     lv_obj_set_style_text_color(ui_BassValue, lv_color_hex(0xCCCCCC), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -137,7 +136,7 @@ void ui_ToneControlScreen_screen_init(void)
     lv_obj_set_width(ui_TrebleArc, 200);
     lv_obj_set_height(ui_TrebleArc, 200);
     lv_obj_set_x(ui_TrebleArc, 120);
-    lv_obj_set_y(ui_TrebleArc, 30);
+    lv_obj_set_y(ui_TrebleArc, 0);
     lv_obj_set_align(ui_TrebleArc, LV_ALIGN_CENTER);
     lv_arc_set_value(ui_TrebleArc, 50);
 
@@ -151,7 +150,7 @@ void ui_ToneControlScreen_screen_init(void)
     lv_obj_set_width(ui_TrebleValue, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_TrebleValue, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_TrebleValue, 120);
-    lv_obj_set_y(ui_TrebleValue, 30);
+    lv_obj_set_y(ui_TrebleValue, -15);
     lv_obj_set_align(ui_TrebleValue, LV_ALIGN_CENTER);
     lv_label_set_text(ui_TrebleValue, "50");
     lv_obj_set_style_text_color(ui_TrebleValue, lv_color_hex(0xCCCCCC), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -159,25 +158,11 @@ void ui_ToneControlScreen_screen_init(void)
     lv_obj_set_style_text_font(ui_TrebleValue, &lv_font_montserrat_48, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_opa(ui_TrebleValue, 0, LV_PART_MAIN | LV_STATE_DISABLED);
 
-    ui_HomeButton7 = lv_img_create(ui_ToneControlScreen);
-    lv_img_set_src(ui_HomeButton7, &ui_img_home_png);
-    lv_obj_set_width(ui_HomeButton7, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_HomeButton7, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_HomeButton7, 0);
-    lv_obj_set_y(ui_HomeButton7, 195);
-    lv_obj_set_align(ui_HomeButton7, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_HomeButton7, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
-    lv_obj_clear_flag(ui_HomeButton7, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    ui_object_set_themeable_style_property(ui_HomeButton7, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
-                                           _ui_theme_color_turquoise);
-    ui_object_set_themeable_style_property(ui_HomeButton7, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
-                                           _ui_theme_alpha_turquoise);
-
     ui_Text_Treble = lv_label_create(ui_ToneControlScreen);
     lv_obj_set_width(ui_Text_Treble, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Text_Treble, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_Text_Treble, 120);
-    lv_obj_set_y(ui_Text_Treble, 100);
+    lv_obj_set_y(ui_Text_Treble, 25);
     lv_obj_set_align(ui_Text_Treble, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Text_Treble, "TREBLE");
     lv_obj_set_style_text_color(ui_Text_Treble, lv_color_hex(0xCCCCCC), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -188,7 +173,7 @@ void ui_ToneControlScreen_screen_init(void)
     lv_obj_set_width(ui_SaveToneVol, 200);
     lv_obj_set_height(ui_SaveToneVol, 50);
     lv_obj_set_x(ui_SaveToneVol, 0);
-    lv_obj_set_y(ui_SaveToneVol, -160);
+    lv_obj_set_y(ui_SaveToneVol, -175);
     lv_obj_set_align(ui_SaveToneVol, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_SaveToneVol, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_SaveToneVol, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
@@ -207,7 +192,7 @@ void ui_ToneControlScreen_screen_init(void)
     lv_obj_set_width(ui_SaveToneVolText, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_SaveToneVolText, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_SaveToneVolText, 0);
-    lv_obj_set_y(ui_SaveToneVolText, -160);
+    lv_obj_set_y(ui_SaveToneVolText, -175);
     lv_obj_set_align(ui_SaveToneVolText, LV_ALIGN_CENTER);
     lv_label_set_text(ui_SaveToneVolText, "SAVE THIS");
     lv_obj_set_style_text_color(ui_SaveToneVolText, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -218,25 +203,84 @@ void ui_ToneControlScreen_screen_init(void)
     lv_obj_set_width(ui_InternalSpeaker, 50);
     lv_obj_set_height(ui_InternalSpeaker, 25);
     lv_obj_set_x(ui_InternalSpeaker, 120);
-    lv_obj_set_y(ui_InternalSpeaker, 145);
+    lv_obj_set_y(ui_InternalSpeaker, 115);
     lv_obj_set_align(ui_InternalSpeaker, LV_ALIGN_CENTER);
 
     ui_bluetoothswitch = lv_switch_create(ui_ToneControlScreen);
     lv_obj_set_width(ui_bluetoothswitch, 50);
     lv_obj_set_height(ui_bluetoothswitch, 25);
     lv_obj_set_x(ui_bluetoothswitch, -120);
-    lv_obj_set_y(ui_bluetoothswitch, 145);
+    lv_obj_set_y(ui_bluetoothswitch, 115);
     lv_obj_set_align(ui_bluetoothswitch, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_bluetoothswitch, LV_OBJ_FLAG_HIDDEN);     /// Flags
 
-    ui_Label1 = lv_label_create(ui_ToneControlScreen);
-    lv_obj_set_width(ui_Label1, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Label1, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Label1, -43);
-    lv_obj_set_y(ui_Label1, 145);
-    lv_obj_set_align(ui_Label1, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label1, "INTERNAL SPEAKER ON/OFF");
-    lv_obj_add_flag(ui_Label1, LV_OBJ_FLAG_HIDDEN);     /// Flags
+    ui_speakeron = lv_img_create(ui_ToneControlScreen);
+    lv_img_set_src(ui_speakeron, &ui_img_volume_up_48x48_png);
+    lv_obj_set_width(ui_speakeron, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_speakeron, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_speakeron, 120);
+    lv_obj_set_y(ui_speakeron, 145);
+    lv_obj_set_align(ui_speakeron, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_speakeron, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_clear_flag(ui_speakeron, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_img_set_zoom(ui_speakeron, 128);
+    ui_object_set_themeable_style_property(ui_speakeron, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
+                                           _ui_theme_color_turquoise);
+    ui_object_set_themeable_style_property(ui_speakeron, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
+                                           _ui_theme_alpha_turquoise);
+
+    ui_speakeroff = lv_img_create(ui_ToneControlScreen);
+    lv_img_set_src(ui_speakeroff, &ui_img_volume_off_48x48_png);
+    lv_obj_set_width(ui_speakeroff, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_speakeroff, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_speakeroff, 120);
+    lv_obj_set_y(ui_speakeroff, 145);
+    lv_obj_set_align(ui_speakeroff, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_speakeroff, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_clear_flag(ui_speakeroff, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_img_set_zoom(ui_speakeroff, 128);
+    lv_obj_set_style_img_recolor(ui_speakeroff, lv_color_hex(0x7F7F7F), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor_opa(ui_speakeroff, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_bluetoothon = lv_img_create(ui_ToneControlScreen);
+    lv_img_set_src(ui_bluetoothon, &ui_img_bt_connected_png);
+    lv_obj_set_width(ui_bluetoothon, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_bluetoothon, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_bluetoothon, -120);
+    lv_obj_set_y(ui_bluetoothon, 145);
+    lv_obj_set_align(ui_bluetoothon, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_bluetoothon, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_clear_flag(ui_bluetoothon, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_object_set_themeable_style_property(ui_bluetoothon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
+                                           _ui_theme_color_turquoise);
+    ui_object_set_themeable_style_property(ui_bluetoothon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
+                                           _ui_theme_alpha_turquoise);
+
+    ui_bluetoothoff = lv_img_create(ui_ToneControlScreen);
+    lv_img_set_src(ui_bluetoothoff, &ui_img_bt_png);
+    lv_obj_set_width(ui_bluetoothoff, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_bluetoothoff, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_bluetoothoff, -120);
+    lv_obj_set_y(ui_bluetoothoff, 145);
+    lv_obj_set_align(ui_bluetoothoff, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_bluetoothoff, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_clear_flag(ui_bluetoothoff, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_img_recolor(ui_bluetoothoff, lv_color_hex(0x7F7F7F), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor_opa(ui_bluetoothoff, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_HomeButton7 = lv_img_create(ui_ToneControlScreen);
+    lv_img_set_src(ui_HomeButton7, &ui_img_home_png);
+    lv_obj_set_width(ui_HomeButton7, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_HomeButton7, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_HomeButton7, 0);
+    lv_obj_set_y(ui_HomeButton7, 195);
+    lv_obj_set_align(ui_HomeButton7, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_HomeButton7, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_clear_flag(ui_HomeButton7, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_object_set_themeable_style_property(ui_HomeButton7, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
+                                           _ui_theme_color_turquoise);
+    ui_object_set_themeable_style_property(ui_HomeButton7, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
+                                           _ui_theme_alpha_turquoise);
 
     ui_ledmqtt = lv_img_create(ui_ToneControlScreen);
     lv_img_set_src(ui_ledmqtt, &ui_img_circle16x16_png);
@@ -253,68 +297,12 @@ void ui_ToneControlScreen_screen_init(void)
     ui_object_set_themeable_style_property(ui_ledmqtt, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
                                            _ui_theme_alpha_yellow);
 
-    ui_speakeron = lv_img_create(ui_ToneControlScreen);
-    lv_img_set_src(ui_speakeron, &ui_img_volume_up_48x48_png);
-    lv_obj_set_width(ui_speakeron, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_speakeron, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_speakeron, 120);
-    lv_obj_set_y(ui_speakeron, 175);
-    lv_obj_set_align(ui_speakeron, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_speakeron, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
-    lv_obj_clear_flag(ui_speakeron, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_img_set_zoom(ui_speakeron, 128);
-    ui_object_set_themeable_style_property(ui_speakeron, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
-                                           _ui_theme_color_turquoise);
-    ui_object_set_themeable_style_property(ui_speakeron, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
-                                           _ui_theme_alpha_turquoise);
-
-    ui_speakeroff = lv_img_create(ui_ToneControlScreen);
-    lv_img_set_src(ui_speakeroff, &ui_img_volume_off_48x48_png);
-    lv_obj_set_width(ui_speakeroff, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_speakeroff, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_speakeroff, 120);
-    lv_obj_set_y(ui_speakeroff, 175);
-    lv_obj_set_align(ui_speakeroff, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_speakeroff, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
-    lv_obj_clear_flag(ui_speakeroff, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_img_set_zoom(ui_speakeroff, 128);
-    lv_obj_set_style_img_recolor(ui_speakeroff, lv_color_hex(0x7F7F7F), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor_opa(ui_speakeroff, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    ui_bluetoothon = lv_img_create(ui_ToneControlScreen);
-    lv_img_set_src(ui_bluetoothon, &ui_img_bt_connected_png);
-    lv_obj_set_width(ui_bluetoothon, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_bluetoothon, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_bluetoothon, -120);
-    lv_obj_set_y(ui_bluetoothon, 175);
-    lv_obj_set_align(ui_bluetoothon, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_bluetoothon, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
-    lv_obj_clear_flag(ui_bluetoothon, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    ui_object_set_themeable_style_property(ui_bluetoothon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
-                                           _ui_theme_color_turquoise);
-    ui_object_set_themeable_style_property(ui_bluetoothon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
-                                           _ui_theme_alpha_turquoise);
-
-    ui_bluetoothoff = lv_img_create(ui_ToneControlScreen);
-    lv_img_set_src(ui_bluetoothoff, &ui_img_bt_png);
-    lv_obj_set_width(ui_bluetoothoff, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_bluetoothoff, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_bluetoothoff, -120);
-    lv_obj_set_y(ui_bluetoothoff, 175);
-    lv_obj_set_align(ui_bluetoothoff, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_bluetoothoff, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
-    lv_obj_clear_flag(ui_bluetoothoff, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    ui_object_set_themeable_style_property(ui_bluetoothoff, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
-                                           _ui_theme_color_turquoise);
-    ui_object_set_themeable_style_property(ui_bluetoothoff, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
-                                           _ui_theme_alpha_turquoise);
-
     lv_obj_add_event_cb(ui_BassArc, ui_event_BassArc, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_TrebleArc, ui_event_TrebleArc, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_HomeButton7, ui_event_HomeButton7, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_SaveToneVol, ui_event_SaveToneVol, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_InternalSpeaker, ui_event_InternalSpeaker, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_bluetoothswitch, ui_event_bluetoothswitch, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_HomeButton7, ui_event_HomeButton7, LV_EVENT_ALL, NULL);
     uic_ToneControlScreen = ui_ToneControlScreen;
     uic_BassArc = ui_BassArc;
     uic_BassValue = ui_BassValue;
@@ -325,11 +313,11 @@ void ui_ToneControlScreen_screen_init(void)
     uic_SaveToneVolText = ui_SaveToneVolText;
     uic_InternalSpeaker = ui_InternalSpeaker;
     uic_bluetoothswitch = ui_bluetoothswitch;
-    uic_ledmqtt = ui_ledmqtt;
     uic_speakeron = ui_speakeron;
     uic_speakeroff = ui_speakeroff;
     uic_bluetoothon = ui_bluetoothon;
     uic_bluetoothoff = ui_bluetoothoff;
+    uic_ledmqtt = ui_ledmqtt;
 
 }
 
@@ -348,7 +336,6 @@ void ui_ToneControlScreen_screen_destroy(void)
     ui_TrebleArc = NULL;
     uic_TrebleValue = NULL;
     ui_TrebleValue = NULL;
-    ui_HomeButton7 = NULL;
     uic_Text_Treble = NULL;
     ui_Text_Treble = NULL;
     uic_SaveToneVol = NULL;
@@ -359,9 +346,6 @@ void ui_ToneControlScreen_screen_destroy(void)
     ui_InternalSpeaker = NULL;
     uic_bluetoothswitch = NULL;
     ui_bluetoothswitch = NULL;
-    ui_Label1 = NULL;
-    uic_ledmqtt = NULL;
-    ui_ledmqtt = NULL;
     uic_speakeron = NULL;
     ui_speakeron = NULL;
     uic_speakeroff = NULL;
@@ -370,5 +354,8 @@ void ui_ToneControlScreen_screen_destroy(void)
     ui_bluetoothon = NULL;
     uic_bluetoothoff = NULL;
     ui_bluetoothoff = NULL;
+    ui_HomeButton7 = NULL;
+    uic_ledmqtt = NULL;
+    ui_ledmqtt = NULL;
 
 }

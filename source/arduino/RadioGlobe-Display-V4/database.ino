@@ -876,27 +876,38 @@ uint16_t AddToScroll(char * songartist)
 
   // get filename part from url
   // example  /GLOBEMUSIC/HT/Emeline_Michel/Emeline_Michel_-_Reine_De_Coeur_-_2008/08_Yon_Ti_Mo.mp3
+
+  //GLOBE SAYS: PLAYLIST_SONG_ARTIST 60 >/GLOBEMUSIC/FR/Pascal Rogé/Poulenc- Chamber Music/03 Sextet for wind quintet & piano in C major- Prestissimo.mp3<
+  //songartist has / -> 03 Sextet for wind quintet & piano in C major- Prestissimo
+  //songartist without underscores -> 03 Sextet for wind quintet & piano in C major- Prestissimo
+  //songartist split at >-< ->  Prestissimo
+  //songartist ended with dots if too long Prestissimo
+
   if((q=strrchr(songartist, '.'))!= NULL)*q=0; // first, terminate at .mp3
 
   if((p=strrchr(songartist, '/'))!= NULL) // last '/' in string
   { p++; // skip the '/'
-    Serial.printf("songartist has / -> %s\n", p);
+    Serial.printf("songartist had / [%s]\n", p);
   }
   else p = songartist; // start at begin again
+  
+  RemoveUTF8Unprintables(p); // converts to extended ascii where possible (todo make font table extended too)
   
   // now we have the filename without extension 
   // replace underscores with spaces
   for (int i = 0; p[i] != '\0'; i++) 
   { if (p[i] == '_')  p[i] = ' ';
   }
-  Serial.printf("songartist without underscores -> %s\n", p);
+  Serial.printf("songartist without underscores [%s]\n", p);
 
   if(isdigit(*p) && isdigit(*(p+1)) && *(p+2)==' ')p+=3; // skip the track number if part of songname
   else if( isalpha(*p) && isdigit(*(p+1)) && isdigit(*(p+2)) && *(p+3)=='-')p+=4; // skip the track number of jukebox files
   else if( isdigit(*p) && isdigit(*(p+1)) && isalpha(*(p+2)))p+=2; // skip numbers as 07A
+  else if( isdigit(*p) && isdigit(*(p+1)) && isalpha(*(p+2)))p+=2; // skip numbers as 07A
+  Serial.printf("songartist initial cleanup -> [%s]\n", p);
+  if(*p=='-')p++; // skip leading '-' if any
+  if(*p==' ')p++; // skip leading space if any
   
-  RemoveUTF8Unprintables(p); // converts to extended ascii where possible (todo make font table extended too)
-
   // if too long, maybe splice if it is format artist - songtitle format
   if(strlen(p)>20)
   { if((q = strchr(p, '-')) != NULL)
@@ -904,11 +915,11 @@ uint16_t AddToScroll(char * songartist)
       len = strlen(q);
       memmove(p, q, len);
       p[len]=0;
+      Serial.printf("songartist split at >-< [%s]\n", p);
     }
   }
-  Serial.printf("songartist split at >-< -> %s\n", p);
+  
   // remove leading spaces just in case
-  // todo
   q = p;
   while(*q != 0 && *q == ' ')q++;
   if(q != p)memmove(p, q, strlen(q) + 1);
@@ -917,12 +928,12 @@ uint16_t AddToScroll(char * songartist)
   while((len = strlen(p))>20)
   { if((q=strrchr(p, ' '))!= NULL) // last space in string
     { strcpy(q, "...");
-      Serial.printf("shortened %s len was %d\n", p, len);
+      Serial.printf("shortened [%s] len was %d\n", p, len);
     }
     else break;
   }
 
-  Serial.printf("songartist ended with dots if too long %s\n", p);
+  Serial.printf("songartist ended with dots if too long [%s]\n", p);
 
 
   strcpy(Stations.StationNUG[Stations.count].name, p);

@@ -334,7 +334,7 @@ void ui_Favorites_screen_init(void)
     lv_obj_set_width(ui_GlobeRSSI, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_GlobeRSSI, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_GlobeRSSI, -160);
-    lv_obj_set_y(ui_GlobeRSSI, -40);
+    lv_obj_set_y(ui_GlobeRSSI, -45);
     lv_obj_set_align(ui_GlobeRSSI, LV_ALIGN_CENTER);
     lv_label_set_text(ui_GlobeRSSI, "-99dB");
     ui_object_set_themeable_style_property(ui_GlobeRSSI, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_COLOR,
@@ -346,7 +346,7 @@ void ui_Favorites_screen_init(void)
     lv_obj_set_width(ui_GlobeText, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_GlobeText, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_GlobeText, -160);
-    lv_obj_set_y(ui_GlobeText, -100);
+    lv_obj_set_y(ui_GlobeText, -95);
     lv_obj_set_align(ui_GlobeText, LV_ALIGN_CENTER);
     lv_label_set_text(ui_GlobeText, "Globe");
     ui_object_set_themeable_style_property(ui_GlobeText, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_COLOR,
@@ -372,7 +372,7 @@ void ui_Favorites_screen_init(void)
     lv_obj_set_width(ui_MemoryUsage, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_MemoryUsage, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_MemoryUsage, -160);
-    lv_obj_set_y(ui_MemoryUsage, 100);
+    lv_obj_set_y(ui_MemoryUsage, 95);
     lv_obj_set_align(ui_MemoryUsage, LV_ALIGN_CENTER);
     lv_label_set_text(ui_MemoryUsage, "00.0%");
     ui_object_set_themeable_style_property(ui_MemoryUsage, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_COLOR,
@@ -384,7 +384,7 @@ void ui_Favorites_screen_init(void)
     lv_obj_set_width(ui_MemoryText, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_MemoryText, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_MemoryText, -160);
-    lv_obj_set_y(ui_MemoryText, 40);
+    lv_obj_set_y(ui_MemoryText, 45);
     lv_obj_set_align(ui_MemoryText, LV_ALIGN_CENTER);
     lv_label_set_text(ui_MemoryText, "Memory");
     ui_object_set_themeable_style_property(ui_MemoryText, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_COLOR,
