@@ -4,25 +4,23 @@ The puck display goes black during the upgrade, just hang in there for a few min
 
 If your version does not have the auto-update yet, it takes a bit more work.
 
-First, download the two bin files for globe and display as found in the release.
+1) download the three bin files for globe (firmware) and display (firmware and new partition table) as found in the release.
+   These can all be uploaded using a chrome browser on PC and a webtool
+2) Browse to: https://thelastoutpostworkshop.github.io/ESPConnect/
+3) Connect Puck, use the blue connect button, select the USB port, and connect.
+   Select Flash Tools on the left.
+4) First flash the new partition file for the puck. Load it in the flashtool, select Recommended Offsets -> Partition Table • 0x8000 • 4 KB
+   Hit the large FLASH FIRMWARE bar/button.
+5) Load the RadioGlobe-Display.bin, select Recommended Offsets -> App0 0x10000 4MB
+   Hit the large FLASH FIRMWARE bar/button.
+6) Disconnect Puck, reset it with side button.
+7) Connect the Globe ESP32S3 to your PC. Use the blue connect button, select the USB port, and connect.
+8) Load the RadioGlobe-Globe.bin, select Recommended Offsets -> App0 0x10000 3MB
+   Hit the large FLASH FIRMWARE bar/button.
 
-These can be uploaded using a chrome browser on PC and a webtool
-
-Remove the globe’s ESP32 module, and connect it with a USB cable to your PC. 
-
-Don’t even try with a Mac, use a PC and use Chrome browser. 
-Browse to: https://thelastoutpostworkshop.github.io/ESPConnect/
-
-Use the blue connect button, select the USB port, and connect.
-Select Flash Tools on the left.
-Load the provided bin file with the new software.
-Select Recommended Offsets -> App0 0x10000 3MB
-Do NOT select anything else!!!
-Hit the large FLASH FIRMWARE bar/button.
-Software is now loaded into the device. This may take a minute.
-Unplug the ESP32 module and put it back in the globe. Check the orientation!
-
-Follow the same procedure for the puck, plug it it, connect, load the provided bin file for the puck, 
-set the recommend offset and flash the firmware. Reset the puck with the side button. 
+From now on, you can update automatically, no more fiddling with cables.
+Everytime you power down/up the globe using the puck, it will check for an update and the cogwheel will turn red if there is one available.
+You can also force a check for new updates, by long pressing the serial number in the setup menu.
+During an automatic update the puck goes black, don't worry, it will come back after 2-3 minutes.
 
 Enjoy & Good luck!
