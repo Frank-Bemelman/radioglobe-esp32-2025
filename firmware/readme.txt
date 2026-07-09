@@ -6,7 +6,7 @@ The puck display goes black during the upgrade, just hang in there for a few min
 HOWEVER!!! If your version does NOT have the auto-update feature yet, it takes a bit more work.
 Good news is, you only have to do this once.
 
-1) download the three bin files for globe (firmware) and display (firmware and new partition table) as found in the release.
+1) download the three bin files for globe (firmware) and puck (firmware and new partition table) as found in the release.
    These can all be uploaded using a chrome browser on PC and a webtool
 2) Browse to: https://thelastoutpostworkshop.github.io/ESPConnect/
 3) Connect Puck, use the blue connect button, select the USB port, and connect.
