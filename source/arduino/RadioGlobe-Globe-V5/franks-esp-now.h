@@ -34,7 +34,7 @@ const char * messagetexts[] = {
    { "FINDNEWSTATION 17"},
    { "GLOBE_MAC 18"},
    { "GLOBE_IP 19"},
-   { "DEAD_STATION 20"},
+   { "MESSAGE_FREE_TO_USE 20"},
    { "START_THIS_STATION 21"},
    { "PAUSE_RADIO 22"},
    { "RESUME_RADIO 23"},
@@ -105,9 +105,8 @@ const char * messagetexts[] = {
 #define MESSAGE_FINDNEWSTATION 17
 #define MESSAGE_GLOBE_MAC 18
 #define MESSAGE_GLOBE_IP 19
-#define MESSAGE_DEAD_STATION 20
-// as a result from a roller selection made
-#define MESSAGE_START_THIS_STATION 21
+#define MESSAGE_FREE_TO_USE 20 // can be used when needed
+#define MESSAGE_START_THIS_STATION 21 // as a result from a roller selection made
 #define MESSAGE_PAUSE_RADIO 22
 #define MESSAGE_RESUME_RADIO 23
 #define MESSAGE_WANT_NEXT_STATION 24

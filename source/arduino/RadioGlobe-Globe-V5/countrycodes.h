@@ -293,7 +293,7 @@ country_info CountryList[] =
  { "ZM", "Zambia", "Zambian Kwacha", "ZMW",	967, 0 },
  { "ZW", "Zimbabwe", "Zimbabwe Dollar", "ZWL", 932, 0 },
 
- { "XX", "XX-???", "Sardines", "", 0, 1}
+ { "XX", "XX-???", "Sardines", "", 0, 1.47}
 };
 
 

@@ -82,6 +82,8 @@ void StartPlayFromSD(void)
     AddToQueueForDisplay("1", MESSAGE_MUSIC_MODE);
     strcpy(ActiveStationTitle, "SD-Card Music Files");
     AddToQueueForDisplay(ActiveStationTitle, MESSAGE_STATION_NAME);
+    AddToQueueForDisplay("NOW PLAYING", MESSAGE_STATUS_LINE); // remove 'station name'
+
     DataFromGlobe.D_QueueStationIndex = -1; // forget radiostation playing
     PlaylistTracks=0;
     CollectFilePathsForCountry(CountryCodeSelectorSD);
@@ -106,6 +108,7 @@ void PlaySomethingFromSD(void)
 
 void PlayFromPlaylistByIndex(uint16_t idx)
 { char message[16];
+  char path_filename[256];
   if(idx < PlaylistTracks)
   {
     SetVolumeMapped(0);
@@ -114,15 +117,23 @@ void PlayFromPlaylistByIndex(uint16_t idx)
     { stream.stopSong(); // stop whatever stream or file was playing
     }  
 
-    stream.connectToFile(SD, Playlist[idx]); // play it
+    stream.connectToFile(SD, Playlist[idx]); // play this path/file
 
     if(stream.isRunning())
     { char *p;
       char *q;
+      strcpy(path_filename, Playlist[idx]+1); // copy without the leading '/' from path /GLOBEMUSIC/NL/....
       if((p=strrchr(Playlist[idx], '/'))!= NULL)
-      { strcpy(ActiveSongTitle, p+1);
-        if((q=strrchr(ActiveSongTitle, '.'))!= NULL)*q=0; // remove file extension
+      { // path/file -> use file
+        strcpy(ActiveSongTitle, p+1);
+        if((q=strrchr(ActiveSongTitle, '.'))!= NULL)*q=0; // remove file mp3 or whatever extension
         AddToQueueForDisplay(ActiveSongTitle, MESSAGE_SONG_TITLE);
+    
+        if((p=strrchr(path_filename, '/'))!= NULL)*p=0;
+        //sprintf(ActiveStationTitle, "SD-Card %s", path_filename);
+        sprintf(ActiveStationTitle, "%s", path_filename);
+        AddToQueueForDisplay(ActiveStationTitle, MESSAGE_STATION_NAME);
+
         sprintf(message, "%d", idx);
         AddToQueueForDisplay(message, MESSAGE_SET_ROLLER_INDEX); // adjust roller on puck
       }
