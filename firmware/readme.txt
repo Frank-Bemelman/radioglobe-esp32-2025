@@ -1,8 +1,10 @@
-Latest version has an easier auto update function. Go into settings on the puck, long press the serial number and it will upgrade
-both globe and puck, using the bin files from the release. First the globe upgrades automatically, then the puck will upgrade also.
+Latest version has an easier auto update function. It will signal a new update is available, if the cogwheel setup button is red. 
+Go into settings on the puck, long press the serial number and it will upgrade both globe and puck, using the bin files from the release. 
+First the globe upgrades automatically, then the puck will upgrade also.
 The puck display goes black during the upgrade, just hang in there for a few minutes - it will reboot after a few minutes.
 
-If your version does not have the auto-update yet, it takes a bit more work.
+HOWEVER!!! If your version does NOT have the auto-update feature yet, it takes a bit more work.
+Good news is, you only have to do this once.
 
 1) download the three bin files for globe (firmware) and display (firmware and new partition table) as found in the release.
    These can all be uploaded using a chrome browser on PC and a webtool
@@ -14,6 +16,7 @@ If your version does not have the auto-update yet, it takes a bit more work.
 5) Load the RadioGlobe-Display.bin, select Recommended Offsets -> App0 0x10000 4MB
    Hit the large FLASH FIRMWARE bar/button.
 6) Disconnect Puck, reset it with side button.
+
 7) Connect the Globe ESP32S3 to your PC. Use the blue connect button, select the USB port, and connect.
 8) Load the RadioGlobe-Globe.bin, select Recommended Offsets -> App0 0x10000 3MB
    Hit the large FLASH FIRMWARE bar/button.
