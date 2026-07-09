@@ -82,7 +82,8 @@ const char * messagetexts[] = {
    { "MESSAGE_UPDATE_GLOBE 65"},
    { "MESSAGE_UPDATE_PUCK 66"},
    { "MESSAGE_GLOBE_HOSTNAME 67"},
-   { "MESSAGE_MAX 68"}
+   { "MESSAGE_SILENT_POWER_DOWN 68"}, 
+   { "MESSAGE_MAX 69"}
  };
 
 
@@ -156,7 +157,8 @@ const char * messagetexts[] = {
 #define MESSAGE_UPDATE_GLOBE 65
 #define MESSAGE_UPDATE_PUCK 66
 #define MESSAGE_GLOBE_HOSTNAME 67
-#define MESSAGE_MAX 68
+#define MESSAGE_SILENT_POWER_DOWN 68
+#define MESSAGE_MAX 69
 
 #define MESSAGE_URL_HTTP_400_BAD_REQUEST 400
 #define MESSAGE_URL_HTTP_403_REFUSED 403

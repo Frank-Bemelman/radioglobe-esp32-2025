@@ -1,4 +1,4 @@
-// in arduino library manager...
+// in arduino library manager....
 // install libs as shown here https://randomnerdtutorials.com/esp32-wi-fi-manager-asyncwebserver/
 // this is for the wifi manager portal
 
@@ -504,7 +504,7 @@ void setup()
     Serial.println(WiFi.localIP());
   }  
 
- // setupwebserver();
+  setupwebserver();
   
   sprintf(message, "%s.local", WiFi.getHostname());
   AddToQueueForDisplay(message, MESSAGE_GLOBE_HOSTNAME);
@@ -810,7 +810,11 @@ void loop()
         break;
 
       case MESSAGE_POWERDOWN:
-        GlobePowerDown();
+        GlobePowerDown(0);
+        break;
+        
+      case MESSAGE_SILENT_POWER_DOWN:
+      GlobePowerDown(1);
         break;
 
       case MESSAGE_POWERUP:
@@ -1429,7 +1433,7 @@ void PlaySoundBite(uint8_t *soundbite, unsigned long long length, uint16_t volum
   Speakers(SPEAKERS_DELAYED_OFF);
 }
 
-void GlobePowerDown(void)
+void GlobePowerDown(uint16_t silentmode)
 { uint16_t restore_volume;
   bPowerStatus = false;
   EEPROM.get(0x0, GlobeSettings); // need stored volume settings
@@ -1444,9 +1448,10 @@ void GlobePowerDown(void)
   loopMQTT();
   DataFromGlobe.D_QueueStationIndex = -1;
   
-  PlaySoundBite((uint8_t *)mp3_shutdown, sizeof(mp3_shutdown), 0); 
+  if(silentmode==0)PlaySoundBite((uint8_t *)mp3_shutdown, sizeof(mp3_shutdown), 0); 
   Serial.printf("POWERDOWN completed\n");
 
+  SetVolumeMapped(0);
   digitalWrite(BT_POWER_PIN, LOW); // turn off BT module
 
   // tell puck that a globe update is available
