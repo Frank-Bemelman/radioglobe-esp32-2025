@@ -16,10 +16,13 @@ Good news is, you only have to do this once.
 5) Load the RadioGlobe-Display.bin, select Recommended Offsets -> App0 0x10000 4MB
    Hit the large FLASH FIRMWARE bar/button.
 6) Disconnect Puck, reset it with side button.
+7) Check in the puck setup if the build date has been adjusted. If not, try again with App1 0x410000 4MB
 
-7) Connect the Globe ESP32S3 to your PC. Use the blue connect button, select the USB port, and connect.
-8) Load the RadioGlobe-Globe.bin, select Recommended Offsets -> App0 0x10000 3MB
-   Hit the large FLASH FIRMWARE bar/button.
+8) Connect the Globe ESP32S3 to your PC. Use the blue connect button, select the USB port, and connect.
+9) Load the RadioGlobe-Globe.bin, select Recommended Offsets -> App0 0x10000 3MB
+   Hit the large FLASH FIRMWARE bar/button. 
+10) Disconnect Globe and reset globe (power off-on).
+11) Check in the puck setup if the globe build date has been adjusted. If not, try again with App1 0x310000 3MB
 
 From now on, you can update automatically, no more fiddling with cables.
 Everytime you power down/up the globe using the puck, it will check for an update and the cogwheel will turn red if there is one available.
