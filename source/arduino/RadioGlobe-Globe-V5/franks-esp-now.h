@@ -24,7 +24,7 @@ const char * messagetexts[] = {
    { "OPEN_WEATHER_MAP_API_KEY 7"},
    { "GOOGLE_API_KEY 8"},
    { "TIMEZONE_ID 9"},
-   { "TIMEZONE_NAME 10"},
+   { "FREE_TO_USE2 10"},
    { "THIS_IS_HOME 11"},
    { "EX_CHANGE_RATE 12"},
    { "SSID_FOR_GLOBE 13"},
@@ -69,7 +69,7 @@ const char * messagetexts[] = {
    { "GLOBE CLOSED PORTAL 52"},
    { "PUCK_ESP_NOW_INIT 53"},
    { "SET_PUCK_WIFI_CHANNEL 54"},
-   { "GLOBE_HAS_SD 55"},
+   { "GLOBE_SD_GB 55"},
    { "GLOBE_PLAY_SD 56"},
    { "GET_GEOLOCATION 57"},
    { "GET_WEATHER_DATA 58"},
@@ -96,7 +96,7 @@ const char * messagetexts[] = {
 #define MESSAGE_OPEN_WEATHER_MAP_API_KEY 7
 #define MESSAGE_GOOGLE_API_KEY 8
 #define MESSAGE_TIMEZONE_ID 9
-#define MESSAGE_TIMEZONE_NAME 10
+#define MESSAGE_FREE_TO_USE2 10
 #define MESSAGE_THIS_IS_HOME 11
 #define MESSAGE_EX_CHANGE_RATE 12
 #define MESSAGE_SSID_FOR_GLOBE 13
@@ -144,7 +144,7 @@ const char * messagetexts[] = {
 #define MESSAGE_GLOBE_CLOSED_PORTAL 52
 #define MESSAGE_PUCK_ESP_NOW_INIT 53
 #define MESSAGE_SET_PUCK_WIFI_CHANNEL 54
-#define MESSAGE_GLOBE_HAS_SD 55
+#define MESSAGE_GLOBE_SD_GB 55
 #define MESSAGE_GLOBE_PLAY_SD 56
 #define MESSAGE_GET_GEOLOCATION 57
 #define MESSAGE_GET_WEATHER_DATA 58

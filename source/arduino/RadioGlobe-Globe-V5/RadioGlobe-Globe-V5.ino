@@ -183,7 +183,7 @@ struct eepromData
   uint16_t btmodule_switchable;
   uint16_t btmodule_power_on;
   char open_weather_map_api_key[64];
-  uint16_t sdcard_present;
+  uint16_t globe_sd_gb;
   char spare_data[];
 };
 eepromData GlobeSettings; 
@@ -246,7 +246,7 @@ void setup()
   google_api_key[1]='I';
   google_api_key[2]='z';
   google_api_key[3]='a';
-
+  
   startMillis = millis();
 
   xTaskCreatePinnedToCore(
@@ -326,7 +326,7 @@ void setup()
   // start SD card
   hspi = new SPIClass (HSPI);
   hspi->begin(SD_CLK, SD_MISO, SD_MOSI, SD_CS);
-  CheckSD(); // also updates GlobeSettings.sdcard_present and eeprom update if need be
+  CheckSD(); // also updates GlobeSettings.globe_sd_gb and eeprom update if need be
 
   if(GlobeSettings.btmodule_power_on) digitalWrite(BT_POWER_PIN, HIGH);  // turn on
   else digitalWrite(BT_POWER_PIN, LOW);  // turn off
@@ -444,6 +444,7 @@ void setup()
   Serial.printf("Wifi-strenght = %d dBm\n", WiFi.RSSI());
 
   setup_esp_now();
+
   
   // setup MQTT for Home Assitant if configured in portal settings
   if(GlobeSettings.ee_mqttserver_ip[0] || GlobeSettings.ee_mqttserver_ip[1] || GlobeSettings.ee_mqttserver_ip[2] || GlobeSettings.ee_mqttserver_ip[3])
@@ -454,6 +455,8 @@ void setup()
   sprintf(message, "%02X:%02X:%02X:%02X:%02X:%02X", GlobeMac[0], GlobeMac[1], GlobeMac[2], GlobeMac[3], GlobeMac[4], GlobeMac[5]);
   AddToQueueForDisplay(message, MESSAGE_GLOBE_MAC);
   sprintf(message, "%d", WiFi.channel());
+  AddToQueueForDisplay(message, MESSAGE_SET_PUCK_WIFI_CHANNEL);
+  
 
   if(GlobeSettings.btmodule_installed == 0)Serial.println("No Bluetooth module installed");
   else Serial.println("Has Bluetooth module installed");
@@ -463,9 +466,6 @@ void setup()
   
   sprintf(message, "%d-%d-%d", GlobeSettings.btmodule_switchable, GlobeSettings.btmodule_power_on, GlobeSettings.btmodule_installed);
   AddToQueueForDisplay(message, MESSAGE_DISPLAY_BT_SWITCHABLE_STATE);
-
-  sprintf(message, "%d", GlobeSettings.sdcard_present);
-  AddToQueueForDisplay(message, MESSAGE_GLOBE_HAS_SD);
 
   AddToQueueForDisplay(WiFi.localIP().toString().c_str(), MESSAGE_GLOBE_IP);
 
@@ -498,12 +498,18 @@ void setup()
   else Serial.printf("MDNS setup of %s.local succes!\n", message);
     
 
-  if(GlobeSettings.sdcard_present == 1)
-  { ftp.begin("globe", "globe");
+  if(GlobeSettings.globe_sd_gb !=0)
+  { // tell puck size of card
+    sprintf(message, "%d GB", GlobeSettings.globe_sd_gb);
+    AddToQueueForDisplay(message, MESSAGE_GLOBE_SD_GB);
+    ftp.begin("globe", "globe");
     Serial.println("FTP gestart!");
     Serial.println(WiFi.localIP());
   }  
-
+  else // no SD card
+  { // tell puck
+    AddToQueueForDisplay("0 GB", MESSAGE_GLOBE_SD_GB);
+  }
   setupwebserver();
   
   sprintf(message, "%s.local", WiFi.getHostname());
@@ -532,8 +538,8 @@ void loop()
   static char PreviousUrl[QUEUEMESSAGELENGTH] =""; // holds the url requested by display
   static bool bFirst = true;
   
-   if(GlobeSettings.sdcard_present == 1)ftp.handleFTP();
-   else   Serial.printf("GlobeSettings.sdcard_present = %d\n", GlobeSettings.sdcard_present);
+   if(GlobeSettings.globe_sd_gb != 0)ftp.handleFTP();
+   // else Serial.printf("GlobeSettings.globe_sd_gb = %d\n", GlobeSettings.globe_sd_gb);
 
   loop2(); // checks portal button
   stream.loop();
@@ -1049,6 +1055,8 @@ bool StartNewStation(void)
 //  strcpy(TargetUrl, "https://stream.zeno.fm/2ee8m52mb"); 
 //  strcpy(TargetUrl, "https://stream.zeno.fm/8pbaase2w2quv");
 //  strcpy(TargetUrl, "http://178.19.58.119:1818/;"); // mime ="" ???? but plays when just assume MP3
+// AI station from Andon labs, dit is de eerste, backlink broadcast
+//  https://streaming.live365.com/a13541
 
 
   lapMillis = millis(); 
@@ -1557,7 +1565,7 @@ void InitializeGlobeSettings(void)
   GlobeSettings.ee_volume = 40;
   GlobeSettings.ee_internal_speakers = 1;
   memset(GlobeSettings.ee_mqttserver_ip, 0 , 4);
-  strcpy(GlobeSettings.google_api_key, "0");
+  strcpy(GlobeSettings.google_api_key, google_api_key);
   memset(GlobeSettings.ee_puckmac, 0 , 6); 
   strcpy(GlobeSettings.HomeCountryCode, "NL");
   strcpy(GlobeSettings.ssid, "SSID");

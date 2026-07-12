@@ -21,23 +21,25 @@ uint16_t TrackFromPlayListToPlay = 0;
 bool CheckSD(void)
 { if (!SD.begin(SD_CS, *hspi, 40000000)) // 40000000 works and so does 80000000, no difference though
   { Serial.println("[ERROR] No SD card present");
-    if(GlobeSettings.sdcard_present == 1)
-    { // wrong in config
-      GlobeSettings.sdcard_present = 0;
+
+    if(GlobeSettings.globe_sd_gb != 0)
+    { // wrong in config, correct it
+      GlobeSettings.globe_sd_gb = 0;
       EEPROM.put(0x0, GlobeSettings);
       EEPROM.commit();
     }
     return false;
   } 
   else 
-  {
+  { uint16_t GB;
+    GB = ((SD.cardSize()/1000000)+500)/1000;
+    if(GB%2)GB++;
     Serial.println("[INFO] SD card present");
-    Serial.print("[INFO] Capacity SD: ");
-    Serial.print(SD.cardSize() / (1024 * 1024));
-    Serial.println("MB");
-    if(GlobeSettings.sdcard_present == 0)
+    Serial.printf("[INFO] Capacity SD: %d GB\n", GB);
+
+    if(GlobeSettings.globe_sd_gb != GB)
     { // wrong in config
-      GlobeSettings.sdcard_present = 1;
+      GlobeSettings.globe_sd_gb = GB;
       EEPROM.put(0x0, GlobeSettings);
       EEPROM.commit();
     }
@@ -51,8 +53,8 @@ void StartPlayFromSD(void)
 { static char PrevCountryCodeSelectorSD[3] = "";
   Serial.println("Play from SD as requested by puck ");
 
-  if(GlobeSettings.sdcard_present == 0)
-  { Serial.printf("StartPlayFromSD() -> GlobeSettings.sdcard_present indicates No SD card!!!\n");
+  if(GlobeSettings.globe_sd_gb == 0)
+  { Serial.printf("StartPlayFromSD() -> GlobeSettings.globe_sd_gb indicates No SD card!!!\n");
     return;
   }
   else Serial.printf("StartPlayFromSD() -> Let's go!\n");

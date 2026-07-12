@@ -75,7 +75,7 @@ void ReadAS5600Encoders(void * pvParameters)
   static int16_t EWDegLive10; // unfiltered, uncalibrated EW degrees times 10
 
   
-  static int8_t  AverageIdx = 0;
+  static uint8_t  AverageIdx = 0;
   static bool  stable = false;
   static bool  stable_changed = true;
   static int16_t NSFilteredRAW;
