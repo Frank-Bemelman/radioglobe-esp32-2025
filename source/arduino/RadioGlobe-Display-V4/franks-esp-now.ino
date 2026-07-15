@@ -67,7 +67,7 @@ bool setup_esp_now(void)
    
   
   revertChan = DisplaySettings.wifichannel;
-  if(revertChan==0)revertChan = 11;
+  if(revertChan>11)revertChan = 11;
   // first try with stored wifi channel to see if that connects with globe or gives a response from globe
   // when first channel fails, loop through all channels
   loopchannels:
