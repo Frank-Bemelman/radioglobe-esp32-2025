@@ -51,28 +51,19 @@ bool CheckSD(void)
 // called by puck message (and subsequent when filehas ended)
 void StartPlayFromSD(void)
 { static char PrevCountryCodeSelectorSD[3] = "";
-  Serial.println("Play from SD as requested by puck ");
+  Serial.printf("Play from SD as requested by puck using CountryCodeSelectorSD -> %s\n", CountryCodeSelectorSD);
 
   if(GlobeSettings.globe_sd_gb == 0)
   { Serial.printf("StartPlayFromSD() -> GlobeSettings.globe_sd_gb indicates No SD card!!!\n");
     return;
   }
-  else Serial.printf("StartPlayFromSD() -> Let's go!\n");
-
+  
   // force a reload from SD
-  if(strcmp(PrevCountryCodeSelectorSD, CountryCodeSelectorSD) !=NULL)
+  if(strcmp(PrevCountryCodeSelectorSD, CountryCodeSelectorSD) != 0)
   { strcpy(PrevCountryCodeSelectorSD, CountryCodeSelectorSD); 
     bMusicMode = false;
     bMusicModePrev = false;
   }
-
-  if(0) // for test purposes
-  { stream.stopSong(); // stop whatever stream or file was playing
-    Speakers(SPEAKERS_ON);
-    Serial.println("Play 1000Kz test.wav from SD");
-    stream.connectToFile(SD, "/1000hz10s.wav"); // play it
-    return;
-  }  
 
   if(bMusicMode)Serial.printf("MusicMode true\n");
   else Serial.printf("MusicMode false\n");

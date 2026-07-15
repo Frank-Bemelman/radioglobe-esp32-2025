@@ -36,30 +36,78 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
   if(PrevDataFromDisplay.D_QueueMessageType != DataFromDisplay.D_QueueMessageType)
   { PrevDataFromDisplay.D_QueueMessageType = DataFromDisplay.D_QueueMessageType;
     if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_TIMEZONE_BY_GPS)
-    { D_StationGpsNS = DataFromDisplay.D_StationGpsNS;
-      D_StationGpsEW = DataFromDisplay.D_StationGpsEW;
-      DataFromGlobe.FindTimeZone = MESSAGE_GET_TIMEZONE_BY_GPS; // makes the CallGetTimeZone task actually do it
+    { Serial.printf("GLOBE SAYS -> MESSAGE_GET_TIMEZONE_BY_GPS\n");
+      //TZ_NS = DataFromDisplay.D_StationGpsNS;
+      //TZ_EW = DataFromDisplay.D_StationGpsEW;
+      //TZ_RequestedStation = DataFromDisplay.D_RequestedStation;
+      //DataFromGlobe.FindTimeZone = MESSAGE_GET_TIMEZONE_BY_GPS; // makes the CallGetTimeZone task actually do it
+
+      ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
+      ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsNS;
+      ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsEW;
+      ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_RequestedStation;
+      ApiCallsToDo.ApiQueueIndexIn++;
+      ApiCallsToDo.ApiQueueIndexIn %= APIQUEUESIZE;
+      ApiCallsToDo.ApiQueueCnt++;
+
       return; // don't add to queue
     }  
 
     if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_TIMEZONE)
-    { ns_cal_received = DataFromDisplay.ns_cal;
-      ew_cal_received = DataFromDisplay.ew_cal;
-      DataFromGlobe.FindTimeZone = MESSAGE_GET_TIMEZONE; // makes the CallGetTimeZone task actually do it
+    { Serial.printf("GLOBE SAYS -> MESSAGE_GET_TIMEZONE\n");
+      //TZ_NS = DataFromDisplay.ns_cal/10;
+      //TZ_EW = DataFromDisplay.ew_cal/10;
+      //TZ_RequestedStation = DataFromDisplay.D_RequestedStation;
+      //DataFromGlobe.FindTimeZone = MESSAGE_GET_TIMEZONE; // makes the CallGetTimeZone task actually do it
+
+      ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
+      ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ns_cal/10;
+      ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ew_cal/10;
+      ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_RequestedStation;
+      ApiCallsToDo.ApiQueueIndexIn++;
+      ApiCallsToDo.ApiQueueIndexIn %= APIQUEUESIZE;
+      ApiCallsToDo.ApiQueueCnt++;
+
       return; // don't add to queue
     }  
 
     if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_GEOLOCATION_BY_GPS)
-    { D_GeoLocationGpsNS = DataFromDisplay.D_StationGpsNS;
-      D_GeoLocationGpsEW = DataFromDisplay.D_StationGpsEW;
-      DataFromGlobe.FindGeoLocationData = MESSAGE_GET_GEOLOCATION_BY_GPS; // makes the CallGetTimeZone task actually do it
+    { Serial.printf("GLOBE SAYS -> MESSAGE_GET_GEOLOCATION_BY_GPS\n");
+      //if(D_RequestedStation==9999) // if api caller is free
+      //{ D_GeoStationNS = DataFromDisplay.D_StationGpsNS;
+      //  D_GeoStationEW = DataFromDisplay.D_StationGpsEW;
+      //  D_RequestedStation = DataFromDisplay.D_RequestedStation;
+      //  DataFromGlobe.FindGeoLocationData = MESSAGE_GET_GEOLOCATION_BY_GPS; // makes the CallGetTimeZone task actually do it
+      //}  
+
+      ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
+      ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsNS;
+      ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsEW;
+      ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_RequestedStation;
+      ApiCallsToDo.ApiQueueIndexIn++;
+      ApiCallsToDo.ApiQueueIndexIn %= APIQUEUESIZE;
+      ApiCallsToDo.ApiQueueCnt++;
+
       return; // don't add to queue
     }  
 
     if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_GEOLOCATION)
-    { ns_cal_received = DataFromDisplay.ns_cal;
-      ew_cal_received = DataFromDisplay.ew_cal;
-      DataFromGlobe.FindGeoLocationData = MESSAGE_GET_GEOLOCATION; // makes the CallGetTimeZone task actually do it
+    { Serial.printf("GLOBE SAYS -> MESSAGE_GET_GEOLOCATION (station%d)\n", DataFromDisplay.D_RequestedStation);
+      //if(D_RequestedStation==9999) // if api caller is free
+      //{ D_GeoLocationNS = DataFromDisplay.ns_cal/10;
+      //  D_GeoLocationEW = DataFromDisplay.ew_cal/10;
+      //  D_RequestedStation = DataFromDisplay.D_RequestedStation;
+      //  DataFromGlobe.FindGeoLocationData = MESSAGE_GET_GEOLOCATION; // makes the CallGetTimeZone task actually do it
+      //}  
+
+      ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
+      ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ns_cal/10;
+      ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ew_cal/10;
+      ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_RequestedStation;
+      ApiCallsToDo.ApiQueueIndexIn++;
+      ApiCallsToDo.ApiQueueIndexIn %= APIQUEUESIZE;
+      ApiCallsToDo.ApiQueueCnt++;
+
       return; // don't add to queue
     }  
 
@@ -162,7 +210,7 @@ void loop_esp_now() {
           DataFromGlobe.D_QueueMessageCount = ToDisplay.QueueCnt;
           strcpy(DataFromGlobe.G_QueueMessage, ToDisplay.QueueMessage[ToDisplay.QueueIndexOut]);   
           DataFromGlobe.G_QueueMessageType = ToDisplay.QueueMessageType[ToDisplay.QueueIndexOut];
-          Serial.printf("Message %d-%d sent to display = >%s<\n", DataFromGlobe.G_QueueSerialNumber, DataFromGlobe.G_QueueMessageType, DataFromGlobe.G_QueueMessage);
+          //Serial.printf("Message %d-%d sent to display = >%s<\n", DataFromGlobe.G_QueueSerialNumber, DataFromGlobe.G_QueueMessageType, DataFromGlobe.G_QueueMessage);
           ToDisplay.QueueIndexOut++;
           if(ToDisplay.QueueIndexOut>=QUEUESIZE)ToDisplay.QueueIndexOut = 0;
           ToDisplay.QueueCnt--;

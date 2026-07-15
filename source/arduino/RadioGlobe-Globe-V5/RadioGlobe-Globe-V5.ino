@@ -115,7 +115,7 @@ Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 
 
-SPIClass *hspi = NULL;
+SPIClass *hspi = 0;
 
 ESP32_VS1053_Stream stream;
 //VS1053 chunkplayer(VS1053_CS, VS1053_DCS, VS1053_DREQ); // made a playChunk member in ESP32_VS1053_Stream library
@@ -190,7 +190,7 @@ eepromData GlobeSettings;
 
 uint8_t rtone[4] = {0, 3, 14, 0}; // tone control register of VS1053 responding to display controls for bass & treble, values of 0-15
 
-bool GetRatesNow = false;
+uint32_t RefreshRatesCountDownTimer = 0;
 uint16_t IgnoreMqqtUpdates = 0;
 
 uint8_t GlobeMac[6];
@@ -246,6 +246,14 @@ void setup()
   google_api_key[1]='I';
   google_api_key[2]='z';
   google_api_key[3]='a';
+
+  EEPROM.begin(EEPROM_SIZE);
+  EEPROM.get(0x0, GlobeSettings);
+
+  InitializeGlobeSettings(); // at first run, initialize eeprom with some reasonable values
+
+  if(CheckIfBTSwitchable())GlobeSettings.btmodule_switchable = 1;
+  else GlobeSettings.btmodule_switchable = 0;
   
   startMillis = millis();
 
@@ -260,17 +268,18 @@ void setup()
   
   PixelUpdate(0, 0xFFFFFF, 0x000000, 10000); // solid white                     
 
-  
+  // BT module is switchable
   pinMode(BT_CONNECT_PIN, OUTPUT);
-  digitalWrite(BT_CONNECT_PIN, HIGH);  
+  if(GlobeSettings.btmodule_power_on) digitalWrite(BT_POWER_PIN, HIGH);  // turn on
+  else digitalWrite(BT_POWER_PIN, LOW);  // turn off
   
   pinMode(MUTE_AMPLIFIERS, OUTPUT);
   Speakers(SPEAKERS_OFF);
+
   pinMode(SPEAKER_TOGGLE_PIN, INPUT_PULLUP);
   pinMode(PORTALSWITCH_PIN, INPUT_PULLUP); // input to button for opening portal
 
   Serial.begin(115200);
-
   Serial.printf("GlobeSettings size = %d bytes\n", sizeof(GlobeSettings));
 
   //Start SPI bus
@@ -299,39 +308,19 @@ void setup()
   stream.setInfoCB(audio_showstreamtitle);
   // Set the EOF callback
   stream.setEofCB(audio_eof_stream);    
-
-  // Set the fail callback
-  //stream.setFailCB(audio_fail);    
-
   // Set the error callback
   stream.setErrorCB(audio_error);    
-
-
+    
   delay(50);
 
- 
-
-  // Initialise as5600_0 Connection
-  Wire.begin(SDA_1, SCL_1);
-  Wire1.begin(SDA_2, SCL_2);
-
-  EEPROM.begin(EEPROM_SIZE);
-  EEPROM.get(0x0, GlobeSettings);
-
-  if(CheckIfBTSwitchable())GlobeSettings.btmodule_switchable = 1;
-  else GlobeSettings.btmodule_switchable = 0;
-
-  InitializeGlobeSettings(); // at first run, initialize with some reasonable values
+  stream.stopSong(); // also does a _vs1053->switchToMp3Mode() when things are still idle
+  PlaySoundBite((uint8_t *)mp3_happy_ping, sizeof(mp3_happy_ping), 0); 
 
   // start SD card
   hspi = new SPIClass (HSPI);
   hspi->begin(SD_CLK, SD_MISO, SD_MOSI, SD_CS);
   CheckSD(); // also updates GlobeSettings.globe_sd_gb and eeprom update if need be
 
-  if(GlobeSettings.btmodule_power_on) digitalWrite(BT_POWER_PIN, HIGH);  // turn on
-  else digitalWrite(BT_POWER_PIN, LOW);  // turn off
-
-  
   GlobeSettings.ssid[sizeof(GlobeSettings.ssid)-1]=0;
   //Serial.printf("Eeprom ssid: %s\n", GlobeSettings.ssid);
   GlobeSettings.password[sizeof(GlobeSettings.password)-1]=0;
@@ -342,6 +331,10 @@ void setup()
 
   Serial.printf("Mqtt Server set at %d.%d.%d.%d\n", (uint16_t)GlobeSettings.ee_mqttserver_ip[0], (uint16_t)GlobeSettings.ee_mqttserver_ip[1], (uint16_t)GlobeSettings.ee_mqttserver_ip[2], (uint16_t)GlobeSettings.ee_mqttserver_ip[3]);
 
+  // Initialise as5600_0 and as5600_0 connection
+  Wire.begin(SDA_1, SCL_1);
+  Wire1.begin(SDA_2, SCL_2);
+  
     // NS encoder
   as5600_1.begin();  //  set direction pin.
   as5600_1.setDirection(AS5600_CLOCK_WISE);
@@ -387,7 +380,7 @@ void setup()
   
   memcpy(PuckMac, GlobeSettings.ee_puckmac, 6);
 
-  PlaySoundBite((uint8_t *)mp3_happy_ping, sizeof(mp3_happy_ping), 0); 
+  
 
   DataFromGlobe.D_QueueStationIndex = -1;
 
@@ -418,7 +411,8 @@ void setup()
   }
   else 
   { Serial.println("Try Connecting with WifiManager");
-    PlaySoundBite((uint8_t *)mp3_smartphone_portal, sizeof(mp3_smartphone_portal), 50); 
+    // play it loud enough to be noticed
+    PlaySoundBite((uint8_t *)mp3_smartphone_portal, sizeof(mp3_smartphone_portal), 60); 
     AutoConnect(); // wifi auto connect with portal if need be
     if(WiFi.isConnected())
     { Serial.println("Connected with WifiManager stored credentials");
@@ -433,7 +427,8 @@ void setup()
   }
   else
   { Serial.println(" wifi NOT connected.");
-    PlaySoundBite((uint8_t *)mp3_wifidisconnected, sizeof(mp3_wifidisconnected), 0); 
+    // play it loud enough to be noticed
+    PlaySoundBite((uint8_t *)mp3_wifidisconnected, sizeof(mp3_wifidisconnected), 60); 
     while(1)
     { PixelUpdate(6, 0xFF0000, 0x000000, 5000); // flash, solid red   
       delay(5000);
@@ -487,7 +482,7 @@ void setup()
   sprintf(message, "%d", GlobeSettings.serialnumber);
   AddToQueueForDisplay(message, MESSAGE_DISPLAY_SERIALNUMBER); // set puck to same serial number
   // end of setup
-  GetRatesNow = true;
+  RefreshRatesCountDownTimer = 0;
   bSetupCompleted = true;
   
   Serial.printf("Started with Hostname %s\n", WiFi.getHostname()); 
@@ -514,9 +509,6 @@ void setup()
   
   sprintf(message, "%s.local", WiFi.getHostname());
   AddToQueueForDisplay(message, MESSAGE_GLOBE_HOSTNAME);
-  // end of setup
-  GetRatesNow = true;
-  bSetupCompleted = true;
 }
 
 
@@ -536,6 +528,7 @@ void loop()
   static uint32_t value_int32t = 0;
   static uint16_t connection_lost_counter;
   static char PreviousUrl[QUEUEMESSAGELENGTH] =""; // holds the url requested by display
+  static char StartThisStation[QUEUEMESSAGELENGTH] =""; // holds the url requested by display
   static bool bFirst = true;
   
    if(GlobeSettings.globe_sd_gb != 0)ftp.handleFTP();
@@ -579,7 +572,7 @@ void loop()
       Serial.printf("S-GlobeSettings.btmodule_installed = %d\n", GlobeSettings.btmodule_installed);
       Serial.printf("S-GlobeSettings.btmodule_switchable = %d\n", GlobeSettings.btmodule_switchable);
       strcpy(text, receivedMessage.c_str());
-      if((p = strstr(text, "BI")) != NULL) 
+      if((p = strstr(text, "BI")) != 0) 
       { if(text[2]=='0')
         { GlobeSettings.btmodule_installed = 0;
           GlobeSettings.btmodule_switchable = 0;
@@ -597,7 +590,7 @@ void loop()
         sprintf(message, "%d-%d-%d", GlobeSettings.btmodule_switchable, GlobeSettings.btmodule_power_on, GlobeSettings.btmodule_installed);
         AddToQueueForDisplay(message, MESSAGE_DISPLAY_BT_SWITCHABLE_STATE);
       }
-      if((p = strstr(text, "BS")) != NULL) 
+      if((p = strstr(text, "BS")) != 0) 
       { Serial.printf("BS-GlobeSettings.btmodule_installed = %d\n", GlobeSettings.btmodule_installed);
         Serial.printf("BS-GlobeSettings.btmodule_switchable = %d\n", GlobeSettings.btmodule_switchable);
         if(text[2]=='0')GlobeSettings.btmodule_switchable = 0;
@@ -611,7 +604,7 @@ void loop()
         sprintf(message, "%d-%d-%d", GlobeSettings.btmodule_switchable, GlobeSettings.btmodule_power_on, GlobeSettings.btmodule_installed);
         AddToQueueForDisplay(message, MESSAGE_DISPLAY_BT_SWITCHABLE_STATE);
       }
-      if((p = strstr(text, "SN")) != NULL) 
+      if((p = strstr(text, "SN")) != 0) 
       { Serial.printf("SN-GlobeSettings.serialnumber was = %d\n", GlobeSettings.serialnumber);
         if(strlen(text)>3)
         { sscanf(text,"SN%d", &value_int32t);
@@ -659,7 +652,7 @@ void loop()
      switch(QueueMessageType)
      { case MESSAGE_OPEN_WEATHER_MAP_API_KEY:
          Serial.println(QueueMessage);
-         if(strcmp(GlobeSettings.open_weather_map_api_key, QueueMessage)!=NULL)
+         if(strcmp(GlobeSettings.open_weather_map_api_key, QueueMessage)!=0)
          { strcpy(GlobeSettings.open_weather_map_api_key, QueueMessage);
            Serial.println("Eeprom saved -> GlobeSettings.open_weather_map_api_key");
            EEPROM.put(0x0, GlobeSettings);
@@ -669,7 +662,7 @@ void loop()
       
        case MESSAGE_GOOGLE_API_KEY:
          Serial.println(QueueMessage);
-         if(strcmp(GlobeSettings.google_api_key, QueueMessage)!=NULL)
+         if(strcmp(GlobeSettings.google_api_key, QueueMessage)!=0)
          { strcpy(GlobeSettings.google_api_key, QueueMessage);
            Serial.println("Eeprom saved -> GlobeSettings.google_api_key");
            EEPROM.put(0x0, GlobeSettings);
@@ -683,14 +676,14 @@ void loop()
          EEPROM.put(0x0, GlobeSettings);
          EEPROM.commit();
          Serial.println("Eeprom saved -> GlobeSettings.HomeCountryCode");
-         GetRatesNow = true;
+         RefreshRatesCountDownTimer = 0; // get new rates immediately
          break;  
 
        // display want exchange rate, for a country code supplied
        case MESSAGE_EX_CHANGE_RATE:
-         extern char exchangepayload[]; 
-         if(exchangepayload[0]==0)
-         { GetRatesNow = true;
+         if(RefreshRatesCountDownTimer==0)
+         { // rates not received yet
+           break;
          }
          else 
          { int16_t fromindex = IsCountryCodeValid(GlobeSettings.HomeCountryCode);
@@ -728,20 +721,30 @@ void loop()
          break;  
 
        case MESSAGE_START_THIS_STATION:
+         // format QueueMessage is "NL-http://stationurl"
+         extern char CountryCodeSelectorSD[3];
+        
+         if(QueueMessage[2]=='-')
+         { strcpy(TargetUrl, QueueMessage+3); // new format with countrycode-url
+           strncpy(CountryCodeSelectorSD, QueueMessage, 2);
+           CountryCodeSelectorSD[3]=0;
+         } 
+         else strcpy(TargetUrl, QueueMessage); // old format only url
+
          if(!bPowerStatus)
          { Serial.printf("MESSAGE_START_THIS_STATION: IGNORED (Power Down)\n");
            break;
          }
 
-         if((strcmp(PreviousUrl, QueueMessage) == NULL) && stream.isRunning())
+         if((strcmp(PreviousUrl, TargetUrl) == 0) && stream.isRunning())
          { // already connected PLAYING
-           Serial.printf("ALREADY CONNECTED TO STATION: %s\n", QueueMessage);  
+           Serial.printf("ALREADY CONNECTED TO STATION: %s\n", TargetUrl);  
            AddToQueueForDisplay(TargetUrl, MESSAGE_STATION_CONNECTED);
            break;
          }
              
-         strcpy(PreviousUrl, QueueMessage);
-         strcpy(TargetUrl, QueueMessage);
+         strcpy(PreviousUrl, TargetUrl);
+         //strcpy(TargetUrl, QueueMessage);
 
          // DataFromDisplay.D_QueueStationIndex range = 0-49 for found stations and 50-53 for presets, -1 if idle
          Serial.printf("DataFromDisplay.D_QueueStationIndex = %d\n", DataFromDisplay.D_QueueStationIndex);
@@ -873,11 +876,11 @@ void loop()
         stream.connectToFile(SD, QueueMessage); // play it 
         break;
       
-      case MESSAGE_RELOAD_SD_WITH_COUNTRY:
-        extern char CountryCodeSelectorSD[3];
-        strcpy(CountryCodeSelectorSD, QueueMessage); // will trigger StartPlayFromSD(void)
-        strcpy(PreviousUrl, "");
-        break;
+      //case MESSAGE_RELOAD_SD_WITH_COUNTRY:
+        //extern char CountryCodeSelectorSD[3];
+        //strcpy(CountryCodeSelectorSD, QueueMessage); // will trigger StartPlayFromSD(void)
+      //  strcpy(PreviousUrl, "");
+      //  break;
 
       case MESSAGE_START_FILE_BY_INDEX:
         uint16_t idx;
@@ -1055,8 +1058,8 @@ bool StartNewStation(void)
 //  strcpy(TargetUrl, "https://stream.zeno.fm/2ee8m52mb"); 
 //  strcpy(TargetUrl, "https://stream.zeno.fm/8pbaase2w2quv");
 //  strcpy(TargetUrl, "http://178.19.58.119:1818/;"); // mime ="" ???? but plays when just assume MP3
-// AI station from Andon labs, dit is de eerste, backlink broadcast
-//  https://streaming.live365.com/a13541
+//  AI station from Andon labs, dit is de eerste, backlink broadcast
+//  strcpy(TargetUrl, "https://streaming.live365.com/a13541");
 
 
   lapMillis = millis(); 
@@ -1095,10 +1098,7 @@ void SetVolumeMapped(uint16_t volume)
   static uint8_t Actual_vs1053vol=0;
   static uint8_t New_vs1053vol;
 
-  New_vs1053vol = map(volume, 0, 100, 60, 100); // range is 128db - more practical useable volume range of VS1053 is 68-100, 100-> 0dB and 68 being very quiet -40db
- 
-  Serial.printf("New_vs1053vol (mapped parameter) = %d - Actual_vs1053vol = %d\n", New_vs1053vol, Actual_vs1053vol);
-
+  // first some led animation
   if(bSetupCompleted)
   { if(volume>prevvol)
     { PixelUpdate(4, 0xFFFF00, 0x000000, 1000); // right turn yellow
@@ -1109,6 +1109,11 @@ void SetVolumeMapped(uint16_t volume)
   }  
   prevvol = volume;
 
+  if(volume)New_vs1053vol = map(volume, 0, 100, 60, 100); // range is 128db - more practical useable volume range of VS1053 is 68-100, 100-> 0dB and 68 being very quiet -40db
+  else New_vs1053vol = 0;
+ 
+  Serial.printf("SetVolumeMapped() with -> %d New_vs1053vol (mapped parameter) -> %d Actual_vs1053vol -> %d\n", volume, New_vs1053vol, Actual_vs1053vol);
+
   if(volume==0)Speakers(SPEAKERS_DELAYED_OFF);
   else // we have a volume
   { if(GlobeSettings.ee_internal_speakers == 1)
@@ -1117,12 +1122,11 @@ void SetVolumeMapped(uint16_t volume)
     else Speakers(SPEAKERS_DELAYED_OFF); // no sound from speakers wanted
   } 
 
-
   //if(Actual_vs1053vol!=New_vs1053vol)
   { Serial.printf("New Volume adjusted to %d\n", New_vs1053vol);
-    if(volume==0)New_vs1053vol = 0;
+    stream.forceVolume(New_vs1053vol);
     Actual_vs1053vol=New_vs1053vol;
-    stream.setVolume(Actual_vs1053vol);
+    Serial.printf("stream.setVolume -> Actual_vs1053vol is now -> %d SpeakerOffAfter25ms -> %d MUTE_AMPLIFIERS Output -> %d\n", Actual_vs1053vol, SpeakerOffAfter25mS, digitalRead(MUTE_AMPLIFIERS));
   }  
 }
 
@@ -1171,9 +1175,11 @@ void audio_showstation(const char* info)
 
 void audio_showstreamtitle(const char* info) 
 { char filtered[256];
-  char output[256];
+  static char previnfo[256];
   int cnt;
   char *p;
+
+  if(strcmp(previnfo, info)==0)return; // once, not twice the same
 
   strcpy(MetaDataSongTitle, info); // keep a local copy to mess around with
 
@@ -1261,7 +1267,7 @@ void ReplaceHtmlEntities(char *name) {
   char *p = name;
   
   // Find the next occurrence of an ampersand
-  while ((p = strchr(p, '&')) != NULL) {
+  while ((p = strchr(p, '&')) != 0) {
     
     // Check for NUMERIC entities (starts with &#)
     if (strncmp(p, "&#", 2) == 0) {
@@ -1419,15 +1425,10 @@ void PlaySoundBite(uint8_t *soundbite, unsigned long long length, uint16_t volum
 
   if(volume_to_use<10)volume_to_use=10; 
   if(volume_to_use>70)volume_to_use=70; 
-  SetVolumeMapped(volume_to_use); // also enables amplifiers
-
-  // extra reset, or else sometimes an old snippet of station music is played before the power down tune is played
-  //chunkplayer.switchToMp3Mode(); // does a softReset() also
-
-  Speakers(SPEAKERS_ON);
-  // delay(250); // move to Speakers function
-  //   chunkplayer.playChunk((uint8_t *)mp3_silence_1_sec, sizeof(mp3_silence_1_sec));
-   
+  Speakers(SPEAKERS_ON); 
+  SetVolumeMapped(volume_to_use); 
+  Serial.printf("PlaySoundBite playing with volume -> %d\n", volume_to_use);
+  
   stream.playChunk(soundbite, length);
   //delay(1000);
   //  chunkplayer.playChunk((uint8_t *)mp3_silence_1_sec, sizeof(mp3_silence_1_sec));
@@ -1511,29 +1512,27 @@ uint32_t PlayWhile(uint8_t *soundbite, unsigned long long length, bool playwhile
    if(oldplaywhile != playwhile)
    { Serial.printf("playwhile = %d\n", (int)playwhile);
      oldplaywhile = playwhile;
-     if(playwhile) // start or continue
+     if(playwhile) // it was a start
      { bytes_to_play = length;
        snippets_to_play = bytes_to_play / SNIPLENGHT;
        snippet = 0; // start at begin of soundbite
        Serial.printf("snippets_to_play = %ld\n", snippets_to_play);
-     
      }
-     else
+     else // stop
      { snippets_to_play = 0;
        Speakers(SPEAKERS_DELAYED_OFF);
      }
    }
 
    if(snippet <= snippets_to_play)
-   { SetVolumeMapped(DataFromDisplay.volumevalue); 
+   { if(GlobeSettings.ee_internal_speakers && (digitalRead(MUTE_AMPLIFIERS)==1))Speakers(SPEAKERS_ON);
+     // radio tuning sound at volume level as set on puck
+     SetVolumeMapped(DataFromDisplay.volumevalue);
      if(snippet < snippets_to_play) // full size snippets
      { Serial.printf("snippet = %ld\n", snippet);
-       if(GlobeSettings.ee_internal_speakers)Speakers(SPEAKERS_ON);
-       snippetMs = millis();
+       //snippetMs = millis();
        stream.playChunk(&soundbite[(snippet * SNIPLENGHT)], SNIPLENGHT); 
-       
-       
-       Serial.println(millis() - snippetMs);
+       //Serial.println(millis() - snippetMs);
        Speakers(SPEAKERS_DELAYED_OFF);
        snippet++;
      }
@@ -1606,17 +1605,17 @@ void Speakers(uint8_t mode)
   if(prev_mode != mode)
   { prev_mode = mode;
     if(mode == SPEAKERS_OFF)
-    { digitalWrite(MUTE_AMPLIFIERS, 1); // turn off immediately
-      Serial.println("Speakers OFF");
+    { SpeakerOffAfter25mS = 0;
+      digitalWrite(MUTE_AMPLIFIERS, 1); // turn off immediately
+      Serial.println("Amplifiers are OFF");
     }
     else if(mode == SPEAKERS_DELAYED_OFF)
     { SpeakerOffAfter25mS = 200; // turn of after 200 x 25mS -> 5000mS delay
     }
     else if(mode == SPEAKERS_ON)
     { SpeakerOffAfter25mS = 0;
-      Serial.println("Speakers ON");
       digitalWrite(MUTE_AMPLIFIERS, 0); // turn on immediately
-      //delay(250); 
+      Serial.println("Amplifiers are ON");
     }
   }  
 }

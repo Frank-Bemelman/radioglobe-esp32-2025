@@ -132,11 +132,11 @@ void AutoConnect(void)
 
   if(!res) 
   { Serial.println("AutoConnect()Failed to connect or hit timeout");
-//    PlaySoundBite((uint8_t *)mp3_wifidisconnected, sizeof(mp3_wifidisconnected)); 
     delay(2000);
     Serial.println("AutoConnect() - Starting config portal");
     wm.setConfigPortalTimeout(120);
-    PlaySoundBite((uint8_t *)mp3_smartphone_portal, sizeof(mp3_smartphone_portal), 50); 
+    // play it loud enough to be noticed
+    PlaySoundBite((uint8_t *)mp3_smartphone_portal, sizeof(mp3_smartphone_portal), 60); 
     if(!wm.startConfigPortal(portalName, ""))
     {  delay(5000);
        ESP.restart();
@@ -145,7 +145,7 @@ void AutoConnect(void)
 
   //if you get here you have connected to the WiFi    
   Serial.println("AutoConnect() - connected...yeey :)");
-  PlaySoundBite((uint8_t *)mp3_wificonnected, sizeof(mp3_wificonnected), 50); 
+  PlaySoundBite((uint8_t *)mp3_wificonnected, sizeof(mp3_wificonnected), 0); 
   
   ssid =wm.getWiFiSSID();
   password = wm.getWiFiPass();
@@ -189,7 +189,8 @@ void checkButton(bool force)
       // start portal w delay
       Serial.println("checkButton() - Starting config portal");
       wm.setConfigPortalTimeout(120);
-      PlaySoundBite((uint8_t *)mp3_smartphone_portal, sizeof(mp3_smartphone_portal), 50); 
+      // play it loud enough to be noticed
+      PlaySoundBite((uint8_t *)mp3_smartphone_portal, sizeof(mp3_smartphone_portal), 60); 
 
       
       // if (!wm.startConfigPortal("OnDemandAP","password")) {
@@ -200,7 +201,7 @@ void checkButton(bool force)
       } else 
       { //if you get here you have connected to the WiFi
         Serial.println("checkButton() - connected...yeey :)");
-        PlaySoundBite((uint8_t *)mp3_wificonnected, sizeof(mp3_wificonnected), 50); 
+        PlaySoundBite((uint8_t *)mp3_wificonnected, sizeof(mp3_wificonnected), 0); 
         ssid =wm.getWiFiSSID();
         password = wm.getWiFiPass();
         Serial.println(ssid);
@@ -211,7 +212,8 @@ void checkButton(bool force)
           EEPROM.put(0x0, GlobeSettings);
           EEPROM.commit();
           Serial.println("checkButton() - SSID and password saved to EEprom.");
-          PlaySoundBite((uint8_t *)mp3_rebooting_radioglobe, sizeof(mp3_rebooting_radioglobe), 50); 
+          // play it loud enough to be noticed
+          PlaySoundBite((uint8_t *)mp3_rebooting_radioglobe, sizeof(mp3_rebooting_radioglobe), 60); 
           delay(2000);
           ESP.restart();
         }         

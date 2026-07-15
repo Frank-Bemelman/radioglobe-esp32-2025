@@ -194,14 +194,14 @@ void loopMQTT(void) {
   // every second, update values using MQTT (for Home Assistant)
   if ((millis() - lastSentAt) >= 1000) 
   { lastSentAt = millis();
-    sprintf(value, "%.6f", D_StationGpsNS);
+    sprintf(value, "%.6f", D_GeoStationNS);
     if(strcmp(previous_gpsns, value)!=NULL)
     { strcpy(previous_gpsns, value);
       Serial.printf("Tell HA new D_StationGpsNS is %s\n", value);
       HA_GlobeGpsNs.setValue(value);
     }
 
-    sprintf(value, "%.6f", D_StationGpsEW);
+    sprintf(value, "%.6f", D_GeoStationEW);
     if(strcmp(previous_gpsew, value)!=NULL)
     { strcpy(previous_gpsew, value);
       Serial.printf("Tell HA new D_StationGpsEW is %s\n", value);

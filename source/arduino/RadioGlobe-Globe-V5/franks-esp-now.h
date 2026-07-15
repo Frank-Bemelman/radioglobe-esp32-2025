@@ -13,6 +13,19 @@ typedef struct {
   uint16_t QueueCnt;
 } Queue;
 
+#define APIQUEUESIZE 25
+typedef struct {               
+  uint16_t ApiType[APIQUEUESIZE];
+  float ApiParameterNS[APIQUEUESIZE];
+  float ApiParameterEW[APIQUEUESIZE];
+  uint16_t ApiRequestedStation[APIQUEUESIZE];
+  uint16_t ApiQueueIndexIn;
+  uint16_t ApiQueueIndexOut;
+  uint16_t ApiQueueCnt;
+} ApiQueue;
+
+ApiQueue ApiCallsToDo; // queue with apis to call
+
 const char * messagetexts[] = {
    { "UNSUPPORTED MESSAGE"},
    { "SONG_TITLE 1"},
@@ -185,7 +198,7 @@ typedef struct struct_message1 {
     uint16_t internalspeakeron; // speakers on or off
     uint16_t D_BatteryVoltage;
     uint16_t btmodule_power_on; // bluetooth on or off
-    
+    int16_t  D_RequestedStation;   
 } struct_from_display;
 
 typedef struct struct_message2 {
@@ -198,7 +211,7 @@ typedef struct struct_message2 {
     int16_t  UnravelingResult; // tells display that Globe is occupied unraveling .m3u or .pls url to get the actual streaming url
     uint16_t G_QueueSerialNumber;
     uint16_t G_QueueMessageType;
-    int16_t D_QueueStationIndex; // echo back unaltered
+    int16_t  D_QueueStationIndex; // echo back unaltered
     char     G_QueueMessage[QUEUEMESSAGELENGTH];
     uint16_t D_QueueSerialNumber; // echo back to display confirm reception
     uint16_t D_QueueMessageType;
@@ -208,6 +221,7 @@ typedef struct struct_message2 {
     uint16_t G_Volume;
     bool     G_EncoderReliable;
     int16_t  G_rssi_globe;
+    int16_t  D_ApisFetchedForStation;   
 
 
 } struct_from_globe;
@@ -230,10 +244,14 @@ Queue FromDisplay; // queue with messages from display
 
 int16_t CalibrateZeroPos = 0;
 
-int16_t ns_cal_received;
-int16_t ew_cal_received;
-float D_StationGpsNS;
-float D_StationGpsEW;
-float D_GeoLocationGpsNS;
-float D_GeoLocationGpsEW;
+int16_t TZ_NS;
+int16_t TZ_EW;
+int16_t TZ_RequestedStation = 9999;
+
+float D_GeoStationNS;
+float D_GeoStationEW;
+float D_GeoLocationNS;
+float D_GeoLocationEW;
+int16_t D_RequestedStation = 9999;
+
 

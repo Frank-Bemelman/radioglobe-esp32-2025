@@ -2,8 +2,8 @@
 
 void setup_tasks(void)
 { xTaskCreatePinnedToCore(
-                    CallGetTimeZone,   /* Task function. */
-                    "CallGetTimeZone",     /* name of task. */
+                    Queued_Api_Calls,   /* Task function. */
+                    "Queued_Api_Calls",  /* name of task. */
                     10000,       /* Stack size of task */
                     NULL,        /* parameter of the task */
                     3,           /* priority of the task */
@@ -27,40 +27,6 @@ void setup_tasks(void)
                     1);          /* pin task to core 0 */      
 
 
-}
-
-void CallGetTimeZone(void * pvParameters)
-{ while(1)
-  { if(DataFromGlobe.FindTimeZone == MESSAGE_GET_TIMEZONE)
-    { GetTimeZone(ns_cal_received/10, ew_cal_received/10); 
-      DataFromGlobe.FindTimeZone = 0;
-    }
-    else if(DataFromGlobe.FindTimeZone == MESSAGE_GET_TIMEZONE_BY_GPS)
-    { GetTimeZone(D_StationGpsNS, D_StationGpsEW);
-      DataFromGlobe.FindTimeZone = 0;
-    }
-    else if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_GEOLOCATION)
-    { GetGeolocationData(ns_cal_received/10, ew_cal_received/10, false); // get for just a location
-      DataFromGlobe.FindGeoLocationData = MESSAGE_GET_WEATHER_DATA; // also find weather data after this TODO -> by ns_cal_receved etc
-    }
-    else if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_WEATHER_DATA)
-    { GetOpenWeatherData(ns_cal_received/10, ew_cal_received/10);
-      DataFromGlobe.FindGeoLocationData = 0;
-    }
-    else if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_GEOLOCATION_BY_GPS)
-    { GetGeolocationData(D_GeoLocationGpsNS, D_GeoLocationGpsEW, true); // get for a radio station
-      DataFromGlobe.FindGeoLocationData = MESSAGE_GET_WEATHER_DATA_BY_GPS; // also find weather data after this
-    }
-    else if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_WEATHER_DATA_BY_GPS)
-    { GetOpenWeatherData(D_GeoLocationGpsNS, D_GeoLocationGpsEW);
-      DataFromGlobe.FindGeoLocationData = 0;
-    }
-    else if(GetRatesNow)
-    { FetchJsonExchangeRates();
-      GetRatesNow = false;
-    }
-    vTaskDelay(100 / portTICK_PERIOD_MS); // lowered to 100, was 200
-  }  
 }
 
 // Task to read the globe encoders, roughly ten times a second
@@ -93,6 +59,9 @@ void ReadAS5600Encoders(void * pvParameters)
       { Serial.printf("SerialPort Closed\n");
       }
     }
+
+    if(RefreshRatesCountDownTimer && (ReadEncoderTicker100mS%10)==0)RefreshRatesCountDownTimer--;
+    
     
     // keep 4 last readings
     if(!EncoderReliable)
@@ -123,15 +92,13 @@ void ReadAS5600Encoders(void * pvParameters)
       EWFilteredRAW = (AverageEW[0] + AverageEW[1] + AverageEW[2] + AverageEW[3]) / 4;
     }  
 
-    // check if last reading is fairly different from the average
+    // check if last NS/EW readings are fairly different from the average
     if((abs(NSFilteredRAW - AverageNS[(AverageIdx-1)%4])<8) && (abs(EWFilteredRAW - AverageEW[(AverageIdx-1)%4])<8))
     { // pretty stable
       if(stable100ms<10000)stable100ms++;
-      if(EncoderReliable && (stable100ms>9))
+      if(EncoderReliable && (stable100ms>9)) // if stable for 1 second
       { stable = true;
         if(LedAnimationBrightness)LedAnimationBrightness-=5; // brigthness dims down in roughly 2.5 seconds
-        //stream.forceVolume(0);
-        //Speakers(SPEAKERS_OFF);
       }
     }  
     else // NS/EW movement detected
@@ -179,8 +146,6 @@ void ReadAS5600Encoders(void * pvParameters)
       }
       else
       { bEncoderKillStation = true;
-        //AddToQueueForDisplay("", MESSAGE_STATION_NAME); // remove 'station name'
-        //AddToQueueForDisplay("", MESSAGE_SONG_TITLE); // remove 'song title'
       }  
     }
 
@@ -188,7 +153,7 @@ void ReadAS5600Encoders(void * pvParameters)
     checkSpeakerToggleButton();
     //Serial.println("EFree Heap B4 we continue " + String(ESP.getFreeHeap()));  
 
-    if((ReadEncoderTicker100mS % 10)==0)DataFromGlobe.G_rssi_globe = WiFi.RSSI();
+    if((ReadEncoderTicker100mS % 50)==0)DataFromGlobe.G_rssi_globe = WiFi.RSSI(); // every 5 seconds
 
     if((ReadEncoderTicker100mS % 3000)==0) // check every 5 minutes if battery needs recharge
     // if((ReadEncoderTicker100mS % 100)==0) // check every 10 seconds (testing) if battery needs recharge
