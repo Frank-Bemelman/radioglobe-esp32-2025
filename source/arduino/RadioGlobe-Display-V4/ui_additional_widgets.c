@@ -21,6 +21,21 @@ lv_obj_t * uic_SetFuzzinessValue;
 lv_obj_t * uic_mainscreen_speakeron;
 lv_obj_t * uic_mainscreen_speakeroff;
 lv_obj_t * uic_MusicLibraryButton;
+lv_obj_t * uic_PresetFlag1 = NULL;
+lv_obj_t * uic_PresetFlag2 = NULL;
+lv_obj_t * uic_PresetFlag3 = NULL;
+lv_obj_t * uic_PresetFlag4 = NULL;
+lv_obj_t * uic_GlobeSDText  = NULL;
+lv_obj_t * uic_GlobeSDSizeText  = NULL;
+
+lv_obj_t * uic_BatteryText  = NULL;
+lv_obj_t * uic_BatteryLevel  = NULL;
+
+lv_obj_t * uic_BatteryVoltage = NULL;
+
+lv_obj_t * uic_PresetFlag = NULL;
+
+
 
 
 
@@ -41,9 +56,36 @@ lv_obj_t * ui_SetFuzzinessButtonR = NULL;
 lv_obj_t * ui_SetFuzzinessValue = NULL;
 lv_obj_t * ui_mainscreen_speakeron = NULL;
 lv_obj_t * ui_mainscreen_speakeroff = NULL;
-lv_obj_t * ui_MusicLibraryButton = NULL;
+//lv_obj_t * ui_MusicLibraryButton = NULL;
+
+lv_obj_t * ui_PresetFlag1 = NULL;
+lv_obj_t * ui_PresetFlag2 = NULL;
+lv_obj_t * ui_PresetFlag3 = NULL;
+lv_obj_t * ui_PresetFlag4 = NULL;
+lv_obj_t * ui_GlobeSDText  = NULL;
+lv_obj_t * ui_GlobeSDSizeText  = NULL;
+
+lv_obj_t * ui_BatteryText  = NULL;
+lv_obj_t * ui_BatteryLevel  = NULL;
 
 
+lv_obj_t * ui_BatteryVoltage = NULL;
+
+lv_obj_t * ui_PresetFlag = NULL;
+
+
+void ui_event_PresetFlag(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_LONG_PRESSED_REPEAT) {
+      
+        //station1(e);
+    }
+    if(event_code == LV_EVENT_CLICKED) {
+        //station1(e);
+    }
+}
 
 
 void ui_event_Portal_Button(lv_event_t * e)
@@ -86,17 +128,17 @@ void ui_event_SetFuzzinessButtonR(lv_event_t * e)
   }
 }
 
-void ui_event_MusicLibraryButton(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
+//void ui_event_MusicLibraryButton(lv_event_t * e)
+//{
+//    lv_event_code_t event_code = lv_event_get_code(e);
+//
+//    if(event_code == LV_EVENT_CLICKED) {
+//        GlobePlaySD(e);
+//        beep(e);
+//    }
+//}
 
-    if(event_code == LV_EVENT_CLICKED) {
-        GlobePlaySD(e);
-        beep(e);
-    }
-}
-
-
+// not used anymore
 void ui_additional_widgets_init(void)
 {   ui_Open_Portal_Text = lv_label_create(ui_SetupScreen);
     lv_obj_set_width(ui_Open_Portal_Text, 140);
@@ -318,22 +360,100 @@ void ui_additional_text_init(void)
   uic_mainscreen_speakeron = ui_mainscreen_speakeron;
   uic_mainscreen_speakeroff = ui_mainscreen_speakeroff;
 
-  ui_MusicLibraryButton = lv_img_create(ui_Favorites);
-  lv_img_set_src(ui_MusicLibraryButton, &icon_musiclib75x75_png);
-  lv_obj_set_width(ui_MusicLibraryButton, LV_SIZE_CONTENT);   /// 1
-  lv_obj_set_height(ui_MusicLibraryButton, LV_SIZE_CONTENT);    /// 1
-  lv_obj_set_x(ui_MusicLibraryButton, 170);
-  lv_obj_set_y(ui_MusicLibraryButton, 0);
-  lv_obj_set_align(ui_MusicLibraryButton, LV_ALIGN_CENTER);
-  lv_obj_add_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
-  lv_obj_clear_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-  ui_object_set_themeable_style_property(ui_MusicLibraryButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
-                                         _ui_theme_color_turquoise);
-  ui_object_set_themeable_style_property(ui_MusicLibraryButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
-                                         _ui_theme_alpha_turquoise);
-  lv_obj_add_event_cb(ui_MusicLibraryButton, ui_event_MusicLibraryButton, LV_EVENT_ALL, NULL);   // in calibration.ino                                         
+//  ui_MusicLibraryButton = lv_img_create(ui_Favorites);
+//  lv_img_set_src(ui_MusicLibraryButton, &icon_musiclib75x75_png);
+//  lv_obj_set_width(ui_MusicLibraryButton, LV_SIZE_CONTENT);   /// 1
+//  lv_obj_set_height(ui_MusicLibraryButton, LV_SIZE_CONTENT);    /// 1
+//  lv_obj_set_x(ui_MusicLibraryButton, 170);
+//  lv_obj_set_y(ui_MusicLibraryButton, 0);
+//  lv_obj_set_align(ui_MusicLibraryButton, LV_ALIGN_CENTER);
+//  lv_obj_add_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+//  lv_obj_clear_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+//  ui_object_set_themeable_style_property(ui_MusicLibraryButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
+//                                         _ui_theme_color_turquoise);
+//  ui_object_set_themeable_style_property(ui_MusicLibraryButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
+//                                         _ui_theme_alpha_turquoise);
+//  lv_obj_add_event_cb(ui_MusicLibraryButton, ui_event_MusicLibraryButton, LV_EVENT_ALL, NULL);   // in calibration.ino                                         
+//
+//  uic_MusicLibraryButton = ui_MusicLibraryButton;
 
-  uic_MusicLibraryButton = ui_MusicLibraryButton;
 
+  ui_PresetFlag = lv_img_create(ui_Favorites);
+  lv_img_set_src(ui_PresetFlag, &ui_img_xx_png);
+  lv_obj_set_width(ui_PresetFlag, LV_SIZE_CONTENT);   /// 1
+  lv_obj_set_height(ui_PresetFlag, LV_SIZE_CONTENT);    /// 1
+  lv_obj_set_x(ui_PresetFlag, 155);
+  lv_obj_set_y(ui_PresetFlag, -104);
+  lv_obj_set_align(ui_PresetFlag, LV_ALIGN_CENTER);
+  lv_obj_add_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN);   
+  lv_obj_clear_flag(ui_PresetFlag, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
+                      LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE);     /// Flags
+  lv_img_set_zoom(ui_PresetFlag, 192);
+  uic_PresetFlag = ui_PresetFlag;
+  
+
+  lv_obj_add_event_cb(ui_PresetFlag, ui_event_PresetFlag, LV_EVENT_ALL, NULL);
+  
+
+  ui_GlobeSDText = lv_label_create(ui_Favorites);
+  lv_obj_set_width(ui_GlobeSDText, LV_SIZE_CONTENT);   /// 1
+  lv_obj_set_height(ui_GlobeSDText, LV_SIZE_CONTENT);    /// 1
+  lv_obj_set_x(ui_GlobeSDText, -165);
+  lv_obj_set_y(ui_GlobeSDText, 10);
+  lv_obj_set_align(ui_GlobeSDText, LV_ALIGN_CENTER);
+  lv_label_set_text(ui_GlobeSDText, "Globe SD");
+  lv_obj_set_style_text_color(ui_GlobeSDText, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
+  lv_obj_set_style_text_opa(ui_GlobeSDText, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+  uic_GlobeText = ui_GlobeText;
+
+  ui_GlobeSDSizeText = lv_label_create(ui_Favorites);
+  lv_obj_set_width(ui_GlobeSDSizeText, LV_SIZE_CONTENT);   /// 1
+  lv_obj_set_height(ui_GlobeSDSizeText, LV_SIZE_CONTENT);    /// 1
+  lv_obj_set_x(ui_GlobeSDSizeText, -165);
+  lv_obj_set_y(ui_GlobeSDSizeText, 60);
+  lv_obj_set_align(ui_GlobeSDSizeText, LV_ALIGN_CENTER);
+  lv_label_set_text(ui_GlobeSDSizeText, "XX GB");
+  lv_obj_set_style_text_color(ui_GlobeSDSizeText, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
+  lv_obj_set_style_text_opa(ui_GlobeSDSizeText, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+  uic_GlobeSDSizeText = ui_GlobeSDSizeText;
+
+  ui_BatteryText = lv_label_create(ui_Favorites);
+  lv_obj_set_width(ui_BatteryText, LV_SIZE_CONTENT);   /// 1
+  lv_obj_set_height(ui_BatteryText, LV_SIZE_CONTENT);    /// 1
+  lv_obj_set_x(ui_BatteryText, -165);
+  lv_obj_set_y(ui_BatteryText, 80);
+  lv_obj_set_align(ui_BatteryText, LV_ALIGN_CENTER);
+  lv_label_set_text(ui_BatteryText, "Battery");
+  lv_obj_set_style_text_color(ui_BatteryText, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
+  lv_obj_set_style_text_opa(ui_BatteryText, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+  uic_BatteryText = ui_BatteryText;
+
+  ui_BatteryLevel = lv_label_create(ui_Favorites);
+  lv_obj_set_width(ui_BatteryLevel, LV_SIZE_CONTENT);   /// 1
+  lv_obj_set_height(ui_BatteryLevel, LV_SIZE_CONTENT);    /// 1
+  lv_obj_set_x(ui_BatteryLevel, -165);
+  lv_obj_set_y(ui_BatteryLevel, 130);
+  lv_obj_set_align(ui_BatteryLevel, LV_ALIGN_CENTER);
+  lv_label_set_text(ui_BatteryLevel, "50%");
+  lv_obj_set_style_text_color(ui_BatteryLevel, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
+  lv_obj_set_style_text_opa(ui_BatteryLevel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+  uic_BatteryLevel = ui_BatteryLevel;
+
+
+  ui_BatteryVoltage = lv_label_create(ui_Home);
+  lv_obj_set_height(ui_BatteryVoltage, 18);
+  lv_obj_set_width(ui_BatteryVoltage, LV_SIZE_CONTENT);   /// 52
+  lv_obj_set_x(ui_BatteryVoltage, 162);
+  lv_obj_set_y(ui_BatteryVoltage, 109);
+  lv_obj_set_align(ui_BatteryVoltage, LV_ALIGN_CENTER);
+  lv_label_set_long_mode(ui_BatteryVoltage, LV_LABEL_LONG_CLIP);
+  lv_label_set_text(ui_BatteryVoltage, "");
+  lv_obj_clear_flag(ui_BatteryVoltage,
+                      LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
+                      LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
+  lv_obj_set_style_text_align(ui_BatteryVoltage, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+  uic_BatteryVoltage = ui_BatteryVoltage;
+
+    
 
 }

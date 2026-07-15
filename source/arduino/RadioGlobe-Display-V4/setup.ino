@@ -240,9 +240,10 @@ void handlePowerCycle(void)
       ui_object_set_themeable_style_property(ui_Home_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_red);
       ui_object_set_themeable_style_property(ui_Home_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_red);
       lv_obj_invalidate(ui_Home_Power_Off_Icon);
-      ui_object_set_themeable_style_property(uic_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_red);
-      ui_object_set_themeable_style_property(uic_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_red);
-      lv_obj_invalidate(uic_Clock_Power_Off_Icon);
+      lv_img_set_src(ui_Clock_Power_Off_Icon, &ui_img_power75x75_png); // icon on clock face
+      ui_object_set_themeable_style_property(ui_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_red);
+      ui_object_set_themeable_style_property(ui_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_red);
+      lv_obj_invalidate(ui_Clock_Power_Off_Icon);
       lv_refr_now(NULL);
       Lvgl_Loop();  
 
@@ -269,6 +270,9 @@ void handlePowerCycle(void)
     }
     else
     { // Power on
+      char content[128];
+      sprintf(content, "Sleeptimer =% d -> %d by handlePowerCycle doing a power on\n", AutoSleepTimer, AUTOPOWERDOWNAFTER);
+      AppendToLogFile("/Sleeptimer.log", content);
       AutoSleepTimer = AUTOPOWERDOWNAFTER;
       bPowerStatus = true;
       ClockBackLight = true;
@@ -364,9 +368,9 @@ void SetFlag(char *countrycode)
   lv_img_set_src(uic_Database_Flag, &my_flag_img);
   lv_img_set_src(uic_HomeFlagToStore, &my_flag_img);
   lv_img_set_src(uic_ClockFlag, &my_flag_img);
+  lv_img_set_src(ui_PresetFlag, &my_flag_img);
 
 }
-
 
 
 static lv_img_dsc_t StationMap_img_dsc;
@@ -421,7 +425,7 @@ void ClockFlagToggle(lv_event_t * e)
     sprintf(content, "%f-%f", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
     AddToQueueForGlobe("DISPLAY WANTS MQTT STATUS", MESSAGE_MQTT_STATUS); 
     AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_BY_GPS);  
-    lv_label_set_text(uic_Clock_Country, AllUpperCase(Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].town));
+    lv_label_set_text(ui_Clock_Country, AllUpperCase(Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].town));
   }
   else 
   { Serial.println("ClockFlagToggle = WORLD");
@@ -431,7 +435,7 @@ void ClockFlagToggle(lv_event_t * e)
     AddToQueueForGlobe("DISPLAY WANTS MQTT STATUS", MESSAGE_MQTT_STATUS); 
     AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_BY_GPS);  
     strcpy(content, Stations.StationNUG[Stations.requested].countryname);
-    lv_label_set_text(uic_Clock_Country, AllUpperCase(content));
+    lv_label_set_text(ui_Clock_Country, AllUpperCase(content));
   }
 
 }
@@ -597,8 +601,11 @@ void ShowWeatherData(bool state)
   }
 }
 
-void ShowBatteryLevel(int newbatteryvoltage) // 0 -> hide, >=1 -> show, negative -> only store
-{ static int actbatteryvoltage = -1;
+void ShowBatteryLevel(int newbatteryvoltage) // 0 -> hide, 1 -> show hide weather icon and show battery icons, negative -> only update value 
+{ static int abs_newvoltage;
+  static int battery_voltage = -1;
+  static int actbatterypercentage = 1;
+  static int battery_percentage = -1;
   char content[32];
 
   if(newbatteryvoltage == 0) // means hide battery
@@ -613,34 +620,56 @@ void ShowBatteryLevel(int newbatteryvoltage) // 0 -> hide, >=1 -> show, negative
     return;
   }
 
-
   if(newbatteryvoltage<0) // when negative it is just store and return
-  { if(actbatteryvoltage>0)
-    { if(actbatteryvoltage != -newbatteryvoltage)
-      { actbatteryvoltage = -newbatteryvoltage;
-        sprintf(content, "%d.%d V", actbatteryvoltage/10, actbatteryvoltage%10);
-        lv_label_set_text(ui_BatteryVoltage, content);
-      }  
-      if(actbatteryvoltage>34)return;
+  { if(abs_newvoltage != -newbatteryvoltage)
+    { abs_newvoltage = -newbatteryvoltage;
+      
+      // track voltage, one step up/down at the time 
+      if(battery_voltage = -1) battery_voltage = abs_newvoltage;
+      if(battery_voltage < abs_newvoltage)battery_voltage++;
+      if(battery_voltage > abs_newvoltage)battery_voltage--;
+
+      // map voltage to percentage 
+      if(battery_voltage>=410)actbatterypercentage = 100;
+      else if(battery_voltage>=406)actbatterypercentage = map(battery_voltage, 406, 409, 90, 100);  //  90; 
+      else if(battery_voltage>=398)actbatterypercentage = map(battery_voltage, 398, 405, 80, 89);  //  80; 
+      else if(battery_voltage>=392)actbatterypercentage = map(battery_voltage, 392, 397, 70, 79);  //  70; 
+      else if(battery_voltage>=387)actbatterypercentage = map(battery_voltage, 387, 391, 60, 69);  //  60; 
+      else if(battery_voltage>=375)actbatterypercentage = map(battery_voltage, 375, 386, 50, 59);  //  50; 
+      else if(battery_voltage>=367)actbatterypercentage = map(battery_voltage, 367, 374, 40, 49);  //  40; 
+      else if(battery_voltage>=360)actbatterypercentage = map(battery_voltage, 360, 366, 30, 39);  //  30; 
+      else if(battery_voltage>=345)actbatterypercentage = map(battery_voltage, 345, 359, 20, 29);  //  20; 
+      else if(battery_voltage>=330)actbatterypercentage = map(battery_voltage, 330, 344, 10, 19);  //  10;
+      else if(battery_voltage>=300)actbatterypercentage = map(battery_voltage, 300, 329, 0, 9);  //  1;
+      else battery_voltage = 0;
+
+      // track percentage, one step up/down at the time
+      if(battery_percentage==-1)battery_percentage = actbatterypercentage;
+      if(battery_percentage < actbatterypercentage)battery_percentage++;
+      if(battery_percentage > actbatterypercentage)battery_percentage--;
+
+      sprintf(content, "%d%%", battery_percentage);
+      lv_label_set_text(ui_BatteryVoltage, content);
+      lv_label_set_text(ui_BatteryLevel, content);
     }
-    actbatteryvoltage = -newbatteryvoltage; 
-  }
-  else
-  { if(newbatteryvoltage > 1) actbatteryvoltage = newbatteryvoltage;
+    return;
   }
 
   ShowWeatherData(false);
 
-  sprintf(content, "%d.%d V", actbatteryvoltage/10, actbatteryvoltage%10);
+  sprintf(content, "%d%%", battery_percentage);
   lv_label_set_text(ui_BatteryVoltage, content);
+  lv_label_set_text(ui_BatteryLevel, content);
+
+
   lv_obj_clear_flag(uic_BatteryVoltage, LV_OBJ_FLAG_HIDDEN); 
     
-  if(actbatteryvoltage > 36)
+  if(actbatterypercentage > 90)
   { lv_obj_add_flag(ui_Battery_Icon_Low, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui_Battery_Icon_Medium, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(ui_Battery_Icon_High, LV_OBJ_FLAG_HIDDEN);
   }
-  else if(newbatteryvoltage > 34)
+  else if(actbatterypercentage > 50)
   { lv_obj_add_flag(ui_Battery_Icon_Low, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(ui_Battery_Icon_Medium, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui_Battery_Icon_High, LV_OBJ_FLAG_HIDDEN);

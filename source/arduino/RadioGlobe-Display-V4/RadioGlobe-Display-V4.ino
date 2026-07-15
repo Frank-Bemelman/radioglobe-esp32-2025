@@ -1,5 +1,5 @@
 
-// Using LVGL with Arduino requires some extra steps :
+// Using LVGL with Arduino requires some extra steps:
 // Be sure to read the docs here: https://docs.lvgl.io/master/get-started/platforms/arduino.html  */
 // #include "lv_conf.h" (root lib folder)
 // #include "lvgl.h" (loaded elsewere)
@@ -18,6 +18,7 @@
 // 14APR2026 Boards Manager (back to 3.3.7, ESP32S3 Dev Module 16MB 4MB app (custom partition) PSRAM OPI)) 
 
 
+// 14 JUL 26 -> added battery level status on preset screen
 // 4 JUL 26 -> changed lcd driver frequency from 16Mhz to 14Mhz (hope it fixes the odd screen glithtes) in Display_7701.h
 // 4 JUL 26 -> greater click area around flag and power icon on clock face
 // 29 JUN 26 -> update and FTP features added
@@ -114,7 +115,7 @@ struct eepromData
   char google_api_key[64];
   char open_weather_map_api_key[64];
   uint16_t expand_search; // number of degrees to look around for a station
-  uint16_t globe_has_sdcard;
+  uint16_t globe_sd_gb;
   uint16_t auto_update_state = 0;
   
   char spare_data[];
@@ -186,8 +187,8 @@ EXT_RAM_ATTR calibrations_arraybin def_cal;
 uint16_t CalToIndexNS;
 uint16_t CalToIndexEW;
 bool bPowerStatus = true;
-#define AUTOPOWERDOWNAFTER 8 * 3600; // auto power after 8 hour
-//#define AUTOPOWERDOWNAFTER 10 * 60; // auto power after 10 minutes, for test
+#define AUTOPOWERDOWNAFTER (8 * 3600) // auto power after 8 hour
+//#define AUTOPOWERDOWNAFTER (3 * 60) // auto power after 3 minutes, for test
 uint32_t AutoSleepTimer = AUTOPOWERDOWNAFTER;
 
 #define DEFAULT_BACKLIGHT 75
@@ -210,7 +211,12 @@ bool ClockHomeTime = true;
 bool ClockBackLight = true; // keep the clock lit up
 
 void Driver_Loop(void *parameter)
-{
+{ static int16_t RawGyro[4];
+  static uint8_t  RawGyroIdx = 0;
+  static int16_t AverageGyro = 0;
+  uint16_t CurrentMotion;
+  uint16_t FilteredMotion;
+  
   while(1)
   { GlobalTicker100mS++;
     //QMI8658_Loop();  // get accelero meter, not needed
@@ -218,17 +224,33 @@ void Driver_Loop(void *parameter)
     // BAT_Get_Volts();
     bTimer100ms = true;
 
+    RawGyroIdx %= 4;
+    getGyroscope();
+    uint16_t CurrentMotion = abs((int)Gyro.x) + abs((int)Gyro.y) + abs((int)Gyro.z); 
+    RawGyro[RawGyroIdx] = CurrentMotion;
+    RawGyroIdx++;
+
+    FilteredMotion = (RawGyro[0] + RawGyro[1] + RawGyro[2] + RawGyro[3]) / 4;
+
     // auto dim backlight and gyro test every second
     if((GlobalTicker100mS % 10)==0)
     { GlobalTicker1S++;
       if(UpdateState==0) // update process may turn off the backlight - don't wake it on by accident
       { getGyroscope();
         uint16_t motion = abs((int)Gyro.x) + abs((int)Gyro.y) + abs((int)Gyro.z); 
+        // seen -> Log File /Sleeptimer.log appended with Sleeptimer = 17752 -> 28800 by motion value 64
+        // have to do better, added a filter now 
         //Serial.printf("x%f - y%f - z%f\n", Gyro.x, Gyro.y, Gyro.z);
-        //Serial.printf("motion is %d\n", motion);
+        
+        // at rest, value is aroung 4-10
+        // when tilted normal, values of 60
+        //Serial.printf("FilteredMotion is %d\n", FilteredMotion);
         //Serial.printf("motion %d freeze %d backlightvalue %d\n", motion, freeze, backlightvalue);
-        if(motion>30)
+        if(FilteredMotion>30)
         { BacklightValue = DEFAULT_BACKLIGHT;
+          char content[128];
+          sprintf(content, "Sleeptimer =% d -> %d by motion value %d", AutoSleepTimer, AUTOPOWERDOWNAFTER, motion);
+          AppendToLogFile("/Sleeptimer.log", content);
           AutoSleepTimer = AUTOPOWERDOWNAFTER;
           ClockBackLight = true;
           if(bPowerStatus)
@@ -348,8 +370,8 @@ void setup()
   lv_label_set_text(ui_Home_City, "");
   lv_label_set_text(ui_Home_Country, "");
   ShowWeatherData(false); // hide weather info
-  if(DisplaySettings.globe_has_sdcard==1)lv_obj_clear_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
-  else lv_obj_add_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
+  //if(DisplaySettings.globe_has_sdcard==1)lv_obj_clear_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
+  //else lv_obj_add_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
 
 
   // give flag and power button on clock face a much larger click area
@@ -406,6 +428,9 @@ void setup()
   //Serial.println(content);
   //lv_label_set_text(ui_GlobeMac, content);
   lv_label_set_text(ui_PuckBuild, build_timestamp);
+
+  sprintf(content, "%d GB", DisplaySettings.globe_sd_gb);
+  lv_label_set_text(ui_GlobeSDSizeText, content);
 
   ShowWeatherData(false);
 
@@ -464,7 +489,8 @@ bool bInfoScreen = false;
 char *partofday[4] = {"Sweet Night", "Good Morning", "Jolly Afternoon", "Nice Evening"};
 char *weekdays[7] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 char *monthnames[12] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
-char timezonename[64] = "";
+char ClockTimeZoneName[64] = "";
+char OldClockTimeZoneName[64] = "";
 
 
 void loop()
@@ -499,15 +525,16 @@ void loop()
   char *p1;
   char countrycode[3]="";
 
+  // clock face variables
   static int16_t OldHourAngle;
   int16_t HourAngle;
   static int16_t OldMinuteAngle;
   int16_t MinuteAngle;
   static int16_t OldSecondAngle;
   int16_t SecondAngle;
-  unsigned long ClockMillisLapse;
-  static unsigned long SecondStartMs;
-
+  static int16_t OldHour;
+  int16_t Hour;
+  
 
 
   Lvgl_Loop();
@@ -600,9 +627,13 @@ void loop()
 
     if(oldscreen != screen) // screen changed
     { oldscreen = screen;
-      AutoSleepTimer = AUTOPOWERDOWNAFTER;
+        
       if(bPowerStatus==true)
-      { if(screen == ui_CalibrationScreen) // force refresh raw coordinate
+      { sprintf(content, "Sleeptimer =% d -> %d by screen-change", AutoSleepTimer, AUTOPOWERDOWNAFTER);
+        AppendToLogFile("/Sleeptimer.log", content);
+        AutoSleepTimer = AUTOPOWERDOWNAFTER;
+
+        if(screen == ui_CalibrationScreen) // force refresh raw coordinate
         { PrevDataFromGlobe.ns = -1;  
         }
         if(screen == ui_CalibrationScreenAdvanced) // force refresh
@@ -682,8 +713,10 @@ void loop()
           break;
         case MESSAGE_TIMEZONE_ID:
           if(strlen(QueueMessage))
-          { AllUpperCase(QueueMessage);
-            lv_label_set_text(ui_Time_Zone, QueueMessage);
+          { strcpy(ClockTimeZoneName, QueueMessage);
+            AllUpperCase(ClockTimeZoneName);
+            lv_label_set_text(ui_Time_Zone, ClockTimeZoneName); // on home screen - clock screen does it's own updates every second
+            
             datetime.month = DataFromGlobe.timeinfo.tm_mon;
             datetime.day = DataFromGlobe.timeinfo.tm_mday;
             datetime.dotw = DataFromGlobe.timeinfo.tm_wday;
@@ -692,19 +725,15 @@ void loop()
             datetime.second = DataFromGlobe.timeinfo.tm_sec;
             datetime.year = DataFromGlobe.timeinfo.tm_year;
             PCF85063_Set_All(datetime);
+            
             // also set system wide clock as well, to get the right times and dates on files created 
             now = mktime(&DataFromGlobe.timeinfo); // get it in epoch seconds 
             // Serial.printf("NEW GLOBE EPOCH UTC SECONDS = %ld\n", (long)now);
             settimeofday((const timeval *) &now, NULL);
-            strcpy(timezonename, QueueMessage);
-            sprintf(content, "%s\n%s %d-%s-%d\n%s",  timezonename, weekdays[datetime.dotw], (size_t)datetime.day, monthnames[datetime.month],  (size_t)datetime.year%100, partofday[datetime.hour/6]);
-            lv_label_set_text(ui_Time_Zone_Clock, content); // on clock screen
+
           }  
           break;
            
-        case MESSAGE_TIMEZONE_NAME:
-          break;
-
         case MESSAGE_EX_CHANGE_RATE:
           // 1 Euro = 1.13 US Dollar - or some sort of message
           // Pay With Euro Here - when same valuta as at home is used
@@ -769,31 +798,26 @@ void loop()
           DataFromDisplay.D_QueueStationIndex = -1;
           Stations.playing = -1;
           if(DataFromGlobe.D_QueueMessageCount<10) // don't waste time logging when behind schedule
-          { SD_MMC.end(); //?? just to be sure
-            if(SD_MMC.begin("/sdcard", true, false)) // we have a card 
-            { // response is like "error  -> url"
-              // reported error message will be used as filename
-              char filename[QUEUEMESSAGELENGTH];
-              strcpy(filename, QueueMessage);
-              char *p;
-              if((p=strstr(filename, " -> "))!=0)
-              { *p=0;
-                //Serial.printf("MESSAGE_CONNECTTOHOST_FAILURE filename part is <%s>\n", filename);
-                // reported error message will be used as filename, must sanize first
-                const char *illegal_chars = " \\/:*?\"<>|";
-                p = filename;
-                while (*p)
-                { if (strchr(illegal_chars, *p) != NULL) *p = '_'; // Replace with a safe character
-                  p++;
-                }
-                //Serial.printf("MESSAGE_CONNECTTOHOST_FAILURE sanitized filename will be <%s>\n", filename);
-                sprintf(logfile, "/ERR-%s.log", filename);
-                //Serial.printf("MESSAGE_CONNECTTOHOST_FAILURE full filename will be <%s>\n", logfile);
-                AppendBadStationToFile(SD_MMC, logfile, QueueMessage);
-                SD_MMC.end();
+          { // response is like "error  -> url"
+            // reported error message will be used as filename
+            char filename[QUEUEMESSAGELENGTH];
+            strcpy(filename, QueueMessage);
+            char *p;
+            if((p=strstr(filename, " -> "))!=0)
+            { *p=0;
+              //Serial.printf("MESSAGE_CONNECTTOHOST_FAILURE filename part is <%s>\n", filename);
+              // reported error message will be used as filename, must sanize first
+              const char *illegal_chars = " \\/:*?\"<>|";
+              p = filename;
+              while (*p)
+              { if (strchr(illegal_chars, *p) != NULL) *p = '_'; // Replace with a safe character
+                p++;
               }
-              SD_MMC.end();
-            }  
+              //Serial.printf("MESSAGE_CONNECTTOHOST_FAILURE sanitized filename will be <%s>\n", filename);
+              sprintf(logfile, "/ERR-%s.log", filename);
+              //Serial.printf("MESSAGE_CONNECTTOHOST_FAILURE full filename will be <%s>\n", logfile);
+              AppendToLogFile(logfile, QueueMessage);
+            }
           }    
           break; 
 
@@ -809,11 +833,7 @@ void loop()
             //delay(300); // so we can actually notice the text change on the screen
             if(!bMusicMode)
             if(DataFromGlobe.D_QueueMessageCount<10) // don't waste time logging when behind schedule
-            { SD_MMC.end(); //??
-              if(SD_MMC.begin("/sdcard", true, false))
-              { AppendBadStationToFile(SD_MMC, "/audio-eof-stream.txt", QueueMessage);
-                SD_MMC.end();
-              }  
+            { AppendToLogFile("/audio-eof-stream.txt", QueueMessage);
             }    
           }
           break;
@@ -859,27 +879,7 @@ void loop()
           }
           break;
 
-        case MESSAGE_STATION_CONNECTED: // 25
-          // MESSAGE FROM GLOBE: 25 >https://stream06.dotpoint.nl:8004/stream<
-          // update text for station scroller 
-          // update leds on preset screen
-          bMusicMode = false;
-          if(Stations.requested<MAX_STATIONS+MAX_FAVORITES)
-          { lv_label_set_text(ui_Status_Line, "NOW PLAYING");
-            sprintf(content, "%s - Connected", Stations.StationNUG[Stations.requested].name);
-            Stations.playing = Stations.requested;
-            lv_label_set_text(ui_StationRollerComment, content); 
-             if(Stations.requested<MAX_STATIONS) // not a preset but from the list of available stations
-            { if(Stations.connect_attempts>0)Stations.connect_attempts--;
-              Serial.printf("(GLOBE SAYS): Station Connected %s\n", Stations.StationNUG[Stations.requested].name);
-              SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
-            }
-            else
-            { Serial.printf("(GLOBE SAYS): Preset Connected %s\n", Stations.StationNUG[Stations.requested].name);
-              SetLed(Stations.requested-MAX_STATIONS, UI_THEME_COLOR_GREEN);
-            }
-          }  
-          break;
+        
 
         case MESSAGE_GLOBE_WANTS_CURRENT_STATION: // 26 after a power up
            if(!bMusicMode)
@@ -955,9 +955,16 @@ void loop()
           // example: ","
           // example: ""
           // example: "XX,???"  // at sea
+
+          // check if the somewhat late arrived data is still applicable for the station most recently ordered
+          Serial.printf("DataFromGlobe.D_ApisFetchedForStation %d<> Stations.requested -> %d\n", DataFromGlobe.D_ApisFetchedForStation, Stations.requested);
+          if(DataFromGlobe.D_ApisFetchedForStation != Stations.requested)break;
+
+          // yes, this data belongs to the last station ordered, lets take it seriously 
           strcpy(town, "");
           strcpy(countrycode, "");
           if((p1=strchr(QueueMessage, ','))!= NULL)strcpy(town, p1+1);
+          
           if(isalpha(QueueMessage[0]))
           { countrycode[0] = QueueMessage[0];
             if(isalpha(QueueMessage[1]))
@@ -970,7 +977,7 @@ void loop()
           Serial.printf("GPS Countrycode = %s and town = %s\n", countrycode, town);
 
           // maybe this is not needed anymore once database is 100% cleaned up with correct country names
-          // but leave it for now to see if we get alarming messages
+          // but leave it for now to see if we still accumulate alarming messages
           if(QueueMessageType == MESSAGE_GET_GEOLOCATION_BY_GPS)
           { // check if country code is different from database, log when mismatch
             { if(Stations.requested<MAX_STATIONS+MAX_FAVORITES) // skip MAX_HOMES here
@@ -978,24 +985,20 @@ void loop()
                 { if(strcmp(Stations.StationNUG[Stations.requested].countrycode, countrycode)!=NULL) // country different from expected
                   { // must write to file for later examination
                     Serial.printf("Problem with Stations.requested = %d\n", Stations.requested);
-                    SD_MMC.end(); //??
-                    if(SD_MMC.begin("/sdcard", true, false))
-                    { strcpy(logfile, "/database-error.log");
-                      AppendBadStationToFile(SD_MMC, logfile, QueueMessage);
-                      sprintf(content, "Error in Database - requested countrycode %s should be %s", Stations.StationNUG[Stations.requested].countrycode, countrycode);
-                      AppendBadStationToFile(SD_MMC, logfile, content);
-                      Serial.println(content);
-                      sprintf(content, "                  - gps_ns = %f gps_ew = %f", Stations.StationNUG[Stations.requested].gps_ns, Stations.StationNUG[Stations.requested].gps_ew);
-                      AppendBadStationToFile(SD_MMC, logfile, content);
-                      Serial.println(content);
-                      sprintf(content, "                  - url = %s", Stations.StationNUG[Stations.requested].url);
-                      AppendBadStationToFile(SD_MMC, logfile, content);
-                      Serial.println(content);
-                      sprintf(content, "                  - town = %s", Stations.StationNUG[Stations.requested].town);
-                      AppendBadStationToFile(SD_MMC, logfile, content);
-                      Serial.println(content);
-                      SD_MMC.end();             
-                    }  
+                    strcpy(logfile, "/database-error.log");
+                    AppendToLogFile(logfile, QueueMessage);
+                    sprintf(content, "Error in Database - requested countrycode %s should be %s", Stations.StationNUG[Stations.requested].countrycode, countrycode);
+                    AppendToLogFile(logfile, content);
+                    Serial.println(content);
+                    sprintf(content, "                  - gps_ns = %f gps_ew = %f", Stations.StationNUG[Stations.requested].gps_ns, Stations.StationNUG[Stations.requested].gps_ew);
+                    AppendToLogFile(logfile, content);
+                    Serial.println(content);
+                    sprintf(content, "                  - url = %s", Stations.StationNUG[Stations.requested].url);
+                    AppendToLogFile(logfile, content);
+                    Serial.println(content);
+                    sprintf(content, "                  - town = %s", Stations.StationNUG[Stations.requested].town);
+                    AppendToLogFile(logfile, content);
+                    Serial.println(content);
                   }
                 }    
               } 
@@ -1054,13 +1057,31 @@ void loop()
 
         case MESSAGE_STATION_CONNECTED_IN_MS:
           // append to connect log
-          SD_MMC.end(); //??
-          if(SD_MMC.begin("/sdcard", true, false))
-          { strcpy(logfile, "/connecting-times.csv");
-            AppendBadStationToFile(SD_MMC, logfile, QueueMessage);
-            SD_MMC.end();
-          }  
+          strcpy(logfile, "/connecting-times.csv");
+          AppendToLogFile(logfile, QueueMessage);
           break;
+
+        case MESSAGE_STATION_CONNECTED: // 25
+          // MESSAGE FROM GLOBE: 25 >https://stream06.dotpoint.nl:8004/stream<
+          // update text for station scroller 
+          // update leds on preset screen
+          bMusicMode = false;
+          if(Stations.requested<MAX_STATIONS+MAX_FAVORITES)
+          { lv_label_set_text(ui_Status_Line, "NOW PLAYING");
+            sprintf(content, "%s - Connected", Stations.StationNUG[Stations.requested].name);
+            Stations.playing = Stations.requested;
+            lv_label_set_text(ui_StationRollerComment, content); 
+            if(Stations.requested<MAX_STATIONS) // not a preset but from the list of available stations
+            { if(Stations.connect_attempts>0)Stations.connect_attempts--;
+              Serial.printf("(GLOBE SAYS): Station Connected %s\n", Stations.StationNUG[Stations.requested].name);
+              SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
+            }
+            else
+            { Serial.printf("(GLOBE SAYS): Preset Connected %s\n", Stations.StationNUG[Stations.requested].name);
+              SetLed(Stations.requested-MAX_STATIONS, UI_THEME_COLOR_GREEN);
+            }
+          }  
+          break;          
 
          case MESSAGE_STATION_WEATHER_DATA:
           ShowBatteryLevel(false);
@@ -1080,6 +1101,7 @@ void loop()
           break;
 
         case MESSAGE_MQTT_STATUS:
+          // Home Assistant is connected, turn on yellow led in Home button on tone control screen
           if(strcmp(QueueMessage, "ON")==0)lv_obj_clear_flag(ui_ledmqtt, LV_OBJ_FLAG_HIDDEN);
           else lv_obj_add_flag(ui_ledmqtt, LV_OBJ_FLAG_HIDDEN);
           break;
@@ -1170,11 +1192,21 @@ void loop()
           }
           break;
 
-        case MESSAGE_GLOBE_HAS_SD:
-          sscanf(QueueMessage, "%d", &DisplaySettings.globe_has_sdcard);
-          if(OldDisplaySettings.globe_has_sdcard != DisplaySettings.globe_has_sdcard)SaveDisplaySettingsToEeprom();
-          if(DisplaySettings.globe_has_sdcard==1)lv_obj_clear_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
-          else lv_obj_add_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
+        case MESSAGE_GLOBE_SD_GB:
+          
+          sscanf(QueueMessage, "%d", &DisplaySettings.globe_sd_gb);
+          if(OldDisplaySettings.globe_sd_gb != DisplaySettings.globe_sd_gb)SaveDisplaySettingsToEeprom();
+        
+          if(DisplaySettings.globe_sd_gb==0)
+          { lv_label_set_text(ui_GlobeSDSizeText, "NO CARD");
+          }
+          else
+          { sprintf(content, "%d GB", DisplaySettings.globe_sd_gb);
+            lv_label_set_text(ui_GlobeSDSizeText, content);
+          }
+
+          //if(DisplaySettings.globe_has_sdcard==1)lv_obj_clear_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
+          //else lv_obj_add_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
           break;
 
         case MESSAGE_MUSIC_MODE:
@@ -1228,7 +1260,7 @@ void loop()
 
         case MESSAGE_GLOBE_HOSTNAME:
           // display on setup screen
-          Serial.printf("New Hostname receivedAdress received from Globe = %s\n", QueueMessage);
+          Serial.printf("Hostname received from Globe = %s\n", QueueMessage);
           sprintf(content, "Globe Website %s", QueueMessage);
           lv_label_set_text(ui_GlobeMac, content);
           break;
@@ -1249,6 +1281,9 @@ void loop()
     if(DataFromDisplay.volumevalue != newvolumevalue)
     { DataFromDisplay.volumevalue = newvolumevalue; // globe will pick that up
       BacklightValue = DEFAULT_BACKLIGHT;
+
+      sprintf(content, "Sleeptimer =% d -> by volume changed%d", AutoSleepTimer, AUTOPOWERDOWNAFTER);
+      AppendToLogFile("/Sleeptimer.log", content);
       AutoSleepTimer = AUTOPOWERDOWNAFTER;
       ShowVolumeTimer = DEFAULT_SHOW_VOLUME_TIMER;
       lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide flag
@@ -1304,7 +1339,10 @@ void loop()
 
     // new uncalibrated encoder position arrived, remap to calibrated
     if(((PrevDataFromGlobe.ns !=  DataFromGlobe.ns) || (PrevDataFromGlobe.ew !=  DataFromGlobe.ew)) && DataFromGlobe.G_EncoderReliable)
-    { //Serial.println("Update coordinates on lcd!");
+    { sprintf(content, "Sleeptimer =% d -> %d by globe movement", AutoSleepTimer, AUTOPOWERDOWNAFTER);
+      AppendToLogFile("/Sleeptimer.log", content);
+
+      //Serial.println("Update coordinates on lcd!");
       if(UpdateState==0)BacklightValue = DEFAULT_BACKLIGHT; // do not wake up backlight when update might happen
       remap_ns_ew(DataFromGlobe.ns, DataFromGlobe.ew); 
       if(screen == ui_CalibrationScreenAdvanced)
@@ -1358,17 +1396,22 @@ void loop()
       }
     }
 
-    // battery indicator consists of 3 slightly different icons on top of one another
+    // battery stuff and auto sleep timer
     if(PrevGlobalTicker1S != GlobalTicker1S) // check every second
-    { PrevGlobalTicker1S = GlobalTicker1S;
-      newbatteryvoltage = ((analogReadMilliVolts(BAT_ADC_PIN) * 3) + 50) / 100; // read voltage in tenths of volts times 3 because of voltage divider 
-      ShowBatteryLevel(-newbatteryvoltage);
-      DataFromDisplay.D_BatteryVoltage = newbatteryvoltage;
+    { // at boot and every 5 seconds after
+      if((PrevGlobalTicker1S % 5)==0) 
+      { newbatteryvoltage = ((analogReadMilliVolts(BAT_ADC_PIN) * 3) + 50) / 10; // read voltage in 10mV steps times 3 because of voltage divider 
+        ShowBatteryLevel(-newbatteryvoltage);
+        DataFromDisplay.D_BatteryVoltage = newbatteryvoltage/10;
+      }
+
+      PrevGlobalTicker1S = GlobalTicker1S;
+
       //if((PrevGlobalTicker1S%30)==0)
-      //if((PrevGlobalTicker1S%1)==0)
-      //{ Serial.print("AutoSleepTimer ->");
-      //  Serial.println(AutoSleepTimer);
+      //if((PrevGlobalTicker1S%10)==0)
+      //{ Serial.printf("AutoSleepTimer %d:%02d:%02d\n", (AutoSleepTimer/3600), ((AutoSleepTimer/60)%60), (AutoSleepTimer%60));
       //}
+
       if(AutoSleepTimer)
       { AutoSleepTimer--;
         if(AutoSleepTimer<DataFromDisplay.volumevalue)
@@ -1380,6 +1423,7 @@ void loop()
             lv_label_set_text(ui_VolumeValue, content);
             lv_arc_set_value(ui_VolumeArc, newvolumevalue);
             DataFromDisplay.volumevalue = newvolumevalue;
+            Serial.printf("Powerdown volume -> %d\n", DataFromDisplay.volumevalue);
           }
         }
         else if(DataFromDisplay.volumevalue <2)
@@ -1405,21 +1449,23 @@ void loop()
 
 
     if((GlobalTicker100mS % 1)==0)
-    { //if(oldsecond != datetime.second)
-      //{ oldsecond = datetime.second;
-      //  //SecondStartMs = millis(); // uncomment for smooth movement
-      //}
-       
-      if(screen == ui_ClockScreen) // we are on clock screen
-      { // uncomment for smooth movement
-        //ClockMillisLapse = millis() - SecondStartMs;
-        //ClockMillisLapse %= 1000;
-        //Serial.printf("ClockMillisLapse = %ld\n", ClockMillisLapse);
-        //SecondAngle = ((datetime.second * 3600)/60) + (((ClockMillisLapse) * 60)/1000); // smooth movement
-
-        SecondAngle = ((datetime.second * 3600)/60); // full second steps
+    { if(screen == ui_ClockScreen) // we are on clock screen
+      { SecondAngle = ((datetime.second * 3600)/60); // full second steps
         HourAngle = ((datetime.hour * 3600)/12) + ((datetime.minute * 3600)/720);
         MinuteAngle = (ui_MinuteHand, ((datetime.minute * 3600)/60)) + datetime.second;
+        Hour = datetime.hour;
+
+        if(strcmp(OldClockTimeZoneName, ClockTimeZoneName)!=NULL)
+        { strcpy(OldClockTimeZoneName, ClockTimeZoneName);
+          sprintf(content, "%s\n%s %d-%s-%d\n%s",  ClockTimeZoneName, weekdays[datetime.dotw], (size_t)datetime.day, monthnames[datetime.month],  (size_t)datetime.year%100, partofday[datetime.hour/6]);
+          lv_label_set_text(ui_Time_Zone_Clock, content); // on clock screen
+        }
+
+        if(OldHour!=Hour) // as that might change the day of week, date, nice evening text
+        { OldHour=Hour;
+          sprintf(content, "%s\n%s %d-%s-%d\n%s",  ClockTimeZoneName, weekdays[datetime.dotw], (size_t)datetime.day, monthnames[datetime.month],  (size_t)datetime.year%100, partofday[datetime.hour/6]);
+          lv_label_set_text(ui_Time_Zone_Clock, content); // on clock screen
+        }
 
         if(OldHourAngle != HourAngle)
         { OldHourAngle = HourAngle;

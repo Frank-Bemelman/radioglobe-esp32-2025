@@ -62,6 +62,8 @@ LV_IMG_DECLARE(ui_img_worldmap_bw_360x180_png);    // assets/worldmap_bw_360x180
 LV_IMG_DECLARE(ui_img_circle16x16_png);    // assets/circle16x16.png
 LV_IMG_DECLARE(ui_img_wifi32x32_png);    // assets/wifi32x32.png
 LV_IMG_DECLARE(ui_img_memory_32x32_png);    // assets/memory_32x32.png
+LV_IMG_DECLARE(ui_img_sd_card_32x32_png);    // assets/Sd_Card_32x32.png
+LV_IMG_DECLARE(ui_img_battery_0_bar_32x32_png);    // assets/Battery_0_Bar_32x32.png
 LV_IMG_DECLARE(ui_img_volume_up_48x48_png);    // assets/volume_up_48x48.png
 LV_IMG_DECLARE(ui_img_volume_off_48x48_png);    // assets/volume_off_48x48.png
 LV_IMG_DECLARE(ui_img_bt_connected_png);    // assets/bt_connected.png

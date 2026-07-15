@@ -14,7 +14,6 @@ lv_obj_t * uic_Home_Country;
 lv_obj_t * uic_Home_City;
 lv_obj_t * uic_Home_Flag;
 lv_obj_t * uic_Home_Power_Off_Icon;
-lv_obj_t * uic_BatteryVoltage;
 lv_obj_t * uic_Battery_Icon_High;
 lv_obj_t * uic_Battery_Icon_Medium;
 lv_obj_t * uic_Battery_Icon_Low;
@@ -42,7 +41,6 @@ lv_obj_t * ui_SettingButton = NULL;
 lv_obj_t * ui_Battery_Icon_Low = NULL;
 lv_obj_t * ui_Battery_Icon_Medium = NULL;
 lv_obj_t * ui_Battery_Icon_High = NULL;
-lv_obj_t * ui_BatteryVoltage = NULL;
 lv_obj_t * ui_Home_Power_Off_Icon = NULL;
 lv_obj_t * ui_Home_Flag = NULL;
 lv_obj_t * ui_Home_City = NULL;
@@ -360,19 +358,6 @@ void ui_Home_screen_init(void)
     ui_object_set_themeable_style_property(ui_Battery_Icon_High, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
                                            _ui_theme_alpha_turquoise);
 
-    ui_BatteryVoltage = lv_label_create(ui_Home);
-    lv_obj_set_height(ui_BatteryVoltage, 18);
-    lv_obj_set_width(ui_BatteryVoltage, LV_SIZE_CONTENT);   /// 52
-    lv_obj_set_x(ui_BatteryVoltage, 162);
-    lv_obj_set_y(ui_BatteryVoltage, 109);
-    lv_obj_set_align(ui_BatteryVoltage, LV_ALIGN_CENTER);
-    lv_label_set_long_mode(ui_BatteryVoltage, LV_LABEL_LONG_CLIP);
-    lv_label_set_text(ui_BatteryVoltage, "");
-    lv_obj_clear_flag(ui_BatteryVoltage,
-                      LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
-                      LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
-    lv_obj_set_style_text_align(ui_BatteryVoltage, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-
     ui_Home_Power_Off_Icon = lv_img_create(ui_Home);
     lv_img_set_src(ui_Home_Power_Off_Icon, &ui_img_power75x75_png);
     lv_obj_set_width(ui_Home_Power_Off_Icon, LV_SIZE_CONTENT);   /// 1
@@ -514,7 +499,6 @@ void ui_Home_screen_init(void)
     uic_Battery_Icon_Low = ui_Battery_Icon_Low;
     uic_Battery_Icon_Medium = ui_Battery_Icon_Medium;
     uic_Battery_Icon_High = ui_Battery_Icon_High;
-    uic_BatteryVoltage = ui_BatteryVoltage;
     uic_Home_Power_Off_Icon = ui_Home_Power_Off_Icon;
     uic_Home_Flag = ui_Home_Flag;
     uic_Home_City = ui_Home_City;
@@ -559,8 +543,6 @@ void ui_Home_screen_destroy(void)
     ui_Battery_Icon_Medium = NULL;
     uic_Battery_Icon_High = NULL;
     ui_Battery_Icon_High = NULL;
-    uic_BatteryVoltage = NULL;
-    ui_BatteryVoltage = NULL;
     uic_Home_Power_Off_Icon = NULL;
     ui_Home_Power_Off_Icon = NULL;
     uic_Home_Flag = NULL;

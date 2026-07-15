@@ -94,7 +94,8 @@ uint8_t UpdateFirmware(uint8_t state)
        }
 
        if(!checkFirmwareVersie("github.com", "/Frank-Bemelman/radioglobe-esp32-2025/releases/download/RadioGlobe-Firmware/RadioGlobe-Display.bin"))
-       { lv_label_set_text(ui_Station_Title, "Puck Firmware Is The Latest");
+       { WiFi.disconnect();
+         lv_label_set_text(ui_Station_Title, "Puck Firmware Is The Latest");
          lv_label_set_text(ui_Status_Line, "");
          Lvgl_Loop();
          delay(2000);

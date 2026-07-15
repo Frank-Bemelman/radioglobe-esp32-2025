@@ -426,9 +426,7 @@ void FindNewStation(void)
   int16_t mapfind_ns;
   int16_t mapfind_ew;
 
-  int32_t mSstartsearch;
-  uint16_t randomrange = 0;
-  
+  int32_t search_mS;
  
   char dirpath[64];
   File root;
@@ -438,22 +436,16 @@ void FindNewStation(void)
   
 
   // convert to whole degrees to be used for finding directory path to url file
-  ns = DataFromDisplay.ns_cal;
-  ew = DataFromDisplay.ew_cal;
-  ns+= 5;
-  ew+= 5;
-  ns/=10;
-  ew/=10;
+  ns = (DataFromDisplay.ns_cal+5)/10; // from tenths of degrees to whole degrees
+  ew = (DataFromDisplay.ew_cal+5)/10; // from tenths of degrees to whole degrees
 
   Stations.count = 0;
   Stations.requested -1;
   char firstcountrycode[3] = ""; // near borders, different countries can be in the directory, decided to stick with the first found
 
 
-  mSstartsearch = millis();
+  search_mS = millis();
 
-  //mapfind = SnapToNearestStation(ns, ew, &mapfind_ns, &mapfind_ew, 1);
-   
   //nieuw, probeer minimaal 10 stations te vinden, blijf witte pixels zoeken
   uint16_t hitcount = 0;
   while(Stations.count < 10 && hitcount<10)
@@ -464,14 +456,18 @@ void FindNewStation(void)
       break;
     }
     CollectStationsAtGps(mapfind_ns, mapfind_ew, firstcountrycode);
-    if(randomrange==0)randomrange = Stations.count; // count from first succesful find
     Serial.printf("Collecting Attempt %d gave %d stations\n", hitcount, Stations.count);
   }
 
   
-  Serial.printf("End search -> %ld\n", millis() - mSstartsearch);
+  Serial.printf("End search -> %ld\n", millis() - search_mS);
   
-  
+  // turn of preset leds
+  SetLed(1, 0);
+  SetLed(2, 0);
+  SetLed(3, 0);
+  SetLed(4, 0);
+  lv_obj_add_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN); 
 
   if(Stations.count)
   { sprintf(content, "%d Stations Found", Stations.count);
@@ -481,27 +477,20 @@ void FindNewStation(void)
     
     // pick a random station from the list
     uint16_t random_station; 
-    random_station = random(0,randomrange);
+    random_station = random(0,Stations.count);
+    
     Stations.connect_attempts = 0;
     ForceGlobeStationGPSupdate = true; 
     AddStationToQueueForGlobe(random_station);
-
-    // turn of preset leds
-    SetLed(1, 0);
-    SetLed(2, 0);
-    SetLed(3, 0);
-    SetLed(4, 0);
   }  
   else
   { lv_label_set_text(ui_Station_Name, "No Stations Found");
-      
     // normally, timezone is requested for the station that is requested
     // if no stations are found, set the timezone according to the coordinates from the globe
     Stations.requested = -1; 
     AddStationToQueueForGlobe(-1); // no new station to play really, but will trigger timezone/geolocation requests
   }
 
-  
   // dump to serial port
   //for(int n = 0; n<Stations.count; n++)
   //{ Serial.printf("[%d] N=%s\nU=%s\n", n, Stations.StationNUG[n].name, Stations.StationNUG[n].url);
@@ -732,7 +721,7 @@ void RadioGlobeClick(lv_event_t * e)
     Serial.printf("RadioGlobeClick() return\n");
   }  
 
-  if(clicktime==5 && DisplaySettings.globe_has_sdcard==1 ) // long press, toggle between radio/music mode
+  if(clicktime==5 && DisplaySettings.globe_sd_gb!=0) // long press, toggle between radio/music mode
   { //Serial.printf("RadioGlobeClick clicktime==5 LV_EVENT_LONG_PRESSED_REPEAT \n");
     if(!bMusicMode)
     { //Serial.printf("Radio -> Music Mode LV_EVENT_LONG_PRESSED_REPEAT \n");
@@ -980,6 +969,9 @@ void AddStationToQueueForGlobe(int16_t station)
   char message[QUEUEMESSAGELENGTH];
   char content[128];
 
+  Stations.requested = station; 
+  DataFromDisplay.D_RequestedStation = Stations.requested;
+  
   if(station < 0) // no actual station to play really, but will trigger timezone/geolocation requests
   { lv_label_set_text(uic_Home_City, "");
     //on map
@@ -987,14 +979,15 @@ void AddStationToQueueForGlobe(int16_t station)
     lv_label_set_text(ui_Database_GPS_Position, content);
     lv_obj_set_pos(uic_MapCursor, (int)DataFromDisplay.ew_cal/10 - 16, -(int)DataFromDisplay.ns_cal/10); // moved 16 to left, dot is painted left-top corner?
     lv_label_set_text(ui_Database_Output_File, ""); // remove typical "You are in ..." from map
-
-    AddToQueueForGlobe("", MESSAGE_GET_TIMEZONE); // will use DataFromDisplay.ns_cal, DataFromDisplay.ew_cal as coordinates
-    AddToQueueForGlobe("", MESSAGE_GET_GEOLOCATION); // will use DataFromDisplay.ns_cal, DataFromDisplay.ew_cal as coordinates
+    sprintf(content, "Stations.requested = %d", Stations.requested); 
+    AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION); // will use DataFromDisplay.ns_cal, DataFromDisplay.ew_cal as coordinates
+    AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE); // will use DataFromDisplay.ns_cal, DataFromDisplay.ew_cal as coordinates
+    loop_esp_now(); // send it now, before it gets old
+    lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide flag
   }
   else if(station<MAX_STATIONS+MAX_FAVORITES)
   { bMusicMode = false;
     DataFromDisplay.D_QueueStationIndex = station;
-    Stations.requested = station; 
     Stations.playing = -1;
 
     if(station<MAX_STATIONS)Stations.connect_attempts++;
@@ -1011,11 +1004,11 @@ void AddStationToQueueForGlobe(int16_t station)
     { strcpy(lastgpsrequest, message);
       ForceGlobeStationGPSupdate = false;
 
-      // early prepare globe to load new directory from this country with music urls from SD
-      AddToQueueForGlobe(Stations.StationNUG[station].countrycode, MESSAGE_RELOAD_SD_WITH_COUNTRY);
+      sprintf(content, "Stations.requested = %d", Stations.requested); 
+      AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION_BY_GPS);
+      AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_BY_GPS);
+      loop_esp_now(); // send it now, before it gets old
 
-      AddToQueueForGlobe("", MESSAGE_GET_GEOLOCATION_BY_GPS);
-      AddToQueueForGlobe("", MESSAGE_GET_TIMEZONE_BY_GPS);
 
       Serial.printf("Flag = %s\n", Stations.StationNUG[station].countrycode);
 
@@ -1023,6 +1016,15 @@ void AddStationToQueueForGlobe(int16_t station)
       // set flags early - possibly corrected later, when globe thinks it is different 
       SetFlag(Stations.StationNUG[station].countrycode);
       lv_obj_clear_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start
+      
+      // reposition flag vertically for preset stations
+      if(station>=MAX_STATIONS)
+      { int16_t yc = ((station - MAX_STATIONS) * 70) - 104;
+        //Serial.printf("station=%d yc = %d\n", station, yc);
+        lv_obj_set_y(ui_PresetFlag, yc);  // -104 -34 34 104 
+        lv_event_send(ui_PresetFlag, LV_EVENT_REFRESH, NULL);
+        lv_obj_clear_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start
+      }  
 
       Serial.printf("Town = %s\n", Stations.StationNUG[station].town);
       lv_label_set_text(uic_Home_City, Stations.StationNUG[station].town);
@@ -1053,7 +1055,9 @@ void AddStationToQueueForGlobe(int16_t station)
     }
 
     if(bPowerStatus == true)
-    { AddToQueueForGlobe(Stations.StationNUG[station].url, MESSAGE_START_THIS_STATION);
+    { sprintf(message, "%s-%s", Stations.StationNUG[station].countrycode, Stations.StationNUG[station].url);
+      // send countrycode and station url to globe
+      AddToQueueForGlobe(message, MESSAGE_START_THIS_STATION);
     }
 
   }
@@ -1141,21 +1145,31 @@ void ReadStationsBitmapFile(fs::FS &fs, char* filename)
 }
 
 
-void AppendBadStationToFile(fs::FS &fs, char* filename, char *url)
-{ File badfile = fs.open(filename, FILE_APPEND);
+void AppendToLogFile(char *filename, char *url)
+{ char logtext[256];
+  if(FtpBootState)return; // don't mess around while FTP active
 
-  if(!badfile)
-  { Serial.printf("Could not open Bad Station File %s for append\n", filename);
+  if(strcmp(filename, "/Sleeptimer.log") == 0)return; // turn those off for now
+
+  snprintf(logtext, 256, "%d-%s-%d %02d:%02d ->%s",    (size_t)datetime.day, monthnames[datetime.month],  (size_t)datetime.year%100, datetime.hour, datetime.minute, url);
+          
+
+  if(SD_MMC.begin("/sdcard", true, false)) // we have a card 
+  { File badfile = SD_MMC.open(filename, FILE_APPEND);
+    if(!badfile)
+    { Serial.printf("Could not open Bad Station File %s for append\n", filename);
+      badfile.close();
+      badfile = SD_MMC.open(filename, FILE_WRITE);
+      badfile.printf("File %s created\n", filename);  
+      Serial.printf("File %s created\n", filename);  
+      badfile.close();
+      return;
+    }
+    Serial.printf("Log File %s appended with %s\n", filename, logtext);
+    badfile.println(logtext);  
     badfile.close();
-    badfile = fs.open(filename, FILE_WRITE);
-    badfile.printf("File %s created\n", filename);  
-    Serial.printf("File %s created\n", filename);  
-    badfile.close();
-    return;
-  }
-  Serial.printf("Station File %s appended with %s\n", filename, url);
-  badfile.println(url);  
-  badfile.close();
+    SD_MMC.end();
+  }  
 }
 
 bool FindCountryNameByCode(char *countryname, char*countrycode)

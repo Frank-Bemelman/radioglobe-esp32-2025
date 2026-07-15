@@ -27,6 +27,8 @@ SET(SOURCES ui_Home.c
     ui_img_circle16x16_png.c
     ui_img_wifi32x32_png.c
     ui_img_memory_32x32_png.c
+    ui_img_sd_card_32x32_png.c
+    ui_img_battery_0_bar_32x32_png.c
     ui_img_volume_up_48x48_png.c
     ui_img_volume_off_48x48_png.c
     ui_img_bt_connected_png.c

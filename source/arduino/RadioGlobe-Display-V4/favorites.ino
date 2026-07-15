@@ -247,6 +247,7 @@ void LoadFavorites(void)
           strncpy(Stations.StationNUG[favcount+MAX_STATIONS].countrycode, p, 2);
           Stations.StationNUG[favcount+MAX_STATIONS].countrycode[2]=0;
           Serial.printf("Preset % d countrycode = <%s>\n", favcount, Stations.StationNUG[favcount+MAX_STATIONS].countrycode);
+          //if(favcount<4)SetFlag(Stations.StationNUG[favcount+MAX_STATIONS].countrycode, favcount+1); // sets the flag in the preset screen but was too memory costly
         }
         if((p = strstr(text, "\"countryname\": ")) != NULL) 
         { p+=16; // jump forward to start of name
