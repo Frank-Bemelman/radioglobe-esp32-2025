@@ -106,6 +106,7 @@ Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 //#define SD_CLK 36  // yellow (pin 4 SD module)
 //#define SD_MISO 37 // orange (pin 5 SD module)
 
+// later PCB boards have the SD card integrated in the design
 #define SD_MOSI 41 // green (pin 3 SD module)
 #define SD_CLK 40  // yellow (pin 4 SD module)
 #define SD_MISO 38 // orange (pin 5 SD module)
@@ -309,7 +310,7 @@ void setup()
   // Set the EOF callback
   stream.setEofCB(audio_eof_stream);    
   // Set the error callback
-  stream.setErrorCB(audio_error);    
+  stream.setErrorCB(VS1053error);    
     
   delay(50);
 
@@ -423,6 +424,10 @@ void setup()
   { Serial.print("Wifi connected to IP: ");
     Serial.println(WiFi.localIP());
     PixelUpdate(0, 0x00FF00, 0x000000, 5000); // solid green
+    configTime(0, 0, "pool.ntp.org");
+    uint32_t huidigIntervalMs = sntp_get_sync_interval();
+    uint32_t intervalMinuten = huidigIntervalMs / 1000 / 60;
+    Serial.printf("Ingesteld SNTP interval: %u ms (%u minuten)\n", huidigIntervalMs, intervalMinuten);
     delay(2000);
   }
   else
@@ -505,8 +510,8 @@ void setup()
   { // tell puck
     AddToQueueForDisplay("0 GB", MESSAGE_GLOBE_SD_GB);
   }
-  setupwebserver();
   
+  setupwebserver(); // that's all
   sprintf(message, "%s.local", WiFi.getHostname());
   AddToQueueForDisplay(message, MESSAGE_GLOBE_HOSTNAME);
 }
@@ -531,16 +536,15 @@ void loop()
   static char StartThisStation[QUEUEMESSAGELENGTH] =""; // holds the url requested by display
   static bool bFirst = true;
   
-   if(GlobeSettings.globe_sd_gb != 0)ftp.handleFTP();
-   // else Serial.printf("GlobeSettings.globe_sd_gb = %d\n", GlobeSettings.globe_sd_gb);
-
-  loop2(); // checks portal button
-  stream.loop();
+  if(GlobeSettings.globe_sd_gb != 0)ftp.handleFTP();
+   
+  loop2(); // checks portal button in advanced.ino
+  
+  stream.loop(); // keeps the VS1053 going
+  
   if(bMqttActivated==1234)loopMQTT();
-  //else Serial.printf("bMqttActivated ??? = %d\n", bMqttActivated);
-
-  //Serial.println(touchRead(8));
-  if(UpdateState)
+  
+  if(UpdateState) // update check in one step at the time
   { UpdateState = UpdateFirmware(UpdateState);
   } 
 
@@ -561,75 +565,74 @@ void loop()
     }
   }
 
-  if(Timer100msSerialIsOpen) // only when enabled, as this works when serial port is actually connected, but hangs when there is no usb cable to PC
-  { 
-  while(Serial.available()) 
-  { Serial.print(".");
-    incomingChar = Serial.read();
-    if(incomingChar == '\n')
-    { Serial.print("You typed this: ");
-      Serial.println(receivedMessage);
-      Serial.printf("S-GlobeSettings.btmodule_installed = %d\n", GlobeSettings.btmodule_installed);
-      Serial.printf("S-GlobeSettings.btmodule_switchable = %d\n", GlobeSettings.btmodule_switchable);
-      strcpy(text, receivedMessage.c_str());
-      if((p = strstr(text, "BI")) != 0) 
-      { if(text[2]=='0')
-        { GlobeSettings.btmodule_installed = 0;
-          GlobeSettings.btmodule_switchable = 0;
-          digitalWrite(BT_POWER_PIN, LOW);
-        }  
-        else 
-        { GlobeSettings.btmodule_installed = 1;
-          digitalWrite(BT_POWER_PIN, HIGH);
-        } 
-        Serial.printf("BI-GlobeSettings.btmodule_installed = %d\n", GlobeSettings.btmodule_installed);
-        Serial.printf("BI-GlobeSettings.btmodule_switchable = %d\n", GlobeSettings.btmodule_switchable);
-        EEPROM.put(0x0, GlobeSettings);
-        EEPROM.commit();
-        Serial.println("Eeprom initialized & saved..");
-        sprintf(message, "%d-%d-%d", GlobeSettings.btmodule_switchable, GlobeSettings.btmodule_power_on, GlobeSettings.btmodule_installed);
-        AddToQueueForDisplay(message, MESSAGE_DISPLAY_BT_SWITCHABLE_STATE);
-      }
-      if((p = strstr(text, "BS")) != 0) 
-      { Serial.printf("BS-GlobeSettings.btmodule_installed = %d\n", GlobeSettings.btmodule_installed);
-        Serial.printf("BS-GlobeSettings.btmodule_switchable = %d\n", GlobeSettings.btmodule_switchable);
-        if(text[2]=='0')GlobeSettings.btmodule_switchable = 0;
-        else GlobeSettings.btmodule_switchable = 1;
-        if(GlobeSettings.btmodule_installed==0)GlobeSettings.btmodule_switchable = 0;
-        Serial.printf("BS-GlobeSettings.btmodule_installed = %d\n", GlobeSettings.btmodule_installed);
-        Serial.printf("BS-GlobeSettings.btmodule_switchable = %d\n", GlobeSettings.btmodule_switchable);
-        EEPROM.put(0x0, GlobeSettings);
-        EEPROM.commit();
-        Serial.println("Eeprom initialized & saved..");
-        sprintf(message, "%d-%d-%d", GlobeSettings.btmodule_switchable, GlobeSettings.btmodule_power_on, GlobeSettings.btmodule_installed);
-        AddToQueueForDisplay(message, MESSAGE_DISPLAY_BT_SWITCHABLE_STATE);
-      }
-      if((p = strstr(text, "SN")) != 0) 
-      { Serial.printf("SN-GlobeSettings.serialnumber was = %d\n", GlobeSettings.serialnumber);
-        if(strlen(text)>3)
-        { sscanf(text,"SN%d", &value_int32t);
-          if((value_int32t>50) && (value_int32t<10000)) // valis serial number
-          { if(GlobeSettings.serialnumber != value_int32t) // only take action if actually changed
-            { GlobeSettings.serialnumber = value_int32t;
-              Serial.printf("SN-GlobeSettings.serialnumber stored = %d\n", GlobeSettings.serialnumber);
-              EEPROM.put(0x0, GlobeSettings);
-              EEPROM.commit();
-              Serial.printf("SN-GlobeSettings.serialnumber stored in EEprom = %d\n", GlobeSettings.serialnumber);
-              sprintf(text, "%d", GlobeSettings.serialnumber);
-              AddToQueueForDisplay(text, MESSAGE_DISPLAY_SERIALNUMBER); // set puck to same serial number
+  if(Timer100msSerialIsOpen) // only when enabled, as this works when serial port is actually connected, but could hang when there is no usb cable to PC
+  { while(Serial.available()) 
+    { Serial.print(".");
+      incomingChar = Serial.read();
+      if(incomingChar == '\n')
+      { Serial.print("You typed this: ");
+        Serial.println(receivedMessage);
+        Serial.printf("S-GlobeSettings.btmodule_installed = %d\n", GlobeSettings.btmodule_installed);
+        Serial.printf("S-GlobeSettings.btmodule_switchable = %d\n", GlobeSettings.btmodule_switchable);
+        strcpy(text, receivedMessage.c_str());
+        if((p = strstr(text, "BI")) != 0) 
+        { if(text[2]=='0')
+          { GlobeSettings.btmodule_installed = 0;
+            GlobeSettings.btmodule_switchable = 0;
+            digitalWrite(BT_POWER_PIN, LOW);
+          }  
+          else 
+          { GlobeSettings.btmodule_installed = 1;
+            digitalWrite(BT_POWER_PIN, HIGH);
+          } 
+          Serial.printf("BI-GlobeSettings.btmodule_installed = %d\n", GlobeSettings.btmodule_installed);
+          Serial.printf("BI-GlobeSettings.btmodule_switchable = %d\n", GlobeSettings.btmodule_switchable);
+          EEPROM.put(0x0, GlobeSettings);
+          EEPROM.commit();
+          Serial.println("Eeprom initialized & saved..");
+          sprintf(message, "%d-%d-%d", GlobeSettings.btmodule_switchable, GlobeSettings.btmodule_power_on, GlobeSettings.btmodule_installed);
+          AddToQueueForDisplay(message, MESSAGE_DISPLAY_BT_SWITCHABLE_STATE);
+        }
+        if((p = strstr(text, "BS")) != 0) 
+        { Serial.printf("BS-GlobeSettings.btmodule_installed = %d\n", GlobeSettings.btmodule_installed);
+          Serial.printf("BS-GlobeSettings.btmodule_switchable = %d\n", GlobeSettings.btmodule_switchable);
+          if(text[2]=='0')GlobeSettings.btmodule_switchable = 0;
+          else GlobeSettings.btmodule_switchable = 1;
+          if(GlobeSettings.btmodule_installed==0)GlobeSettings.btmodule_switchable = 0;
+          Serial.printf("BS-GlobeSettings.btmodule_installed = %d\n", GlobeSettings.btmodule_installed);
+          Serial.printf("BS-GlobeSettings.btmodule_switchable = %d\n", GlobeSettings.btmodule_switchable);
+          EEPROM.put(0x0, GlobeSettings);
+          EEPROM.commit();
+          Serial.println("Eeprom initialized & saved..");
+          sprintf(message, "%d-%d-%d", GlobeSettings.btmodule_switchable, GlobeSettings.btmodule_power_on, GlobeSettings.btmodule_installed);
+          AddToQueueForDisplay(message, MESSAGE_DISPLAY_BT_SWITCHABLE_STATE);
+        }
+        if((p = strstr(text, "SN")) != 0) 
+        { Serial.printf("SN-GlobeSettings.serialnumber was = %d\n", GlobeSettings.serialnumber);
+          if(strlen(text)>3)
+          { sscanf(text,"SN%d", &value_int32t);
+            if((value_int32t>50) && (value_int32t<10000)) // valis serial number
+            { if(GlobeSettings.serialnumber != value_int32t) // only take action if actually changed
+              { GlobeSettings.serialnumber = value_int32t;
+                Serial.printf("SN-GlobeSettings.serialnumber stored = %d\n", GlobeSettings.serialnumber);
+                EEPROM.put(0x0, GlobeSettings);
+                EEPROM.commit();
+                Serial.printf("SN-GlobeSettings.serialnumber stored in EEprom = %d\n", GlobeSettings.serialnumber);
+                sprintf(text, "%d", GlobeSettings.serialnumber);
+                AddToQueueForDisplay(text, MESSAGE_DISPLAY_SERIALNUMBER); // set puck to same serial number
+              }
             }
-          }
-        }  
-      }
+          }  
+        }
 
-      receivedMessage = "";
-      Serial.printf("->GlobeSettings.btmodule_installed = %d\n", GlobeSettings.btmodule_installed);
-      Serial.printf("->GlobeSettings.btmodule_switchable = %d\n", GlobeSettings.btmodule_switchable);
+        receivedMessage = "";
+        Serial.printf("->GlobeSettings.btmodule_installed = %d\n", GlobeSettings.btmodule_installed);
+        Serial.printf("->GlobeSettings.btmodule_switchable = %d\n", GlobeSettings.btmodule_switchable);
+      }
+      else
+      { receivedMessage += incomingChar;
+      }
     }
-    else
-    { receivedMessage += incomingChar;
-    }
-  }
   }
 
 
@@ -646,7 +649,6 @@ void loop()
      if((QueueMessageType>=0) && (QueueMessageType<=MESSAGE_MAX)) 
      { Serial.printf("DISPLAY SAYS: %s >%s<\n", messagetexts[QueueMessageType], QueueMessage);  
      }
-
 
      // and now take care of it
      switch(QueueMessageType)
@@ -914,7 +916,6 @@ void loop()
   if(bEncoderKillStation)
   { bEncoderKillStation = false;
     stream.stopSong();
-    //chunkplayer.switchToMp3Mode(); // or Playwhile (radio-tuning-effect-sound) goes chit-chit-chit if this interrupted a file playing
     Speakers(SPEAKERS_DELAYED_OFF);
     DataFromGlobe.D_QueueStationIndex = -1;
     strcpy(ActiveUrl, "");
@@ -923,6 +924,11 @@ void loop()
     AddToQueueForDisplay("", MESSAGE_SONG_TITLE); // remove 'song title'    
   }
   
+  if((ReadEncoderTicker100mS%10)==0)
+  {
+     //Serial.printf("Volume = %d\n", stream.getVuMeter());
+  }
+
 
   // volume and tone levels checking
   //if(bVolumeToneControlsActive == true)
@@ -996,7 +1002,7 @@ void loop()
       bFirst = false;
     }
   }  
-  //delay(5);
+  vTaskDelay(1); // makes me feel good
 }
 
 
@@ -1020,7 +1026,6 @@ bool StartNewStation(void)
   if(stream.isRunning())
   { Serial.printf("First stop this one: %s\n", ActiveUrl);
     stream.stopSong();
-//    chunkplayer.switchToMp3Mode();
   }
   
   Speakers(SPEAKERS_DELAYED_OFF);
@@ -1092,7 +1097,6 @@ bool StartNewStation(void)
 
 
 
-// would be nice if it went gradually
 void SetVolumeMapped(uint16_t volume)
 { static uint16_t prevvol;
   static uint8_t Actual_vs1053vol=0;
@@ -1133,37 +1137,41 @@ void SetVolumeMapped(uint16_t volume)
 
 
 void audio_showstation(const char* info) 
-{ char *p;
+{ char filtered[256];
+  static char previnfo[256];
+  char *p;
   int cnt;
-  char stationname[256];
-  char filtered[256];
-  char output[256];
 
-  strcpy(stationname, info); // keep a local copy to mess around with
-  Serial.printf("Station: %s\n", stationname);
+  if(strcmp(previnfo, info)==0)return; // once, not twice the same
+
+  strcpy(MetaDataRadioStation, info); // keep a local copy to mess around with
+
+  Serial.printf("Station: %s\n", MetaDataRadioStation);
   // filter crap station naming, stick with our own name from the datebase
-  if((p=strchr(stationname, '-')) !=0) *p=0; // split idotic long names that combine station & content 
-  if(strcasecmp(stationname, "no name")==0)return; // ignore meaningless names
-  if(strcasecmp(stationname, "my station name")==0)return; // ignore meaningless names
-  if(strcasecmp(stationname, "this is my server name")==0)return; // ignore meaningless names
-  if(strcasecmp(stationname, "untitled")==0)return; // ignore meaningless names
-  if(strcasecmp(stationname, "unnamed Server")==0)return; // ignore meaningless names
-  if(strcasecmp(stationname, "offline")==0)return; // ignore meaningless names
-  if(strcasecmp(stationname, "stream")==0)return; // ignore meaningless names
-  if(strlen(stationname)<2)return; // ignore meaningless names
-  if(strncmp(stationname, "Streaming by", 12) == 0) memmove(stationname, stationname + 12, strlen(stationname + 12) + 1); // remove nonsense
-  if(strncmp(stationname, "Radio Station Name:", 19) == 0) memmove(stationname, stationname + 19, strlen(stationname + 19) + 1); // remove nonsense
+  if((p=strchr(MetaDataRadioStation, '-')) !=0) *p=0; // split idotic long names that combine station & content 
+  if(strcasecmp(MetaDataRadioStation, "no name")==0)return; // ignore meaningless names
+  if(strcasecmp(MetaDataRadioStation, "my station name")==0)return; // ignore meaningless names
+  if(strcasecmp(MetaDataRadioStation, "this is my server name")==0)return; // ignore meaningless names
+  if(strcasecmp(MetaDataRadioStation, "untitled")==0)return; // ignore meaningless names
+  if(strcasecmp(MetaDataRadioStation, "unnamed Server")==0)return; // ignore meaningless names
+  if(strcasecmp(MetaDataRadioStation, "offline")==0)return; // ignore meaningless names
+  if(strcasecmp(MetaDataRadioStation, "stream")==0)return; // ignore meaningless names
+  if(strncmp(MetaDataRadioStation, "Streaming by", 12) == 0) memmove(MetaDataRadioStation, MetaDataRadioStation + 12, strlen(MetaDataRadioStation + 12) + 1); // remove nonsense
+  if(strncmp(MetaDataRadioStation, "Radio Station Name:", 19) == 0) memmove(MetaDataRadioStation, MetaDataRadioStation + 19, strlen(MetaDataRadioStation + 19) + 1); // remove nonsense
 
-  ReplaceHtmlEntities(stationname);
-  UTF8ToExtAscii(stationname);
-  clean_spaces(MetaDataSongTitle);
+  ReplaceHtmlEntities(MetaDataRadioStation);
+  UTF8ToExtAscii(MetaDataRadioStation);
+  clean_spaces(MetaDataRadioStation);
 
-  cnt = filter_string_v3(stationname, filtered);
+  if(strlen(MetaDataRadioStation)<2)return; // ignore meaningless names
+  
+
+  cnt = filter_string_v3(MetaDataRadioStation, filtered);
   
   Serial.printf("STATION <%s> filtered:%d <%s>\n", info, cnt, filtered );
   
   if(cnt==0) // readable text, not Thai, Arabic etc.
-  { strcpy(ActiveStationTitle, stationname);
+  { strcpy(ActiveStationTitle, MetaDataRadioStation);
     AddToQueueForDisplay(ActiveStationTitle, MESSAGE_STATION_NAME);
   }
   else
@@ -1191,18 +1199,18 @@ void audio_showstreamtitle(const char* info)
   // Serial.printf("Stream title: %s\n", MetaDataSongTitle);
   // filter known crap messages
   if(strcasecmp(MetaDataSongTitle, "Now Playing info goes here")==0)return;
-  //if(strcmp(MetaDataSongTitle, " - ")==0)return;
-  if(strcasecmp(MetaDataSongTitle, "adbreak")==0)return; // ignore meaningless names
-  if(strcasecmp(MetaDataSongTitle, "Unknown")==0)return; 
+  if(strcasecmp(MetaDataSongTitle, "adbreak")==0)return;  // ignore meaningless names
+  if(strcasecmp(MetaDataSongTitle, "Unknown")==0)return;  // ignore meaningless names
   if(strcasecmp(MetaDataSongTitle, "adinsert")==0)return; // ignore meaningless names
+  if((p=strstr(MetaDataSongTitle, ".mp3"))!=0) *p=0;      // ignore that too
 
   ReplaceHtmlEntities(MetaDataSongTitle);
-  UTF8ToExtAscii(MetaDataSongTitle); // better?
+  UTF8ToExtAscii(MetaDataSongTitle); 
   clean_spaces(MetaDataSongTitle);
 
   cnt = filter_string_v3(MetaDataSongTitle, filtered);
   Serial.printf("SONGTITLE <%s> %d <%s>\n", MetaDataSongTitle, cnt, filtered );
-  // replace if not printable text, like Thai, Arabic etc.
+  // replace text if not printable text, like Thai, Arabic etc.
   if(cnt>0)strcpy(MetaDataSongTitle, "Mystery Content");
   if(strcmp(ActiveSongTitle, MetaDataSongTitle)!=0) // new one, send it to puck
   { strcpy(ActiveSongTitle, MetaDataSongTitle);
@@ -1218,7 +1226,6 @@ void audio_eof_stream(const char* info)
 
   Speakers(SPEAKERS_DELAYED_OFF);
   Serial.printf("End of stream  -> %s\n", info);
-
 
   DataFromGlobe.D_QueueStationIndex = -1;
 
@@ -1430,10 +1437,6 @@ void PlaySoundBite(uint8_t *soundbite, unsigned long long length, uint16_t volum
   Serial.printf("PlaySoundBite playing with volume -> %d\n", volume_to_use);
   
   stream.playChunk(soundbite, length);
-  //delay(1000);
-  //  chunkplayer.playChunk((uint8_t *)mp3_silence_1_sec, sizeof(mp3_silence_1_sec));
-  //  chunkplayer.playChunk((uint8_t *)mp3_silence_1_sec, sizeof(mp3_silence_1_sec));
-  //delay(1000);
   delay(250);
   SetVolumeMapped(GlobeSettings.ee_volume); // will enable amplifiers (if speaker switch == on) if radio stream running, else amplifiers off
   // did this soundbite played during radio playing (like battery low warning)
@@ -1638,7 +1641,7 @@ void audio_fail(void)
 }  
 
 // called from VS1053 driver
-void audio_error(const char *error) 
+void VS1053error(const char *error) 
 { Serial.printf("Error from VS1053 -> %s\n", error);
   VS1053_connectResult = error;
 }

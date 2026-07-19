@@ -29,32 +29,7 @@ char api_url[256];
 // plan is to queue these 
 void Queued_Api_Calls(void * pvParameters)
 { while(1)
-  { if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_GEOLOCATION)
-    { GetGeolocationData(D_GeoLocationNS, D_GeoLocationEW, D_RequestedStation); // get for just a location
-      DataFromGlobe.FindGeoLocationData = MESSAGE_GET_WEATHER_DATA; // also find weather data after this TODO -> by ns_cal_receved etc
-    }
-    else if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_WEATHER_DATA)
-    { GetOpenWeatherData(D_GeoLocationNS, D_GeoLocationEW);
-      DataFromGlobe.FindGeoLocationData = 0;
-    }
-    else if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_GEOLOCATION_BY_GPS)
-    { GetGeolocationData(D_GeoStationNS, D_GeoStationEW, D_RequestedStation); // get for a radio station
-      DataFromGlobe.FindGeoLocationData = MESSAGE_GET_WEATHER_DATA_BY_GPS; // also find weather data after this
-    }
-    else if(DataFromGlobe.FindGeoLocationData == MESSAGE_GET_WEATHER_DATA_BY_GPS)
-    { GetOpenWeatherData(D_GeoStationNS, D_GeoStationEW);
-      DataFromGlobe.FindGeoLocationData = 0;
-    }
-    else if(DataFromGlobe.FindTimeZone == MESSAGE_GET_TIMEZONE)
-    { GetTimeZone(TZ_NS, TZ_EW); 
-      DataFromGlobe.FindTimeZone = 0;
-    }
-    else if(DataFromGlobe.FindTimeZone == MESSAGE_GET_TIMEZONE_BY_GPS)
-    { GetTimeZone(TZ_NS, TZ_EW);
-      DataFromGlobe.FindTimeZone = 0;
-    }
-    
-    else if(RefreshRatesCountDownTimer==0)
+  { if(RefreshRatesCountDownTimer==0)
     { FetchJsonExchangeRates(); // resets RefreshRatesCountDownTimer
     }
 
@@ -64,40 +39,44 @@ void Queued_Api_Calls(void * pvParameters)
       switch(ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexOut])
       { case MESSAGE_GET_TIMEZONE_BY_GPS:
         case MESSAGE_GET_TIMEZONE:
-          GetTimeZone(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut]);
+        case MESSAGE_GET_HOME_TIMEZONE:
+          GetTimeZone(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexOut]);
+          GetOpenWeatherData(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut]);
           break;
 
 
         case MESSAGE_GET_GEOLOCATION_BY_GPS:
         case MESSAGE_GET_GEOLOCATION:
           GetGeolocationData(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexOut]);
-          GetOpenWeatherData(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut]);
           break;
           
         default:
           break;  
       }
       ApiCallsToDo.ApiQueueIndexOut++;
-      ApiCallsToDo.ApiQueueIndexOut %= QUEUESIZE;
+      ApiCallsToDo.ApiQueueIndexOut %= APIQUEUESIZE;
       ApiCallsToDo.ApiQueueCnt--;
       loop_esp_now();
     }
-
-
-    vTaskDelay(100 / portTICK_PERIOD_MS); // lowered to 100, was 200
+    vTaskDelay(25 / portTICK_PERIOD_MS); // lowered to 100, was 200
   }  
 }
 
+void CancelApiType(uint16_t ApiType)
+{ for(uint16_t n = 0; n<APIQUEUESIZE; n++)
+  { if(ApiCallsToDo.ApiType[n]==ApiType)
+    { ApiCallsToDo.ApiType[n]=0;
+    }
+ }
+}
 
-
-void GetTimeZone(float StationGpsNS, float StationGpsEW)
+void GetTimeZone(float StationGpsNS, float StationGpsEW, uint16_t ApiType)
 { WiFiClientSecure client;
   time_t now;
   char   payload[256]; 
   char   content[256]; 
-  int dstOffset = 0;
-  int rawOffset = 0;
-  struct tm timeinfo;
+  int32_t dstOffset = 0;
+  int32_t rawOffset = 0;
   bool print = 0;
   
   //Serial.println("MFree Heap at Start  GetTimeZone()" + String(ESP.getFreeHeap()));   
@@ -144,11 +123,30 @@ void GetTimeZone(float StationGpsNS, float StationGpsEW)
     if(strcmp(doc["status"],"OK") == 0)
     { dstOffset = doc["dstOffset"];
       rawOffset = doc["rawOffset"];
+
       // use these offsets 
       Serial.printf("GetTimeZone1 retrieving time elapsed -> %ld mSec\n", millis() - lapMillis);
-      configTime(rawOffset, dstOffset, ntpServer);
-      Serial.printf("GetTimeZone2 retrieving time elapsed -> %ld mSec\n", millis() - lapMillis);
-      getLocalTime(&DataFromGlobe.timeinfo);
+
+      char posix[32];
+      int32_t total_offset = -(rawOffset+dstOffset);
+      snprintf(posix, sizeof(posix), "CUSTOM%ld:%02ld:%02ld", (total_offset/3600), labs((total_offset%3600)/60), labs(total_offset%60));
+      // is something like "CUSTOM-2:00:00
+      Serial.printf("TZ posix = %s\n", posix);
+      setenv("TZ", posix, 1);
+      tzset();
+      if(ApiType==MESSAGE_GET_HOME_TIMEZONE)AddToQueueForDisplay(posix, MESSAGE_HOME_TIMEZONE_POSIX);
+      AddToQueueForDisplay(posix, MESSAGE_TIMEZONE_POSIX);
+
+      uint16_t retrys = 0;
+      while(!getLocalTime(&DataFromGlobe.timeinfo) && retrys < 50) 
+      { delay(100);
+        retrys++;
+      }
+      DataFromGlobe.G_now = time(NULL); // UTC for puck
+
+      //Serial.printf("TEST -> hour = %d\n", DataFromGlobe.timeinfo.tm_hour);
+      //Serial.printf("TEST -> min = %d\n", DataFromGlobe.timeinfo.tm_min);
+  
       Serial.printf("GetTimeZone3 retrieving time elapsed -> %ld mSec\n", millis() - lapMillis);
       //sprintf(content, "TZN - %s", (const char*)doc["timeZoneName"]); 
       sprintf(content, "TZ - %s", (const char*)doc["timeZoneId"]); 
@@ -160,9 +158,23 @@ void GetTimeZone(float StationGpsNS, float StationGpsEW)
     { dstOffset = 0;
       rawOffset = 0;
       // use these offsets 
-      configTime(rawOffset, dstOffset, ntpServer);
-      getLocalTime(&DataFromGlobe.timeinfo);
+      setenv("TZ", "CUSTOM0:00:00", 1);
+      tzset(); 
+      AddToQueueForDisplay("CUSTOM0:00:00", MESSAGE_TIMEZONE_POSIX);
+      uint16_t retrys = 0;
+      while(!getLocalTime(&DataFromGlobe.timeinfo) && retrys < 50) 
+      { delay(100);
+        retrys++;
+      }
+      DataFromGlobe.G_now = time(NULL); // UTC for puck
       AddToQueueForDisplay("TZ - Nautical", MESSAGE_TIMEZONE_ID);
+      
+
+      CancelApiType(MESSAGE_GET_GEOLOCATION); // does not make sense anymore
+      strcpy(CountryCodeSelectorSD, "XX");
+      DataFromGlobe.D_ApisFetchedForStation = -1;
+      AddToQueueForDisplay("XX,???", MESSAGE_GET_GEOLOCATION);
+
       //printLocalTime();
     }
   }

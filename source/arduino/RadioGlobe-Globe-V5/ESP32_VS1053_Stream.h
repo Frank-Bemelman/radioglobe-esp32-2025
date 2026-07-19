@@ -12,8 +12,8 @@
 
 #define VS1053_INITIALVOLUME 95
 #define VS1053_ICY_METADATA true
-#define VS1053_CONNECT_TIMEOUT_MS 1000
-#define VS1053_CONNECT_TIMEOUT_MS_SSL 2000
+#define VS1053_CONNECT_TIMEOUT_MS 500
+#define VS1053_CONNECT_TIMEOUT_MS_SSL 1000
 #define VS1053_STREAM_TIMEOUT_MS 900
 #define VS1053_MAX_URL_LENGTH 2048
 #define VS1053_MAX_REDIRECT_COUNT 3
@@ -89,6 +89,8 @@ public:
     
     void forceVolume(const uint8_t newVolume); /* 0-100 */
 
+    uint8_t getVuMeter(); /* 0-31 */
+
     const char *lastUrl();
 
     size_t size();
@@ -163,6 +165,8 @@ private:
 
     const uint8_t SCI_HDAT0 = 0x08;
     const uint8_t SCI_HDAT1 = 0x09;
+    const uint8_t SCI_AICTRL3 = 0x0F;
+    const uint8_t SCI_STATUS = 0x01;
 
     uint8_t _codec = CODEC_UNKNOWN;
     void _updateBitRate();

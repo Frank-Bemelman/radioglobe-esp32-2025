@@ -2101,7 +2101,13 @@ bool FtpServer::doMlsd()
 
 		// struct tm * timeinfo;
 
-		strcpy(dtStr, "19700101000000");
+		//strcpy(dtStr, "19700101000000");
+
+    time_t writeTime = fileDir.getLastWrite(); 
+		struct tm * timeinfo = localtime(&writeTime);
+      
+		// Formatteer naar YYYYMMDDHHMMSS (Format vereist voor MLSD)
+		strftime(dtStr, sizeof(dtStr), "%Y%m%d%H%M%S", timeinfo);
 
 		// Use fileDir.size() for file size and avoid redeclaring fz twice
 

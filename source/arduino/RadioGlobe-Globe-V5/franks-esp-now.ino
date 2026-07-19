@@ -35,13 +35,13 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
   // quickly store gps location for timezone request before they become altered
   if(PrevDataFromDisplay.D_QueueMessageType != DataFromDisplay.D_QueueMessageType)
   { PrevDataFromDisplay.D_QueueMessageType = DataFromDisplay.D_QueueMessageType;
-    if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_TIMEZONE_BY_GPS)
+    if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_TIMEZONE_BY_GPS || DataFromDisplay.D_QueueMessageType == MESSAGE_GET_HOME_TIMEZONE)
     { Serial.printf("GLOBE SAYS -> MESSAGE_GET_TIMEZONE_BY_GPS\n");
       //TZ_NS = DataFromDisplay.D_StationGpsNS;
       //TZ_EW = DataFromDisplay.D_StationGpsEW;
       //TZ_RequestedStation = DataFromDisplay.D_RequestedStation;
       //DataFromGlobe.FindTimeZone = MESSAGE_GET_TIMEZONE_BY_GPS; // makes the CallGetTimeZone task actually do it
-
+      CancelApiType(MESSAGE_GET_TIMEZONE_BY_GPS);
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
       ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsNS;
       ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsEW;
@@ -60,6 +60,7 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
       //TZ_RequestedStation = DataFromDisplay.D_RequestedStation;
       //DataFromGlobe.FindTimeZone = MESSAGE_GET_TIMEZONE; // makes the CallGetTimeZone task actually do it
 
+      CancelApiType(MESSAGE_GET_TIMEZONE);
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
       ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ns_cal/10;
       ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ew_cal/10;
@@ -79,7 +80,8 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
       //  D_RequestedStation = DataFromDisplay.D_RequestedStation;
       //  DataFromGlobe.FindGeoLocationData = MESSAGE_GET_GEOLOCATION_BY_GPS; // makes the CallGetTimeZone task actually do it
       //}  
-
+      
+      CancelApiType(MESSAGE_GET_GEOLOCATION_BY_GPS);
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
       ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsNS;
       ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsEW;
@@ -99,7 +101,8 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
       //  D_RequestedStation = DataFromDisplay.D_RequestedStation;
       //  DataFromGlobe.FindGeoLocationData = MESSAGE_GET_GEOLOCATION; // makes the CallGetTimeZone task actually do it
       //}  
-
+      
+      CancelApiType(MESSAGE_GET_GEOLOCATION);
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
       ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ns_cal/10;
       ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ew_cal/10;

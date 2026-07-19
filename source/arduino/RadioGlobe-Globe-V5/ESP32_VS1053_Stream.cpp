@@ -159,6 +159,7 @@ bool ESP32_VS1053_Stream::startDecoder(const uint8_t CS, const uint8_t DCS, cons
     if (_vs1053->getChipVersion() == 4)
     {
         log_d("Patching vs1053 firmware");
+        //_vs1053->loadDefaultVs1053Patches(); 
         _vs1053->loadUserCode(PATCHES_FLAC, PATCHES_FLAC_SIZE);
     }
     _allocateRingbuffer();
@@ -827,7 +828,7 @@ bool ESP32_VS1053_Stream::isRunning()
 void ESP32_VS1053_Stream::stopSong()
 {
     if (!_http && !_playingFile)
-    { _vs1053->switchToMp3Mode();
+    { //_vs1053->switchToMp3Mode();
         return;
     }    
 
@@ -858,7 +859,7 @@ void ESP32_VS1053_Stream::stopSong()
     {
         _file.close();
         _playingFile = false;
-        _vs1053->switchToMp3Mode();
+ //       _vs1053->switchToMp3Mode();
         return;
     }
 
@@ -867,7 +868,7 @@ void ESP32_VS1053_Stream::stopSong()
     _http = nullptr;
     _bytesLeftInChunk = 0;
     _dataSeen = false;
-    _vs1053->switchToMp3Mode();
+//    _vs1053->switchToMp3Mode();
 }
 
 uint8_t ESP32_VS1053_Stream::getVolume()
@@ -887,6 +888,24 @@ void ESP32_VS1053_Stream::forceVolume(const uint8_t newVolume)
     if (_vs1053)
         _vs1053->setVolume(_volume);
 }
+
+uint8_t ESP32_VS1053_Stream::getVuMeter()
+{ // read  VU-meter registers
+  // turn on Vu meter
+
+  if(!_http && !_playingFile)return 0;
+
+  uint16_t regvalue = _vs1053->readRegister(SCI_STATUS); 
+  if((regvalue & 0x0200)==0) _vs1053->writeRegister(SCI_STATUS, (regvalue | 0x200)); 
+    
+  uint16_t vu_values = _vs1053->readRegister(SCI_AICTRL3); 
+  uint8_t left_channel = highByte(vu_values);
+  uint8_t right_channel = lowByte(vu_values);
+
+  return max(left_channel, right_channel);
+}
+
+
 
 
 void ESP32_VS1053_Stream::setTone(uint8_t *rtone)
