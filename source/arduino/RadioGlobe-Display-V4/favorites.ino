@@ -185,7 +185,7 @@ void SaveFavoritesToEEprom(void)
   for(station = 0; station<MAX_FAVORITES+MAX_HOMES; station++)
   { memcpy(&DisplaySettings.stationnug[station], &Stations.StationNUG[MAX_STATIONS+station], sizeof(Stations.StationNUG[0]));
   }
-  SaveDisplaySettingsToEeprom();
+  SaveDisplaySettings();
   Serial.println("Finished saving favorites/presets to EEprom");
 }
 
@@ -389,11 +389,11 @@ void LoadApiKeys(void)
   // local keys now filled with defaults from ..\secrets.h or fetched from api-keys.txt
   if(strcmp(DisplaySettings.google_api_key, googlekey) != NULL)
   { strcpy(DisplaySettings.google_api_key, googlekey);
-    SaveDisplaySettingsToEeprom();
+    SaveDisplaySettings();
   }
   if(strcmp(DisplaySettings.open_weather_map_api_key, weatherkey) != NULL)
   { strcpy(DisplaySettings.open_weather_map_api_key, weatherkey);
-    SaveDisplaySettingsToEeprom();
+    SaveDisplaySettings();
   }
 
   Serial.printf("Currently stored in eeprom google_api_key  = %s\n", DisplaySettings.google_api_key);

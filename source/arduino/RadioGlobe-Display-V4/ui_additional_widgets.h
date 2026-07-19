@@ -45,12 +45,13 @@ extern lv_obj_t * ui_mainscreen_speakeroff;
 extern lv_obj_t * ui_PresetFlag;
 extern void ui_event_PresetFlag(lv_event_t * e);
 
+extern lv_obj_t * ui_GlobeChannel;
 extern lv_obj_t * ui_GlobeSDText;
 extern lv_obj_t * ui_GlobeSDSizeText;
 extern lv_obj_t * ui_BatteryText;
 extern lv_obj_t * ui_BatteryLevel;
 
-extern lv_obj_t * ui_BatteryVoltage;
+extern lv_obj_t * ui_BatteryLevelHome;
 
 
 
@@ -77,13 +78,14 @@ extern lv_obj_t * uic_mainscreen_speakeroff;
 extern lv_obj_t * uic_MusicLibraryButton;
 extern lv_obj_t * uic_PresetFlag;
 
+extern lv_obj_t * uic_GlobeChannel;
 extern lv_obj_t * uic_GlobeSDText;
 extern lv_obj_t * uic_GlobeSDSizeText;
 extern lv_obj_t * uic_BatteryText;
 extern lv_obj_t * uic_BatteryLevel;
 
 
-extern lv_obj_t * uic_BatteryVoltage;
+extern lv_obj_t * uic_BatteryLevelHome;
 
 
 

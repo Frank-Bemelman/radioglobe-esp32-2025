@@ -2097,36 +2097,40 @@ bool FtpServer::doMlsd()
 	  if( fileDir )
 	  {
 		  DEBUG_PRINTLN(F("DIR NEXT "));
-		char dtStr[ 15 ];
+		  char dtStr[ 15 ];
 
-		// struct tm * timeinfo;
+		  // struct tm * timeinfo;
 
-		strcpy(dtStr, "19700101000000");
+		  //strcpy(dtStr, "19700101000000");
 
-		// Use fileDir.size() for file size and avoid redeclaring fz twice
+      time_t writeTime = fileDir.getLastWrite(); 
+		  struct tm * timeinfo = localtime(&writeTime);
+      
+		  // Formatteer naar YYYYMMDDHHMMSS (Format vereist voor MLSD)
+		  strftime(dtStr, sizeof(dtStr), "%Y%m%d%H%M%S", timeinfo);
 
-		long fz = fileDir.size();
-		String fn = fileDir.name();
-		fn.remove(0, fn.lastIndexOf("/")+1);
+		  // Use fileDir.size() for file size and avoid redeclaring fz twice
 
+		  long fz = fileDir.size();
+		  String fn = fileDir.name();
+		  fn.remove(0, fn.lastIndexOf("/")+1);
 
+		  data.print( F("Type=") );
 
-		data.print( F("Type=") );
+		  data.print( ( fileDir.isDirectory() ? F("dir") : F("file")) );
+		  data.print( F(";Modify=") ); data.print(dtStr);// data.print( makeDateTimeStr( dtStr, time, time) );
+		  data.print( F(";Size=") ); data.print( fz );
+		  data.print( F("; ") ); data.println( fn );
 
-		data.print( ( fileDir.isDirectory() ? F("dir") : F("file")) );
-		data.print( F(";Modify=") ); data.print(dtStr);// data.print( makeDateTimeStr( dtStr, time, time) );
-		data.print( F(";Size=") ); data.print( fz );
-		data.print( F("; ") ); data.println( fn );
+		  DEBUG_PRINT( F("Type=") );
+		  DEBUG_PRINT( ( fileDir.isDirectory() ? F("dir") : F("file")) );
 
-		DEBUG_PRINT( F("Type=") );
-		DEBUG_PRINT( ( fileDir.isDirectory() ? F("dir") : F("file")) );
+		  DEBUG_PRINT( F(";Modify=") ); DEBUG_PRINT(dtStr); //DEBUG_PRINT( makeDateTimeStr( dtStr, time, time) );
+		  DEBUG_PRINT( F(";Size=") ); DEBUG_PRINT( fz );
+		  DEBUG_PRINT( F("; ") ); DEBUG_PRINTLN( fn );
 
-		DEBUG_PRINT( F(";Modify=") ); DEBUG_PRINT(dtStr); //DEBUG_PRINT( makeDateTimeStr( dtStr, time, time) );
-		DEBUG_PRINT( F(";Size=") ); DEBUG_PRINT( fz );
-		DEBUG_PRINT( F("; ") ); DEBUG_PRINTLN( fn );
-
-		nbMatch ++;
-		return true;
+		  nbMatch ++;
+		  return true;
 	  }
 
 #elif STORAGE_TYPE == STORAGE_FATFS

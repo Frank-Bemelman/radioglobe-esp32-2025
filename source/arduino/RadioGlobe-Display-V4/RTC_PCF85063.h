@@ -6,7 +6,6 @@
 //PCF85063_ADDRESS
 #define PCF85063_ADDRESS    (0x51)
 //
-#define YEAR_OFFSET			    (1970)
 // registar overview - crtl & status reg
 #define RTC_CTRL_1_ADDR     (0x00)
 #define RTC_CTRL_2_ADDR     (0x01)

@@ -75,11 +75,11 @@ void PCF85063_Set_Date(datetime_t date)
 {
 	uint8_t buf[4] = {decToBcd(date.day),
 					  decToBcd(date.dotw),
-					  decToBcd(date.month),
-					  decToBcd(date.year - YEAR_OFFSET)};
-	esp_err_t ret = I2C_Write(PCF85063_ADDRESS, RTC_DAY_ADDR, buf, sizeof(buf));
-	if(ret != ESP_OK)
-		printf("PCF85063 : Date setting failed\r\n");
+					  decToBcd(date.month+1), // see 8.3.6 Register Months datasheet
+						decToBcd((date.year + 1900) % 100)};
+	 esp_err_t ret = I2C_Write(PCF85063_ADDRESS, RTC_DAY_ADDR, buf, sizeof(buf));
+	 if(ret != ESP_OK)
+	 	printf("PCF85063 : Date setting failed\r\n");
 }
 
 /******************************************************************************
@@ -94,9 +94,8 @@ void PCF85063_Set_All(datetime_t time)
 					  decToBcd(time.hour),
 					  decToBcd(time.day),
 					  decToBcd(time.dotw),
-					  decToBcd(time.month),
-//					  decToBcd(time.year - YEAR_OFFSET)}; wrong
-					  decToBcd(time.year%100)};
+					  decToBcd(time.month+1), // see 8.3.6 Register Months datasheet
+					  decToBcd((time.year + 1900) % 100)};
 
 	esp_err_t ret = I2C_Write(PCF85063_ADDRESS, RTC_SECOND_ADDR, buf, sizeof(buf));
 	if(ret != ESP_OK)
@@ -120,8 +119,7 @@ void PCF85063_Read_Time(datetime_t *time)
 		time->hour = bcdToDec(buf[2] & 0x3F);
 		time->day = bcdToDec(buf[3] & 0x3F);
 		time->dotw = bcdToDec(buf[4] & 0x07);
-		time->month = bcdToDec(buf[5] & 0x1F);
-//		time->year = bcdToDec(buf[6]) + YEAR_OFFSET;
+		time->month = bcdToDec(buf[5] & 0x1F) - 1; // see 8.3.6 Register Months datasheet
 		time->year = bcdToDec(buf[6]);
 	}
 }

@@ -9,7 +9,6 @@ lv_obj_t * uic_IconBattery;
 lv_obj_t * uic_IconSdCard;
 lv_obj_t * uic_MemoryUsage;
 lv_obj_t * uic_GlobeRSSI;
-lv_obj_t * uic_GlobeText;
 lv_obj_t * uic_led4;
 lv_obj_t * uic_led3;
 lv_obj_t * uic_led2;
@@ -42,7 +41,6 @@ lv_obj_t * ui_led1 = NULL;
 lv_obj_t * ui_led2 = NULL;
 lv_obj_t * ui_led3 = NULL;
 lv_obj_t * ui_led4 = NULL;
-lv_obj_t * ui_GlobeText = NULL;
 lv_obj_t * ui_IconWifi = NULL;
 lv_obj_t * ui_GlobeRSSI = NULL;
 lv_obj_t * ui_MemoryText = NULL;
@@ -336,16 +334,6 @@ void ui_Favorites_screen_init(void)
     ui_object_set_themeable_style_property(ui_led4, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
                                            _ui_theme_alpha_green);
 
-    ui_GlobeText = lv_label_create(ui_Favorites);
-    lv_obj_set_width(ui_GlobeText, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_GlobeText, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_GlobeText, -165);
-    lv_obj_set_y(ui_GlobeText, -130);
-    lv_obj_set_align(ui_GlobeText, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_GlobeText, "Globe");
-    lv_obj_set_style_text_color(ui_GlobeText, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_GlobeText, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-
     ui_IconWifi = lv_img_create(ui_Favorites);
     lv_img_set_src(ui_IconWifi, &ui_img_wifi32x32_png);
     lv_obj_set_width(ui_IconWifi, LV_SIZE_CONTENT);   /// 1
@@ -445,7 +433,6 @@ void ui_Favorites_screen_init(void)
     uic_led2 = ui_led2;
     uic_led3 = ui_led3;
     uic_led4 = ui_led4;
-    uic_GlobeText = ui_GlobeText;
     uic_GlobeRSSI = ui_GlobeRSSI;
     uic_MemoryUsage = ui_MemoryUsage;
     uic_IconSdCard = ui_IconSdCard;
@@ -490,8 +477,6 @@ void ui_Favorites_screen_destroy(void)
     ui_led3 = NULL;
     uic_led4 = NULL;
     ui_led4 = NULL;
-    uic_GlobeText = NULL;
-    ui_GlobeText = NULL;
     ui_IconWifi = NULL;
     uic_GlobeRSSI = NULL;
     ui_GlobeRSSI = NULL;

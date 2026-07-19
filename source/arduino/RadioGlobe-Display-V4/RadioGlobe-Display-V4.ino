@@ -117,7 +117,7 @@ struct eepromData
   uint16_t expand_search; // number of degrees to look around for a station
   uint16_t globe_sd_gb;
   uint16_t auto_update_state = 0;
-  
+  char home_tz_posix[24];
   char spare_data[];
 };
 eepromData DisplaySettings; // values to work with
@@ -323,6 +323,20 @@ uint64_t sleepTime = 10000000;  // Sleep duration in microseconds (10 seconds)
 
 extern void setupusb();
 
+// todo, work in progress, faster context switching of clockface (home vs world)
+typedef struct locationData 
+{ char TimeZonePosix[32]; // to set TZ system clock
+  char CountryCode[3]; // for clock face
+  char CountryName[64]; // for clock face
+  char TZname[64]; // for clock face
+  char DayAndDate[64]; // for clock face
+  char HelloText[64]; // for clock face
+};
+
+locationData Home = {"CUSTOM0:00:00", "XX", "", "", "", ""};
+locationData World = {"CUSTOM0:00:00", "XX", "", "", "", ""};
+
+
 void setup()
 { char content[64];
 
@@ -351,7 +365,7 @@ void setup()
   //setupusb(); // doesnt work - wanted to use puck as usb storage for PC 
 
   EEPROM.begin(EEPROM_SIZE);
-  LoadDisplaySettingsFromEeprom();
+  LoadDisplaySettings();
   InitializeDisplaySettings(); // at first run, initialize with some reasonable values
 
   setup_esp_now(); 
@@ -413,7 +427,7 @@ void setup()
 
   // show used wifi channel in preset screen
   sprintf(content, "CH-%d", DisplaySettings.wifichannel);
-  lv_label_set_text(ui_GlobeText, content);
+  lv_label_set_text(ui_GlobeChannel, content);
 
   //lv_mem_init(); ??? crashes everything
   monitor_update(); // memory percentage
@@ -470,10 +484,15 @@ void setup()
   DataFromDisplay.D_StationGpsNS = Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].gps_ns;
   DataFromDisplay.D_StationGpsEW = Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].gps_ew;
   strcpy(GlobePositionCountryCode, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode);
+  
+  strcpy(Home.CountryCode, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode); 
+  strcpy(World.CountryCode, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode); 
+  strcpy(Home.CountryName, AllUpperCase(Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].town)); // home sweet home is a nicer alternative
+  strcpy(World.CountryName, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countryname); 
   sprintf(content, "%f-%f", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
+  AddToQueueForGlobe(content, MESSAGE_GET_HOME_TIMEZONE);
   AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION_BY_GPS);
-  AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_BY_GPS);
-
+  
   //if(DisplaySettings.globe_has_sdcard)
   //{ ftp.begin("guest", "guest");
   //  Serial.println("FTP gestart!");
@@ -489,7 +508,6 @@ bool bInfoScreen = false;
 char *partofday[4] = {"Sweet Night", "Good Morning", "Jolly Afternoon", "Nice Evening"};
 char *weekdays[7] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 char *monthnames[12] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
-char ClockTimeZoneName[64] = "";
 char OldClockTimeZoneName[64] = "";
 
 
@@ -563,27 +581,28 @@ void loop()
     //monitor_update(); 
     while(Serial.available()) 
     { incomingChar = Serial.read();
+      receivedMessage += incomingChar;
       if(incomingChar == '\n')
       { Serial.print("You typed this: ");
         Serial.println(receivedMessage);
-        if(receivedMessage[0]=='G')
+        if(receivedMessage.c_str()[0]=='G')
         { // store globe mac address example globe 54 -> GM=98:A3:16:EC:27:C4
           // scanf with %hx because NewMac[] is array of uint8_t
           sscanf(receivedMessage.c_str(), "GM=%hx:%hx:%hx:%hx:%hx:%hx", &NewMac[0], &NewMac[1], &NewMac[2], &NewMac[3], &NewMac[4], &NewMac[5]);
           memcpy(DisplaySettings.globemac, NewMac, sizeof(DisplaySettings.globemac));
           Serial.printf("New Mac Adress For Globe = %s\n", receivedMessage.c_str());
-          SaveDisplaySettingsToEeprom();
+          SaveDisplaySettings();
           Serial.println("New Globe Mac saved to EEprom..");
           setup_esp_add_peer(); 
           sprintf(content, "Globe Mac %02X:%02X:%02X:%02X:%02X:%02X", (uint16_t)DisplaySettings.globemac[0], (uint16_t)DisplaySettings.globemac[1], (uint16_t)DisplaySettings.globemac[2], (uint16_t)DisplaySettings.globemac[3], (uint16_t)DisplaySettings.globemac[4], (uint16_t)DisplaySettings.globemac[5]);
           lv_label_set_text(ui_GlobeMac, content);
         }
-        else if(receivedMessage[0]=='M')
+        else if(receivedMessage.c_str()[0]=='M')
         { // print pucks mac address
           readMacAddress();
         }
-        else if(receivedMessage[0]=='S')
-        { if(receivedMessage[1]=='B')
+        else if(receivedMessage.c_str()[0]=='S')
+        { if(receivedMessage.c_str()[1]=='B')
           { if(DisplaySettings.bluetoothswitchable == 1)
             { DisplaySettings.bluetoothswitchable = 0;
             }
@@ -591,35 +610,45 @@ void loop()
             { DisplaySettings.bluetoothswitchable = 1;
             }
             Serial.printf("Updating DisplaySettings.bluetoothswitchable -> %d\n", DisplaySettings.bluetoothswitchable);
-            SaveDisplaySettingsToEeprom();
+            SaveDisplaySettings();
           }
           set_optional_items();
         } 
-        else if(receivedMessage[0]=='F')
-        { uint16_t digit = receivedMessage[1]-48;
+        else if(receivedMessage.c_str()[0]=='F')
+        { uint16_t digit = receivedMessage.c_str()[1]-48;
           if(digit>3)digit=3;
           AddStationToQueueForGlobe(digit+MAX_STATIONS); // presets come just after the regular list of stations
         }
-        else if(receivedMessage[0]=='Q')
+        else if(receivedMessage.c_str()[0]=='Q')
         { AddToQueueForGlobe("", MESSAGE_GLOBE_PLAY_SD);
         }
-        else if(receivedMessage[0]=='X')
+        else if(receivedMessage.c_str()[0]=='X')
         { DataFromDisplay.D_QueueStationIndex = 49;
           AddToQueueForGlobe("https://stream.zeno.fm/dahlxvtaz1guv", MESSAGE_START_THIS_STATION); https://stream.zeno.fm/dahlxvtaz1guv
         }
-        else if(receivedMessage[0]=='R')
+        else if(receivedMessage.c_str()[0]=='R')
         { DisplaySettings.magicnumber = 0; // reset
           InitializeDisplaySettings();
           ESP.restart();
         }
-        else if(receivedMessage[0]=='U')
+        else if(receivedMessage.c_str()[0]=='U')
         { //AddToQueueForGlobe("1", MESSAGE_UPDATE_GLOBE);
           UpdateState = 1;
         }
+        else if(receivedMessage.c_str()[0]=='T')
+        { if(receivedMessage.c_str()[1]=='\n')printSystemTimes();
+          if(receivedMessage.c_str()[1]=='0')
+          { Serial.printf("Serial Command TZ CUSTOM0:00:00\n");
+            setenv("TZ", "CUSTOM0:00:00", 1);
+            tzset(); 
+          }
+        }
+        else if(receivedMessage.c_str()[0]=='Z')
+        { Serial.printf("Serial Command filedatestamp\n");
+          AppendToLogFile("/filedatestamp", "Test");
+        }
+
         receivedMessage = "";
-      }
-      else
-      { receivedMessage += incomingChar;
       }
     }
   
@@ -647,7 +676,7 @@ void loop()
       { CalibrationModeLatLong = (CALMODE_NS | CALMODE_EW); // also effects the display of calibrated coordinates, 
         bInfoScreen = false;
         bDatabaseScreenUpdate = false;
-        if(OldDisplaySettings.expand_search != DisplaySettings.expand_search)SaveDisplaySettingsToEeprom();
+        if(OldDisplaySettings.expand_search != DisplaySettings.expand_search)SaveDisplaySettings();
       }
       monitor_update();
     }
@@ -713,25 +742,81 @@ void loop()
           break;
         case MESSAGE_TIMEZONE_ID:
           if(strlen(QueueMessage))
-          { strcpy(ClockTimeZoneName, QueueMessage);
-            AllUpperCase(ClockTimeZoneName);
-            lv_label_set_text(ui_Time_Zone, ClockTimeZoneName); // on home screen - clock screen does it's own updates every second
+          { strcpy(World.TZname, QueueMessage);
+            AllUpperCase(World.TZname);
+            lv_label_set_text(ui_Time_Zone, World.TZname); // on home screen - clock screen does it's own updates every second
             
-            datetime.month = DataFromGlobe.timeinfo.tm_mon;
+            datetime.year = DataFromGlobe.timeinfo.tm_year;
+            Serial.printf("MESSAGE_TIMEZONE_ID ->>> Year = %d\n", DataFromGlobe.timeinfo.tm_year);
+            datetime.month = DataFromGlobe.timeinfo.tm_mon; 
             datetime.day = DataFromGlobe.timeinfo.tm_mday;
             datetime.dotw = DataFromGlobe.timeinfo.tm_wday;
             datetime.hour = DataFromGlobe.timeinfo.tm_hour; // + (timeinfo.tm_isdst>0)?1:0;
             datetime.minute = DataFromGlobe.timeinfo.tm_min;
             datetime.second = DataFromGlobe.timeinfo.tm_sec;
-            datetime.year = DataFromGlobe.timeinfo.tm_year;
-            PCF85063_Set_All(datetime);
             
-            // also set system wide clock as well, to get the right times and dates on files created 
-            now = mktime(&DataFromGlobe.timeinfo); // get it in epoch seconds 
-            // Serial.printf("NEW GLOBE EPOCH UTC SECONDS = %ld\n", (long)now);
-            settimeofday((const timeval *) &now, NULL);
+            PCF85063_Set_All(datetime); // this time is already TZ corrected
+            
+//            setenv("TZ", "CUSTOM0:00:00", 1);
+//            tzset(); 
+            struct timeval tv;
+            tv.tv_sec = DataFromGlobe.G_now; // set our system clock to UTC received from globe
+            tv.tv_usec = 0;  
+            settimeofday(&tv, NULL);
+
+            struct tm time_info;
+            localtime_r(&tv.tv_sec, &time_info);
+  
+            // 3. Print the formatted calendar components
+            printf("MESSAGE_TIMEZONE_ID Date localtime_r: Y%04d-M%02d-D%02d\n", 
+            time_info.tm_year + 1900, // tm_year is years since 1900
+            time_info.tm_mon + 1,     // tm_mon is 0-indexed (0 = January)
+            time_info.tm_mday);
+
+            printf("MESSAGE_TIMEZONE_ID Time localtime_r: %02d:%02d:%02d.%06ld\n", 
+            time_info.tm_hour, 
+            time_info.tm_min, 
+            time_info.tm_sec,
+            tv.tv_usec);               // Microseconds from gettimeofday
+
+            gmtime_r(&tv.tv_sec, &time_info);
+
+          // 3. Print the formatted calendar components
+            printf("MESSAGE_TIMEZONE_ID Date gmtime_r: Y%04d-M%02d-D%02d\n", 
+            time_info.tm_year + 1900, // tm_year is years since 1900
+            time_info.tm_mon + 1,     // tm_mon is 0-indexed (0 = January)
+            time_info.tm_mday);
+
+            printf("MESSAGE_TIMEZONE_ID Time gmtime_r: %02d:%02d:%02d.%06ld\n", 
+            time_info.tm_hour, 
+            time_info.tm_min, 
+            time_info.tm_sec,
+            tv.tv_usec);               // Microseconds from gettimeofday
+
+
 
           }  
+          break;
+
+        case MESSAGE_TIMEZONE_POSIX:
+        case MESSAGE_HOME_TIMEZONE_POSIX:
+          Serial.printf("MESSAGE_TIMEZONE_POSIX -> %s", QueueMessage);
+          if(QueueMessageType==MESSAGE_HOME_TIMEZONE_POSIX)
+          { 
+            strcpy(Home.TimeZonePosix, QueueMessage);
+            strcpy(DisplaySettings.home_tz_posix, Home.TimeZonePosix);
+            if(strcmp(OldDisplaySettings.home_tz_posix, DisplaySettings.home_tz_posix)!=0)SaveDisplaySettings();
+            { strcpy(DisplaySettings.home_tz_posix, Home.TimeZonePosix);
+              SaveDisplaySettings();
+              SaveEepromToFile();
+            }
+          }  
+          else
+          { strcpy(World.TimeZonePosix, QueueMessage);
+          }
+          setenv("TZ", QueueMessage, 1);
+          tzset();
+          printSystemTimes();
           break;
            
         case MESSAGE_EX_CHANGE_RATE:
@@ -747,8 +832,7 @@ void loop()
          case MESSAGE_FINDNEWSTATION:
           // station or file already killed by globe
           bMusicMode = false;
-          SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0); // turn off leds just in case
-           if((screen != ui_CalibrationScreen) && (screen != ui_CalibrationScreenAdvanced))
+          if((screen != ui_CalibrationScreen) && (screen != ui_CalibrationScreenAdvanced))
           { // if in tone controle screen or preset screen, jump back to home screen
             if((screen != ui_DatabaseScreen) || (bInfoScreen==true))
             { if(screen==ui_ClockScreen) // clock screen
@@ -784,7 +868,7 @@ void loop()
           Serial.printf("Globe Mac %02X:%02X:%02X:%02X:%02X:%02X (Current)\n", (uint16_t)DisplaySettings.globemac[0], (uint16_t)DisplaySettings.globemac[1], (uint16_t)DisplaySettings.globemac[2], (uint16_t)DisplaySettings.globemac[3], (uint16_t)DisplaySettings.globemac[4], (uint16_t)DisplaySettings.globemac[5]);
           if(memcmp(DisplaySettings.globemac, NewMac, sizeof(DisplaySettings.globemac)) != 0)
           { memcpy(DisplaySettings.globemac, NewMac, sizeof(DisplaySettings.globemac));
-            SaveDisplaySettingsToEeprom();
+            SaveDisplaySettings();
             Serial.println("New (Different) Globe Mac saved to EEprom..");
             setup_esp_add_peer(); 
             sprintf(content, "Globe Mac %02X:%02X:%02X:%02X:%02X:%02X", (uint16_t)DisplaySettings.globemac[0], (uint16_t)DisplaySettings.globemac[1], (uint16_t)DisplaySettings.globemac[2], (uint16_t)DisplaySettings.globemac[3], (uint16_t)DisplaySettings.globemac[4], (uint16_t)DisplaySettings.globemac[5]);
@@ -803,8 +887,10 @@ void loop()
             char filename[QUEUEMESSAGELENGTH];
             strcpy(filename, QueueMessage);
             char *p;
-            if((p=strstr(filename, " -> "))!=0)
+            if( (p=strstr(filename, " -> ")) !=0 )
             { *p=0;
+              if( (p=strstr(filename, ":"))!=0)*p=0; // shorten more
+
               //Serial.printf("MESSAGE_CONNECTTOHOST_FAILURE filename part is <%s>\n", filename);
               // reported error message will be used as filename, must sanize first
               const char *illegal_chars = " \\/:*?\"<>|";
@@ -1008,8 +1094,12 @@ void loop()
           if(strlen(countrycode)==2) // && (strcmp(countrycode, "XX")!=NULL)) // XX is impossible for a radiostation
           { strcpy(Stations.StationNUG[Stations.requested].countrycode, countrycode); // only when a positive result was returned (Google does not report on palestine and some others)
             if(FindCountryNameByCode(Stations.StationNUG[Stations.requested].countryname, Stations.StationNUG[Stations.requested].countrycode))
-            { Serial.printf("Called from radioglobe-display.ino line 785\n");
+            { Serial.printf("Called from radioglobe-display.ino line ~1068\n");
               SetFlag(countrycode);
+              strcpy(GlobePositionCountryCode,countrycode); 
+              strcpy(World.CountryCode, countrycode); // later used for clock face
+              strcpy(World.CountryName, AllUpperCase(Stations.StationNUG[Stations.requested].countryname)); // later used for clock face
+              
               lv_event_send(ui_Home_Flag, LV_EVENT_REFRESH, NULL);
               lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // show flag 
               lv_label_set_text(ui_Home_Country, AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
@@ -1079,6 +1169,7 @@ void loop()
             else
             { Serial.printf("(GLOBE SAYS): Preset Connected %s\n", Stations.StationNUG[Stations.requested].name);
               SetLed(Stations.requested-MAX_STATIONS, UI_THEME_COLOR_GREEN);
+              lv_obj_clear_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN); 
             }
           }  
           break;          
@@ -1116,7 +1207,7 @@ void loop()
           { if(DisplaySettings.bluetoothswitchable != 1)
             { DisplaySettings.bluetoothswitchable = 1;
               Serial.printf("Updating DisplaySettings.bluetoothswitchable -> %d\n", DisplaySettings.bluetoothswitchable);
-              SaveDisplaySettingsToEeprom();
+              SaveDisplaySettings();
               Serial.println("..and bluetoothswitchable saved to EEprom..");
             }
           }
@@ -1124,7 +1215,7 @@ void loop()
           { if(DisplaySettings.bluetoothswitchable != 0)
             { DisplaySettings.bluetoothswitchable = 0;
               Serial.printf("Updating DisplaySettings.bluetoothswitchable -> %d\n", DisplaySettings.bluetoothswitchable);
-              SaveDisplaySettingsToEeprom();
+              SaveDisplaySettings();
               Serial.println("..and bluetoothswitchable to EEprom..");
             }
           }
@@ -1133,7 +1224,7 @@ void loop()
           { if(DisplaySettings.btmodule_power_on != 1)
             { DisplaySettings.btmodule_power_on = 1;
               Serial.printf("Updating DisplaySettings.btmodule_power_on -> %d\n", DisplaySettings.btmodule_power_on);
-              SaveDisplaySettingsToEeprom();
+              SaveDisplaySettings();
               Serial.println("..and saved to EEprom..");
             }
           }
@@ -1141,7 +1232,7 @@ void loop()
           { if(DisplaySettings.btmodule_power_on != 0)
             { DisplaySettings.btmodule_power_on = 0;
               Serial.printf("Updating DisplaySettings.btmodule_power_on -> %d\n", DisplaySettings.btmodule_power_on);
-              SaveDisplaySettingsToEeprom();
+              SaveDisplaySettings();
               Serial.println("..and saved to EEprom..");
             }
           }
@@ -1150,7 +1241,7 @@ void loop()
           { if(DisplaySettings.bluetoothinstalled != 1)
             { DisplaySettings.bluetoothinstalled = 1;
               Serial.printf("Updating DisplaySettings.bluetoothinstalled -> %d\n", DisplaySettings.bluetoothinstalled);
-              SaveDisplaySettingsToEeprom();
+              SaveDisplaySettings();
               Serial.println("..and saved to EEprom..");
             }
           }
@@ -1158,7 +1249,7 @@ void loop()
           { if(DisplaySettings.bluetoothinstalled != 0)
             { DisplaySettings.bluetoothinstalled = 0;
               Serial.printf("Updating DisplaySettings.bluetoothinstalled -> %d\n", DisplaySettings.bluetoothinstalled);
-              SaveDisplaySettingsToEeprom();
+              SaveDisplaySettings();
               Serial.println("..and saved to EEprom..");
             }
           }
@@ -1173,7 +1264,7 @@ void loop()
               { if(DisplaySettings.serialnumber != value_int32t) // only take action if actuallly changed
                 { DisplaySettings.serialnumber = value_int32t;
                   Serial.printf("New serialnumber is %d\n", DisplaySettings.serialnumber);
-                  SaveDisplaySettingsToEeprom();
+                  SaveDisplaySettings();
                   Serial.println("New serialnumber saved to EEprom..");
                 }
               }
@@ -1185,7 +1276,7 @@ void loop()
           sscanf(QueueMessage, "%d", &new_channel);
           if(DisplaySettings.wifichannel != new_channel)
           { DisplaySettings.wifichannel = new_channel;
-            SaveDisplaySettingsToEeprom();
+            SaveDisplaySettings();
             Serial.println("New Wifi Channel saved to EEprom..");
             // reset puck
             ESP.restart();
@@ -1195,7 +1286,7 @@ void loop()
         case MESSAGE_GLOBE_SD_GB:
           
           sscanf(QueueMessage, "%d", &DisplaySettings.globe_sd_gb);
-          if(OldDisplaySettings.globe_sd_gb != DisplaySettings.globe_sd_gb)SaveDisplaySettingsToEeprom();
+          if(OldDisplaySettings.globe_sd_gb != DisplaySettings.globe_sd_gb)SaveDisplaySettings();
         
           if(DisplaySettings.globe_sd_gb==0)
           { lv_label_set_text(ui_GlobeSDSizeText, "NO CARD");
@@ -1214,6 +1305,8 @@ void loop()
           else bMusicMode = false;
 
           SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
+          lv_obj_add_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN); 
+
            
           if(bMusicMode == true)
           { // empty roller
@@ -1450,20 +1543,30 @@ void loop()
 
     if((GlobalTicker100mS % 1)==0)
     { if(screen == ui_ClockScreen) // we are on clock screen
-      { SecondAngle = ((datetime.second * 3600)/60); // full second steps
-        HourAngle = ((datetime.hour * 3600)/12) + ((datetime.minute * 3600)/720);
-        MinuteAngle = (ui_MinuteHand, ((datetime.minute * 3600)/60)) + datetime.second;
+      { SecondAngle = datetime.second * 60; // full second steps
+        MinuteAngle = (datetime.minute * 60) + datetime.second;
+        HourAngle = ((datetime.hour%12) * 300) + (datetime.minute * 5);
         Hour = datetime.hour;
 
-        if(strcmp(OldClockTimeZoneName, ClockTimeZoneName)!=NULL)
-        { strcpy(OldClockTimeZoneName, ClockTimeZoneName);
-          sprintf(content, "%s\n%s %d-%s-%d\n%s",  ClockTimeZoneName, weekdays[datetime.dotw], (size_t)datetime.day, monthnames[datetime.month],  (size_t)datetime.year%100, partofday[datetime.hour/6]);
+        if(ClockHomeTime)
+        {
+
+        }
+        else
+        {
+
+        }
+        
+        if(strcmp(OldClockTimeZoneName, World.TZname)!=NULL)
+        { strcpy(OldClockTimeZoneName, World.TZname);
+          sprintf(content, "%s\n%s %d-%s-%d\n%s",  World.TZname, weekdays[datetime.dotw], (size_t)datetime.day, monthnames[datetime.month],  (size_t)datetime.year%100, partofday[datetime.hour/6]);
+          //strcpy(Home. ,content);
           lv_label_set_text(ui_Time_Zone_Clock, content); // on clock screen
         }
 
         if(OldHour!=Hour) // as that might change the day of week, date, nice evening text
         { OldHour=Hour;
-          sprintf(content, "%s\n%s %d-%s-%d\n%s",  ClockTimeZoneName, weekdays[datetime.dotw], (size_t)datetime.day, monthnames[datetime.month],  (size_t)datetime.year%100, partofday[datetime.hour/6]);
+          sprintf(content, "%s\n%s %d-%s-%d\n%s",  World.TZname, weekdays[datetime.dotw], (size_t)datetime.day, monthnames[datetime.month],  (size_t)datetime.year%100, partofday[datetime.hour/6]);
           lv_label_set_text(ui_Time_Zone_Clock, content); // on clock screen
         }
 
@@ -1485,11 +1588,11 @@ void loop()
       
       // check flag
       if(ClockHomeTime)
-      { strcpy(ClockFlagCountryCode, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode);
+      { strcpy(ClockFlagCountryCode, Home.CountryCode);
         //Serial.printf("ClockFlagCountryCode from Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode = %s\n", ClockFlagCountryCode);
       }
       else
-      { strcpy(ClockFlagCountryCode, GlobePositionCountryCode);
+      { strcpy(ClockFlagCountryCode, World.CountryCode);
         //Serial.printf("ClockFlagCountryCode from GlobePositionCountryCode = %s\n", ClockFlagCountryCode);
       }
       if(strcmp(OldClockFlagCountryCode, ClockFlagCountryCode)!=NULL)
@@ -1585,6 +1688,9 @@ void InitializeDisplaySettings(void)
 { if(DisplaySettings.magicnumber == 123456)
   { Serial.println("EEprom data seems OK");
     if(DisplaySettings.expand_search<2)DisplaySettings.expand_search = 2;
+    if(strncmp(DisplaySettings.home_tz_posix, "CUSTOM", 5)!=0)
+    { strcpy(DisplaySettings.home_tz_posix, "CUSTOM0:00:00"); 
+    }
     return;
   }
 
@@ -1642,6 +1748,7 @@ void InitializeDisplaySettings(void)
   strcpy(DisplaySettings.stationnug[4].town, "Home Sweet Home");
   strcpy(DisplaySettings.stationnug[4].countrycode, "NL");
 //  strcpy(DisplaySettings.stationnug[4].countryname, "Netherlands");
+  strcpy(DisplaySettings.home_tz_posix, "CUSTOM0:00:00");
 
   DisplaySettings.bluetoothswitchable = 0;
   DisplaySettings.wifichannel = 11;
@@ -1706,14 +1813,15 @@ void set_optional_items(void)
 void SetClockHands(void)
 { int16_t HourAngle;
   int16_t MinuteAngle;
-  HourAngle = ((datetime.hour * 3600)/12) + ((datetime.minute * 3600)/720);
-  MinuteAngle = (ui_MinuteHand, ((datetime.minute * 3600)/60)) + datetime.second;
+  int16_t SecondAngle;
+  
+  SecondAngle = datetime.second * 60; // full second steps
+  MinuteAngle = (datetime.minute * 60) + datetime.second;
+  HourAngle = ((datetime.hour%12) * 300) + (datetime.minute * 5);
 
-//  lv_img_set_angle(ui_HourHand, ((datetime.hour * 3600)/12));
-//  lv_img_set_angle(ui_MinuteHand, ((datetime.minute * 3600)/60));
   lv_img_set_angle(ui_HourHand, HourAngle);
   lv_img_set_angle(ui_MinuteHand, MinuteAngle);
-  lv_img_set_angle(ui_SecondHand, ((datetime.second * 3600)/60));
+  lv_img_set_angle(ui_SecondHand, SecondAngle);
 }
 
 
@@ -1797,19 +1905,19 @@ void RemoveUTF8Unprintables(char *str)
 }
 
 
-void SaveDisplaySettingsToEeprom(void)
+void SaveDisplaySettings(void)
 { if(SaveEepromToFile())
   { // succes
     return;
   }
-
+  // fallback
   EEPROM.put(0x0, DisplaySettings);
   EEPROM.commit();
   memcpy(&OldDisplaySettings, &DisplaySettings, sizeof(OldDisplaySettings));
   Serial.printf("Eeprom saved\n");
 }
 
-void LoadDisplaySettingsFromEeprom(void)
+void LoadDisplaySettings(void)
 { // first try loading from file
   if(LoadEepromFromFile())
   { memcpy(&OldDisplaySettings, &DisplaySettings, sizeof(OldDisplaySettings));
@@ -1864,42 +1972,25 @@ bool LoadEepromFromFile(void)
   return result;
 }
 
-void setup2() {
-  Serial.begin(115200);
-  delay(1000);
-  
-  Serial.println("Start handmatige 2.8C I2C bypass...");
-  
-  // Start de schone bus
-  Wire.begin(15, 7, 100000);
-  delay(100);
 
-  // Praat rechtstreeks met de TCA9554 expander (adres 0x20) via standaard Arduino code
-  Wire.beginTransmission(0x20);
-  Wire.write(0x03); // Configuratie register
-  Wire.write(0x00); // Zet alle 8 pinnen op OUTPUT
-  uint8_t error = Wire.endTransmission();
+void printSystemTimes() {
+    time_t now;
+    struct tm timeinfo;
+    char buffer[64];
 
-  if (error == 0) {
-    Serial.println("Succes! De EXIO chip reageert perfect via de kale bypass.");
-    
-    // Handmatige reset van het ST7701 scherm via expander pin 1
-    Wire.beginTransmission(0x20);
-    Wire.write(0x01); // Output register
-    Wire.write(0xFD); // Pin 1 LAAG (Reset active)
-    Wire.endTransmission();
-    delay(50);
-    
-    Wire.beginTransmission(0x20);
-    Wire.write(0x01);
-    Wire.write(0xFF); // Pin 1 HOOG (Reset release)
-    Wire.endTransmission();
-    
-    // Zet de backlight aan op de fysieke GPIO 6
-    pinMode(6, OUTPUT);
-    digitalWrite(6, HIGH);
-  } else {
-    Serial.printf("Bypass faalde met Arduino foutcode: %d\n", error);
-  }
-}
+    // 1. Get the raw system epoch seconds
+    time(&now);
+    Serial.printf("\n--- Time Verification ---\n");
+    Serial.printf("Raw Unix Epoch: %ld\n", now);
 
+    // 2. Print UTC / GMT Time
+    gmtime_r(&now, &timeinfo);
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &timeinfo);
+    Serial.printf("GMT/UTC Time  : %s\n", buffer);
+
+    // 3. Print Local Time (Uses your TZ variable)
+    localtime_r(&now, &timeinfo);
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &timeinfo);
+    Serial.printf("Local Time    : %s\n", buffer);
+    Serial.printf("-------------------------\n\n");
+}    

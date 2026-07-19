@@ -150,7 +150,7 @@ bool setup_esp_now(void)
         beepforMs(50);
         if(DisplaySettings.wifichannel != WiFi.channel())
         { DisplaySettings.wifichannel = WiFi.channel();
-          SaveDisplaySettingsToEeprom();
+          SaveDisplaySettings();
         }  
         break;
       }

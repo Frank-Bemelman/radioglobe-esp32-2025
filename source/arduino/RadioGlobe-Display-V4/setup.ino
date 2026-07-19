@@ -257,7 +257,7 @@ void handlePowerCycle(void)
         delay(15);
       }
       delay(100);
-      SetClockHands();
+      SetClockHands(); // quicly update neglected clock  
       ClockBackLight = true;
       lv_scr_load(ui_ClockScreen);
       lv_refr_now(NULL);
@@ -296,7 +296,7 @@ void SaveVolTone(lv_event_t * e)
 { if(isLongPressed(e)==5)
   { // tell globe to save
     AddToQueueForGlobe("SAVE VOLUME AND TONE CONTROLS", MESSAGE_STORE_VOLUME_AND_TONE);
-    SaveDisplaySettingsToEeprom();
+    SaveDisplaySettings();
     beepforMs(1000);
   }
 }
@@ -416,26 +416,33 @@ void ClockFlagToggle(lv_event_t * e)
   ClockHomeTime = !ClockHomeTime;
   beepforMs(50);
 
-
+  // toggles between home and possibly other location on globe
+  // todo - two structures for home/world, each aware of timezone, names and texts for the clock, for a faster switch between the two
+  // that would save the time of doing an actual lookup every time
   if(ClockHomeTime)
   { Serial.println("ClockFlagToggle = HOME");
     // use home location as stored in favorites.txt as 5th record to get timezone and place
     DataFromDisplay.D_StationGpsNS = Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].gps_ns;
     DataFromDisplay.D_StationGpsEW = Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].gps_ew;
     sprintf(content, "%f-%f", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
-    AddToQueueForGlobe("DISPLAY WANTS MQTT STATUS", MESSAGE_MQTT_STATUS); 
-    AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_BY_GPS);  
-    lv_label_set_text(ui_Clock_Country, AllUpperCase(Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].town));
+    //AddToQueueForGlobe("DISPLAY WANTS MQTT STATUS", MESSAGE_MQTT_STATUS); 
+    if(strncmp(DisplaySettings.home_tz_posix, "CUSTOM", 5)!=0)AddToQueueForGlobe(content, MESSAGE_GET_HOME_TIMEZONE);  
+    else AddToQueueForGlobe(content, MESSAGE_GET_HOME_TIMEZONE);  // todo -> change timezone system clock
+    //lv_label_set_text(ui_Clock_Country, AllUpperCase(Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countryname));
+    // Home.CountryName, in setup(), intitialized with "HOME SWEET HOME", which is a nicer alternative
+    lv_label_set_text(ui_Clock_Country, Home.CountryName);
+    //lv_label_set_text(ui_Time_Zone_Clock, Home.TZname); // on clock screen
   }
   else 
   { Serial.println("ClockFlagToggle = WORLD");
     DataFromDisplay.D_StationGpsNS = Stations.StationNUG[Stations.requested].gps_ns;
     DataFromDisplay.D_StationGpsEW = Stations.StationNUG[Stations.requested].gps_ew;
     sprintf(content, "%f-%f", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
-    AddToQueueForGlobe("DISPLAY WANTS MQTT STATUS", MESSAGE_MQTT_STATUS); 
+    //AddToQueueForGlobe("DISPLAY WANTS MQTT STATUS", MESSAGE_MQTT_STATUS); 
     AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_BY_GPS);  
-    strcpy(content, Stations.StationNUG[Stations.requested].countryname);
-    lv_label_set_text(ui_Clock_Country, AllUpperCase(content));
+    //lv_label_set_text(ui_Clock_Country, AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
+    lv_label_set_text(ui_Clock_Country, World.CountryName);
+    //lv_label_set_text(ui_Time_Zone_Clock, World.TZname); // on clock screen
   }
 
 }
@@ -609,11 +616,11 @@ void ShowBatteryLevel(int newbatteryvoltage) // 0 -> hide, 1 -> show hide weathe
   char content[32];
 
   if(newbatteryvoltage == 0) // means hide battery
-  { lv_obj_add_flag(uic_BatteryVoltage, LV_OBJ_FLAG_HIDDEN); 
+  { lv_obj_add_flag(uic_BatteryLevelHome, LV_OBJ_FLAG_HIDDEN); 
     lv_obj_add_flag(uic_Battery_Icon_High, LV_OBJ_FLAG_HIDDEN); 
     lv_obj_add_flag(uic_Battery_Icon_Low, LV_OBJ_FLAG_HIDDEN); 
     lv_obj_add_flag(uic_Battery_Icon_Medium, LV_OBJ_FLAG_HIDDEN); 
-    lv_event_send(uic_BatteryVoltage, LV_EVENT_REFRESH, NULL);
+    lv_event_send(uic_BatteryLevelHome, LV_EVENT_REFRESH, NULL);
     lv_event_send(uic_Battery_Icon_High, LV_EVENT_REFRESH, NULL);
     lv_event_send(uic_Battery_Icon_Low, LV_EVENT_REFRESH, NULL);
     lv_event_send(uic_Battery_Icon_Medium, LV_EVENT_REFRESH, NULL);
@@ -649,7 +656,7 @@ void ShowBatteryLevel(int newbatteryvoltage) // 0 -> hide, 1 -> show hide weathe
       if(battery_percentage > actbatterypercentage)battery_percentage--;
 
       sprintf(content, "%d%%", battery_percentage);
-      lv_label_set_text(ui_BatteryVoltage, content);
+      lv_label_set_text(ui_BatteryLevelHome, content);
       lv_label_set_text(ui_BatteryLevel, content);
     }
     return;
@@ -658,11 +665,11 @@ void ShowBatteryLevel(int newbatteryvoltage) // 0 -> hide, 1 -> show hide weathe
   ShowWeatherData(false);
 
   sprintf(content, "%d%%", battery_percentage);
-  lv_label_set_text(ui_BatteryVoltage, content);
+  lv_label_set_text(ui_BatteryLevelHome, content);
   lv_label_set_text(ui_BatteryLevel, content);
 
 
-  lv_obj_clear_flag(uic_BatteryVoltage, LV_OBJ_FLAG_HIDDEN); 
+  lv_obj_clear_flag(uic_BatteryLevelHome, LV_OBJ_FLAG_HIDDEN); 
     
   if(actbatterypercentage > 90)
   { lv_obj_add_flag(ui_Battery_Icon_Low, LV_OBJ_FLAG_HIDDEN);

@@ -974,16 +974,18 @@ void AddStationToQueueForGlobe(int16_t station)
   
   if(station < 0) // no actual station to play really, but will trigger timezone/geolocation requests
   { lv_label_set_text(uic_Home_City, "");
+    lv_label_set_text(uic_Home_Country, "");
     //on map
     sprintf(content, "GPS NS %2.1f - EW %3.1f", (float)DataFromDisplay.ns_cal/10, (float)DataFromDisplay.ew_cal/10);
     lv_label_set_text(ui_Database_GPS_Position, content);
     lv_obj_set_pos(uic_MapCursor, (int)DataFromDisplay.ew_cal/10 - 16, -(int)DataFromDisplay.ns_cal/10); // moved 16 to left, dot is painted left-top corner?
     lv_label_set_text(ui_Database_Output_File, ""); // remove typical "You are in ..." from map
     sprintf(content, "Stations.requested = %d", Stations.requested); 
-    AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION); // will use DataFromDisplay.ns_cal, DataFromDisplay.ew_cal as coordinates
     AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE); // will use DataFromDisplay.ns_cal, DataFromDisplay.ew_cal as coordinates
+    AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION); // will use DataFromDisplay.ns_cal, DataFromDisplay.ew_cal as coordinates
     loop_esp_now(); // send it now, before it gets old
     lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide flag
+    lv_obj_add_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN);
   }
   else if(station<MAX_STATIONS+MAX_FAVORITES)
   { bMusicMode = false;
@@ -1005,54 +1007,50 @@ void AddStationToQueueForGlobe(int16_t station)
       ForceGlobeStationGPSupdate = false;
 
       sprintf(content, "Stations.requested = %d", Stations.requested); 
-      AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION_BY_GPS);
       AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_BY_GPS);
+      AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION_BY_GPS);
       loop_esp_now(); // send it now, before it gets old
-
-
-      Serial.printf("Flag = %s\n", Stations.StationNUG[station].countrycode);
-
-      // show immedeately what is known
-      // set flags early - possibly corrected later, when globe thinks it is different 
-      SetFlag(Stations.StationNUG[station].countrycode);
-      lv_obj_clear_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start
-      
-      // reposition flag vertically for preset stations
-      if(station>=MAX_STATIONS)
-      { int16_t yc = ((station - MAX_STATIONS) * 70) - 104;
-        //Serial.printf("station=%d yc = %d\n", station, yc);
-        lv_obj_set_y(ui_PresetFlag, yc);  // -104 -34 34 104 
-        lv_event_send(ui_PresetFlag, LV_EVENT_REFRESH, NULL);
-        lv_obj_clear_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start
-      }  
-
-      Serial.printf("Town = %s\n", Stations.StationNUG[station].town);
-      lv_label_set_text(uic_Home_City, Stations.StationNUG[station].town);
-      lv_obj_clear_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
-
-      Serial.printf("Country = %s\n", Stations.StationNUG[station].countryname);
-      strcpy(content, Stations.StationNUG[station].countryname);
-      lv_label_set_text(uic_Home_Country, AllUpperCase(content));
-      lv_obj_clear_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
-      lv_label_set_text(uic_Clock_Country, AllUpperCase(content));
-      lv_obj_clear_flag(uic_Clock_Country, LV_OBJ_FLAG_HIDDEN); // unhide country name 
-
-
-      strcpy(GlobePositionCountryCode, Stations.StationNUG[station].countrycode);
-
-      // also update the world map screen
-      sprintf(content,"Greetings From  %s", AllUpperCase(Stations.StationNUG[station].countryname));
-      lv_label_set_text(ui_Database_Town_Name, content);
-      lv_label_set_text(ui_Database_Progress, ""); // erase exchange currency and rate
-      lv_obj_set_pos(uic_MapCursor, (int)Stations.StationNUG[station].gps_ew - 16, -(int)Stations.StationNUG[station].gps_ns); // moved 16 to left, dot is painted left-top corner?
-      sprintf(content, "GPS NS %2.4f - EW %3.4f", Stations.StationNUG[station].gps_ns, Stations.StationNUG[station].gps_ew);
-      lv_label_set_text(ui_Database_GPS_Position, content);
-      sprintf(content,"You Are In  %s", Stations.StationNUG[station].town);
-      lv_label_set_text(ui_Database_Output_File, content);
-
-
-      ShowWeatherData(false); // will be restored later, when globe has fetched new weather info
     }
+
+    Serial.printf("Flag = %s\n", Stations.StationNUG[station].countrycode);
+
+    // show immedeately what is known
+    // set flags early - possibly corrected later, when globe thinks it is different 
+    SetFlag(Stations.StationNUG[station].countrycode);
+    lv_obj_clear_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start
+      
+    // reposition flag vertically for preset stations
+    if(station>=MAX_STATIONS)
+    { int16_t yc = ((station - MAX_STATIONS) * 70) - 104;
+      //Serial.printf("station=%d yc = %d\n", station, yc);
+      lv_obj_set_y(ui_PresetFlag, yc);  // -104 -34 34 104 
+      lv_obj_clear_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start
+      lv_event_send(ui_PresetFlag, LV_EVENT_REFRESH, NULL);
+    }  
+
+    Serial.printf("Town = %s\n", Stations.StationNUG[station].town);
+    lv_label_set_text(uic_Home_City, Stations.StationNUG[station].town);
+    lv_obj_clear_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
+
+    Serial.printf("Country = %s\n", Stations.StationNUG[station].countryname);
+    strcpy(content, Stations.StationNUG[station].countryname);
+    lv_label_set_text(uic_Home_Country, AllUpperCase(content));
+    lv_obj_clear_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
+    lv_label_set_text(uic_Clock_Country, AllUpperCase(content));
+    lv_obj_clear_flag(uic_Clock_Country, LV_OBJ_FLAG_HIDDEN); // unhide country name 
+
+
+    strcpy(GlobePositionCountryCode, Stations.StationNUG[station].countrycode);
+
+    // also update the world map screen
+    sprintf(content,"Greetings From  %s", AllUpperCase(Stations.StationNUG[station].countryname));
+    lv_label_set_text(ui_Database_Town_Name, content);
+    lv_label_set_text(ui_Database_Progress, ""); // erase exchange currency and rate
+    lv_obj_set_pos(uic_MapCursor, (int)Stations.StationNUG[station].gps_ew - 16, -(int)Stations.StationNUG[station].gps_ns); // moved 16 to left, dot is painted left-top corner?
+    sprintf(content, "GPS NS %2.4f - EW %3.4f", Stations.StationNUG[station].gps_ns, Stations.StationNUG[station].gps_ew);
+    lv_label_set_text(ui_Database_GPS_Position, content);
+    sprintf(content,"You Are In  %s", Stations.StationNUG[station].town);
+    lv_label_set_text(ui_Database_Output_File, content);
 
     if(bPowerStatus == true)
     { sprintf(message, "%s-%s", Stations.StationNUG[station].countrycode, Stations.StationNUG[station].url);
@@ -1147,29 +1145,40 @@ void ReadStationsBitmapFile(fs::FS &fs, char* filename)
 
 void AppendToLogFile(char *filename, char *url)
 { char logtext[256];
+  char active_posix_tz[32];
   if(FtpBootState)return; // don't mess around while FTP active
 
   if(strcmp(filename, "/Sleeptimer.log") == 0)return; // turn those off for now
 
   snprintf(logtext, 256, "%d-%s-%d %02d:%02d ->%s",    (size_t)datetime.day, monthnames[datetime.month],  (size_t)datetime.year%100, datetime.hour, datetime.minute, url);
-          
+
+  // file creation dates seem to reflect a double TZ correction
+  // use UTC to make it a bit more predictable
+  //strcpy(active_posix_tz, getenv("TZ")); // crashes display and all?????? make sure TZ is set, first TZ may have not happened yet
+  //setenv("TZ", "CUSTOM0:00:00", 1);
+  //tzset();
 
   if(SD_MMC.begin("/sdcard", true, false)) // we have a card 
-  { File badfile = SD_MMC.open(filename, FILE_APPEND);
-    if(!badfile)
+  { File logfile = SD_MMC.open(filename, FILE_APPEND);
+    if(!logfile)
     { Serial.printf("Could not open Bad Station File %s for append\n", filename);
-      badfile.close();
-      badfile = SD_MMC.open(filename, FILE_WRITE);
-      badfile.printf("File %s created\n", filename);  
+      logfile.close();
+      logfile = SD_MMC.open(filename, FILE_WRITE);
+      logfile.printf("File %s created\n", filename);  
       Serial.printf("File %s created\n", filename);  
-      badfile.close();
+      logfile.close();
       return;
     }
     Serial.printf("Log File %s appended with %s\n", filename, logtext);
-    badfile.println(logtext);  
-    badfile.close();
+    logfile.println(logtext);  
+    logfile.flush();
+    logfile.close();
     SD_MMC.end();
   }  
+
+  //setenv("TZ", active_posix_tz, 1);
+  //tzset();
+
 }
 
 bool FindCountryNameByCode(char *countryname, char*countrycode)

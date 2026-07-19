@@ -22,7 +22,7 @@ const char * messagetexts[] = {
    { "OPEN_WEATHER_MAP_API_KEY 7"},
    { "GOOGLE_API_KEY 8"},
    { "TIMEZONE_ID 9"},
-   { "FREE_TO_USE2 10"},
+   { "TIMEZONE_POSIX 10"},
    { "THIS_IS_HOME 11"},
    { "EX_CHANGE_RATE 12"},
    { "SSID_FOR_GLOBE 13"},
@@ -81,7 +81,9 @@ const char * messagetexts[] = {
    { "MESSAGE_UPDATE_PUCK 66"},
    { "MESSAGE_GLOBE_HOSTNAME 67"},
    { "MESSAGE_SILENT_POWER_DOWN 68"}, 
-   { "MESSAGE_MAX 69"}
+   { "GET_HOME_TIMEZONE 69"},
+   { "MESSAGE_HOME_TIMEZONE_POSIX 70"},
+   { "MESSAGE_MAX 71"}
    
 };
 
@@ -94,7 +96,7 @@ const char * messagetexts[] = {
 #define MESSAGE_OPEN_WEATHER_MAP_API_KEY 7
 #define MESSAGE_GOOGLE_API_KEY 8
 #define MESSAGE_TIMEZONE_ID 9
-#define MESSAGE_FREE_TO_USE2 10
+#define MESSAGE_TIMEZONE_POSIX 10
 #define MESSAGE_THIS_IS_HOME 11
 #define MESSAGE_EX_CHANGE_RATE 12
 #define MESSAGE_SSID_FOR_GLOBE 13
@@ -163,7 +165,9 @@ const char * messagetexts[] = {
 #define MESSAGE_UPDATE_PUCK 66
 #define MESSAGE_GLOBE_HOSTNAME 67
 #define MESSAGE_SILENT_POWER_DOWN 68
-#define MESSAGE_MAX 69
+#define MESSAGE_GET_HOME_TIMEZONE 69
+#define MESSAGE_HOME_TIMEZONE_POSIX 70
+#define MESSAGE_MAX 71
 
 typedef struct struct_message1 {
     int16_t  ns_cal;
@@ -206,6 +210,7 @@ typedef struct struct_message2 {
     bool     G_EncoderReliable;
     int16_t  G_rssi_globe;
     int16_t  D_ApisFetchedForStation; 
+    time_t   G_now;
 
 
 } struct_from_globe;

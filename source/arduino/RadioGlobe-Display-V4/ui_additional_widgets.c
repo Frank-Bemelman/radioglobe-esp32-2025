@@ -25,13 +25,15 @@ lv_obj_t * uic_PresetFlag1 = NULL;
 lv_obj_t * uic_PresetFlag2 = NULL;
 lv_obj_t * uic_PresetFlag3 = NULL;
 lv_obj_t * uic_PresetFlag4 = NULL;
+
+lv_obj_t * uic_GlobeChannel = NULL;
 lv_obj_t * uic_GlobeSDText  = NULL;
 lv_obj_t * uic_GlobeSDSizeText  = NULL;
 
 lv_obj_t * uic_BatteryText  = NULL;
 lv_obj_t * uic_BatteryLevel  = NULL;
 
-lv_obj_t * uic_BatteryVoltage = NULL;
+lv_obj_t * uic_BatteryLevelHome = NULL;
 
 lv_obj_t * uic_PresetFlag = NULL;
 
@@ -62,6 +64,8 @@ lv_obj_t * ui_PresetFlag1 = NULL;
 lv_obj_t * ui_PresetFlag2 = NULL;
 lv_obj_t * ui_PresetFlag3 = NULL;
 lv_obj_t * ui_PresetFlag4 = NULL;
+
+lv_obj_t * ui_GlobeChannel = NULL;
 lv_obj_t * ui_GlobeSDText  = NULL;
 lv_obj_t * ui_GlobeSDSizeText  = NULL;
 
@@ -69,7 +73,7 @@ lv_obj_t * ui_BatteryText  = NULL;
 lv_obj_t * ui_BatteryLevel  = NULL;
 
 
-lv_obj_t * ui_BatteryVoltage = NULL;
+lv_obj_t * ui_BatteryLevelHome = NULL;
 
 lv_obj_t * ui_PresetFlag = NULL;
 
@@ -394,6 +398,17 @@ void ui_additional_text_init(void)
 
   lv_obj_add_event_cb(ui_PresetFlag, ui_event_PresetFlag, LV_EVENT_ALL, NULL);
   
+  ui_GlobeChannel = lv_label_create(ui_Favorites);
+  lv_obj_set_width(ui_GlobeChannel, LV_SIZE_CONTENT);   /// 1
+  lv_obj_set_height(ui_GlobeChannel, LV_SIZE_CONTENT);    /// 1
+  lv_obj_set_x(ui_GlobeChannel, -165);
+  lv_obj_set_y(ui_GlobeChannel, -130);
+  lv_obj_set_align(ui_GlobeChannel, LV_ALIGN_CENTER);
+  lv_label_set_text(ui_GlobeChannel, "Globe");
+  lv_obj_set_style_text_color(ui_GlobeChannel, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
+  lv_obj_set_style_text_opa(ui_GlobeChannel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+  uic_GlobeChannel = ui_GlobeChannel;
+
 
   ui_GlobeSDText = lv_label_create(ui_Favorites);
   lv_obj_set_width(ui_GlobeSDText, LV_SIZE_CONTENT);   /// 1
@@ -404,7 +419,7 @@ void ui_additional_text_init(void)
   lv_label_set_text(ui_GlobeSDText, "Globe SD");
   lv_obj_set_style_text_color(ui_GlobeSDText, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
   lv_obj_set_style_text_opa(ui_GlobeSDText, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-  uic_GlobeText = ui_GlobeText;
+  uic_GlobeSDText = ui_GlobeSDText;
 
   ui_GlobeSDSizeText = lv_label_create(ui_Favorites);
   lv_obj_set_width(ui_GlobeSDSizeText, LV_SIZE_CONTENT);   /// 1
@@ -440,19 +455,19 @@ void ui_additional_text_init(void)
   uic_BatteryLevel = ui_BatteryLevel;
 
 
-  ui_BatteryVoltage = lv_label_create(ui_Home);
-  lv_obj_set_height(ui_BatteryVoltage, 18);
-  lv_obj_set_width(ui_BatteryVoltage, LV_SIZE_CONTENT);   /// 52
-  lv_obj_set_x(ui_BatteryVoltage, 162);
-  lv_obj_set_y(ui_BatteryVoltage, 109);
-  lv_obj_set_align(ui_BatteryVoltage, LV_ALIGN_CENTER);
-  lv_label_set_long_mode(ui_BatteryVoltage, LV_LABEL_LONG_CLIP);
-  lv_label_set_text(ui_BatteryVoltage, "");
-  lv_obj_clear_flag(ui_BatteryVoltage,
+  ui_BatteryLevelHome = lv_label_create(ui_Home);
+  lv_obj_set_height(ui_BatteryLevelHome, 18);
+  lv_obj_set_width(ui_BatteryLevelHome, LV_SIZE_CONTENT);   /// 52
+  lv_obj_set_x(ui_BatteryLevelHome, 162);
+  lv_obj_set_y(ui_BatteryLevelHome, 109);
+  lv_obj_set_align(ui_BatteryLevelHome, LV_ALIGN_CENTER);
+  lv_label_set_long_mode(ui_BatteryLevelHome, LV_LABEL_LONG_CLIP);
+  lv_label_set_text(ui_BatteryLevelHome, "");
+  lv_obj_clear_flag(ui_BatteryLevelHome,
                       LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
                       LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
-  lv_obj_set_style_text_align(ui_BatteryVoltage, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-  uic_BatteryVoltage = ui_BatteryVoltage;
+  lv_obj_set_style_text_align(ui_BatteryLevelHome, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+  uic_BatteryLevelHome = ui_BatteryLevelHome;
 
     
 
