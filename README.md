@@ -2,7 +2,7 @@
 
 # radioglobe-esp32-2025
 Radio Globe using ESP32 and Waveshare round touch LCD 2.1 inch<br><br>
-
+UPDATE 27-JUL-2026<br>New station150K.json file upload. Removed all station url's that are no longer active. This also improves the experience with the globe, no more skipping of stations that are no longer active. Used a long running script to test all url's.<br><br>
 UPDATE 15-JUL-2026<br>Improved handling of retrieving timezone and geolocation. Race conditions could occur, now hopefully solved. Battery percentage indicator, better than that silly voltage level. <br><br>
 UPDATE 12-JUL-2026<br>Automatic Auto Power Off. If you only set the volume to 0, the globe keeps streaming in the background. Which is a waste of bandwidth, for you and for the radio station. So, after 5 minutes, the globe switches off and the clock is shown. Also, after 8 hours normal playing but without any user interaction, the globe will turn the volume down and switches off silently.<br><br> 
 UPDATE 7-JUL-2026<br>Switching between Radio and SD music files, can now be done by long pressing the RADIO GLOBE / MUSIC GLOBE text on the main screen. When playing SD card files, the actual path GLOBEMUSIC/xxxx is shown.<br><br>
