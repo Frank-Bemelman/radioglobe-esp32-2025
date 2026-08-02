@@ -299,7 +299,7 @@ void setup()
   else digitalWrite(BT_POWER_PIN, LOW);  // turn off
   
   pinMode(MUTE_AMPLIFIERS, OUTPUT);
-  Speakers(SPEAKERS_OFF);
+  Speakers(SPEAKERS_ON);
 
   pinMode(SPEAKER_TOGGLE_PIN, INPUT_PULLUP);
   pinMode(PORTALSWITCH_PIN, INPUT_PULLUP); // input to button for opening portal

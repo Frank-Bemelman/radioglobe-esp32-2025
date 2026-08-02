@@ -46,7 +46,7 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
   { MessageSerialNumberApi = DataFromDisplay.D_QueueSerialNumberSend; // treat once, never twice
     DataFromGlobe.D_QueueSerialNumberReceived = MessageSerialNumberApi; // echo back
     if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_TIMEZONE_BY_GPS || DataFromDisplay.D_QueueMessageType == MESSAGE_HOME_TIMEZONE_NAME)
-    { Serial.printf("PUCK SAYS -> MESSAGE_GET_TIMEZONE_BY_GPS\n");
+    { Serial.printf("PUCK SAYS -> MESSAGE_GET_TIMEZONE_BY_GPS <%s>\n", DataFromDisplay.D_QueueMessage);
       CancelApiType(MESSAGE_GET_TIMEZONE_BY_GPS); // cancel previous ones
       CancelApiType(MESSAGE_HOME_TIMEZONE_NAME); // cancel previous ones
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
@@ -59,7 +59,7 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
       return; // don't add to queue
     }  
     else if((DataFromDisplay.D_QueueMessageType == MESSAGE_TIMEZONE_NAME))
-    { Serial.printf("PUCK SAYS -> MESSAGE_GET_TIMEZONE\n");
+    { Serial.printf("PUCK SAYS -> MESSAGE_GET_TIMEZONE <%s>\n", DataFromDisplay.D_QueueMessage);
       CancelApiType(MESSAGE_TIMEZONE_NAME);
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
       ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ns_cal/10.0;
@@ -71,19 +71,32 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
       return; // don't add to queue
     }  
     else if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_GEOLOCATION_BY_GPS)
-    { Serial.printf("PUCK SAYS -> MESSAGE_GET_GEOLOCATION_BY_GPS\n");
-      CancelApiType(MESSAGE_GET_GEOLOCATION_BY_GPS);
+    { Serial.printf("PUCK SAYS -> MESSAGE_GET_GEOLOCATION_BY_GPS <%s>\n", DataFromDisplay.D_QueueMessage);
+      //PUCK SAYS -> MESSAGE_GET_GEOLOCATION_BY_GPS <25 52.813301 6.090900>
+      int16_t station;
+      float nsGps;
+      float ewGps;
+      sscanf(DataFromDisplay.D_QueueMessage, "%d %f %f", &station, &nsGps, &ewGps);
+      Serial.printf("  SSCANF-ED AS %d %f %f\n", station, nsGps, ewGps);
+      CancelApiType(MESSAGE_GET_GEOLOCATION_BY_GPS); 
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
-      ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsNS;
-      ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsEW;
-      ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_RequestedStation;
+      
+      //ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsNS;
+      //ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsEW;
+      //ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_RequestedStation;
+      
+      ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = station;
+      ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = nsGps;
+      ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = ewGps;
+      
       ApiCallsToDo.ApiQueueIndexIn++;
       ApiCallsToDo.ApiQueueIndexIn %= APIQUEUESIZE;
       ApiCallsToDo.ApiQueueCnt++;
       return; // don't add to queue
     }  
     else if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_GEOLOCATION)
-    { Serial.printf("PUCK SAYS -> MESSAGE_GET_GEOLOCATION (station%d)\n", DataFromDisplay.D_RequestedStation);
+    { Serial.printf("PUCK SAYS -> MESSAGE_GET_GEOLOCATION <%s> (station %d )\n",  DataFromDisplay.D_QueueMessage, DataFromDisplay.D_RequestedStation);
+      // PUCK SAYS -> MESSAGE_GET_GEOLOCATION <-1 33.900002 -38.299999> (station -1 )
       CancelApiType(MESSAGE_GET_GEOLOCATION);
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
       ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ns_cal/10.0;
@@ -95,7 +108,7 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
       return; // don't add to queue
     }  
     else if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_FLIGHT_DATA)
-    { Serial.printf("PUCK SAYS -> MESSAGE_GET_FLIGHT_DATA\n");
+    { Serial.printf("PUCK SAYS -> MESSAGE_GET_FLIGHT_DATA <%s>\n", DataFromDisplay.D_QueueMessage);
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
       ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ns_cal/10.0;
       ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ew_cal/10.0;
@@ -291,5 +304,4 @@ void AddToQueueForDisplay(const char* message, uint16_t queuemessagetype)
   else Serial.println("Queue to display is full!!!");
   Q_filling = false;
 }
-
 

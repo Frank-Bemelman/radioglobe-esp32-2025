@@ -36,7 +36,8 @@ void Queued_Api_Calls(void * pvParameters)
     // process messages arrived in ApiQueue
     while(ApiCallsToDo.ApiQueueIndexIn != ApiCallsToDo.ApiQueueIndexOut) // we have to catch up with new messages
     { // process ApiCallsToDo.ApiQueueMessageType[ApiCallsToDo.ApiQueueIndexOut];
-      switch(ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexOut])
+      uint16_t ApiType = ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexOut]; // atomic 
+      switch(ApiType)
       { case MESSAGE_GET_TIMEZONE_BY_GPS:
         case MESSAGE_TIMEZONE_NAME:
         case MESSAGE_HOME_TIMEZONE_NAME:
@@ -46,6 +47,9 @@ void Queued_Api_Calls(void * pvParameters)
 
 
         case MESSAGE_GET_GEOLOCATION_BY_GPS:
+          GetGeolocationData(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexOut]);
+          break;
+
         case MESSAGE_GET_GEOLOCATION:
           GetGeolocationData(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexOut]);
           break;
@@ -244,11 +248,11 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW, int16_t AskingFo
       payload[cnt]=0;
       if(print)Serial.printf("cnt=%d ->%s\n", cnt, payload);
       if((p = strrchr(payload, '\"')) != NULL)*p=0; // get rid of the last ",
-       if((p = strstr(payload, "\"short_name\" : \"")) != NULL)
-       { p+=16;
-         //Serial.println(p);
-         strcpy(shortname, p); // contains town name or countrycode
-       }
+      if((p = strstr(payload, "\"short_name\" : \"")) != NULL)
+      { p+=16;
+        //Serial.println(p);
+        strcpy(shortname, p); // contains town name or countrycode
+      }
       // if((p = strstr(payload, "\"long_name\" : \"")) != NULL)
       // { p+=15;
       //  Serial.println(p);
@@ -839,5 +843,4 @@ float BerekenAfstandKm(float lat1, float lon1, float lat2, float lon2) {
 }
 
 */
-
 
