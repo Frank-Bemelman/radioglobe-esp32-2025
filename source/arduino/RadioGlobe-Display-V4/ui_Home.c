@@ -51,6 +51,15 @@ lv_obj_t * ui_Weather_Humidity = NULL;
 lv_obj_t * ui_arrowleft = NULL;
 lv_obj_t * ui_arrowright = NULL;
 // event funtions
+void ui_event_Home(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_SCREEN_UNLOADED) {
+        OnMainScreenUnLoaded(e);
+    }
+}
+
 void ui_event_HomeGps(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
@@ -129,6 +138,16 @@ void ui_event_Home_Flag(lv_event_t * e)
 
     if(event_code == LV_EVENT_CLICKED) {
         StationInfo(e);
+    }
+}
+
+void ui_event_Weather_Icon(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_CLICKED) {
+        RadarScreenOn(e);
+        (e);
     }
 }
 
@@ -419,7 +438,7 @@ void ui_Home_screen_init(void)
     lv_obj_set_x(ui_Weather_Icon, 162);
     lv_obj_set_y(ui_Weather_Icon, 70);
     lv_obj_set_align(ui_Weather_Icon, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_Weather_Icon, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_add_flag(ui_Weather_Icon, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
     lv_obj_clear_flag(ui_Weather_Icon, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
     ui_Weather_Temperature = lv_label_create(ui_Home);
@@ -484,8 +503,10 @@ void ui_Home_screen_init(void)
     lv_obj_add_event_cb(ui_SettingButton, ui_event_SettingButton, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_Home_Power_Off_Icon, ui_event_Home_Power_Off_Icon, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_Home_Flag, ui_event_Home_Flag, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_Weather_Icon, ui_event_Weather_Icon, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_arrowleft, ui_event_arrowleft, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_arrowright, ui_event_arrowright, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_Home, ui_event_Home, LV_EVENT_ALL, NULL);
     uic_Home = ui_Home;
     uic_HomeGps = ui_HomeGps;
     uic_Local_Time = ui_Local_Time;

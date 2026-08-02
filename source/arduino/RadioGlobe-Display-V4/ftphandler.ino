@@ -21,7 +21,7 @@ uint16_t HandleFtpBootState(uint16_t FtpBootState)
 
       case 1:
         //esp_now_deinit();
-        if(!SD_MMC.begin("/sdcard", true, false))
+        if(Puck_SD_GB == 0)
         { lv_label_set_text(ui_TextSecretCodeToUnlock, "NO SD CARD");
           delay(100);
           Lvgl_Loop();
@@ -29,6 +29,7 @@ uint16_t HandleFtpBootState(uint16_t FtpBootState)
           FtpBootState = 10;
           return FtpBootState;
         }  
+        lv_obj_add_flag(ui_HomeButton4, LV_OBJ_FLAG_HIDDEN); // hide home button
         FtpBootState++;
         return FtpBootState;
         break;
@@ -67,6 +68,7 @@ uint16_t HandleFtpBootState(uint16_t FtpBootState)
           delay(100);
           Lvgl_Loop();
           delay(2000);
+          lv_obj_clear_flag(ui_HomeButton4, LV_OBJ_FLAG_HIDDEN); // show home icon
           FtpBootState = 10;
           return FtpBootState;
         }
@@ -75,7 +77,6 @@ uint16_t HandleFtpBootState(uint16_t FtpBootState)
         break;
 
       case 4: // FTP START
-        SD_MMC.begin("/sdcard", true, false);
         Serial.printf("HandleFtpBootState %d\n", FtpBootState);
         ftp.begin("globe", "globe");
         Serial.println("FTP gestart!");
@@ -97,13 +98,13 @@ uint16_t HandleFtpBootState(uint16_t FtpBootState)
         Lvgl_Loop();
         delay(2000);
         WiFi.disconnect();
-        SD_MMC.end();
         FtpBootState++;
         return FtpBootState;
         break;
 
-      case 10: // closing everything, back to normal
+      case 10: // closing everything, all back to normal
         Serial.printf("HandleFtpBootState %d\n", FtpBootState);
+        lv_obj_clear_flag(ui_HomeButton4, LV_OBJ_FLAG_HIDDEN); // show home icon
         lv_label_set_text(ui_TextSecretCodeToUnlock, "SECRET CODE TO UNLOCK");
         //setup_esp_now();
         bFtpActive = false;

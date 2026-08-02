@@ -10,7 +10,17 @@
 #define RTC_CTRL_1_ADDR     (0x00)
 #define RTC_CTRL_2_ADDR     (0x01)
 #define RTC_OFFSET_ADDR     (0x02)
-#define RTC_RAM_by_ADDR     (0x03)
+#define RTC_RAM_ADDR        (0x03)
+
+#define RTC_RAM_POWERED_ON  (0x01) // bit one is a flag to keep the status of powered up or down -> puck boots as powered down or powered up
+#define RTC_RAM_SPARE_0X02  (0x02) 
+#define RTC_RAM_SPARE_0X04  (0x04) 
+#define RTC_RAM_SPARE_0X08  (0x08) 
+#define RTC_RAM_SPARE_0X10  (0x10) 
+#define RTC_RAM_SPARE_0X20  (0x20) 
+#define RTC_RAM_SPARE_0X40  (0x40) 
+#define RTC_RAM_SPARE_0X80  (0x80) 
+
 // registar overview - time & data reg
 #define RTC_SECOND_ADDR		  (0x04)
 #define RTC_MINUTE_ADDR		  (0x05)
@@ -82,11 +92,12 @@ void PCF85063_Set_All(datetime_t time);
 
 void PCF85063_Read_Time(datetime_t *time);
 
-
 void PCF85063_Enable_Alarm(void);
 uint8_t PCF85063_Get_Alarm_Flag();
 void PCF85063_Set_Alarm(datetime_t time);
 void PCF85063_Read_Alarm(datetime_t *time);
+void PCF85063_Write_RTCRAM(uint8_t data);
+uint8_t PCF85063_Read_RTCRAM(void);
 
 void datetime_to_str(char *datetime_str,datetime_t time);
 

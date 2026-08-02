@@ -13,6 +13,7 @@ extern "C" {
 // SCREEN: ui_ClockScreen
 extern void ui_ClockScreen_screen_init(void);
 extern void ui_ClockScreen_screen_destroy(void);
+extern void ui_event_ClockScreen(lv_event_t * e);
 extern lv_obj_t * ui_ClockScreen;
 extern void ui_event_ClockFace(lv_event_t * e);
 extern lv_obj_t * ui_ClockFace;

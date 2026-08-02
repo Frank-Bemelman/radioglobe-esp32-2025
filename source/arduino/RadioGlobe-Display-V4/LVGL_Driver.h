@@ -14,7 +14,8 @@
 #define EXAMPLE_LVGL_TICK_PERIOD_MS  2
 
 
-extern lv_disp_drv_t disp_drv;
+//extern lv_disp_drv_t disp_drv;
+extern lv_disp_drv_t* disp_drv_ptr;
 
 void Lvgl_print(const char * buf);
 void Lvgl_Display_LCD( lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p ); // Displays LVGL content on the LCD.    This function implements associating LVGL data to the LCD screen

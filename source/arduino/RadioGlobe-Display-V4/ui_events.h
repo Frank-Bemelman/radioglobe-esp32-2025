@@ -10,12 +10,14 @@
 extern "C" {
 #endif
 
+void OnMainScreenUnLoaded(lv_event_t * e);
 void SwitchToClock(lv_event_t * e);
 void RadioGlobeClick(lv_event_t * e);
 void beep(lv_event_t * e);
 void SetupEnter(lv_event_t * e);
 void PowerCycle(lv_event_t * e);
 void StationInfo(lv_event_t * e);
+void RadarScreenOn(lv_event_t * e);
 void CalibrationEnter(lv_event_t * e);
 void DatabaseEnter(lv_event_t * e);
 void ResetAllEnter(lv_event_t * e);
@@ -44,6 +46,7 @@ void SpeakerToggle(lv_event_t * e);
 void BlueToothToggle(lv_event_t * e);
 void CalibratePoint(lv_event_t * e);
 void RollerNSorEWChanged(lv_event_t * e);
+void OnClockScreenLoad(lv_event_t * e);
 void ClockFaceClick(lv_event_t * e);
 void ClockFlagToggle(lv_event_t * e);
 void ClockHomePower(lv_event_t * e);

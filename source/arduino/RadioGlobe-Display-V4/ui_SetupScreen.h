@@ -29,7 +29,7 @@ extern void ui_event_SetHomeButton(lv_event_t * e);
 extern lv_obj_t * ui_SetHomeButton;
 extern lv_obj_t * ui_SetHomeButtonText;
 extern lv_obj_t * ui_HomeFlagToStore;
-extern lv_obj_t * ui_YouLiveHere;
+extern lv_obj_t * ui_GlobeCurrentCountry;
 // CUSTOM VARIABLES
 extern lv_obj_t * uic_SetupScreen;
 extern lv_obj_t * uic_HomeButton;
@@ -42,7 +42,7 @@ extern lv_obj_t * uic_ResetAllButtonText;
 extern lv_obj_t * uic_SetHomeButton;
 extern lv_obj_t * uic_SetHomeButtonText;
 extern lv_obj_t * uic_HomeFlagToStore;
-extern lv_obj_t * uic_YouLiveHere;
+extern lv_obj_t * uic_GlobeCurrentCountry;
 
 #ifdef __cplusplus
 } /*extern "C"*/

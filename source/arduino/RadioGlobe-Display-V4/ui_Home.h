@@ -13,6 +13,7 @@ extern "C" {
 // SCREEN: ui_Home
 extern void ui_Home_screen_init(void);
 extern void ui_Home_screen_destroy(void);
+extern void ui_event_Home(lv_event_t * e);
 extern lv_obj_t * ui_Home;
 extern void ui_event_HomeGps(lv_event_t * e);
 extern lv_obj_t * ui_HomeGps;
@@ -39,6 +40,7 @@ extern void ui_event_Home_Flag(lv_event_t * e);
 extern lv_obj_t * ui_Home_Flag;
 extern lv_obj_t * ui_Home_City;
 extern lv_obj_t * ui_Home_Country;
+extern void ui_event_Weather_Icon(lv_event_t * e);
 extern lv_obj_t * ui_Weather_Icon;
 extern lv_obj_t * ui_Weather_Temperature;
 extern lv_obj_t * ui_Weather_Humidity;

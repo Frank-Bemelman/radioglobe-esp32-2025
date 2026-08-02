@@ -6,7 +6,9 @@
 ******************************************************************************/
 #include "LVGL_Driver.h"
 
-lv_disp_drv_t disp_drv;
+//lv_disp_drv_t disp_drv;
+lv_disp_drv_t* disp_drv_ptr = NULL;
+// uint8_t disp_drv_safety_buffer[64]; // Dit vangt elke mogelijke overflow gegarandeerd op - ik vertrouw disp_drv niet -> eruit, nu eea weer goed loopt - als extra check of dit verschil maakte
 
 static lv_disp_draw_buf_t draw_buf;
 void* buf1 = NULL;
@@ -16,7 +18,7 @@ void* buf2 = NULL;
 // static lv_color_t* buf1 = (lv_color_t*) heap_caps_malloc(LVGL_BUF_LEN, MALLOC_CAP_SPIRAM);
 // static lv_color_t* buf2 = (lv_color_t*) heap_caps_malloc(LVGL_BUF_LEN, MALLOC_CAP_SPIRAM);
     
-
+lv_disp_drv_t *current_disp_drv = NULL; // 28JUL26 20:23
 
 /* Serial debugging */
 void Lvgl_print(const char * buf)
@@ -30,9 +32,19 @@ void Lvgl_print(const char * buf)
     This function implements associating LVGL data to the LCD screen
 */
 void Lvgl_Display_LCD( lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p )
-{
-  LCD_addWindow(area->x1, area->y1, area->x2, area->y2, ( uint8_t *)&color_p->full);
-  lv_disp_flush_ready( disp_drv );
+{ // 28JUL26 20:23 store current driver for VSYNC callback usage
+  current_disp_drv = disp_drv; 
+  
+  // 28JUL26 20:53 replace LCD_addWindow for official esp recommendations
+  esp_lcd_panel_draw_bitmap(panel_handle, area->x1, area->y1, area->x2 + 1, area->y2 + 1, color_p);
+  
+  // 28JUL26 20:53 commented out
+  // LCD_addWindow(area->x1, area->y1, area->x2, area->y2, (uint8_t *)color_p);
+
+
+  
+  // 28JUL26 20:23moved to example_on_vsync_event
+  //lv_disp_flush_ready( disp_drv );
 }
 /*Read the touchpad*/
 void Lvgl_Touchpad_Read( lv_indev_drv_t * indev_drv, lv_indev_data_t * data )
@@ -65,14 +77,26 @@ void Lvgl_Init(void)
   lv_disp_draw_buf_init( &draw_buf, buf1, buf2, ESP_PANEL_LCD_WIDTH * ESP_PANEL_LCD_HEIGHT);           
 
   /*Initialize the display*/
-  lv_disp_drv_init( &disp_drv );
+  disp_drv_ptr = (lv_disp_drv_t*)malloc(sizeof(lv_disp_drv_t));
+  lv_disp_drv_init(disp_drv_ptr);
+  //lv_disp_drv_init( &disp_drv );
+  
   /*Change the following line to your display resolution*/
-  disp_drv.hor_res = LCD_HEIGHT;
-  disp_drv.ver_res = LCD_WIDTH;
-  disp_drv.flush_cb = Lvgl_Display_LCD;
-  disp_drv.full_refresh = 1;                    /**< 1: Always make the whole screen redrawn*/
-  disp_drv.draw_buf = &draw_buf;
-  lv_disp_drv_register( &disp_drv );
+  disp_drv_ptr->hor_res = LCD_HEIGHT;
+  disp_drv_ptr->ver_res = LCD_WIDTH;
+  disp_drv_ptr->flush_cb = Lvgl_Display_LCD;
+  disp_drv_ptr->full_refresh = 1;                    /**< 1: Always make the whole screen redrawn*/
+  disp_drv_ptr->draw_buf = &draw_buf;
+
+  
+  //disp_drv.hor_res = LCD_HEIGHT;
+  //disp_drv.ver_res = LCD_WIDTH;
+  //disp_drv.flush_cb = Lvgl_Display_LCD;
+  //disp_drv.full_refresh = 1;                    /**< 1: Always make the whole screen redrawn*/
+  //disp_drv.draw_buf = &draw_buf;
+
+  lv_disp_drv_register(disp_drv_ptr);
+  //lv_disp_drv_register( &disp_drv );
 
   /*Initialize the (dummy) input device driver*/
   static lv_indev_drv_t indev_drv;
@@ -95,8 +119,22 @@ void Lvgl_Init(void)
   esp_timer_start_periodic(lvgl_tick_timer, EXAMPLE_LVGL_TICK_PERIOD_MS * 1000);
 
 }
+
+extern SemaphoreHandle_t lvgl_mutex;
+
 void Lvgl_Loop(void)
-{
-  lv_timer_handler(); /* let the GUI do its work */
-  // vTaskDelay(pdMS_TO_TICKS(5)); // was commented out -> activated again 14feb26 to see if it helps preventing screen corruption during eeprom writes -> commented out again 15MAR26
+{ if (xSemaphoreTake(lvgl_mutex, pdMS_TO_TICKS(50)) == pdTRUE) 
+  { lv_timer_handler(); /* let the GUI do its work */
+    xSemaphoreGive(lvgl_mutex); // Geef de sleutel direct weer terug
+  }
+  vTaskDelay(pdMS_TO_TICKS(1)); // let's try again 21JUL26
 }
+
+
+void My_Lvgl_Loop(void)
+{ if (xSemaphoreTake(lvgl_mutex, pdMS_TO_TICKS(50)) == pdTRUE) 
+  { Lvgl_Loop(); // Nu 100% veilig beschermd tegen de Driver_Loop task!
+    xSemaphoreGive(lvgl_mutex); // Geef de sleutel direct weer terug
+  }
+  vTaskDelay(pdMS_TO_TICKS(1));
+}   

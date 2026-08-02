@@ -1,6 +1,6 @@
 #include "RTC_PCF85063.h"
-
 datetime_t datetime= {0};
+// char safetybuffer[256]; //temp fix  bug finding
 
 static uint8_t decToBcd(int val);
 static int bcdToDec(uint8_t val);
@@ -36,8 +36,29 @@ void PCF85063_Init()
 }
 
 void RTC_Loop(void)
-{
-  PCF85063_Read_Time(&datetime);
+{ datetime_t clock;
+  int tries = 5;
+
+  if(datetime.hour>23) // false read
+	{ //Serial.printf("RTC_Loop() PCF85063_Read_Time Sarts with corrupted hour = %d\n", (int)datetime.hour);
+	}
+
+  while(tries--)
+	{ PCF85063_Read_Time(&clock);
+		if(clock.hour>23) // false read
+	  { //Serial.printf("RTC_Loop() PCF85063_Read_Time ERROR hour = %d\n", (int)clock.hour);
+		  delay(10);
+	  }
+    else
+	  { memcpy(&datetime, &clock, sizeof(clock));
+      break;
+	  }
+	}	
+
+
+  //PCF85063_Read_Time(&datetime);
+
+	
 }
 /******************************************************************************
 function:	Reset PCF85063
@@ -196,6 +217,28 @@ void PCF85063_Read_Alarm(datetime_t *time)
 		time->dotw = bcdToDec(buf[4] & 0x07);
 	}
 }
+
+void PCF85063_Write_RTCRAM(uint8_t data)
+{ Wire.beginTransmission(PCF85063_ADDRESS);
+  Wire.write(RTC_RAM_ADDR);  // Point to the RAM register
+  Wire.write(data);     // Write your custom byte
+  Wire.endTransmission();
+}
+
+uint8_t PCF85063_Read_RTCRAM(void)
+{ uint8_t data = 0x00;
+	// Set register pointer
+  Wire.beginTransmission(PCF85063_ADDRESS);
+  Wire.write(RTC_RAM_ADDR);
+  Wire.endTransmission(false); // Send restart, keep connection alive
+	// Request the byte
+  Wire.requestFrom(PCF85063_ADDRESS, 1);
+  if (Wire.available()) {
+    data = Wire.read();
+  }
+	return data;
+}
+
 
 
 /******************************************************************************

@@ -5,7 +5,7 @@
 
 #include "ui.h"
 
-lv_obj_t * uic_YouLiveHere;
+lv_obj_t * uic_GlobeCurrentCountry;
 lv_obj_t * uic_HomeFlagToStore;
 lv_obj_t * uic_SetHomeButtonText;
 lv_obj_t * uic_SetHomeButton;
@@ -28,7 +28,7 @@ lv_obj_t * ui_ResetAllButtonText = NULL;
 lv_obj_t * ui_SetHomeButton = NULL;
 lv_obj_t * ui_SetHomeButtonText = NULL;
 lv_obj_t * ui_HomeFlagToStore = NULL;
-lv_obj_t * ui_YouLiveHere = NULL;
+lv_obj_t * ui_GlobeCurrentCountry = NULL;
 // event funtions
 void ui_event_HomeButton(lv_event_t * e)
 {
@@ -245,17 +245,17 @@ void ui_SetupScreen_screen_init(void)
     lv_obj_set_scroll_snap_x(ui_HomeFlagToStore, LV_SCROLL_SNAP_CENTER);
     lv_obj_set_scroll_snap_y(ui_HomeFlagToStore, LV_SCROLL_SNAP_CENTER);
 
-    ui_YouLiveHere = lv_label_create(ui_SetupScreen);
-    lv_obj_set_width(ui_YouLiveHere, 343);
-    lv_obj_set_height(ui_YouLiveHere, 25);
-    lv_obj_set_x(ui_YouLiveHere, 0);
-    lv_obj_set_y(ui_YouLiveHere, -135);
-    lv_obj_set_align(ui_YouLiveHere, LV_ALIGN_CENTER);
-    lv_label_set_long_mode(ui_YouLiveHere, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_label_set_text(ui_YouLiveHere, "YOU LIVE HERE");
-    lv_obj_add_flag(ui_YouLiveHere, LV_OBJ_FLAG_HIDDEN);     /// Flags
-    lv_obj_set_style_text_align(ui_YouLiveHere, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_YouLiveHere, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_GlobeCurrentCountry = lv_label_create(ui_SetupScreen);
+    lv_obj_set_width(ui_GlobeCurrentCountry, 343);
+    lv_obj_set_height(ui_GlobeCurrentCountry, 25);
+    lv_obj_set_x(ui_GlobeCurrentCountry, 0);
+    lv_obj_set_y(ui_GlobeCurrentCountry, -135);
+    lv_obj_set_align(ui_GlobeCurrentCountry, LV_ALIGN_CENTER);
+    lv_label_set_long_mode(ui_GlobeCurrentCountry, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_label_set_text(ui_GlobeCurrentCountry, "YOU LIVE HERE");
+    lv_obj_add_flag(ui_GlobeCurrentCountry, LV_OBJ_FLAG_HIDDEN);     /// Flags
+    lv_obj_set_style_text_align(ui_GlobeCurrentCountry, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_GlobeCurrentCountry, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_HomeButton, ui_event_HomeButton, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_CalibrationButton, ui_event_CalibrationButton, LV_EVENT_ALL, NULL);
@@ -273,7 +273,7 @@ void ui_SetupScreen_screen_init(void)
     uic_SetHomeButton = ui_SetHomeButton;
     uic_SetHomeButtonText = ui_SetHomeButtonText;
     uic_HomeFlagToStore = ui_HomeFlagToStore;
-    uic_YouLiveHere = ui_YouLiveHere;
+    uic_GlobeCurrentCountry = ui_GlobeCurrentCountry;
 
 }
 
@@ -304,7 +304,7 @@ void ui_SetupScreen_screen_destroy(void)
     ui_SetHomeButtonText = NULL;
     uic_HomeFlagToStore = NULL;
     ui_HomeFlagToStore = NULL;
-    uic_YouLiveHere = NULL;
-    ui_YouLiveHere = NULL;
+    uic_GlobeCurrentCountry = NULL;
+    ui_GlobeCurrentCountry = NULL;
 
 }

@@ -1,5 +1,59 @@
 // handling of events on various screens, beeps and long button presses
 
+void RadarScreenOn(lv_event_t * e)
+{ // let's do a flight radar
+  // now screen can switch over
+  extern lv_obj_t * uic_RadarScreen;
+  lv_scr_load(uic_RadarScreen);
+  //beepforMs(50);
+}
+
+// main screen unloaded
+void OnMainScreenUnLoaded(lv_event_t * e)
+{ 
+}
+
+
+// automatic update clock hands before showing clock
+void OnClockScreenLoad(lv_event_t * e)
+{ // before screen becomes visible, sync the clock hands
+
+  lv_event_code_t code = lv_event_get_code(e);
+
+  RTC_Loop(); // after a power on boot, fetch time early
+  ForceSetClockHands();
+  
+  if(code == LV_EVENT_SCREEN_LOAD_START)
+  { // set icon to home icon or power off switch icon
+    if(bPowerStatus)
+    { lv_img_set_src(ui_Clock_Power_Off_Icon, &ui_img_home_png);
+      ui_object_set_themeable_style_property(ui_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
+                                             _ui_theme_color_turquoise);
+      ui_object_set_themeable_style_property(ui_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
+                                             _ui_theme_alpha_turquoise);
+    }
+    else 
+    { lv_img_set_src(ui_Clock_Power_Off_Icon, &ui_img_power75x75_png); // icon on clock face
+      lv_obj_set_style_img_recolor(ui_Clock_Power_Off_Icon, lv_color_make(0xBB, 0xBB, 0xBB), LV_PART_MAIN | LV_STATE_DEFAULT); // off-white
+      lv_obj_set_style_img_recolor_opa(ui_Clock_Power_Off_Icon, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    }                                         
+
+    lv_obj_update_layout(lv_event_get_target(e)); 
+    // now screen can switch over
+
+  }
+
+  if(code == LV_EVENT_SCREEN_LOADED)
+  { lv_refr_now(NULL); 
+    while(BacklightValue < DEFAULT_BACKLIGHT) // gently fade up
+    { Set_Backlight(++BacklightValue);    
+      delay(15);
+    } 
+  }  
+}
+
+
+// decrement the fuzziness
 void FuzzinessButtonL(lv_event_t * e)
 { char content[128];
   lv_event_code_t event_code = lv_event_get_code(e);
@@ -11,6 +65,7 @@ void FuzzinessButtonL(lv_event_t * e)
   }
 }
 
+// increment the fuzziness
 void FuzzinessButtonR(lv_event_t * e)
 { char content[128];
   lv_event_code_t event_code = lv_event_get_code(e);
@@ -28,6 +83,8 @@ void FuzzinessButtonR(lv_event_t * e)
 
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
+
+// yes you can touch the map with your big finger and try your luck
 void MapClicked(lv_event_t * e)
 { lv_point_t p;
   lv_indev_t *indev = lv_indev_get_act();
@@ -44,12 +101,9 @@ void MapClicked(lv_event_t * e)
   p.y = MAX(p.y,-89);
   Serial.printf("x=%d y=%d\n", p.x, p.y);
 
-
   DataFromDisplay.ns_cal = p.y * 10;
   DataFromDisplay.ew_cal = p.x * 10;
   FindNewStation();
-
-
   beepforMs(50);
 }
 
@@ -66,17 +120,16 @@ void SetupEnter(lv_event_t * e)
   // activate 1st Setup Screen
   if(Stations.requested<MAX_STATIONS+MAX_FAVORITES)
   { // show current flag and text 
-    if(strcmp(Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode, Stations.StationNUG[Stations.requested].countrycode)==NULL)lv_label_set_text(uic_YouLiveHere, "You Live Here");
-    //else lv_label_set_text(uic_YouLiveHere, "You Are Here");
+    // check if we are in our own home country
+    if(strcmp(Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode, Stations.StationNUG[Stations.requested].countrycode)==0)lv_label_set_text(uic_GlobeCurrentCountry, "You Live Here");
     lv_obj_clear_flag(uic_HomeFlagToStore, LV_OBJ_FLAG_HIDDEN); // show country flag again
-    lv_obj_clear_flag(uic_YouLiveHere, LV_OBJ_FLAG_HIDDEN); // show country flag again
+    lv_obj_clear_flag(uic_GlobeCurrentCountry, LV_OBJ_FLAG_HIDDEN); // show country name again
   }
 
   sprintf(content, "FUZZINESS %d", DisplaySettings.expand_search);
   lv_label_set_text(uic_SetFuzzinessValue, content);
 
   lv_scr_load(ui_SetupScreen);
-  Lvgl_Loop();
 }
 
 // calibration button on setup screen
@@ -84,7 +137,6 @@ void CalibrationEnter(lv_event_t * e)
 { if(isLongPressed(e)==5)
   { beepforMs(1000);
     lv_scr_load(ui_CalibrationScreen);
-    Lvgl_Loop();
   }  
 }
 
@@ -108,7 +160,6 @@ void DatabaseEnter(lv_event_t * e)
     lv_obj_add_state(uic_MapCursor, LV_STATE_DISABLED); 
     
     lv_scr_load(ui_DatabaseScreen);
-    Lvgl_Loop();  
     strcpy(SecretCode,"12345"); // have to enter again to be sure
     bDatabaseScreenUpdate = true; // we are in the update version of the worldmap screen
     ShowTheStations(); // the red speckled map
@@ -181,7 +232,7 @@ void click1(lv_event_t * e)
   
   if(isLongPressed(e)==5) // after typing OOOOO followed by long press O, shut down
   { if(strcmp(SecretCode, "OOOOO")==0)
-    { // enter deep sleep to save battery
+    { // enter deep sleep to save battery, for shipping purposes
       esp_deep_sleep_start();
     }
   }
@@ -211,9 +262,10 @@ void SerialNumberButton(lv_event_t * e)
 { lv_event_code_t event_code = lv_event_get_code(e);
 
   if(event_code == LV_EVENT_CLICKED) // 7
-  { Serial.println("SerialNumber clicked");
+  { // Serial.println("SerialNumber clicked");
+    
   }
-  if(isLongPressed(e)==5) // after typing OOOOO followed by long press O, shut down
+  if(isLongPressed(e)==5) 
   { Serial.println("SerialNumber long pressed");
     beepforMs(1000);
     lv_scr_load(ui_Home);
@@ -221,13 +273,14 @@ void SerialNumberButton(lv_event_t * e)
   }
 }
 
-
-
-
 void PowerCycle(lv_event_t * e)
 { if(isLongPressed(e)==2)
-  { Serial.printf("Power button long pressed\n");
-    handlePowerCycle();
+  { //Serial.printf("Power button long pressed\n");
+    //handlePowerCycle();
+    if(!trigger_power_cycle_flag) // prevent double triggers with repeat
+    { Serial.printf("Power button long pressed\n");
+      trigger_power_cycle_flag = true; // to be satisfied in main loop()
+    }
   }
 }
 
@@ -236,17 +289,15 @@ void handlePowerCycle(void)
     
     if(bPowerStatus == true)
     { // Power off
+      extern bool bUrlTestRunning;
+      bUrlTestRunning = false;
       bPowerStatus = false;
+      // clear power status bit in RTC ram
+      PCF85063_Write_RTCRAM((PCF85063_Read_RTCRAM() & (RTC_RAM_POWERED_ON ^ 0xFF)));
+
       ui_object_set_themeable_style_property(ui_Home_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_red);
       ui_object_set_themeable_style_property(ui_Home_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_red);
       lv_obj_invalidate(ui_Home_Power_Off_Icon);
-      lv_img_set_src(ui_Clock_Power_Off_Icon, &ui_img_power75x75_png); // icon on clock face
-      ui_object_set_themeable_style_property(ui_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_red);
-      ui_object_set_themeable_style_property(ui_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_red);
-      lv_obj_invalidate(ui_Clock_Power_Off_Icon);
-      lv_refr_now(NULL);
-      Lvgl_Loop();  
-
       
       if(AutoSleepTimer) AddToQueueForGlobe("OFF", MESSAGE_POWERDOWN); // initiated by user
       else AddToQueueForGlobe("OFF", MESSAGE_SILENT_POWER_DOWN); // intiated by countdown of AutoSleepTimer
@@ -256,35 +307,28 @@ void handlePowerCycle(void)
       { Set_Backlight(--BacklightValue);    
         delay(15);
       }
-      delay(100);
-      SetClockHands(); // quicly update neglected clock  
-      ClockBackLight = true;
-      lv_scr_load(ui_ClockScreen);
+      //lv_scr_load(ui_ClockScreen);
+      lv_scr_load_anim(ui_ClockScreen, LV_SCR_LOAD_ANIM_NONE, 0, 0, false);
       lv_refr_now(NULL);
-      Lvgl_Loop();  
-      //BacklightValue = DEFAULT_BACKLIGHT;
-      while(BacklightValue < DEFAULT_BACKLIGHT) // gently fade up
-      { Set_Backlight(++BacklightValue);    
-        delay(15);
-      }
     }
     else
     { // Power on
       char content[128];
+      extern bool bUrlTestRunning;
+      bUrlTestRunning = false;
       sprintf(content, "Sleeptimer =% d -> %d by handlePowerCycle doing a power on\n", AutoSleepTimer, AUTOPOWERDOWNAFTER);
       AppendToLogFile("/Sleeptimer.log", content);
       AutoSleepTimer = AUTOPOWERDOWNAFTER;
       bPowerStatus = true;
+      // set power status bit in RTC ram
+      PCF85063_Write_RTCRAM(PCF85063_Read_RTCRAM() | RTC_RAM_POWERED_ON);
+
       ClockBackLight = true;
       ui_object_set_themeable_style_property(ui_Home_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_green);
       ui_object_set_themeable_style_property(ui_Home_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_green);
       lv_obj_invalidate(ui_Home_Power_Off_Icon);
-      ui_object_set_themeable_style_property(uic_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_green);
-      ui_object_set_themeable_style_property(uic_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_green);
-      lv_obj_invalidate(uic_Clock_Power_Off_Icon);
       lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN);
       lv_refr_now(NULL);
-      Lvgl_Loop();  
 
       AddToQueueForGlobe("ON", MESSAGE_POWERUP);
       delay(1000);
@@ -294,7 +338,7 @@ void handlePowerCycle(void)
 
 void SaveVolTone(lv_event_t * e)
 { if(isLongPressed(e)==5)
-  { // tell globe to save
+  { // tell globe to save settings
     AddToQueueForGlobe("SAVE VOLUME AND TONE CONTROLS", MESSAGE_STORE_VOLUME_AND_TONE);
     SaveDisplaySettings();
     beepforMs(1000);
@@ -303,73 +347,109 @@ void SaveVolTone(lv_event_t * e)
 
 // on Home screen, flag is pressed pressed
 void StationInfo(lv_event_t * e)
-{ if(isLongPressed(e)==5) // actually not used
-  { beepforMs(1000);
-  }
-  else
-  { // use database screen to show where station is located on worldmap with gps coordinates
-    beepforMs(50);
-    Serial.printf("Station %d Info clicked from Home screen\n", Stations.playing);
-    lv_obj_add_flag(uic_RebuildDatabase, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag(uic_RebuildDatabaseButtonText, LV_OBJ_FLAG_HIDDEN);
-    //lv_obj_add_flag(uic_MapBanner, LV_OBJ_FLAG_HIDDEN);  // scroll over text
-    lv_obj_add_flag(uic_Database_Dir_Path, LV_OBJ_FLAG_HIDDEN); 
-    lv_obj_clear_flag(uic_Database_GPS_Position, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_clear_flag(uic_Database_Town_Name, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_clear_state(uic_MapCursor, LV_STATE_DISABLED); 
-    lv_obj_clear_flag(uic_Database_Flag, LV_OBJ_FLAG_HIDDEN);
-    lv_scr_load(ui_DatabaseScreen);
+{ // use database screen to show where station is located on worldmap with gps coordinates
+  beepforMs(50);
+  Serial.printf("Station %d Info clicked from Home screen\n", Stations.playing);
+  lv_obj_add_flag(uic_RebuildDatabase, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_add_flag(uic_RebuildDatabaseButtonText, LV_OBJ_FLAG_HIDDEN);
+  //lv_obj_add_flag(uic_MapBanner, LV_OBJ_FLAG_HIDDEN);  // scroll over text
+  lv_obj_add_flag(uic_Database_Dir_Path, LV_OBJ_FLAG_HIDDEN); 
+  lv_obj_clear_flag(uic_Database_GPS_Position, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_clear_flag(uic_Database_Town_Name, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_clear_state(uic_MapCursor, LV_STATE_DISABLED); 
+  lv_obj_clear_flag(uic_Database_Flag, LV_OBJ_FLAG_HIDDEN);
+  lv_scr_load(ui_DatabaseScreen);
 
-    ShowTheStations(); // the red speckled map
-    lv_scr_load(ui_DatabaseScreen);
-    bInfoScreen = true;
-  }
+  ShowTheStations(); // the red speckled map
+  lv_scr_load(ui_DatabaseScreen);
+  bInfoScreen = true;
 }
-
 
 // flags are stored on SD card as bin files, converted from png originals, using https://lvgl.io/tools/imageconverter LVGLv8, Color format -> CF_TRUE_COLOR_ALPHA Output format -> Binary RGB565 format
 // immage descriptor and data for flag
 lv_img_dsc_t my_flag_img;
 uint8_t my_flag_img_data[96*72*3]; // 20736 bytes
+char my_flag_countrycode[3];
+lv_img_dsc_t my_home_flag_img;
+uint8_t my_home_flag_img_data[96*72*3]; // 20736 bytes
+char my_home_flag_countrycode[3];
 
 void SetFlag(char *countrycode)
 { char lowercasecode[8];
   char path[32];
+  lv_img_dsc_t * flag_img;
+  uint8_t * flag_img_data;
+  char * flag_countrycode;
+
   if(strlen(countrycode)>0)strcpy(lowercasecode, countrycode);
-  else strcpy(lowercasecode, "xxxx");
+  else strcpy(lowercasecode, "xxxx"); // white blank flag
+  
+  if(strcmp(countrycode, "??")==0)strcpy(lowercasecode, "xxxx"); // white blank flag
+  if(strcmp(countrycode, "XX")==0)strcpy(lowercasecode, "xx-sea"); // sea flag
+  
   for(int i = 0; lowercasecode[i]; i++)
   { lowercasecode[i] = tolower(lowercasecode[i]);
   }
-  if(strcmp(countrycode, "??")==NULL)strcpy(lowercasecode, "xxxx");
-  if(strcmp(countrycode, "XX")==NULL)strcpy(lowercasecode, "xx-sea");
-  
-  
-  sprintf(path, "/flags-bin/%s.bin", lowercasecode );
+
+
+  // for home weet home or for world 
+  if(strcmp(countrycode, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode) == 0)
+  { flag_img = &my_home_flag_img;
+    flag_img_data = &my_home_flag_img_data[0];
+    flag_countrycode = &my_home_flag_countrycode[0];
+
+    if(strcmp(flag_countrycode, countrycode) == 0) // already loaded
+    { lv_img_set_src(uic_Home_Flag, flag_img);
+      lv_img_set_src(uic_Database_Flag, flag_img);
+      lv_img_set_src(uic_HomeFlagToStore, flag_img);
+      lv_img_set_src(uic_ClockFlag, flag_img);
+      lv_img_set_src(ui_PresetFlag, flag_img);
+      Serial.printf("HOME FLAG %s SET FROM CACHE\n", countrycode );
+      return;
+    } 
+  }
+  else
+  { flag_img = &my_flag_img;
+    flag_img_data = &my_flag_img_data[0];
+    flag_countrycode = &my_flag_countrycode[0];
+    if(strcmp(flag_countrycode, countrycode) == 0) // already loaded
+    { lv_img_set_src(uic_Home_Flag, flag_img);
+      lv_img_set_src(uic_Database_Flag, flag_img);
+      lv_img_set_src(uic_HomeFlagToStore, flag_img);
+      lv_img_set_src(uic_ClockFlag, flag_img);
+      lv_img_set_src(ui_PresetFlag, flag_img);
+      Serial.printf("WORLD FLAG %s SET FROM CACHE\n", countrycode );
+      return;
+    }
+  }
+
+  strcpy(flag_countrycode, countrycode);
+  sprintf(path, "/flags-bin/%s.bin", lowercasecode ); // flag file names are all lowercase
   Serial.printf("Setflag with %s\n", path);
 
-  my_flag_img.header.always_zero = 0;
-  my_flag_img.header.w = 96;
-  my_flag_img.header.h = 72;
-  my_flag_img.header.cf = LV_IMG_CF_TRUE_COLOR_ALPHA;
-  my_flag_img.data = my_flag_img_data;
+  flag_img->header.always_zero = 0;
+  flag_img->header.w = 96;
+  flag_img->header.h = 72;
+  flag_img->header.cf = LV_IMG_CF_TRUE_COLOR_ALPHA;
+  flag_img->data = flag_img_data;
 
-  SD_MMC.begin("/sdcard", true, false);
-  File fp = SD_MMC.open(path, FILE_READ);
-  if(fp!=NULL)
-  { fp.read((uint8_t *)my_flag_img_data, 4); // header, basically skipping it, header is already filled above
-    fp.read((uint8_t *)my_flag_img_data, sizeof(my_flag_img_data)); // header
-    fp.close();
-    //Serial.printf("Setflag loaded\n");
+  if(Puck_SD_GB)
+  { File fp = SD_MMC.open(path, FILE_READ);
+    if(fp)
+    { fp.read((uint8_t *)flag_img_data, 4); // header, basically skipping it, header is already filled above
+      fp.read((uint8_t *)flag_img_data, sizeof(my_flag_img_data)); // pixel data
+      fp.close();
+      lv_img_set_src(uic_Home_Flag, flag_img);
+      lv_img_set_src(uic_Database_Flag, flag_img);
+      lv_img_set_src(uic_HomeFlagToStore, flag_img);
+      lv_img_set_src(uic_ClockFlag, flag_img);
+      lv_img_set_src(ui_PresetFlag, flag_img);
+      //Serial.printf("Setflag loaded\n");
+    }
+    else
+    { strcpy(flag_countrycode, ""); // mark as not loaded from SD
+    }
   }  
-  SD_MMC.end();
-
-  
-  lv_img_set_src(uic_Home_Flag, &my_flag_img);
-  lv_img_set_src(uic_Database_Flag, &my_flag_img);
-  lv_img_set_src(uic_HomeFlagToStore, &my_flag_img);
-  lv_img_set_src(uic_ClockFlag, &my_flag_img);
-  lv_img_set_src(ui_PresetFlag, &my_flag_img);
-
 }
 
 
@@ -413,24 +493,23 @@ void SpeakerToggle(lv_event_t * e)
 // Clock flag is a toggle to select between home location time and local time of globe position
 void ClockFlagToggle(lv_event_t * e)
 { char content[64];
-  ClockHomeTime = !ClockHomeTime;
+  bClockHomeTime = !bClockHomeTime;
   beepforMs(50);
 
   // toggles between home and possibly other location on globe
   // todo - two structures for home/world, each aware of timezone, names and texts for the clock, for a faster switch between the two
   // that would save the time of doing an actual lookup every time
-  if(ClockHomeTime)
+  if(bClockHomeTime)
   { Serial.println("ClockFlagToggle = HOME");
     // use home location as stored in favorites.txt as 5th record to get timezone and place
     DataFromDisplay.D_StationGpsNS = Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].gps_ns;
     DataFromDisplay.D_StationGpsEW = Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].gps_ew;
     sprintf(content, "%f-%f", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
     //AddToQueueForGlobe("DISPLAY WANTS MQTT STATUS", MESSAGE_MQTT_STATUS); 
-    if(strncmp(DisplaySettings.home_tz_posix, "CUSTOM", 5)!=0)AddToQueueForGlobe(content, MESSAGE_GET_HOME_TIMEZONE);  
-    else AddToQueueForGlobe(content, MESSAGE_GET_HOME_TIMEZONE);  // todo -> change timezone system clock
-    //lv_label_set_text(ui_Clock_Country, AllUpperCase(Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countryname));
-    // Home.CountryName, in setup(), intitialized with "HOME SWEET HOME", which is a nicer alternative
+    if(strncmp(DisplaySettings.home_tz_posix, "CUSTOM", 5)!=0)AddToQueueForGlobe(content, MESSAGE_HOME_TIMEZONE_NAME);  
+    else AddToQueueForGlobe(content, MESSAGE_HOME_TIMEZONE_NAME);  // todo -> change timezone system clock
     lv_label_set_text(ui_Clock_Country, Home.CountryName);
+    SetFlag(Home.CountryCode);
     //lv_label_set_text(ui_Time_Zone_Clock, Home.TZname); // on clock screen
   }
   else 
@@ -440,8 +519,8 @@ void ClockFlagToggle(lv_event_t * e)
     sprintf(content, "%f-%f", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
     //AddToQueueForGlobe("DISPLAY WANTS MQTT STATUS", MESSAGE_MQTT_STATUS); 
     AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_BY_GPS);  
-    //lv_label_set_text(ui_Clock_Country, AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
     lv_label_set_text(ui_Clock_Country, World.CountryName);
+    SetFlag(Home.CountryCode);
     //lv_label_set_text(ui_Time_Zone_Clock, World.TZname); // on clock screen
   }
 
@@ -449,51 +528,29 @@ void ClockFlagToggle(lv_event_t * e)
 
 // Touching location/time on Home screen, switches over to clock
 void SwitchToClock(lv_event_t * e)
-{ char content[64];
-  beepforMs(50);
-  // set icon to home icon
-  lv_img_set_src(ui_Clock_Power_Off_Icon, &ui_img_home_png);
-  ui_object_set_themeable_style_property(ui_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
-                                           _ui_theme_color_turquoise);
-  ui_object_set_themeable_style_property(ui_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
-                                           _ui_theme_alpha_turquoise);
-
-  ClockHomeTime = false; // to sync the clocks Flag toggle state 
+{ beepforMs(50);
+  //ClockHomeTime = false; // to sync the clocks Flag toggle state 
   lv_scr_load(ui_ClockScreen);
 }
 
 // clicking home or power icon on clock face
 void ClockHomePower(lv_event_t * e)
-{ char content[64];
-  beepforMs(50);
+{ beepforMs(50);
 
-  if(bPowerStatus == true)
-  { //Serial.printf("Clock Home/Power clicked while power is on\n");
-    if(ClockHomeTime) // set back to world status
+  if(bPowerStatus == true) // the icon is a home icon
+  { // Serial.printf("Clock Home/Power clicked while power is on\n");
+    if(bClockHomeTime) // set back to world status
     { ClockFlagToggle(e);
-      if(strcmp(ClockFlagCountryCode, Stations.StationNUG[Stations.requested].countrycode)!=NULL)
+      if(strcmp(ClockFlagCountryCode, Stations.StationNUG[Stations.requested].countrycode)!=0)
       { lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN);
       }
     }
-    
     lv_scr_load(ui_Home);
-    lv_img_set_src(ui_Clock_Power_Off_Icon, &ui_img_power75x75_png); // icon on clock face
   }
-  else
-  { //Serial.printf("Clock Home/Power clicked while power is off\n");
-    bPowerStatus = true;
-    ClockBackLight = true;
-    ui_object_set_themeable_style_property(ui_Home_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_green);
-    ui_object_set_themeable_style_property(ui_Home_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_green);
-    lv_obj_invalidate(ui_Home_Power_Off_Icon);
-    lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN);
-    lv_refr_now(NULL);
-    Lvgl_Loop();  
-    AddToQueueForGlobe("ON", MESSAGE_POWERUP);
-    delay(1000);
-    lv_scr_load(ui_Home);
+  else // globe is in off mode
+  { // Serial.printf("Clock Home/Power clicked while power is off\n");
+    handlePowerCycle();
   } 
-
 }
 
 void ClockFaceClick(lv_event_t * e)
@@ -549,6 +606,7 @@ void BlueToothToggle(lv_event_t * e)
   }
 }
 
+// code for weather icon and rh/temperature texts
 // immage descriptor and data for weather icon
 lv_img_dsc_t my_global_weather_img;
 uint8_t my_global_weather_img_data[70*60*3]; // 12600 bytes
@@ -556,19 +614,16 @@ uint8_t my_global_weather_img_data[70*60*3]; // 12600 bytes
 void SetWeatherData(char *settings)
 { char path[32];
   float temperature;
-   int temperaturerounded;
   int humidity;
   char icon[8];
   char content[32];
-  // example "Temp 25.3 Rh 8 Icon 01d"
-
-  sscanf(settings, "Temp %f Rh %d Icon %s", &temperature, &humidity, &icon[0]);
-
-//  sprintf(content, "%.1f°C", temperature);
   
-  temperaturerounded = (temperature + 0.5);
-  sprintf(content, "%d °C", temperaturerounded);
-  
+  // example, setting = "Temp 25.3 Rh 8 Icon 01d"
+
+  sscanf(settings, "Temp %f Rh %d Icon %3s", &temperature, &humidity, &icon[0]);
+
+  int temperaturerounded = (int)round(temperature);
+  sprintf(content, "%d °C", temperaturerounded); 
 
   lv_label_set_text(uic_Weather_Temperature, content);
   sprintf(content, "Rh %d%%", humidity);
@@ -582,15 +637,13 @@ void SetWeatherData(char *settings)
   my_global_weather_img.header.cf = LV_IMG_CF_TRUE_COLOR_ALPHA;
   my_global_weather_img.data = my_global_weather_img_data;
 
-  SD_MMC.begin("/sdcard", true, false);
-  File fp = SD_MMC.open(path, FILE_READ);
-  fp.read((uint8_t *)my_global_weather_img_data, 4); // header, basically skipping it, header is already filled above
-  fp.read((uint8_t *)my_global_weather_img_data, sizeof(my_global_weather_img_data)); // data
-  fp.close();
-  SD_MMC.end();
-
-  lv_img_set_src(uic_Weather_Icon, &my_global_weather_img);
-
+  if(Puck_SD_GB)
+  { File fp = SD_MMC.open(path, FILE_READ);
+    fp.read((uint8_t *)my_global_weather_img_data, 4); // header, basically skipping it, header is already filled above
+    fp.read((uint8_t *)my_global_weather_img_data, sizeof(my_global_weather_img_data)); // data
+    fp.close();
+    lv_img_set_src(uic_Weather_Icon, &my_global_weather_img);
+  }  
 }
 
 void ShowWeatherData(bool state)
@@ -608,14 +661,17 @@ void ShowWeatherData(bool state)
   }
 }
 
-void ShowBatteryLevel(int newbatteryvoltage) // 0 -> hide, 1 -> show hide weather icon and show battery icons, negative -> only update value 
-{ static int abs_newvoltage;
-  static int battery_voltage = -1;
-  static int actbatterypercentage = 1;
-  static int battery_percentage = -1;
+uint16_t ShowBatteryLevel(int request) // 0 -> hide, 1 -> show hide weather icon and show battery icons, negative -> only update value 
+{ uint16_t currentbatteryvoltage;
+  uint16_t actbatterypercentage;
+  static int16_t battery_percentage;
+  static int16_t old_battery_percentage = -1; // to initialise values
   char content[32];
 
-  if(newbatteryvoltage == 0) // means hide battery
+  currentbatteryvoltage = ((analogReadMilliVolts(BAT_ADC_PIN) * 3) + 50) / 10; // read voltage in 10mV steps times 3 because of voltage divider 
+  //Serial.printf("currentbatteryvoltage (200-400) = %d\n", currentbatteryvoltage);
+
+  if(request == 0) // means hide battery
   { lv_obj_add_flag(uic_BatteryLevelHome, LV_OBJ_FLAG_HIDDEN); 
     lv_obj_add_flag(uic_Battery_Icon_High, LV_OBJ_FLAG_HIDDEN); 
     lv_obj_add_flag(uic_Battery_Icon_Low, LV_OBJ_FLAG_HIDDEN); 
@@ -624,45 +680,40 @@ void ShowBatteryLevel(int newbatteryvoltage) // 0 -> hide, 1 -> show hide weathe
     lv_event_send(uic_Battery_Icon_High, LV_EVENT_REFRESH, NULL);
     lv_event_send(uic_Battery_Icon_Low, LV_EVENT_REFRESH, NULL);
     lv_event_send(uic_Battery_Icon_Medium, LV_EVENT_REFRESH, NULL);
-    return;
+    return currentbatteryvoltage/10;
   }
 
-  if(newbatteryvoltage<0) // when negative it is just store and return
-  { if(abs_newvoltage != -newbatteryvoltage)
-    { abs_newvoltage = -newbatteryvoltage;
-      
-      // track voltage, one step up/down at the time 
-      if(battery_voltage = -1) battery_voltage = abs_newvoltage;
-      if(battery_voltage < abs_newvoltage)battery_voltage++;
-      if(battery_voltage > abs_newvoltage)battery_voltage--;
+  if((request<0) || (old_battery_percentage<0)) // update with new battery level
+  { // map voltage to percentage 
+    if(currentbatteryvoltage>=410)actbatterypercentage = 100;
+    else if(currentbatteryvoltage>=406)actbatterypercentage = map(currentbatteryvoltage, 406, 409, 90, 100);  //  90; 
+    else if(currentbatteryvoltage>=398)actbatterypercentage = map(currentbatteryvoltage, 398, 405, 80, 89);  //  80; 
+    else if(currentbatteryvoltage>=392)actbatterypercentage = map(currentbatteryvoltage, 392, 397, 70, 79);  //  70; 
+    else if(currentbatteryvoltage>=387)actbatterypercentage = map(currentbatteryvoltage, 387, 391, 60, 69);  //  60; 
+    else if(currentbatteryvoltage>=375)actbatterypercentage = map(currentbatteryvoltage, 375, 386, 50, 59);  //  50; 
+    else if(currentbatteryvoltage>=367)actbatterypercentage = map(currentbatteryvoltage, 367, 374, 40, 49);  //  40; 
+    else if(currentbatteryvoltage>=360)actbatterypercentage = map(currentbatteryvoltage, 360, 366, 30, 39);  //  30; 
+    else if(currentbatteryvoltage>=345)actbatterypercentage = map(currentbatteryvoltage, 345, 359, 20, 29);  //  20; 
+    else if(currentbatteryvoltage>=330)actbatterypercentage = map(currentbatteryvoltage, 330, 344, 10, 19);  //  10;
+    else if(currentbatteryvoltage>=300)actbatterypercentage = map(currentbatteryvoltage, 300, 329, 0, 9);  //  1;
+    else actbatterypercentage = 0;
 
-      // map voltage to percentage 
-      if(battery_voltage>=410)actbatterypercentage = 100;
-      else if(battery_voltage>=406)actbatterypercentage = map(battery_voltage, 406, 409, 90, 100);  //  90; 
-      else if(battery_voltage>=398)actbatterypercentage = map(battery_voltage, 398, 405, 80, 89);  //  80; 
-      else if(battery_voltage>=392)actbatterypercentage = map(battery_voltage, 392, 397, 70, 79);  //  70; 
-      else if(battery_voltage>=387)actbatterypercentage = map(battery_voltage, 387, 391, 60, 69);  //  60; 
-      else if(battery_voltage>=375)actbatterypercentage = map(battery_voltage, 375, 386, 50, 59);  //  50; 
-      else if(battery_voltage>=367)actbatterypercentage = map(battery_voltage, 367, 374, 40, 49);  //  40; 
-      else if(battery_voltage>=360)actbatterypercentage = map(battery_voltage, 360, 366, 30, 39);  //  30; 
-      else if(battery_voltage>=345)actbatterypercentage = map(battery_voltage, 345, 359, 20, 29);  //  20; 
-      else if(battery_voltage>=330)actbatterypercentage = map(battery_voltage, 330, 344, 10, 19);  //  10;
-      else if(battery_voltage>=300)actbatterypercentage = map(battery_voltage, 300, 329, 0, 9);  //  1;
-      else battery_voltage = 0;
+    // track percentage, one step up/down at the time
+    if(old_battery_percentage<0)battery_percentage = actbatterypercentage;
+    if(battery_percentage < actbatterypercentage)battery_percentage++;
+    if(battery_percentage > actbatterypercentage)battery_percentage--;
 
-      // track percentage, one step up/down at the time
-      if(battery_percentage==-1)battery_percentage = actbatterypercentage;
-      if(battery_percentage < actbatterypercentage)battery_percentage++;
-      if(battery_percentage > actbatterypercentage)battery_percentage--;
-
+    if(old_battery_percentage != battery_percentage)
+    { old_battery_percentage = battery_percentage;
       sprintf(content, "%d%%", battery_percentage);
       lv_label_set_text(ui_BatteryLevelHome, content);
       lv_label_set_text(ui_BatteryLevel, content);
     }
-    return;
+    if(request<0)return currentbatteryvoltage/10; // was just a periodic battery update request
   }
 
-  ShowWeatherData(false);
+  // show battery icon with level
+  ShowWeatherData(false); // hide all weather data, icon and texts
 
   sprintf(content, "%d%%", battery_percentage);
   lv_label_set_text(ui_BatteryLevelHome, content);
@@ -671,12 +722,12 @@ void ShowBatteryLevel(int newbatteryvoltage) // 0 -> hide, 1 -> show hide weathe
 
   lv_obj_clear_flag(uic_BatteryLevelHome, LV_OBJ_FLAG_HIDDEN); 
     
-  if(actbatterypercentage > 90)
+  if(battery_percentage > 90)
   { lv_obj_add_flag(ui_Battery_Icon_Low, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui_Battery_Icon_Medium, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(ui_Battery_Icon_High, LV_OBJ_FLAG_HIDDEN);
   }
-  else if(actbatterypercentage > 50)
+  else if(battery_percentage > 50)
   { lv_obj_add_flag(ui_Battery_Icon_Low, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(ui_Battery_Icon_Medium, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui_Battery_Icon_High, LV_OBJ_FLAG_HIDDEN);
@@ -686,7 +737,7 @@ void ShowBatteryLevel(int newbatteryvoltage) // 0 -> hide, 1 -> show hide weathe
     lv_obj_add_flag(ui_Battery_Icon_Medium, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui_Battery_Icon_High, LV_OBJ_FLAG_HIDDEN);
   } 
-
+  return currentbatteryvoltage/10;
 }
 
 

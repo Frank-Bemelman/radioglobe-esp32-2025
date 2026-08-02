@@ -191,12 +191,12 @@ void SaveCalibrations(void)
 
    // remember, coordinates are in whole tenths of a degree, so is always multiplied by 10.
 
-   // store as lines of txt, first the north hemispehere, followed by south hemispere
+   // store as lines of txt, first the northern hemispehere, followed by southern hemispere
   File calfile;
   char calfilename[] = {"/calibrations.txt"};
   char *p;
 
-  if (!SD_MMC.begin("/sdcard", true, false))return; // no card
+  if(Puck_SD_GB == 0)return; // no card
 
   SD_MMC.remove(calfilename); // delete old file
   calfile = SD_MMC.open(calfilename, FILE_WRITE);
@@ -211,16 +211,14 @@ void SaveCalibrations(void)
       calfile.print("\n");
     }
   }
-    
   calfile.close();
-  SD_MMC.end();    
 }
 
 
 void RollerNSorEWChanged(lv_event_t * e)
 { char content[256];
-  static int16_t prevCalToIndexNS;
-  static int16_t prevCalToIndexEW;
+  static int16_t prevCalToIndexNS = -1;
+  static int16_t prevCalToIndexEW = -1;
   CalToIndexNS = lv_roller_get_selected(uic_RollerNS)+1; // plus 1, because roller does not begin with 90
   CalToIndexEW = lv_roller_get_selected(uic_RollerEW);
 
@@ -388,8 +386,8 @@ void remap_ns_ew(int16_t from_globe_ns, int16_t from_globe_ew)
   int16_t mapped_ns;
   int16_t mapped_ew;
   remap_by_square_number(square_ns, square_ew, from_globe_ns, from_globe_ew, &mapped_ns, &mapped_ew);
-  DataFromDisplay.ns_cal = remapped_ns;
-  DataFromDisplay.ew_cal = remapped_ew;
+  DataFromDisplay.ns_cal = mapped_ns;
+  DataFromDisplay.ew_cal = mapped_ew;
 
   Serial.printf("MAPPING FINISHED -> time elapsed = %ldmS\n", (currentMillis = millis()) - lapMillis);
 
@@ -461,28 +459,36 @@ void check_outside_area(int16_t square_ns, int16_t square_ew, int16_t coord_ns, 
     Serial.printf("OUTSIDE SQ-NS-%d-EW%d -> total area=%ld vs square area=%ld scenario=%d\n", square_ns, square_ew, totalarea, area, *scenario);
     //Serial.printf("dist %d %d %d %d biggest = %d\n", dist[0], dist[1], dist[2], dist[3], biggest+1);
   }
-
-  *scenario = 0;
-  Serial.printf("INSIDE SQ-NS-%d-EW%d -> total area=%ld vs square area=%ld scenario=%d\n", square_ns, square_ew, totalarea, area, *scenario);
+  else
+  { *scenario = 0;
+    Serial.printf("INSIDE SQ-NS-%d-EW%d -> total area=%ld vs square area=%ld scenario=%d\n", square_ns, square_ew, totalarea, area, *scenario);
+  }  
 }
 
 
 int32_t area_triangle(int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3)
 { // int32_t area;
-  float area;
+  // float area;
   // formula area = 1/2 * |x₁(y₂ - y₃) + x₂(y₃ - y₁) + x₃(y₁ - y₂)|
 
-  x1 += 900;
-  x2 += 900;
-  x3 += 900;
-  y1 += 1800;
-  y2 += 1800;
-  y3 += 1800;
+  // move it to an all positive area
+  x1 += 900;  x2 += 900;  x3 += 900;
+  y1 += 1800; y2 += 1800; y3 += 1800;
 
-//  area = abs(   x1*(y2-y3) + x2*(y3-y1) + x3*(y1-y2)   ) / 2;
-  area = abs(   (float)x1*((float)y2-(float)y3) + (float)x2*((float)y3-(float)y1) + (float)x3*((float)y1-(float)y2)   ) / (float)2;
+  // area = abs(   x1*(y2-y3) + x2*(y3-y1) + x3*(y1-y2)   ) / 2;
+  // area = abs(   (float)x1*((float)y2-(float)y3) + (float)x2*((float)y3-(float)y1) + (float)x3*((float)y1-(float)y2)   ) / (float)2;
 
-  return (int32_t)area;
+  // without floats
+  int64_t area = (int64_t)x1 * (y2 - y3) + 
+                 (int64_t)x2 * (y3 - y1) + 
+                 (int64_t)x3 * (y1 - y2);
+
+  // abs value
+  if (area < 0)area = -area;
+
+  // div by 2 now done here  
+  return (int32_t)(area / 2);
+ 
 }
 
 
@@ -534,14 +540,10 @@ void remap_by_square_number(int16_t sq_ns, int16_t sq_ew, int16_t coord_ns, int1
 
   //printf("Mapped point: (%f, %f) -> (%f, %f)\n", x, y, u, v);
 
-  remapped_ew = (int16_t)(u+0.5);
-  remapped_ns = (int16_t)(v+0.5);
-
-  //printf("remapped point: (%d, %d)\n", remapped_ew, remapped_ns);
-
-
-  *mapped_ns = remapped_ns;
-  *mapped_ns = remapped_ew;
+  *mapped_ns = (int16_t)(v+0.5);
+  *mapped_ew = (int16_t)(u+0.5);
+  
+  //printf("remapped point: (%d, %d)\n", *mapped_ns, *mapped_ew);
 
 }
 
@@ -557,22 +559,23 @@ void LoadCalibrations(void)
   int16_t valuetext_idx = 0; 
   
   
-  if (!SD_MMC.begin("/sdcard", true, false))return; // no card
+
+  if(Puck_SD_GB == 0)return; // no card
 
   calfile = SD_MMC.open(calfilename, FILE_READ);
   if(calfile)
   { while(calfile.available() && (linescount<12)) 
     { c = calfile.read(); 
-//      Serial.write(c); 
+      // Serial.write(c); 
       switch(c)
       { case 0x0d:
         case 0x0a:
           break;
         case ',':
-//          Serial.println(valuetext);  
-//          Serial.print(linescount);  
-//          Serial.print("-");  
-//          Serial.println(valcount);  
+          //          Serial.println(valuetext);  
+          //          Serial.print(linescount);  
+          //          Serial.print("-");  
+          //          Serial.println(valcount);  
           valuetext_idx = 0;
           if((valcount%2)==0)
           { ns_ew_calibrations.calibrations[linescount][valcount/2].ns = atoi(valuetext); 
@@ -597,7 +600,6 @@ void LoadCalibrations(void)
   }
   Serial.println("Finished loading calibrations from SD");
   calfile.close();
-  SD_MMC.end();
 }
 
 
@@ -685,12 +687,20 @@ void applyHomography(double H[3][3], double x, double y, double *u, double *v) {
 }
 
 // to move between squares om the map without worrying about overflowing 
+//void safe_ns_calc(int16_t dev, int16_t *square_ns)
+//{ *square_ns += dev;
+//  if(*square_ns==6)*square_ns += dev;
+//  if(*square_ns<0)*square_ns+=12;
+//  if(*square_ns>=12)*square_ns%=12;
+//}
+
 void safe_ns_calc(int16_t dev, int16_t *square_ns)
 { *square_ns += dev;
   if(*square_ns==6)*square_ns += dev;
-  if(*square_ns<0)*square_ns+=12;
-  if(*square_ns>=12)*square_ns%=12;
+  if(*square_ns<0)*square_ns=0;
+  if(*square_ns>11)*square_ns=11;
 }
+
 
 // to move between squares om the map without worrying about overflowing 
 void safe_ew_calc(int16_t dev, int16_t *square_ew)

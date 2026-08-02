@@ -24,6 +24,18 @@ lv_obj_t * ui_HourHand = NULL;
 lv_obj_t * ui_MinuteHand = NULL;
 lv_obj_t * ui_SecondHand = NULL;
 // event funtions
+void ui_event_ClockScreen(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_SCREEN_LOAD_START) {
+        OnClockScreenLoad(e);
+    }
+    if(event_code == LV_EVENT_SCREEN_LOADED) {
+        OnClockScreenLoad(e);
+    }
+}
+
 void ui_event_ClockFace(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
@@ -65,6 +77,8 @@ void ui_ClockScreen_screen_init(void)
     lv_obj_set_align(ui_ClockFace, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_ClockFace, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
     lv_obj_clear_flag(ui_ClockFace, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_img_recolor(ui_ClockFace, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor_opa(ui_ClockFace, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_ClockFlag = lv_img_create(ui_ClockScreen);
     lv_img_set_src(ui_ClockFlag, &ui_img_xx_png);
@@ -88,7 +102,8 @@ void ui_ClockScreen_screen_init(void)
     lv_obj_set_x(ui_Clock_Power_Off_Icon, 0);
     lv_obj_set_y(ui_Clock_Power_Off_Icon, 165);
     lv_obj_set_align(ui_Clock_Power_Off_Icon, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_Clock_Power_Off_Icon, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_add_flag(ui_Clock_Power_Off_Icon,
+                    LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_CHECKABLE | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
     lv_obj_clear_flag(ui_Clock_Power_Off_Icon, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_img_set_zoom(ui_Clock_Power_Off_Icon, 196);
     ui_object_set_themeable_style_property(ui_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
@@ -172,6 +187,7 @@ void ui_ClockScreen_screen_init(void)
     lv_obj_add_event_cb(ui_ClockFace, ui_event_ClockFace, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_ClockFlag, ui_event_ClockFlag, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_Clock_Power_Off_Icon, ui_event_Clock_Power_Off_Icon, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_ClockScreen, ui_event_ClockScreen, LV_EVENT_ALL, NULL);
     uic_ClockScreen = ui_ClockScreen;
     uic_ClockFace = ui_ClockFace;
     uic_ClockFlag = ui_ClockFlag;

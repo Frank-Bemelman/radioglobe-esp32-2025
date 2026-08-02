@@ -1,5 +1,4 @@
-
-// Using LVGL with Arduino requires some extra steps:
+// Using LVGL with Arduino requires some extra steps :
 // Be sure to read the docs here: https://docs.lvgl.io/master/get-started/platforms/arduino.html  */
 // #include "lv_conf.h" (root lib folder)
 // #include "lvgl.h" (loaded elsewere)
@@ -75,6 +74,10 @@ extern char Wifi_PASSWORD[];
 // https://console.cloud.google.com/apis/dashboard?project=subtle-backup-498313-s5
 // char open_weather_map_api_key[] = "YOUR-API-KEY"; // free, get  your own at https://openweathermap.org/api
 
+#define LV_CONF_INCLUDE_SIMPLE // Dwingt LVGL om lokaal in de projectmap te zoeken
+#include "lv_conf.h"           // Laad EERST jouw specifieke configuratie in
+#include <lvgl.h>    
+
 #include "Wireless.h"
 #include "Gyro_QMI8658.h"
 #include "RTC_PCF85063.h"
@@ -118,7 +121,10 @@ struct eepromData
   uint16_t globe_sd_gb;
   uint16_t auto_update_state = 0;
   char home_tz_posix[24];
-  char spare_data[];
+  int16_t testNS;
+  int16_t testEW;
+  uint16_t spare;
+  
 };
 eepromData DisplaySettings; // values to work with
 eepromData OldDisplaySettings; // values to compare for changes
@@ -155,6 +161,7 @@ void readMacAddress()
   }
 }
 
+bool bDoEspNow = false;
 bool bTimer100ms = false;
 bool bUpAndRunning = false;
 bool ForceGlobeStationGPSupdate = false;
@@ -186,7 +193,7 @@ EXT_RAM_ATTR calibrations_arraybin ns_ew_calibrations;
 EXT_RAM_ATTR calibrations_arraybin def_cal;
 uint16_t CalToIndexNS;
 uint16_t CalToIndexEW;
-bool bPowerStatus = true;
+bool bPowerStatus = false;
 #define AUTOPOWERDOWNAFTER (8 * 3600) // auto power after 8 hour
 //#define AUTOPOWERDOWNAFTER (3 * 60) // auto power after 3 minutes, for test
 uint32_t AutoSleepTimer = AUTOPOWERDOWNAFTER;
@@ -207,28 +214,31 @@ lv_mem_monitor_t mon_p; // for lvgl memory info
 char ClockFlagCountryCode[] = "??"; // actual flag shown on clock
 char OldClockFlagCountryCode[] = "??"; // actual flag on clock before change
 char GlobePositionCountryCode[] = "??"; // flag from country at chosen location
-bool ClockHomeTime = true; 
+bool bClockHomeTime = true; 
+bool bPrevClockHomeTime = false; 
 bool ClockBackLight = true; // keep the clock lit up
 
-void Driver_Loop(void *parameter)
+SemaphoreHandle_t lvgl_mutex;
+void Driver_Loop(void *parameter) // runs on core 0
 { static int16_t RawGyro[4];
   static uint8_t  RawGyroIdx = 0;
-  static int16_t AverageGyro = 0;
-  uint16_t CurrentMotion;
+  uint16_t CurrentMotion = 0;
   uint16_t FilteredMotion;
   
   while(1)
   { GlobalTicker100mS++;
-    //QMI8658_Loop();  // get accelero meter, not needed
+    // QMI8658_Loop();  // get accelero meter, not needed 
+    if(datetime.hour>45)Serial.printf("RTC_Loop() PCF85063_Read_Time Starts with corrupted hour = %d\n", (int)datetime.hour);
     RTC_Loop();
+    if(datetime.hour>45)Serial.printf("RTC_Loop() PCF85063_Read_Time Exits with corrupted hour = %d\n", (int)datetime.hour);
     // BAT_Get_Volts();
     bTimer100ms = true;
+    bDoEspNow = true;
 
-    RawGyroIdx %= 4;
     getGyroscope();
-    uint16_t CurrentMotion = abs((int)Gyro.x) + abs((int)Gyro.y) + abs((int)Gyro.z); 
-    RawGyro[RawGyroIdx] = CurrentMotion;
-    RawGyroIdx++;
+    CurrentMotion = abs((int)Gyro.x) + abs((int)Gyro.y) + abs((int)Gyro.z); 
+    RawGyro[RawGyroIdx++] = CurrentMotion;
+    RawGyroIdx %= 4;
 
     FilteredMotion = (RawGyro[0] + RawGyro[1] + RawGyro[2] + RawGyro[3]) / 4;
 
@@ -236,20 +246,17 @@ void Driver_Loop(void *parameter)
     if((GlobalTicker100mS % 10)==0)
     { GlobalTicker1S++;
       if(UpdateState==0) // update process may turn off the backlight - don't wake it on by accident
-      { getGyroscope();
-        uint16_t motion = abs((int)Gyro.x) + abs((int)Gyro.y) + abs((int)Gyro.z); 
-        // seen -> Log File /Sleeptimer.log appended with Sleeptimer = 17752 -> 28800 by motion value 64
+      { // seen -> Log File /Sleeptimer.log appended with Sleeptimer = 17752 -> 28800 by motion value 64
         // have to do better, added a filter now 
-        //Serial.printf("x%f - y%f - z%f\n", Gyro.x, Gyro.y, Gyro.z);
-        
+        // Serial.printf("x%f - y%f - z%f\n", Gyro.x, Gyro.y, Gyro.z);
         // at rest, value is aroung 4-10
         // when tilted normal, values of 60
-        //Serial.printf("FilteredMotion is %d\n", FilteredMotion);
-        //Serial.printf("motion %d freeze %d backlightvalue %d\n", motion, freeze, backlightvalue);
+        // Serial.printf("FilteredMotion is %d\n", FilteredMotion);
+        // Serial.printf("motion %d freeze %d backlightvalue %d\n", motion, freeze, backlightvalue);
         if(FilteredMotion>30)
         { BacklightValue = DEFAULT_BACKLIGHT;
           char content[128];
-          sprintf(content, "Sleeptimer =% d -> %d by motion value %d", AutoSleepTimer, AUTOPOWERDOWNAFTER, motion);
+          sprintf(content, "Sleeptimer =% d -> %d by filtered motion value %d", AutoSleepTimer, AUTOPOWERDOWNAFTER, FilteredMotion);
           AppendToLogFile("/Sleeptimer.log", content);
           AutoSleepTimer = AUTOPOWERDOWNAFTER;
           ClockBackLight = true;
@@ -258,27 +265,37 @@ void Driver_Loop(void *parameter)
           }
         }
       }      
-
-            
+     
       if(HoldBacklight>0)
       { HoldBacklight--;
       }
       else if(BacklightValue>10)
-      { BacklightValue--;
+      { // no auto dimming on radar screen - that screen is just to funny to look at and deserves to be bright
+        extern lv_obj_t * uic_RadarScreen;
+        if(lv_scr_act() != uic_RadarScreen) BacklightValue--;
       }
       
       if(ShowVolumeTimer)
-      { ShowVolumeTimer--; // once timed out, flag will be shown again
-        if(!ShowVolumeTimer && DataFromDisplay.volumevalue)
-        { lv_obj_add_state(ui_VolumeValue, LV_STATE_DISABLED); // away with volume level
-          lv_obj_add_flag(ui_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN); // away with speaker icon
-          lv_obj_add_flag(ui_mainscreen_speakeron, LV_OBJ_FLAG_HIDDEN); // away with speaker icon
-          lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // show country flag again
-          lv_obj_clear_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); // show city name again
-          lv_obj_clear_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN); // show country name again
-          ShowBatteryLevel(false); // hide battery level status
-          ShowWeatherData(true); // show weather status again
-        }  
+      { // check if this is the last tick
+        if(ShowVolumeTimer == 1)
+        { if (xSemaphoreTake(lvgl_mutex, pdMS_TO_TICKS(20)) == pdTRUE)
+          { if(DataFromDisplay.volumevalue) // at zero volume, power off icon is shown, let's keep it that way
+            { lv_obj_add_state(ui_VolumeValue, LV_STATE_DISABLED); 
+              lv_obj_add_flag(ui_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN); 
+              lv_obj_add_flag(ui_mainscreen_speakeron, LV_OBJ_FLAG_HIDDEN); 
+              lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); 
+              lv_obj_clear_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); 
+              lv_obj_clear_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN); 
+            }
+            ShowBatteryLevel(false); 
+            ShowWeatherData(true);
+            xSemaphoreGive(lvgl_mutex); 
+            ShowVolumeTimer = 0; // we're done
+          }
+        }
+        else
+        { ShowVolumeTimer--;
+        }
       }
     }
 
@@ -335,7 +352,17 @@ typedef struct locationData
 
 locationData Home = {"CUSTOM0:00:00", "XX", "", "", "", ""};
 locationData World = {"CUSTOM0:00:00", "XX", "", "", "", ""};
+uint16_t Puck_SD_GB = 0;
 
+// this call is somewhere defined in a library and I want to use it
+extern size_t getArduinoLoopTaskStackSize(void);
+// stacksize is standard 8K
+// as experiment, tried to increase it to see if it made any differences regarding instabilities I had at a certain moment. 
+// can't say it made much difference
+// so I took it out again
+SET_LOOP_TASK_STACK_SIZE(16*1024);
+
+volatile bool trigger_power_cycle_flag = false; // takes care of the power button off screen long pressed
 
 void setup()
 { char content[64];
@@ -361,19 +388,31 @@ void setup()
 
   LCD_Init();   // If you later reinitialize the LCD, you must initialize the SD card again !!!!!!!!!!
   SD_Init();    // It must be initialized after the LCD, and if the LCD is reinitialized later, the SD also needs to be reinitialized
-
+  
   //setupusb(); // doesnt work - wanted to use puck as usb storage for PC 
 
+  uint64_t totalBytes = SD_MMC.totalBytes();
+  Puck_SD_GB = totalBytes/(1024*1024)/1000;
+  Serial.printf("SD Card Capacity = %dGB\n", Puck_SD_GB);
+
+  Serial.printf("Stack size = %d\n", getArduinoLoopTaskStackSize());
+  TaskHandle_t CurrentTask = xTaskGetCurrentTaskHandle();
+  TaskStatus_t TaskStatus;
+  vTaskGetInfo(CurrentTask, &TaskStatus, pdTRUE, eInvalid);
+  Serial.printf("Taskname: %s\n", TaskStatus.pcTaskName);
+  Serial.printf("Free Stack Size: %d bytes\n", uxTaskGetStackHighWaterMark(NULL));
+
   EEPROM.begin(EEPROM_SIZE);
-  LoadDisplaySettings();
-  InitializeDisplaySettings(); // at first run, initialize with some reasonable values
+  EEPROM.get(0x0, DisplaySettings);
+  memcpy(&OldDisplaySettings, &DisplaySettings, sizeof(OldDisplaySettings));
+  
+  LoadDisplaySettings(); // from file, fallback is eeprom
+  InitializeDisplaySettings(); // at first run, and eeprom still virgin, initialize with some reasonable values
 
   setup_esp_now(); 
 
   Lvgl_Init();
-
   ui_init();
-
   ui_additional_text_init(); // manual creation of simple items that didn't fit in the max 150 objects of Squareline Studio
 
   lv_obj_add_flag(ui_Home_Power_Off_Icon, LV_OBJ_FLAG_HIDDEN);
@@ -384,9 +423,6 @@ void setup()
   lv_label_set_text(ui_Home_City, "");
   lv_label_set_text(ui_Home_Country, "");
   ShowWeatherData(false); // hide weather info
-  //if(DisplaySettings.globe_has_sdcard==1)lv_obj_clear_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
-  //else lv_obj_add_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_HIDDEN);
-
 
   // give flag and power button on clock face a much larger click area
   lv_obj_t * invisible_hitbox = lv_obj_create(ui_ClockScreen); 
@@ -411,10 +447,12 @@ void setup()
   lv_obj_clear_flag(ui_ClockFlag, LV_OBJ_FLAG_CLICKABLE);
 
 
+  lvgl_mutex = xSemaphoreCreateMutex();
   
+  extern void Create_Manual_Radar_Screen(void);
+  Create_Manual_Radar_Screen();
 
-  Lvgl_Loop();
-
+  
   xTaskCreatePinnedToCore(
     Driver_Loop,     
     "Other Driver task",   
@@ -425,12 +463,18 @@ void setup()
     0                    
   );
 
+  // retrieve last power status from RTC battery ram
+  bPowerStatus = (PCF85063_Read_RTCRAM() & RTC_RAM_POWERED_ON) != 0;
+
+  // if we are/were in off mode, show clock
+  if(!bPowerStatus)lv_scr_load(ui_ClockScreen);
+
+  Lvgl_Loop();
   // show used wifi channel in preset screen
   sprintf(content, "CH-%d", DisplaySettings.wifichannel);
   lv_label_set_text(ui_GlobeChannel, content);
 
-  //lv_mem_init(); ??? crashes everything
-  monitor_update(); // memory percentage
+  monitor_update(); // memory percentage on preset/favorites screen
 
   set_optional_items(); // BT speaker switch
 
@@ -460,11 +504,9 @@ void setup()
   LoadCalibrations(); 
 
 
-  if(SD_MMC.begin("/sdcard", true, false))
+  if(Puck_SD_GB)
   { ReadStationsBitmapFile(SD_MMC, "/stationsmap.bmp"); // read the bmp with the dots as stations
-    SD_MMC.end();
-  }  
-
+  }
  
   bUpAndRunning = true;
 
@@ -490,7 +532,7 @@ void setup()
   strcpy(Home.CountryName, AllUpperCase(Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].town)); // home sweet home is a nicer alternative
   strcpy(World.CountryName, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countryname); 
   sprintf(content, "%f-%f", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
-  AddToQueueForGlobe(content, MESSAGE_GET_HOME_TIMEZONE);
+  AddToQueueForGlobe(content, MESSAGE_HOME_TIMEZONE_NAME);
   AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION_BY_GPS);
   
   //if(DisplaySettings.globe_has_sdcard)
@@ -498,6 +540,7 @@ void setup()
   //  Serial.println("FTP gestart!");
   //  Serial.println(WiFi.localIP());
   //}  
+  RemoveNSdirectories(); // tests if /stations150K.json is missing, and delete /N and /S directory if so 
 }
 
 bool bDatabaseScreenUpdate = false;
@@ -517,12 +560,7 @@ void loop()
   static int newvolumevalue;
   static int newbassvalue;
   static int newtreblevalue;
-  static int newbatteryvoltage;
-  static int oldbatteryvoltage = 0;
-  
-  static uint8_t oldsecond;
-  static uint8_t oldhour;
-  static uint8_t oldminute;
+    
   static lv_obj_t * oldscreen;
   static time_t now;
   unsigned int stream_connecttohost_result; // received from callback in globe 
@@ -544,24 +582,43 @@ void loop()
   char countrycode[3]="";
 
   // clock face variables
-  static int16_t OldHourAngle;
-  int16_t HourAngle;
-  static int16_t OldMinuteAngle;
-  int16_t MinuteAngle;
-  static int16_t OldSecondAngle;
-  int16_t SecondAngle;
-  static int16_t OldHour;
-  int16_t Hour;
+  static int16_t PrevHourAngle = -1;
+  static int16_t PrevMinuteAngle = -1;
+  static int16_t PrevHour = -1;
+  static int16_t PrevSecond = -1;
+
+  Lvgl_Loop(); 
+  if (datetime.hour > 23 || datetime.hour < 0)
+  { sprintf(content, "Fout gedetecteerd net na Lvgl_Loop_esp_now() datetime.hour = %d\n", datetime.hour);
+    AppendToLogFile("/clockcorruption.log", content);
+  }
+
+  if (trigger_power_cycle_flag) 
+  { handlePowerCycle(); 
+    trigger_power_cycle_flag = false; // Reset de vlag
+  }
   
-
-
-  Lvgl_Loop();
   if(bFtpActive)
   { ftp.handleFTP();
   }
 
-  loop_esp_now(); // send volume & other stuff to globe
-  
+  loop_testurl();
+
+  if (datetime.hour > 23 || datetime.hour < 0)
+  { sprintf(content, "Fout gedetecteerd net na loop_test_url() datetime.hour = %d\n", datetime.hour);
+    AppendToLogFile("/clockcorruption.log", content);
+  }
+
+  if(bDoEspNow)
+  { loop_esp_now(); // send volume & other stuff to globe
+    bDoEspNow = false; // will be set high after 100mS
+  }
+
+  if (datetime.hour > 23 || datetime.hour < 0)
+  { sprintf(content, "Fout gedetecteerd net na loop_esp_now() datetime.hour = %d\n", datetime.hour);
+    AppendToLogFile("/clockcorruption.log", content);
+  }
+
   if(FtpBootState)
   { FtpBootState = HandleFtpBootState(FtpBootState);
   }
@@ -616,8 +673,20 @@ void loop()
         } 
         else if(receivedMessage.c_str()[0]=='F')
         { uint16_t digit = receivedMessage.c_str()[1]-48;
-          if(digit>3)digit=3;
-          AddStationToQueueForGlobe(digit+MAX_STATIONS); // presets come just after the regular list of stations
+          if(digit<4)
+          { AddStationToQueueForGlobe(digit+MAX_STATIONS); // presets come just after the regular list of stations
+          }
+          else
+          { if(digit==5)
+            { sprintf(content, "SE-%s", "http://prem1.di.fm:80/house?bbee26f9daecd1acc06a3cc");
+            }
+            else // 6+
+            { sprintf(content, "DE-%s", "https://lyd.nrk.no/nrk_radio_p1_ostfold_mp3_m");
+            }
+            // send countrycode and station url to globe
+            AddToQueueForGlobe(content, MESSAGE_START_THIS_STATION);
+
+          }
         }
         else if(receivedMessage.c_str()[0]=='Q')
         { AddToQueueForGlobe("", MESSAGE_GLOBE_PLAY_SD);
@@ -647,6 +716,21 @@ void loop()
         { Serial.printf("Serial Command filedatestamp\n");
           AppendToLogFile("/filedatestamp", "Test");
         }
+        else if(receivedMessage.c_str()[0]=='P')
+        { Serial.printf("Power Toggle\n");
+          handlePowerCycle();
+        } 
+        else if(receivedMessage.c_str()[0]=='A')
+        { strcpy(SecretCode, "BOBOB");
+        } 
+        else if(receivedMessage.c_str()[0]=='C')
+        { url_test_init();
+        } 
+        else if(receivedMessage.c_str()[0]=='E')
+        { Save_Settings_Without_Flicker();
+        } 
+
+     
 
         receivedMessage = "";
       }
@@ -654,6 +738,7 @@ void loop()
   
     lv_obj_t * screen = lv_scr_act(); //get active screen
 
+    
     if(oldscreen != screen) // screen changed
     { oldscreen = screen;
         
@@ -678,22 +763,25 @@ void loop()
         bDatabaseScreenUpdate = false;
         if(OldDisplaySettings.expand_search != DisplaySettings.expand_search)SaveDisplaySettings();
       }
+
       monitor_update();
     }
 
     // process one or more queued messages from globe
     while((FromGlobe.QueueIndexIn != FromGlobe.QueueIndexOut) && !bFtpActive) // we have to catch up with new messages
-    { //Serial.printf("FromGlobe.QueueIndexIn = %d FromGlobe.QueueIndexOut = %d\n", FromGlobe.QueueIndexIn, FromGlobe.QueueIndexOut);
-      //Serial.printf("Messages from globe pending %d\n", FromGlobe.QueueCnt);
-      DataFromDisplay.G_QueueSerialNumber = DataFromGlobe.G_QueueSerialNumber; 
-       // copy the essential message info into a more readable variable
+    { //Serial.printf("Messages from globe pending %d\n", FromGlobe.QueueCnt);
+      // copy the essential message info into a more readable variable
       QueueMessageType = FromGlobe.QueueMessageType[FromGlobe.QueueIndexOut];
       memcpy(QueueMessage, FromGlobe.QueueMessage[FromGlobe.QueueIndexOut], sizeof(QueueMessage));
+      QueueMessage[sizeof(QueueMessage) - 1] = '\0'; // make sure it's 0 terminated
       
       if((QueueMessageType>=0) && (QueueMessageType<MESSAGE_MAX)) 
-      { Serial.printf("GLOBE SAYS: %s >%s<\n", messagetexts[QueueMessageType], QueueMessage);  
+      { Serial.printf(" AT switch(QueueMessageType) -> %d-%s-%d %02d:%02d:%02d\n", (int)datetime.day, monthnames[datetime.month],  (int)datetime.year%100, datetime.hour, (int)datetime.minute, (int)datetime.second);
+        Serial.printf("  PROCESS:%d %s >%s<\n", FromGlobe.QueueMessageSerialNumber[FromGlobe.QueueIndexOut], messagetexts[QueueMessageType], QueueMessage);  
       }
-       switch(QueueMessageType)
+   
+      // and now take care of it
+      switch(QueueMessageType)
       { case MESSAGE_SONG_TITLE: // 1
           if(strlen(QueueMessage)>0)RemoveUTF8Unprintables(QueueMessage);
           lv_label_set_text(ui_Station_Title, QueueMessage);
@@ -719,50 +807,46 @@ void loop()
         case MESSAGE_NOP:
           break;
         case MESSAGE_STATION_NAME:
-          Serial.printf("case MESSAGE_STATION_NAME: %s\n", QueueMessage);
-          //if(strlen(QueueMessage))
-          //{ if(strlen(QueueMessage)>31)break;
-          //  if(strlen(QueueMessage)<3)break;
-          //}  
           lv_label_set_text(ui_Station_Name, QueueMessage);
           // rename in scroller if it makes sense
-          if(strlen(QueueMessage)>=3 && strlen(QueueMessage)<=32)
-          { if(!bMusicMode)
+          if(!bMusicMode)
+          { if(strlen(QueueMessage)>=3 && strlen(QueueMessage)<=32)
             { if(Stations.requested<MAX_STATIONS)
               { strcpy(Stations.StationNUG[Stations.requested].name, QueueMessage);
                 ReloadScroll();
               }  
             }
           }  
-          // else it is a station from the preset (1000 or more)  
           break;
         case MESSAGE_DESCRIPTION:
           break;
         case MESSAGE_GOOGLE_API_KEY:
           break;
-        case MESSAGE_TIMEZONE_ID:
+        
+        case MESSAGE_GET_TIMEZONE_BY_GPS:
+        case MESSAGE_TIMEZONE_NAME:
+        case MESSAGE_HOME_TIMEZONE_NAME:
           if(strlen(QueueMessage))
-          { strcpy(World.TZname, QueueMessage);
-            AllUpperCase(World.TZname);
-            lv_label_set_text(ui_Time_Zone, World.TZname); // on home screen - clock screen does it's own updates every second
+          { AllUpperCase(QueueMessage);
             
-            datetime.year = DataFromGlobe.timeinfo.tm_year;
-            Serial.printf("MESSAGE_TIMEZONE_ID ->>> Year = %d\n", DataFromGlobe.timeinfo.tm_year);
+            if(QueueMessageType == MESSAGE_HOME_TIMEZONE_NAME)strcpy(Home.TZname, QueueMessage);
+            else strcpy(World.TZname, QueueMessage);
+
+            datetime.year = DataFromGlobe.timeinfo.tm_year; // years since 1900
             datetime.month = DataFromGlobe.timeinfo.tm_mon; 
             datetime.day = DataFromGlobe.timeinfo.tm_mday;
             datetime.dotw = DataFromGlobe.timeinfo.tm_wday;
             datetime.hour = DataFromGlobe.timeinfo.tm_hour; // + (timeinfo.tm_isdst>0)?1:0;
             datetime.minute = DataFromGlobe.timeinfo.tm_min;
             datetime.second = DataFromGlobe.timeinfo.tm_sec;
-            
             PCF85063_Set_All(datetime); // this time is already TZ corrected
-            
-//            setenv("TZ", "CUSTOM0:00:00", 1);
-//            tzset(); 
+
+            lv_label_set_text(ui_Time_Zone, World.TZname); // on home screen - clock screen does it's own updates every second
+
             struct timeval tv;
             tv.tv_sec = DataFromGlobe.G_now; // set our system clock to UTC received from globe
             tv.tv_usec = 0;  
-            settimeofday(&tv, NULL);
+            settimeofday(&tv, NULL); // sets internal system clock
 
             struct tm time_info;
             localtime_r(&tv.tv_sec, &time_info);
@@ -792,9 +876,6 @@ void loop()
             time_info.tm_min, 
             time_info.tm_sec,
             tv.tv_usec);               // Microseconds from gettimeofday
-
-
-
           }  
           break;
 
@@ -808,7 +889,6 @@ void loop()
             if(strcmp(OldDisplaySettings.home_tz_posix, DisplaySettings.home_tz_posix)!=0)SaveDisplaySettings();
             { strcpy(DisplaySettings.home_tz_posix, Home.TimeZonePosix);
               SaveDisplaySettings();
-              SaveEepromToFile();
             }
           }  
           else
@@ -837,7 +917,7 @@ void loop()
             if((screen != ui_DatabaseScreen) || (bInfoScreen==true))
             { if(screen==ui_ClockScreen) // clock screen
               { Serial.printf("Clock screen, find new station for flag and time update \n");
-                ClockHomeTime = false;
+                //bClockHomeTime = false;
                 FindNewStation();
                 ReloadScroll();
               }
@@ -906,23 +986,6 @@ void loop()
             }
           }    
           break; 
-
-
-        case MESSAGE_AUDIO_EOF_STREAM:
-          if(!bMusicMode)
-          { //lv_label_set_text(ui_StationRollerComment, "");
-            DataFromDisplay.D_QueueStationIndex = -1;
-            Stations.playing = -1;
-            //sprintf(content, "%s - Not Responding", lv_label_get_text(ui_Station_Name));
-            //lv_label_set_text(ui_Station_Name, content); 
-            //Lvgl_Loop(); // update screen
-            //delay(300); // so we can actually notice the text change on the screen
-            if(!bMusicMode)
-            if(DataFromGlobe.D_QueueMessageCount<10) // don't waste time logging when behind schedule
-            { AppendToLogFile("/audio-eof-stream.txt", QueueMessage);
-            }    
-          }
-          break;
 
         case MESSAGE_WANT_NEXT_STATION: // request from globe since it couldn't use the last url
           if(Stations.requested<0)Stations.requested=0;
@@ -1062,6 +1125,11 @@ void loop()
           RemoveUTF8Unprintables(town); // arabic town names are not printable with extended ascii fonts
           Serial.printf("GPS Countrycode = %s and town = %s\n", countrycode, town);
 
+          // if this country code is our own home country, adjust clock status for that 
+          if(strcmp(countrycode, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode) == 0)
+          { bClockHomeTime = true;
+          }
+
           // maybe this is not needed anymore once database is 100% cleaned up with correct country names
           // but leave it for now to see if we still accumulate alarming messages
           if(QueueMessageType == MESSAGE_GET_GEOLOCATION_BY_GPS)
@@ -1108,12 +1176,13 @@ void loop()
               lv_obj_clear_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
               sprintf(content, "%s  -  %s", Stations.StationNUG[Stations.requested].town, AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
               lv_label_set_text(ui_StationRollerPlace, content);
-              // on setup screen
-              lv_label_set_text(ui_YouLiveHere, AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
               
-              if(strcmp(town, "???")==NULL)
+              // on setup screen
+              lv_label_set_text(ui_GlobeCurrentCountry, AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
+              
+              if(strcmp(town, "???")==NULL) // use country name from initial data
               { sprintf(content, "%s", AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
-                Serial.printf("content1 = <%s>\n", content);
+                Serial.printf("content = <%s>\n", content);
                 lv_label_set_text(ui_Home_City, "");
                 // on map
                 sprintf(content,"Greetings From  %s", AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
@@ -1126,6 +1195,7 @@ void loop()
                 if(strlen(town)>3)sprintf(content,"You Are In  %s", town);
                 else sprintf(content,"You Are In  %s", AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
                 lv_label_set_text(ui_Database_Output_File, content);
+                
                 if(strlen(town)>3)sprintf(content, "%s  -  %s", town, AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
                 else sprintf(content, "%s", AllUpperCase(Stations.StationNUG[Stations.requested].countryname));
                 Serial.printf("content2 = <%s>\n", content);
@@ -1133,8 +1203,8 @@ void loop()
                 lv_label_set_text(ui_Home_City, town);
               }
               lv_label_set_text(ui_StationRollerPlace, content);
+              lv_label_set_text(ui_Database_Progress, ""); // exchange rate on map sceen, will be refreshed when globe answers with fresh exchange data
               AddToQueueForGlobe(countrycode, MESSAGE_EX_CHANGE_RATE);
-              lv_label_set_text(ui_Database_Progress, ""); // erase now, will be refreshed when globe answers 
             }
             else
             { sprintf(content, "Countrycode %s Not In List", QueueMessage);
@@ -1358,10 +1428,34 @@ void loop()
           lv_label_set_text(ui_GlobeMac, content);
           break;
 
+        case MESSAGE_TEST_URL:
+          // QueueMessage is "1 http://stationurl"
+          // or "Errordescription http://stationurl"
+          extern bool bUrlTestRunning;
+          if(QueueMessage[0] != '1')
+          { Serial.printf("MESSAGE_TEST_URL -> %s\n", QueueMessage);
+            strcpy(logfile, "/tested-urls.log");
+            AppendToLogFile(logfile, QueueMessage);
+          }  
+     
+          bUrlTestRunning = false;
+          Serial.print("Free Heap: ");
+          Serial.println(ESP.getFreeHeap());
+          break;
+
+        case MESSAGE_GET_FLIGHT_DATA:
+          extern void message_get_flight_date_handler(char *incomingMessage);
+          message_get_flight_date_handler(QueueMessage);
+          break;
+
+
         default:
           Serial.printf("Unsupported message %d from globe: >%s<\n", QueueMessageType, QueueMessage);  
           break;
       }
+
+      Serial.printf(" AT switch(QueueMessageType) break; -> %d-%s-%d %02d:%02d:%02d\n", (int)datetime.day, monthnames[datetime.month],  (int)datetime.year%100, datetime.hour, (int)datetime.minute, (int)datetime.second);
+     
 
       FromGlobe.QueueIndexOut++;
       FromGlobe.QueueIndexOut %= QUEUESIZE;
@@ -1472,20 +1566,21 @@ void loop()
       if(strcmp(SecretCode, "GLOBE")==0)
       { lv_label_set_recolor(ui_lockstatus, true);
         lv_label_set_text(ui_lockstatus, "#00FF00 UNLOCKED#");
-        lv_obj_clear_flag(ui_HomeButton4, LV_OBJ_FLAG_HIDDEN); // show home icon
       }
       else if(strcmp(SecretCode, "BOBOB")==0)
       {  lv_label_set_recolor(ui_lockstatus, true);
          lv_label_set_text(ui_lockstatus, "#0000FF FTP ACTIVE#");
-         lv_obj_add_flag(ui_HomeButton4, LV_OBJ_FLAG_HIDDEN); // hide home button
          FtpBootState = 1; // launch the FTP server 
+      }
+      else if(strcmp(SecretCode, "ELGEL")==0)
+      {  lv_label_set_recolor(ui_lockstatus, true);
+         lv_label_set_text(ui_lockstatus, "#FF00FF URL TEST#");
+         url_test_init(); // set/reset conditions for a fresh url test (takes days to complete) during power down
       }
       else
       { lv_label_set_recolor(ui_lockstatus, true);
         lv_label_set_text(ui_lockstatus, "#FF0000 LOCKED#");
-        // todo show home button
-        lv_obj_clear_flag(ui_HomeButton4, LV_OBJ_FLAG_HIDDEN); // show home icon
-        if(bFtpActive)FtpBootState = 6;
+        if(bFtpActive)FtpBootState = 6; // ends FTP server
       }
     }
 
@@ -1493,9 +1588,7 @@ void loop()
     if(PrevGlobalTicker1S != GlobalTicker1S) // check every second
     { // at boot and every 5 seconds after
       if((PrevGlobalTicker1S % 5)==0) 
-      { newbatteryvoltage = ((analogReadMilliVolts(BAT_ADC_PIN) * 3) + 50) / 10; // read voltage in 10mV steps times 3 because of voltage divider 
-        ShowBatteryLevel(-newbatteryvoltage);
-        DataFromDisplay.D_BatteryVoltage = newbatteryvoltage/10;
+      { DataFromDisplay.D_BatteryVoltage = ShowBatteryLevel(-1); // update only
       }
 
       PrevGlobalTicker1S = GlobalTicker1S;
@@ -1540,81 +1633,71 @@ void loop()
     // or in second steps (better)
     // https://www.pixilart.com/draw?ref=home-page is a nice pixel editor for creating the hands of the clock
 
-
-    if((GlobalTicker100mS % 1)==0)
+    
+    if(PrevSecond != datetime.second)
     { if(screen == ui_ClockScreen) // we are on clock screen
-      { SecondAngle = datetime.second * 60; // full second steps
-        MinuteAngle = (datetime.minute * 60) + datetime.second;
-        HourAngle = ((datetime.hour%12) * 300) + (datetime.minute * 5);
-        Hour = datetime.hour;
+      { PrevSecond = datetime.second;
 
-        if(ClockHomeTime)
-        {
-
-        }
-        else
-        {
-
-        }
-        
-        if(strcmp(OldClockTimeZoneName, World.TZname)!=NULL)
+        // angles in 0-3599 tenth of degrees
+        uint16_t SecondAngle = (datetime.second * 60)%3600; // full second steps
+        uint16_t MinuteAngle = ((datetime.minute * 60) + datetime.second)%3600;
+        uint16_t HourAngle = (((datetime.hour%12) * 300) + (datetime.minute * 5))%3600;
+ 
+        if(strcmp(OldClockTimeZoneName, World.TZname)!=0)
         { strcpy(OldClockTimeZoneName, World.TZname);
-          sprintf(content, "%s\n%s %d-%s-%d\n%s",  World.TZname, weekdays[datetime.dotw], (size_t)datetime.day, monthnames[datetime.month],  (size_t)datetime.year%100, partofday[datetime.hour/6]);
-          //strcpy(Home. ,content);
+          sprintf(content, "%s\n%s %d-%s-%d\n%s",  World.TZname, weekdays[datetime.dotw%7], (size_t)datetime.day, monthnames[datetime.month%12],  (size_t)datetime.year%100, partofday[(datetime.hour/6)%4]);
           lv_label_set_text(ui_Time_Zone_Clock, content); // on clock screen
         }
 
-        if(OldHour!=Hour) // as that might change the day of week, date, nice evening text
-        { OldHour=Hour;
-          sprintf(content, "%s\n%s %d-%s-%d\n%s",  World.TZname, weekdays[datetime.dotw], (size_t)datetime.day, monthnames[datetime.month],  (size_t)datetime.year%100, partofday[datetime.hour/6]);
+        if(PrevHour!=datetime.hour) // as that might also change the day of week, date, nice evening text
+        { PrevHour=datetime.hour;
+          sprintf(content, "%s\n%s %d-%s-%d\n%s",  World.TZname, weekdays[datetime.dotw%7], (int)datetime.day, monthnames[datetime.month%12],  (int)datetime.year%100, partofday[(datetime.hour/6)%4]);
           lv_label_set_text(ui_Time_Zone_Clock, content); // on clock screen
         }
 
-        if(OldHourAngle != HourAngle)
-        { OldHourAngle = HourAngle;
+        if(PrevHourAngle != HourAngle)
+        { PrevHourAngle = HourAngle;
           lv_img_set_angle(ui_HourHand, HourAngle);
         }
 
-        if(OldMinuteAngle != MinuteAngle)
-        { OldMinuteAngle = MinuteAngle;
+        if(PrevMinuteAngle != MinuteAngle)
+        { PrevMinuteAngle = MinuteAngle;
           lv_img_set_angle(ui_MinuteHand, MinuteAngle);
         }
-
-        if(OldSecondAngle != SecondAngle)
-        { OldSecondAngle = SecondAngle;
-          lv_img_set_angle(ui_SecondHand, SecondAngle);
-        }
+        // seconds always changed
+        lv_img_set_angle(ui_SecondHand, SecondAngle);
       }
       
-      // check flag
-      if(ClockHomeTime)
-      { strcpy(ClockFlagCountryCode, Home.CountryCode);
-        //Serial.printf("ClockFlagCountryCode from Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode = %s\n", ClockFlagCountryCode);
-      }
-      else
-      { strcpy(ClockFlagCountryCode, World.CountryCode);
-        //Serial.printf("ClockFlagCountryCode from GlobePositionCountryCode = %s\n", ClockFlagCountryCode);
-      }
-      if(strcmp(OldClockFlagCountryCode, ClockFlagCountryCode)!=NULL)
-      { strcpy(OldClockFlagCountryCode, ClockFlagCountryCode);
-        // set flag
-        Serial.printf("New ClockFlagCountryCode = %s\n", ClockFlagCountryCode);
-        //if(screen == ui_Power)
-        SetFlag(ClockFlagCountryCode);
-        lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN);
+      if(bPrevClockHomeTime!=bClockHomeTime)
+      { bPrevClockHomeTime = bClockHomeTime;
+        if(bClockHomeTime)
+        { strcpy(ClockFlagCountryCode, Home.CountryCode);
+          lv_label_set_text(ui_Clock_Country, Home.CountryName);
+         //Serial.printf("ClockFlagCountryCode from Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode = %s\n", ClockFlagCountryCode);
+        }
+        else
+        { strcpy(ClockFlagCountryCode, World.CountryCode);
+          lv_label_set_text(ui_Clock_Country, World.CountryName);
+          //Serial.printf("ClockFlagCountryCode from GlobePositionCountryCode = %s\n", ClockFlagCountryCode);
+        }
+        if(strcmp(OldClockFlagCountryCode, ClockFlagCountryCode) != 0)
+        { strcpy(OldClockFlagCountryCode, ClockFlagCountryCode);
+          // set flag
+          Serial.printf("New ClockFlagCountryCode = %s\n", ClockFlagCountryCode);
+          //if(screen == ui_Power)
+          SetFlag(ClockFlagCountryCode);
+          lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN);
+        }
       }
     }  
      
-
     // let's do a flashing semicolon between hours an minutes of clock HH:MM
     if(screen == ui_Home) 
     { static uint32_t PrevTicker;
       if(PrevTicker != GlobalTicker100mS)
       { PrevTicker = GlobalTicker100mS;
         if((GlobalTicker100mS % 5)==0) // every 500mS
-        { // Serial.print("Seconds oldsecond: "); Serial.println(oldsecond);
-          // sprintf(content, "%02d:%02d:%02d", datetime.hour, datetime.minute, datetime.second);
-          sprintf(content, "%02d%c%02d", datetime.hour, ((GlobalTicker100mS % 10)==0)?':':' ', datetime.minute);
+        { sprintf(content, "%02d%c%02d", datetime.hour, ((GlobalTicker100mS % 10)==0)?':':' ', datetime.minute);
           lv_label_set_text(ui_Local_Time, content);
         }  
       }
@@ -1648,6 +1731,7 @@ void loop()
       else lv_label_set_text(ui_Text_Radio_Globe, "RADIO GLOBE");
     } 
   }
+
   delay(5); // 18APR26 added this, display brightness glitches fixed this - do not remove!!
 }
 
@@ -1769,7 +1853,7 @@ void InitializeDisplaySettings(void)
   EEPROM.commit();
   memcpy(&OldDisplaySettings, &DisplaySettings, sizeof(OldDisplaySettings));
   // also save to file if sd card is present
-  SaveEepromToFile();
+  SaveSettingsToFile();
 }
 
 // set some ui items, value or availability
@@ -1810,14 +1894,14 @@ void set_optional_items(void)
   }  
 }
 
-void SetClockHands(void)
-{ int16_t HourAngle;
-  int16_t MinuteAngle;
-  int16_t SecondAngle;
-  
-  SecondAngle = datetime.second * 60; // full second steps
-  MinuteAngle = (datetime.minute * 60) + datetime.second;
-  HourAngle = ((datetime.hour%12) * 300) + (datetime.minute * 5);
+void ForceSetClockHands(void)
+{ uint16_t HourAngle;
+  uint16_t MinuteAngle;
+  uint16_t SecondAngle;
+
+  SecondAngle = (datetime.second * 60)%3600; // full second steps
+  MinuteAngle = ((datetime.minute * 60) + datetime.second)%3600;
+  HourAngle = (((datetime.hour%12) * 300) + (datetime.minute * 5))%3600;
 
   lv_img_set_angle(ui_HourHand, HourAngle);
   lv_img_set_angle(ui_MinuteHand, MinuteAngle);
@@ -1906,7 +1990,7 @@ void RemoveUTF8Unprintables(char *str)
 
 
 void SaveDisplaySettings(void)
-{ if(SaveEepromToFile())
+{ if(SaveSettingsToFile())
   { // succes
     return;
   }
@@ -1914,61 +1998,57 @@ void SaveDisplaySettings(void)
   EEPROM.put(0x0, DisplaySettings);
   EEPROM.commit();
   memcpy(&OldDisplaySettings, &DisplaySettings, sizeof(OldDisplaySettings));
-  Serial.printf("Eeprom saved\n");
+  Serial.printf("Could not save to file, saved to Eeprom\n");
 }
 
 void LoadDisplaySettings(void)
 { // first try loading from file
-  if(LoadEepromFromFile())
+  if(LoadSettingsFromFile())
   { memcpy(&OldDisplaySettings, &DisplaySettings, sizeof(OldDisplaySettings));
-    Serial.printf("Eeprom loaded from file eeprom.dat\n");
+    Serial.printf("Settings loaded from file eeprom.dat\n");
     return;
   }
   // else use eeprom if file does not exist
   EEPROM.get(0x0, DisplaySettings);
   memcpy(&OldDisplaySettings, &DisplaySettings, sizeof(OldDisplaySettings));
-  Serial.printf("Eeprom loaded from chip eeprom\n");
+  Serial.printf("Could not load settings from file, loaded settings from chip eeprom\n");
 }
 
-bool SaveEepromToFile(void)
+bool SaveSettingsToFile(void)
 { File file;
   char filename[] = {"/eeprom.dat"};
   bool result = false;
 
-  if (!SD_MMC.begin("/sdcard", true, false))return result; // no card
+  if(Puck_SD_GB==0)return result; // no card
 
   SD_MMC.remove(filename); // delete old file
   file = SD_MMC.open(filename, FILE_WRITE);
   if(file)
   { file.write((uint8_t *)&DisplaySettings, sizeof(DisplaySettings));  
+    file.close();
     result = true;
   }
-  file.close();
-  SD_MMC.end();
-  Serial.printf("Eeprom saved to file eeprom.dat\n");
+  Serial.printf("Settings saved to file eeprom.dat\n");
   memcpy(&OldDisplaySettings, &DisplaySettings, sizeof(OldDisplaySettings));
   return result;
 }
 
-bool LoadEepromFromFile(void)
+bool LoadSettingsFromFile(void)
 { File file;
   char filename[] = {"/eeprom.dat"};
   bool result = false;
 
-  if (!SD_MMC.begin("/sdcard", true, false))
-  { Serial.printf("No card present\n");
-    return result; // no card
+  if(Puck_SD_GB==0)
+  { return result; // no card
   }  
-  Serial.printf("Card present\n");
 
   file = SD_MMC.open(filename, FILE_READ);
   if(file)
-  { Serial.printf("Reading eeprom.dat\n");
+  { Serial.printf("Settings loaded from eeprom.dat\n");
     file.read((uint8_t *)&DisplaySettings, sizeof(DisplaySettings));  
+    file.close();
     result = true;
   }
-  file.close();
-  SD_MMC.end();
   return result;
 }
 
@@ -1994,3 +2074,39 @@ void printSystemTimes() {
     Serial.printf("Local Time    : %s\n", buffer);
     Serial.printf("-------------------------\n\n");
 }    
+
+#include <Preferences.h>
+extern bool vsync_triggered;
+//extern uint32_t measured_frametime_us;
+
+void Save_Settings_Without_Flicker(void) 
+{ Serial.println("Settings saved in Flash with preferences library functions");
+  // saving to flash caused upsetting the display, vertical offsets and continous glitches afterwards
+  // the old eeprom library seems to write in large segments
+  // the preference library writes in smaller chunks, but also gives similar effects, less frequently though
+  // this has led to code below, with mutex and panel restart
+  // result is a perfectly stable display
+  if (xSemaphoreTake(lvgl_mutex, pdMS_TO_TICKS(50)) == pdTRUE) 
+  { Preferences preferences;
+    
+    vsync_triggered = false; // and lets wait for this to go high real soom, by vsync interrupt
+    uint32_t timeout = 0;
+    while (!vsync_triggered && timeout < 22000) // max frame time is 20mS (50Hz), plus some extra slack for the odd slower display
+    { // Use ets_delay_us for wait, without task switching like delay() 
+      // this knife cuts the fastest
+      ets_delay_us(1); 
+      timeout++;
+    }
+    // Open de NVS-namespace "puck_settings" (false = read/write)
+    preferences.begin("puck_settings", false);
+    // save all settings under name "config"
+    preferences.putBytes("config", &DisplaySettings, sizeof(DisplaySettings));
+    preferences.end();
+
+    // restart panel  
+    esp_lcd_rgb_panel_restart(panel_handle); 
+    xSemaphoreGive(lvgl_mutex);
+
+    // Serial.printf("Exact frame-time: %u us (~%.2f ms)\n", measured_frametime_us, (float)measured_frametime_us / 1000.0);
+  }
+}

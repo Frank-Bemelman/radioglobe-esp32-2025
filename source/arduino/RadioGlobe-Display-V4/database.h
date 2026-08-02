@@ -15,8 +15,8 @@ typedef struct BMPHeader{          // Total: 54 bytes
   uint16_t  reserved2 = 0;         // Not used
   uint32_t  offset = 62;           // Offset to image data in bytes from beginning of file (54 + 8 bytes)
   uint32_t  dib_header_size = 40;  // DIB Header size in bytes (40 bytes)
-  uint32_t   width_px = 360;       // Width of the image
-  uint32_t   height_px = 180;      // Height of image
+  uint32_t  width_px = 360;        // Width of the image
+  uint32_t  height_px = 180;       // Height of image
   uint16_t  num_planes = 1;        // Number of color planes
   uint16_t  bits_per_pixel = 1;    // Bits per pixel
   uint32_t  compression = 0;       // Compression type
@@ -39,7 +39,7 @@ typedef struct BMPColorTable
     uint8_t reserved_on = 0x0;  ///< Should be 0.
 };
 
-typedef struct bmpfile{                // Total: 54 + 8 + 8100 bytes
+typedef struct bmpfile{         // Total: 54 + 8 + 8640 bytes
   BMPHeader bmpheader;          // 54 bytes
   BMPColorTable bmpct;          // 8 bytes
   uint8_t  pixeldata[8640];     // 180 ns entries of 360/8=45 ew bytes, round up to multiple of 4 bytes -> 48 -> 180x48 -> 8460 bytes of pixeldata

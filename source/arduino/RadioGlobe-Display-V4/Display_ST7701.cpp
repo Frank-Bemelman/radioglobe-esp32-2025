@@ -373,17 +373,41 @@ void ST7701_Init()
     },
   };
   esp_lcd_new_rgb_panel(&rgb_config, &panel_handle); 
-  // esp_lcd_rgb_panel_event_callbacks_t cbs = {
-  //   .on_vsync = example_on_vsync_event,
-  // };
-  // esp_lcd_rgb_panel_register_event_callbacks(panel_handle, &cbs, &disp_drv);
+
+  // 28JUL26 20:23 4 lines below were commented out, re
+  esp_lcd_rgb_panel_event_callbacks_t cbs = {
+     .on_vsync = example_on_vsync_event,
+   };
+  esp_lcd_rgb_panel_register_event_callbacks(panel_handle, &cbs, NULL);
+  
+  
   esp_lcd_panel_reset(panel_handle);
   esp_lcd_panel_init(panel_handle);
 }
 
+volatile bool vsync_triggered;
+//volatile uint32_t measured_frametime_us;
 bool example_on_vsync_event(esp_lcd_panel_handle_t panel, const esp_lcd_rgb_panel_event_data_t *event_data, void *user_data)
-{
+{ 
+  // measure frame rate time
+  // static uint32_t last_pulse_time = 0;
+  // uint32_t now = (uint32_t)esp_timer_get_time(); // het hardware microseconds
+  // measured_frametime_us = now - last_pulse_time;
+  // last_pulse_time = now;
+  
+  // test result turned out to be 20mS
+  
   BaseType_t high_task_awoken = pdFALSE;
+
+  // 28JUL26 20:23 added/moved the lv_disp_flush_ready() from LVGL_Driver.cpp to here
+  // tell LVGL hardware is finished with buffer
+  extern lv_disp_drv_t *current_disp_drv;
+  if (current_disp_drv != NULL) {
+    lv_disp_flush_ready(current_disp_drv);
+  }
+
+  vsync_triggered = true; // signals savesettings to flash it is relative safe to start
+
   return high_task_awoken == pdTRUE;
 }
 void LCD_Init() {
@@ -393,7 +417,7 @@ void LCD_Init() {
   Backlight_Init();
 }
 
-void LCD_addWindow(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend,uint8_t* color) {
+void LCD_addWindow(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend, uint8_t* color) {
   Xend = Xend + 1;      // esp_lcd_panel_draw_bitmap: x_end End index on x-axis (x_end not included)
   Yend = Yend + 1;      // esp_lcd_panel_draw_bitmap: y_end End index on y-axis (y_end not included)
   if (Xend >= ESP_PANEL_LCD_WIDTH)

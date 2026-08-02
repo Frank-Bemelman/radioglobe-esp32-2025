@@ -81,7 +81,7 @@ void BuildDatabaseNow(void)
   lv_obj_add_flag(uic_HomeButton3, LV_OBJ_FLAG_HIDDEN);
   //lv_label_set_text(ui_MapBanner, "All\nThose\nBeautiful\nInternet\nRadio\nStations\nAround\nThe\nWorld\n");
 
-  if (!SD_MMC.begin("/sdcard", true, false))
+  if(Puck_SD_GB == 0)
   { lv_label_set_text(ui_Database_Dir_Path, "No SD Card Found!");
     Lvgl_Loop();
     delay(1000);
@@ -107,10 +107,9 @@ void BuildDatabaseNow(void)
 
     ReadDatabase(SD_MMC, filename); // don't fortget the forward slash
     WriteStationsBitmapFile(SD_MMC, "/stationsmap.bmp");
-    Serial.println("Einde verhaal database maken 2");
+    Serial.println("Database rebuild done");
   }
-  SD_MMC.end();
-  Serial.println("Einde verhaal database maken 3");
+  Serial.println("End BuildDatabaseNow()");
   bCheckDatabase = false;
 }
 
@@ -510,8 +509,13 @@ void CollectStationsAtGps(int16_t mapfind_ns, int16_t mapfind_ew, char *firstcou
   char oneline[128];
   size_t bytesread;
   char *p;
+  char town[32] = "";
+  char countrycode[3] = "";
+  char countryname[50] ="";
+        
 
-  if (SD_MMC.begin("/sdcard", true, false))
+  
+  if(Puck_SD_GB)
   { dir_ns = mapfind_ns;
     dir_ew = mapfind_ew;
     sprintf(dirpath, "/%c/%d/%d/%c/%d/%d", (dir_ns<0)?'S':'N', abs(dir_ns)/10, abs(dir_ns)%10, (dir_ew<0)?'W':'E', abs(dir_ew)/10, abs(dir_ew)%10);
@@ -527,24 +531,27 @@ void CollectStationsAtGps(int16_t mapfind_ns, int16_t mapfind_ew, char *firstcou
     }
     
     file = root.openNextFile();
-//    while (file && Stations.count<(MAX_STATIONS-1))
-// dit gaat op tilt, met name bij de reload scroll als meer dan ?? stations, zeker geen 100 of 150 mogelijk 
-// dus even naar 25 max
 
-
-    while (file && Stations.count<25) 
+    while (file) 
     { if(!file.isDirectory()) 
       { //Serial.print("STATIONS FILE: ");
         //Serial.print(file.name());
         //Serial.print(" FILE SIZE: ");
         //Serial.println(file.size());
+
+        // while (file && Stations.count<(MAX_STATIONS-1))
+        // dit gaat op tilt, met name bij de reload scroll als meer dan ?? stations, zeker geen 100 of 150 mogelijk 
+        // dus even naar 25 max
+
+        if (Stations.count >= MAX_STATIONS) 
+        { file.close();
+          break; // Verlaat de lus netjes
+        }
+        
         lv_label_set_text(ui_Station_Title, file.name());
-        char town[32] = "";
-        char countrycode[3] = "";
-        char countryname[50]="";
         
         strcpy(town, file.name());
-        // filenames are constructed from name of town, underscore, and 2 letter land code, like -> Naaldwijk_NL.txt
+        // filenames are constructed from name of town, underscore, and 2 letter country code, like -> Amsterdam_NL.txt
         if((p=strchr(town, '_')) != NULL)
         { *p++ = 0;
           //Serial.printf("sizeof(Countrylist) = %ld\n", sizeof(CountryList) / sizeof(country_info));
@@ -560,60 +567,62 @@ void CollectStationsAtGps(int16_t mapfind_ns, int16_t mapfind_ew, char *firstcou
         }
 
         Lvgl_Loop();
+        delay(1); // Geef het OS even tijd na de eerste UI-loop
 
         if(strcmp(firstcountrycode, countrycode) == 0) // same country
         {
-        while(file.available() && Stations.count<25)
-        { bytesread = file.readBytesUntil(0x0a, oneline, sizeof(oneline)-1);
-          oneline[bytesread]=0;
-          if((p = strrchr(oneline, '\"')) != NULL)*p=0; // get rid of the last "
-          // Serial.println(oneline);
-          if((p = strstr(oneline, "\"name\": \"")) != NULL)
-          { // example:  "name": "Dr P4 Syd"
-            // Serial.println(p+9);
-            p+=9; // jump forward to start of name
-            *(p+31)=0; 
-            strcpy(Stations.StationNUG[Stations.count].name, p);
-          }  
-          else if((p = strstr(oneline, "\"url\": \"")) != NULL)
-          { // example:  "url": "https://stream.radio-fratz.de/stream_high.mp3"
-            // Serial.println(p+8);
-            p+=8; // jump forward to start of url
-            strcpy(Stations.StationNUG[Stations.count].url, p);
-          }  
-          else if((p = strstr(oneline, "\"gps\": \"")) != NULL)
-          { // example:  "url": "https://stream.radio-fratz.de/stream_high.mp3"
-            // Serial.println(p+8);
-            p+=8; // jump forward to start of gps coordinates
-            sscanf(p, "%f,%f", &Stations.StationNUG[Stations.count].gps_ns, &Stations.StationNUG[Stations.count].gps_ew);
+          while(file.available() && Stations.count<MAX_STATIONS)
+          { bytesread = file.readBytesUntil(0x0a, oneline, sizeof(oneline)-1);
+            oneline[bytesread]=0;
+            if((p = strrchr(oneline, '\"')) != NULL)*p=0; // get rid of the last "
+            // Serial.println(oneline);
+            if((p = strstr(oneline, "\"name\": \"")) != NULL)
+            { // example:  "name": "Dr P4 Syd"
+              // Serial.println(p+9);
+              p+=9; // jump forward to start of name
+              *(p+31)=0; 
+              strcpy(Stations.StationNUG[Stations.count].name, p);
+            }  
+            else if((p = strstr(oneline, "\"url\": \"")) != NULL)
+            { // example:  "url": "https://stream.radio-fratz.de/stream_high.mp3"
+              // Serial.println(p+8);
+              p+=8; // jump forward to start of url
+              strcpy(Stations.StationNUG[Stations.count].url, p);
+            }  
+            else if((p = strstr(oneline, "\"gps\": \"")) != NULL)
+            { // example:  "url": "https://stream.radio-fratz.de/stream_high.mp3"
+              // Serial.println(p+8);
+              p+=8; // jump forward to start of gps coordinates
+              sscanf(p, "%f,%f", &Stations.StationNUG[Stations.count].gps_ns, &Stations.StationNUG[Stations.count].gps_ew);
 
-            //if((p = strstr(StationArray[stationsfound].url, ".m3u")) == NULL) // no links to m3u file
-            //{ if((p = strstr(StationArray[stationsfound].url, ".pls")) == NULL) // no links in pls file
-            //  { if((p = strstr(oneline, "mp3")) != NULL)stationsfound++; 
-            //    else if((p = strstr(oneline, "MP3")) != NULL)stationsfound++;
-            //  }  
-            //}
-            //else if((p = strstr(oneline, "aac")) != NULL)
-            strcpy(Stations.StationNUG[Stations.count].town, town);
-            strcpy(Stations.StationNUG[Stations.count].countrycode, countrycode);
-            strcpy(Stations.StationNUG[Stations.count].countryname, countryname);
-            // in all honesty, ignore if country and ignore this url if already in list
-            if(strcmp(firstcountrycode, countrycode) == 0) // same country
-            { //Serial.printf("%s same as %s\n", firstcountrycode, countrycode);
-              if(CheckIfUniqueUrl())Stations.count++;
+              //if((p = strstr(StationArray[stationsfound].url, ".m3u")) == NULL) // no links to m3u file
+              //{ if((p = strstr(StationArray[stationsfound].url, ".pls")) == NULL) // no links in pls file
+              //  { if((p = strstr(oneline, "mp3")) != NULL)stationsfound++; 
+              //    else if((p = strstr(oneline, "MP3")) != NULL)stationsfound++;
+              //  }  
+              //}
+              //else if((p = strstr(oneline, "aac")) != NULL)
+
+              strcpy(Stations.StationNUG[Stations.count].town, town);
+              strcpy(Stations.StationNUG[Stations.count].countrycode, countrycode);
+              strcpy(Stations.StationNUG[Stations.count].countryname, countryname);
+              // in all honesty, ignore if country and ignore this url if already in list
+              if(strcmp(firstcountrycode, countrycode) == 0) // same country
+              { //Serial.printf("%s same as %s\n", firstcountrycode, countrycode);
+                if(CheckIfUniqueUrl())Stations.count++;
+              }
+              else
+              { Serial.printf("%s differs from %s\n", firstcountrycode, countrycode);
+                //if(CheckIfUniqueUrl())Stations.count++;
+              }
             }
-            else
-            { Serial.printf("%s differs from %s\n", firstcountrycode, countrycode);
-              //if(CheckIfUniqueUrl())Stations.count++;
-            }
-          }
+          } 
         }
-        }
-        //file = root.openNextFile();
       }
+      file.close();
       file = root.openNextFile();
     } 
-    SD_MMC.end();  
+    root.close();
   }
 }
 
@@ -639,7 +648,7 @@ void SetPixelInMap(int16_t ns, int16_t ew)
 
 bool TestPixelInMap(int16_t ns, int16_t ew)
 { // ew varies between -180 and 179
-  // ew varies between 90 and -89
+  // ns varies between 90 and -89
   // -180 to be stored in [359]
   ew += 180;  // convert -180 to 179 range to 0-359
   ns += 90;   // convert -90 to 90 range to 0-180
@@ -981,7 +990,7 @@ void AddStationToQueueForGlobe(int16_t station)
     lv_obj_set_pos(uic_MapCursor, (int)DataFromDisplay.ew_cal/10 - 16, -(int)DataFromDisplay.ns_cal/10); // moved 16 to left, dot is painted left-top corner?
     lv_label_set_text(ui_Database_Output_File, ""); // remove typical "You are in ..." from map
     sprintf(content, "Stations.requested = %d", Stations.requested); 
-    AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE); // will use DataFromDisplay.ns_cal, DataFromDisplay.ew_cal as coordinates
+    AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_NAME); // will use DataFromDisplay.ns_cal, DataFromDisplay.ew_cal as coordinates
     AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION); // will use DataFromDisplay.ns_cal, DataFromDisplay.ew_cal as coordinates
     loop_esp_now(); // send it now, before it gets old
     lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide flag
@@ -1000,6 +1009,11 @@ void AddStationToQueueForGlobe(int16_t station)
     lv_label_set_text(ui_Station_Name, Stations.StationNUG[station].name);
     lv_label_set_text(ui_Status_Line, "CONNECTING");
     lv_label_set_text(ui_Station_Title, "");
+
+    // if this country code is our own home country, adjust clock status for that 
+    if(strcmp(Stations.StationNUG[station].countrycode, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode) == 0)
+    { bClockHomeTime = true;
+    }
 
     // check if gps position is a new one
     if(strcmp(lastgpsrequest, message) != NULL || (ForceGlobeStationGPSupdate == true))
@@ -1150,7 +1164,7 @@ void AppendToLogFile(char *filename, char *url)
 
   if(strcmp(filename, "/Sleeptimer.log") == 0)return; // turn those off for now
 
-  snprintf(logtext, 256, "%d-%s-%d %02d:%02d ->%s",    (size_t)datetime.day, monthnames[datetime.month],  (size_t)datetime.year%100, datetime.hour, datetime.minute, url);
+  snprintf(logtext, 256, "%d-%s-%d %02d:%02d ->%s",    (int)datetime.day, monthnames[datetime.month],  (int)datetime.year%100, datetime.hour, (int)datetime.minute, url);
 
   // file creation dates seem to reflect a double TZ correction
   // use UTC to make it a bit more predictable
@@ -1158,22 +1172,21 @@ void AppendToLogFile(char *filename, char *url)
   //setenv("TZ", "CUSTOM0:00:00", 1);
   //tzset();
 
-  if(SD_MMC.begin("/sdcard", true, false)) // we have a card 
+  if(Puck_SD_GB)
   { File logfile = SD_MMC.open(filename, FILE_APPEND);
     if(!logfile)
     { Serial.printf("Could not open Bad Station File %s for append\n", filename);
-      logfile.close();
       logfile = SD_MMC.open(filename, FILE_WRITE);
-      logfile.printf("File %s created\n", filename);  
-      Serial.printf("File %s created\n", filename);  
-      logfile.close();
-      return;
+      if(logfile)
+      { logfile.printf("File %s created\n", filename);  
+        Serial.printf("File %s created\n", filename);  
+      }
+      else return;  
     }
     Serial.printf("Log File %s appended with %s\n", filename, logtext);
     logfile.println(logtext);  
     logfile.flush();
     logfile.close();
-    SD_MMC.end();
   }  
 
   //setenv("TZ", active_posix_tz, 1);
@@ -1186,17 +1199,20 @@ bool FindCountryNameByCode(char *countryname, char*countrycode)
   static char prevcountrycode[3] = "";
   static char prevcountryname[50] = "";
   
-  if(strcmp(prevcountrycode, countrycode)==NULL)
+  if(strcmp(prevcountrycode, countrycode)==0)
   { strcpy(countryname, prevcountryname);
     return true;
   }
-  while(n<(sizeof(CountryList) / sizeof(country_info)))
+
+  uint16_t total_countries = sizeof(CountryList) / sizeof(country_info);
+
+  while(n<total_countries)
   { //Serial.printf("CountryList[%d].name = %s countrycode %s\n", n, CountryList[n].name, CountryList[n].code);
-    if(strncmp(countrycode, CountryList[n].code, 2)==NULL)
+    if(strncmp(countrycode, CountryList[n].code, 2)==0)
     { strncpy(prevcountrycode, CountryList[n].code, 2);
       prevcountrycode[2]=0;
-      strncpy(prevcountryname, CountryList[n].name, 49);
-      prevcountryname[49]=0;
+      strncpy(prevcountryname, CountryList[n].name, sizeof(prevcountryname) - 1);
+      prevcountryname[sizeof(prevcountryname) - 1]=0;
       //Serial.println(countryname);
       strcpy(countryname, prevcountryname);
       return true;
