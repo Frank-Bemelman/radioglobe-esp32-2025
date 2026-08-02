@@ -8,6 +8,7 @@
 typedef struct {               
   char     QueueMessage[QUEUESIZE][QUEUEMESSAGELENGTH];  // 50 strings of 128 each (6400 bytes) 
   uint16_t QueueMessageType[QUEUESIZE];
+  uint16_t QueueMessageSerialNumber[QUEUESIZE];
   uint16_t QueueIndexIn;
   uint16_t QueueIndexOut;
   uint16_t QueueCnt;
@@ -63,7 +64,7 @@ const char * messagetexts[] = {
    { "VOLUME_AND_TONE 33"},
    { "DISPLAY_WANTS_VOLUME_AND_TONE 34"},
    { "STORE_VOLUME_AND_TONE 35"},
-   { "AUDIO_EOF_STREAM 36"},
+   { "GET_FLIGHT_DATA 36"},
    { "STATION_CONNECTED_IN_MS 37"},
    { "INTERNAL_SPEAKER_TOGGLE 38"},
    { "GET_WEATHER_DATA_BY_GPS 39"},
@@ -98,7 +99,8 @@ const char * messagetexts[] = {
    { "MESSAGE_SILENT_POWER_DOWN 68"}, 
    { "GET_HOME_TIMEZONE 69"},
    { "HOME_TIMEZONE_POSIX 70"},
-   { "MESSAGE_MAX 71"}
+   { "TEST_URL 71"},
+   { "MESSAGE_MAX 72"}
  };
 
 
@@ -110,7 +112,7 @@ const char * messagetexts[] = {
 #define MESSAGE_DESCRIPTION 6
 #define MESSAGE_OPEN_WEATHER_MAP_API_KEY 7
 #define MESSAGE_GOOGLE_API_KEY 8
-#define MESSAGE_TIMEZONE_ID 9
+#define MESSAGE_TIMEZONE_NAME 9
 #define MESSAGE_TIMEZONE_POSIX 10
 #define MESSAGE_THIS_IS_HOME 11
 #define MESSAGE_EX_CHANGE_RATE 12
@@ -133,13 +135,13 @@ const char * messagetexts[] = {
 #define MESSAGE_GET_TIMEZONE_BY_GPS 27
 #define MESSAGE_STREAMING_IDLE_MS 28
 #define MESSAGE_NEW_LIST_LOADED 29 // after a succesful search by display
-#define MESSAGE_GET_TIMEZONE 30
+#define MESSAGE_GET_TIMEZONEXXXX 30
 #define MESSAGE_POWERDOWN 31
 #define MESSAGE_POWERUP 32
 #define MESSAGE_VOLUME_AND_TONE 33 
 #define MESSAGE_DISPLAY_WANTS_VOLUME_AND_TONE 34
 #define MESSAGE_STORE_VOLUME_AND_TONE 35
-#define MESSAGE_AUDIO_EOF_STREAM 36
+#define MESSAGE_GET_FLIGHT_DATA 36
 #define MESSAGE_STATION_CONNECTED_IN_MS 37
 #define MESSAGE_INTERNAL_SPEAKER_TOGGLE 38
 #define MESSAGE_GET_WEATHER_DATA_BY_GPS 39
@@ -173,9 +175,10 @@ const char * messagetexts[] = {
 #define MESSAGE_UPDATE_PUCK 66
 #define MESSAGE_GLOBE_HOSTNAME 67
 #define MESSAGE_SILENT_POWER_DOWN 68
-#define MESSAGE_GET_HOME_TIMEZONE 69
+#define MESSAGE_HOME_TIMEZONE_NAME 69
 #define MESSAGE_HOME_TIMEZONE_POSIX 70
-#define MESSAGE_MAX 71
+#define MESSAGE_TEST_URL 71
+#define MESSAGE_MAX 72
 
 #define MESSAGE_URL_HTTP_400_BAD_REQUEST 400
 #define MESSAGE_URL_HTTP_403_REFUSED 403
@@ -192,11 +195,11 @@ typedef struct struct_message1 {
     uint16_t bassvalue;
     int16_t  treblevalue;
     int16_t  CalibrateZeroPos;
-    uint16_t D_QueueSerialNumber;
+    uint16_t D_QueueSerialNumberSend;
     uint16_t D_QueueMessageType;
     uint16_t D_QueueStationIndex; // station connected -1 if idle
     char     D_QueueMessage[QUEUEMESSAGELENGTH];
-    uint16_t G_QueueSerialNumber; // echo back to globe confirm reception
+    uint16_t G_QueueSerialNumberReceived; // echo back to globe confirm reception
     float    D_StationGpsNS; // used by globe to get timezone
     float    D_StationGpsEW; // used by globe to get timezone
     uint16_t internalspeakeron; // speakers on or off
@@ -213,11 +216,11 @@ typedef struct struct_message2 {
     int16_t  FindGeoLocationData; // tells display that Globe is occupied finding geolocation data
     int16_t  Unraveling; // tells display that Globe is occupied unraveling .m3u or .pls url to get the actual streaming url
     int16_t  UnravelingResult; // tells display that Globe is occupied unraveling .m3u or .pls url to get the actual streaming url
-    uint16_t G_QueueSerialNumber;
+    uint16_t G_QueueSerialNumberSend;
     uint16_t G_QueueMessageType;
     int16_t  D_QueueStationIndex; // echo back unaltered
     char     G_QueueMessage[QUEUEMESSAGELENGTH];
-    uint16_t D_QueueSerialNumber; // echo back to display confirm reception
+    uint16_t D_QueueSerialNumberReceived; // echo back to display confirm reception
     uint16_t D_QueueMessageType;
     uint16_t D_QueueMessageCount; // number of message in queue
     uint16_t G_QueueBytesStreamed; // can be used to monitor actual streaming of data
@@ -249,14 +252,5 @@ Queue FromDisplay; // queue with messages from display
 
 int16_t CalibrateZeroPos = 0;
 
-int16_t TZ_NS;
-int16_t TZ_EW;
-int16_t TZ_RequestedStation = 9999;
-
-float D_GeoStationNS;
-float D_GeoStationEW;
-float D_GeoLocationNS;
-float D_GeoLocationEW;
-int16_t D_RequestedStation = 9999;
 
 

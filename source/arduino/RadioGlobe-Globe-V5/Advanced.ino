@@ -136,7 +136,7 @@ void AutoConnect(void)
     Serial.println("AutoConnect() - Starting config portal");
     wm.setConfigPortalTimeout(120);
     // play it loud enough to be noticed
-    PlaySoundBite((uint8_t *)mp3_smartphone_portal, sizeof(mp3_smartphone_portal), 60); 
+    PlaySoundBite((uint8_t *)mp3_smartphone_portal, sizeof(mp3_smartphone_portal), 40); 
     if(!wm.startConfigPortal(portalName, ""))
     {  delay(5000);
        ESP.restart();
@@ -188,9 +188,10 @@ void checkButton(bool force)
       killwebserver(); 
       // start portal w delay
       Serial.println("checkButton() - Starting config portal");
+      bPortalOpened = true;
       wm.setConfigPortalTimeout(120);
       // play it loud enough to be noticed
-      PlaySoundBite((uint8_t *)mp3_smartphone_portal, sizeof(mp3_smartphone_portal), 60); 
+      PlaySoundBite((uint8_t *)mp3_smartphone_portal, sizeof(mp3_smartphone_portal), 40); 
 
       
       // if (!wm.startConfigPortal("OnDemandAP","password")) {
@@ -200,6 +201,7 @@ void checkButton(bool force)
         // ESP.restart();
       } else 
       { //if you get here you have connected to the WiFi
+        bPortalOpened = false;
         Serial.println("checkButton() - connected...yeey :)");
         PlaySoundBite((uint8_t *)mp3_wificonnected, sizeof(mp3_wificonnected), 0); 
         ssid =wm.getWiFiSSID();
@@ -213,7 +215,7 @@ void checkButton(bool force)
           EEPROM.commit();
           Serial.println("checkButton() - SSID and password saved to EEprom.");
           // play it loud enough to be noticed
-          PlaySoundBite((uint8_t *)mp3_rebooting_radioglobe, sizeof(mp3_rebooting_radioglobe), 60); 
+          PlaySoundBite((uint8_t *)mp3_rebooting_radioglobe, sizeof(mp3_rebooting_radioglobe), 40); 
           delay(2000);
           ESP.restart();
         }         

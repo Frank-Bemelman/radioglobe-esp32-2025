@@ -16,32 +16,39 @@ void OnDataSent(const esp_now_send_info_t *tx_info, esp_now_send_status_t status
 void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData, int len);
 
 // Callback when data is sent
-void OnDataSent(const esp_now_send_info_t *tx_info, esp_now_send_status_t status){
-//void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
-//Serial.print("\r\nLast Packet Send Status:\t");
-//Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+volatile bool bWasTransmitted = false;
+void OnDataSent(const esp_now_send_info_t *tx_info, esp_now_send_status_t status)
+{ //Serial.print("\r\nLast Packet Send Status:\t");
+  //Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+  bWasTransmitted = (status == ESP_NOW_SEND_SUCCESS);
 }
 
 
 // Callback when data is received
 void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData, int len) 
-{ static uint16_t MessageSerialNumber = -1;
+{ static uint16_t MessageSerialNumberApi = -1;
+  static uint16_t MessageSerialNumber = -1;
   static bool firstskipped = false; // skip the first message after (re)boot
   
-  //Serial.printf("Received From Mac %02X:%02X:%02X:%02X:%02X:%02X\n", rx_info->src_addr[0], rx_info->src_addr[1], rx_info->src_addr[2], rx_info->src_addr[3], rx_info->src_addr[4], rx_info->src_addr[5]);  
+  // this is just a silly check
+  // Serial.printf("Received From Mac %02X:%02X:%02X:%02X:%02X:%02X\n", rx_info->src_addr[0], rx_info->src_addr[1], rx_info->src_addr[2], rx_info->src_addr[3], rx_info->src_addr[4], rx_info->src_addr[5]);  
   
-  memcpy(&DataFromDisplay, incomingData, sizeof(DataFromDisplay));
+  // Copy received raw data, nothing more, certainly not too much
+  int safe_len = (len < sizeof(DataFromDisplay)) ? len : sizeof(DataFromDisplay);
+  memcpy(&DataFromDisplay, incomingData, safe_len);
+  // make sure message string is 0 terminated, just in case it is corrupt data, bitten once, never twice
+  DataFromDisplay.D_QueueMessage[QUEUEMESSAGELENGTH - 1] = 0; 
   
   // quickly store gps location for timezone request before they become altered
-  if(PrevDataFromDisplay.D_QueueMessageType != DataFromDisplay.D_QueueMessageType)
-  { PrevDataFromDisplay.D_QueueMessageType = DataFromDisplay.D_QueueMessageType;
-    if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_TIMEZONE_BY_GPS || DataFromDisplay.D_QueueMessageType == MESSAGE_GET_HOME_TIMEZONE)
-    { Serial.printf("GLOBE SAYS -> MESSAGE_GET_TIMEZONE_BY_GPS\n");
-      //TZ_NS = DataFromDisplay.D_StationGpsNS;
-      //TZ_EW = DataFromDisplay.D_StationGpsEW;
-      //TZ_RequestedStation = DataFromDisplay.D_RequestedStation;
-      //DataFromGlobe.FindTimeZone = MESSAGE_GET_TIMEZONE_BY_GPS; // makes the CallGetTimeZone task actually do it
-      CancelApiType(MESSAGE_GET_TIMEZONE_BY_GPS);
+//  if(PrevDataFromDisplay.D_QueueMessageType != DataFromDisplay.D_QueueMessageType && ((DataFromDisplay.D_QueueMessageType != MESSAGE_NOP) ))
+  //if(PrevDataFromDisplay.D_QueueMessageType != DataFromDisplay.D_QueueMessageType && ((DataFromDisplay.D_QueueMessageType != MESSAGE_NOP) ))
+  if((DataFromDisplay.D_QueueMessageType != MESSAGE_NOP) && (MessageSerialNumberApi != DataFromDisplay.D_QueueSerialNumberSend))
+  { MessageSerialNumberApi = DataFromDisplay.D_QueueSerialNumberSend; // treat once, never twice
+    DataFromGlobe.D_QueueSerialNumberReceived = MessageSerialNumberApi; // echo back
+    if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_TIMEZONE_BY_GPS || DataFromDisplay.D_QueueMessageType == MESSAGE_HOME_TIMEZONE_NAME)
+    { Serial.printf("PUCK SAYS -> MESSAGE_GET_TIMEZONE_BY_GPS\n");
+      CancelApiType(MESSAGE_GET_TIMEZONE_BY_GPS); // cancel previous ones
+      CancelApiType(MESSAGE_HOME_TIMEZONE_NAME); // cancel previous ones
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
       ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsNS;
       ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsEW;
@@ -49,38 +56,22 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
       ApiCallsToDo.ApiQueueIndexIn++;
       ApiCallsToDo.ApiQueueIndexIn %= APIQUEUESIZE;
       ApiCallsToDo.ApiQueueCnt++;
-
       return; // don't add to queue
     }  
-
-    if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_TIMEZONE)
-    { Serial.printf("GLOBE SAYS -> MESSAGE_GET_TIMEZONE\n");
-      //TZ_NS = DataFromDisplay.ns_cal/10;
-      //TZ_EW = DataFromDisplay.ew_cal/10;
-      //TZ_RequestedStation = DataFromDisplay.D_RequestedStation;
-      //DataFromGlobe.FindTimeZone = MESSAGE_GET_TIMEZONE; // makes the CallGetTimeZone task actually do it
-
-      CancelApiType(MESSAGE_GET_TIMEZONE);
+    else if((DataFromDisplay.D_QueueMessageType == MESSAGE_TIMEZONE_NAME))
+    { Serial.printf("PUCK SAYS -> MESSAGE_GET_TIMEZONE\n");
+      CancelApiType(MESSAGE_TIMEZONE_NAME);
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
-      ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ns_cal/10;
-      ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ew_cal/10;
+      ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ns_cal/10.0;
+      ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ew_cal/10.0;
       ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_RequestedStation;
       ApiCallsToDo.ApiQueueIndexIn++;
       ApiCallsToDo.ApiQueueIndexIn %= APIQUEUESIZE;
       ApiCallsToDo.ApiQueueCnt++;
-
       return; // don't add to queue
     }  
-
-    if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_GEOLOCATION_BY_GPS)
-    { Serial.printf("GLOBE SAYS -> MESSAGE_GET_GEOLOCATION_BY_GPS\n");
-      //if(D_RequestedStation==9999) // if api caller is free
-      //{ D_GeoStationNS = DataFromDisplay.D_StationGpsNS;
-      //  D_GeoStationEW = DataFromDisplay.D_StationGpsEW;
-      //  D_RequestedStation = DataFromDisplay.D_RequestedStation;
-      //  DataFromGlobe.FindGeoLocationData = MESSAGE_GET_GEOLOCATION_BY_GPS; // makes the CallGetTimeZone task actually do it
-      //}  
-      
+    else if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_GEOLOCATION_BY_GPS)
+    { Serial.printf("PUCK SAYS -> MESSAGE_GET_GEOLOCATION_BY_GPS\n");
       CancelApiType(MESSAGE_GET_GEOLOCATION_BY_GPS);
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
       ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsNS;
@@ -89,48 +80,49 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
       ApiCallsToDo.ApiQueueIndexIn++;
       ApiCallsToDo.ApiQueueIndexIn %= APIQUEUESIZE;
       ApiCallsToDo.ApiQueueCnt++;
-
       return; // don't add to queue
     }  
-
-    if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_GEOLOCATION)
-    { Serial.printf("GLOBE SAYS -> MESSAGE_GET_GEOLOCATION (station%d)\n", DataFromDisplay.D_RequestedStation);
-      //if(D_RequestedStation==9999) // if api caller is free
-      //{ D_GeoLocationNS = DataFromDisplay.ns_cal/10;
-      //  D_GeoLocationEW = DataFromDisplay.ew_cal/10;
-      //  D_RequestedStation = DataFromDisplay.D_RequestedStation;
-      //  DataFromGlobe.FindGeoLocationData = MESSAGE_GET_GEOLOCATION; // makes the CallGetTimeZone task actually do it
-      //}  
-      
+    else if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_GEOLOCATION)
+    { Serial.printf("PUCK SAYS -> MESSAGE_GET_GEOLOCATION (station%d)\n", DataFromDisplay.D_RequestedStation);
       CancelApiType(MESSAGE_GET_GEOLOCATION);
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
-      ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ns_cal/10;
-      ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ew_cal/10;
+      ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ns_cal/10.0;
+      ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ew_cal/10.0;
       ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_RequestedStation;
       ApiCallsToDo.ApiQueueIndexIn++;
       ApiCallsToDo.ApiQueueIndexIn %= APIQUEUESIZE;
       ApiCallsToDo.ApiQueueCnt++;
-
       return; // don't add to queue
     }  
-
-
+    else if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_FLIGHT_DATA)
+    { Serial.printf("PUCK SAYS -> MESSAGE_GET_FLIGHT_DATA\n");
+      ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
+      ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ns_cal/10.0;
+      ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ew_cal/10.0;
+      ApiCallsToDo.ApiQueueIndexIn++;
+      ApiCallsToDo.ApiQueueIndexIn %= APIQUEUESIZE;
+      ApiCallsToDo.ApiQueueCnt++;
+      return; // don't add to queue
+    }
+    // not a special for api queue, continue..
   }  
 
-  if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_TIMEZONE_BY_GPS)return;
-  if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_TIMEZONE)return;
-  if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_GEOLOCATION_BY_GPS)return;
-  if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_GEOLOCATION)return;
-
   // put in receiving queue
-  if(MessageSerialNumber != DataFromDisplay.D_QueueSerialNumber)
-  { MessageSerialNumber = DataFromDisplay.D_QueueSerialNumber;
+  if((DataFromDisplay.D_QueueMessageType != MESSAGE_NOP) && (MessageSerialNumber != DataFromDisplay.D_QueueSerialNumberSend))
+  { MessageSerialNumber = DataFromDisplay.D_QueueSerialNumberSend;
+    DataFromGlobe.D_QueueSerialNumberReceived = MessageSerialNumber; // echo back
     // Serial.printf("DataFromDisplay.D_QueueSerialNumber = %d\n", DataFromDisplay.D_QueueSerialNumber);
     if(firstskipped)
     { memcpy(&FromDisplay.QueueMessage[FromDisplay.QueueIndexIn], DataFromDisplay.D_QueueMessage, sizeof(DataFromDisplay.D_QueueMessage));
+      FromDisplay.QueueMessage[FromDisplay.QueueIndexIn][sizeof(DataFromDisplay.D_QueueMessage) - 1] = 0; // terminate for safety
       FromDisplay.QueueMessageType[FromDisplay.QueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
-      FromDisplay.QueueIndexIn++;
-      FromDisplay.QueueIndexIn %= QUEUESIZE;
+      FromDisplay.QueueMessageSerialNumber[FromDisplay.QueueIndexIn] =  DataFromDisplay.D_QueueSerialNumberSend;
+      
+      Serial.printf("ESPNOW: OnDataRecv() -> DataFromDisplay.D_QueueSerialNumberSend = %d  - %s %s\n", FromDisplay.QueueMessageSerialNumber[FromDisplay.QueueIndexIn], messagetexts[FromDisplay.QueueMessageType[FromDisplay.QueueIndexIn]], FromDisplay.QueueMessage[FromDisplay.QueueIndexIn]);
+
+      // atomic update of FromDisplay.QueueIndexIn, probably overly cautious since we run on same core
+      uint16_t nextIndex = (FromDisplay.QueueIndexIn + 1) % QUEUESIZE;
+      FromDisplay.QueueIndexIn = nextIndex; 
       FromDisplay.QueueCnt++;
     }
     firstskipped = true;
@@ -138,7 +130,6 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
 
   //Serial.print("Bytes received: ");
   //Serial.println(len);
-
 }
  
 void setup_esp_now() 
@@ -161,7 +152,7 @@ void setup_esp_now()
 
   AddToQueueForDisplay("", MESSAGE_STATION_NAME);
   AddToQueueForDisplay("", MESSAGE_SONG_TITLE);
-  AddToQueueForDisplay("", MESSAGE_TIMEZONE_ID);
+  AddToQueueForDisplay("", MESSAGE_TIMEZONE_NAME);
 
   // Init ESP-NOW
   if (esp_now_init() != ESP_OK) {
@@ -198,36 +189,67 @@ void setup_esp_now()
 bool Q_filling = 0;
 bool Q_sending = 0;
 
-void loop_esp_now() {
-  // we get called here from the encoder loop, every 200mS
-  if(PuckMac[0]==0)return; 
-
+void loop_esp_now() 
+{ static uint16_t wait = 10;
+            
+  // we get called here from the encoder loop, every 100mS
+  
   while(Q_filling); // wait until idle
   Q_sending = true;
   // check and send all queued messages via ESP-NOW
   if(1) //bUpAndRunning)
   { if(ToDisplay.QueueCnt>0)
-    { while(ToDisplay.QueueCnt)
+    { int max_to_send_attempts = 10; 
+      while(ToDisplay.QueueCnt && max_to_send_attempts--) // don't let us hang in here forever, best effort here
       { if(ToDisplay.QueueIndexOut != ToDisplay.QueueIndexIn)
-        { DataFromGlobe.G_QueueSerialNumber++;
+        { //DataFromGlobe.G_QueueSerialNumberSend++;
+          //Serial.printf("ESPNOW esp_now_send() ToDisplay.QueueCnt %d -> ToDisplay.QueueIndexOut %d != ToDisplay.QueueIndexIn %d\n", ToDisplay.QueueCnt, ToDisplay.QueueIndexOut, ToDisplay.QueueIndexIn);
+
           DataFromGlobe.D_QueueMessageCount = ToDisplay.QueueCnt;
-          strcpy(DataFromGlobe.G_QueueMessage, ToDisplay.QueueMessage[ToDisplay.QueueIndexOut]);   
+          // use memcpy, message can have embedded 0's - not always a traditional string 
+          memcpy(DataFromGlobe.G_QueueMessage, ToDisplay.QueueMessage[ToDisplay.QueueIndexOut], QUEUEMESSAGELENGTH);   
+
           DataFromGlobe.G_QueueMessageType = ToDisplay.QueueMessageType[ToDisplay.QueueIndexOut];
-          //Serial.printf("Message %d-%d sent to display = >%s<\n", DataFromGlobe.G_QueueSerialNumber, DataFromGlobe.G_QueueMessageType, DataFromGlobe.G_QueueMessage);
-          ToDisplay.QueueIndexOut++;
-          if(ToDisplay.QueueIndexOut>=QUEUESIZE)ToDisplay.QueueIndexOut = 0;
-          ToDisplay.QueueCnt--;
+          
+          bWasTransmitted = false;
           esp_err_t result = esp_now_send(PuckMac, (uint8_t *) &DataFromGlobe, sizeof(DataFromGlobe));
+          Serial.printf("ESPNOW esp_now_send() SERIALNR %d -> %s sent to display = >%s<\n", DataFromGlobe.G_QueueSerialNumberSend, messagetexts[DataFromGlobe.G_QueueMessageType]  , DataFromGlobe.G_QueueMessage);
+          
+          if(result==0) // && !bWasTransmitted) // all went ok
+          { //Serial.printf("ESPNOW esp_now_send() succesfully queued\n");
+            delay(2); // bWasTransmitted very likely true after this wait
+            int wait = 25;
+            while(wait-- && !bWasTransmitted ) // usually never happens, bWasTransitted already true;
+            { Serial.printf("ESPNOW esp_now_send() wait for message actually send out\n");
+              delay(1);
+            }
+            if(bWasTransmitted)
+            { //Serial.printf("ESPNOW esp_now_send() package DataFromGlobe.G_QueueSerialNumber = %d -> delivered at puck\n", DataFromGlobe.G_QueueSerialNumberSend);
+              Serial.printf("ESPNOW esp_now_send() DISPLAY CONFIRMED  %s -> delivered at puck\n", messagetexts[ToDisplay.QueueMessageType[ToDisplay.QueueIndexOut]]);
+              ToDisplay.QueueIndexOut++;
+              ToDisplay.QueueIndexOut %= QUEUESIZE;
+              ToDisplay.QueueCnt--;
+              DataFromGlobe.G_QueueSerialNumberSend++;
+            }
+            else
+            { Serial.printf("ESPNOW Failed after 25mS waiting, try again..\n");
+            }  
+          } 
+          else
+          { Serial.printf("ESPNOW esp_now_send() could not queue (result=%d) message, will try again after 10 mS\n", result);
+            delay(10);
+          }
+          delay(5);
         }
         // keep last one send
         memcpy(&PrevDataFromGlobe, &DataFromGlobe, sizeof(PrevDataFromGlobe));
+        delay(5); // since we are in a wile loop, this seems to fix the odd lost packet of data
       }
     }
-    else // keep sending last one, if changed with perhaps updated coordinates
+    else // keep sending last one, if changed with perhaps updated coordinates, rssi strength, whatever
     { if(memcmp(&PrevDataFromGlobe, &DataFromGlobe,sizeof(PrevDataFromGlobe)) != 0)
-      { DataFromGlobe.G_QueueMessageType = MESSAGE_NOP; // puck rebooting could pick last send message -> double puck in a row update seen
+      { DataFromGlobe.G_QueueMessageType = MESSAGE_NOP; // don't want this to be picked by puck up as message with real job to do
         esp_err_t result = esp_now_send(PuckMac, (uint8_t *) &DataFromGlobe, sizeof(DataFromGlobe));
-        // Serial.printf("Stuff (usually coordinates or rssi changed) send\n");
         memcpy(&PrevDataFromGlobe, &DataFromGlobe, sizeof(PrevDataFromGlobe));
       }  
     }
@@ -252,15 +274,18 @@ void AddToQueueForDisplay(const char* message, uint16_t queuemessagetype)
     return;
   }
 
-  if(ToDisplay.QueueCnt < (QUEUESIZE-1)) // one empty slot to avoid IndexIn becomes equal to IndexOut
-  { if(ToDisplay.QueueIndexIn>=QUEUESIZE)ToDisplay.QueueIndexIn = 0;
-    strncpy(ToDisplay.QueueMessage[ToDisplay.QueueIndexIn], message, QUEUEMESSAGELENGTH);
-    ToDisplay.QueueMessage[ToDisplay.QueueIndexIn][QUEUEMESSAGELENGTH] = 0; // terminate just in case of idiotic long message
+  if(ToDisplay.QueueCnt < (QUEUESIZE-1)) // at least one empty slot needed
+  { ToDisplay.QueueIndexIn %= QUEUESIZE; // just to be sure
+    //strncpy(ToDisplay.QueueMessage[ToDisplay.QueueIndexIn], message, QUEUEMESSAGELENGTH);
+    memcpy(ToDisplay.QueueMessage[ToDisplay.QueueIndexIn], message, QUEUEMESSAGELENGTH);
+    
+    ToDisplay.QueueMessage[ToDisplay.QueueIndexIn][QUEUEMESSAGELENGTH-1] = 0; // terminate just in case of idiotic long message that could upset the puck decoding this
     ToDisplay.QueueMessageType[ToDisplay.QueueIndexIn] = queuemessagetype;
     
     Serial.printf("TELL DISPLAY (QueueIndexIn %d): %s -> %s\n", ToDisplay.QueueIndexIn, messagetexts[ToDisplay.QueueMessageType[ToDisplay.QueueIndexIn]], ToDisplay.QueueMessage[ToDisplay.QueueIndexIn]);
 
     ToDisplay.QueueIndexIn++;
+    ToDisplay.QueueIndexIn %= QUEUESIZE;
     ToDisplay.QueueCnt++;
   }
   else Serial.println("Queue to display is full!!!");

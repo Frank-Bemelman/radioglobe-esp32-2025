@@ -38,8 +38,8 @@ void Queued_Api_Calls(void * pvParameters)
     { // process ApiCallsToDo.ApiQueueMessageType[ApiCallsToDo.ApiQueueIndexOut];
       switch(ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexOut])
       { case MESSAGE_GET_TIMEZONE_BY_GPS:
-        case MESSAGE_GET_TIMEZONE:
-        case MESSAGE_GET_HOME_TIMEZONE:
+        case MESSAGE_TIMEZONE_NAME:
+        case MESSAGE_HOME_TIMEZONE_NAME:
           GetTimeZone(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexOut]);
           GetOpenWeatherData(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut]);
           break;
@@ -49,6 +49,11 @@ void Queued_Api_Calls(void * pvParameters)
         case MESSAGE_GET_GEOLOCATION:
           GetGeolocationData(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexOut]);
           break;
+
+        case MESSAGE_GET_FLIGHT_DATA:
+          // degrees are full degrees
+          GetAdsbFiFlightData(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut]); 
+          break;  
           
         default:
           break;  
@@ -56,7 +61,6 @@ void Queued_Api_Calls(void * pvParameters)
       ApiCallsToDo.ApiQueueIndexOut++;
       ApiCallsToDo.ApiQueueIndexOut %= APIQUEUESIZE;
       ApiCallsToDo.ApiQueueCnt--;
-      loop_esp_now();
     }
     vTaskDelay(25 / portTICK_PERIOD_MS); // lowered to 100, was 200
   }  
@@ -134,7 +138,7 @@ void GetTimeZone(float StationGpsNS, float StationGpsEW, uint16_t ApiType)
       Serial.printf("TZ posix = %s\n", posix);
       setenv("TZ", posix, 1);
       tzset();
-      if(ApiType==MESSAGE_GET_HOME_TIMEZONE)AddToQueueForDisplay(posix, MESSAGE_HOME_TIMEZONE_POSIX);
+      if(ApiType==MESSAGE_HOME_TIMEZONE_NAME)AddToQueueForDisplay(posix, MESSAGE_HOME_TIMEZONE_POSIX);
       AddToQueueForDisplay(posix, MESSAGE_TIMEZONE_POSIX);
 
       uint16_t retrys = 0;
@@ -150,7 +154,7 @@ void GetTimeZone(float StationGpsNS, float StationGpsEW, uint16_t ApiType)
       Serial.printf("GetTimeZone3 retrieving time elapsed -> %ld mSec\n", millis() - lapMillis);
       //sprintf(content, "TZN - %s", (const char*)doc["timeZoneName"]); 
       sprintf(content, "TZ - %s", (const char*)doc["timeZoneId"]); 
-      AddToQueueForDisplay(content, MESSAGE_TIMEZONE_ID);
+      AddToQueueForDisplay(content, ApiType);
       if(print)Serial.println(content);
       if(print)printLocalTime();      
     }
@@ -167,7 +171,7 @@ void GetTimeZone(float StationGpsNS, float StationGpsEW, uint16_t ApiType)
         retrys++;
       }
       DataFromGlobe.G_now = time(NULL); // UTC for puck
-      AddToQueueForDisplay("TZ - Nautical", MESSAGE_TIMEZONE_ID);
+      AddToQueueForDisplay("TZ - Nautical", MESSAGE_TIMEZONE_NAME);
       
 
       CancelApiType(MESSAGE_GET_GEOLOCATION); // does not make sense anymore
@@ -182,7 +186,7 @@ void GetTimeZone(float StationGpsNS, float StationGpsEW, uint16_t ApiType)
   if(print)Serial.print("Done Google query timezone\n");
   // Serial.println("MFree Heap at End GetTimeZone()" + String(ESP.getFreeHeap()));   
   Serial.printf("GetTimeZone time elapsed -> %ld mSec\n", millis() - lapMillis);
-  TZ_RequestedStation = 9999;
+  
 }
 
 // fetch country and town
@@ -287,8 +291,6 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW, int16_t AskingFo
 
   if(AskingForStation>=0)AddToQueueForDisplay(payload, MESSAGE_GET_GEOLOCATION_BY_GPS);
   else AddToQueueForDisplay(payload, MESSAGE_GET_GEOLOCATION);
-  D_RequestedStation = 9999; // flag as handled, ready for next one
-  //loop_esp_now(); // send out immediately, don't let it go old
 
 }
 
@@ -485,6 +487,174 @@ int IsCountryCodeValid(char *countrycode)
   return index; // which is -1 if we get here
 }
 
+
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+
+// De compacte struct voor ESP-NOW
+
+struct FlightBlip {
+    int16_t rel_x;
+    int16_t rel_y;
+    uint16_t heading;
+    char callsign[8];
+    char type[5];
+    uint16_t altitude_ft; // We slaan direct het Flight Level op (bijv. 310)
+} __attribute__((packed));
+
+struct RadarDataPacket {
+    uint8_t packet_type = 0xAA; // Uniek ID voor de Puck receptie
+    uint8_t num_flights = 0;
+    FlightBlip flights[5];
+} __attribute__((packed));
+
+void GetAdsbFiFlightData(float lat, float lon)
+{ WiFiClientSecure client;  
+          
+    
+    
+    client.setInsecure();
+    // We zoeken in een straal van 25 Nautische Mijlen (~46 km) rondom de bol
+    String url = "https://opendata.adsb.fi/api/v3/lat/" + String(lat, 4) + "/lon/" + String(lon, 4) + "/dist/25";
+
+    Serial.println(url);
+
+    HTTPClient http;
+
+    
+    http.begin(url);
+    
+    int httpCode = http.GET();
+    if (httpCode == HTTP_CODE_OK) {
+        String payload = http.getString();
+        Serial.println(payload);
+        
+//23:17:42.335 -> https://opendata.adsb.fi/api/v3/lat/53.0000/lon/11.0000/dist/25
+
+//https://opendata.adsb.fi/api/v3/lat/44.0000/lon/10.0000/dist/25
+
+        // adsb.fi kan flinke JSON's geven. Genoeg heap op Core 0 reserveren!
+        DynamicJsonDocument doc(16384); 
+        DeserializationError error = deserializeJson(doc, payload);
+        
+        if (!error) 
+        {
+            JsonArray aircrafts = doc["ac"];
+            RadarDataPacket responsePacket;
+            responsePacket.packet_type = 0xAA; 
+            responsePacket.num_flights = 0;
+
+            for (JsonObject ac : aircrafts) 
+            {
+                if (responsePacket.num_flights >= 5) break; // Max 5 op je radarscherm
+
+                if (!ac.containsKey("lat") || !ac.containsKey("lon")) continue;
+
+                float f_lat = ac["lat"].as<float>();
+                float f_lon = ac["lon"].as<float>();
+                float f_track = ac["track"].as<float>();
+                
+                String cleanFlight = ac["flight"].as<String>();
+                cleanFlight.trim(); // Haal eventuele spaties weg
+                if (cleanFlight.length() == 0) cleanFlight = "UNK";
+
+                String cleanType = ac["t"].as<String>();
+                cleanType.trim();
+                if (cleanType.length() == 0) cleanType = "AIRC";
+                
+                int alt_baro = 0;
+                if (ac["alt_baro"].is<int>()) {
+                    alt_baro = ac["alt_baro"].as<int>();
+                }
+
+
+                float afstand_tot_bol = BerekenAfstandKm(lat, lon, f_lat, f_lon);
+
+                const float R = 6371.0; // radius earth in km
+                //const float DEG_TO_RAD = M_PI / 180.0;
+                float mid_lat_rad = ((lat + f_lat) / 2.0) * DEG_TO_RAD;
+                float afstand_x_km = (f_lon - lon) * DEG_TO_RAD * cos(mid_lat_rad) * R;
+                float afstand_y_km = (f_lat - lat) * DEG_TO_RAD * R;
+
+                // 4. Schaal de kilometers om naar de 200-pixel radarstraal
+                // 200 pixels / 46.3 km = 4.31966
+                int16_t calc_x = (int16_t)(afstand_x_km * 4.31966);
+                int16_t calc_y = (int16_t)(afstand_y_km * 4.31966);
+
+                int32_t kwadratische_afstand = ((int32_t)calc_x * calc_x) + ((int32_t)calc_y * calc_y);
+                // Drempel: binnen 400x400 cirkel blijven -> Straal = 200 -> Kwadraat = 40000
+                Serial.printf("x=%d y=%d px^2-afstand=%d afstand-float=%f kM callsign <%s>\n", calc_x, calc_y, kwadratische_afstand, afstand_tot_bol, responsePacket.flights[responsePacket.num_flights].callsign);
+               
+                if (kwadratische_afstand > 40000) 
+                {  Serial.printf("ERUIT   x=%d y=%d px^2-afstand=%d afstand-float=%f kM callsign <%s>\n", calc_x, calc_y, kwadratische_afstand, afstand_tot_bol, responsePacket.flights[responsePacket.num_flights].callsign);
+               
+                    // Vliegtuig valt buiten de ronde radar-cirkel. Direct skippen!
+                    continue; 
+                }
+
+                responsePacket.flights[responsePacket.num_flights].rel_x = calc_x;
+                responsePacket.flights[responsePacket.num_flights].rel_y = calc_y;
+
+                // test to see if this renders the airplane at the center of the puck display - yes it did
+                // if(responsePacket.num_flights == 0)
+                // { responsePacket.flights[responsePacket.num_flights].rel_x = 0;
+                //   responsePacket.flights[responsePacket.num_flights].rel_y = 0;
+                // }
+
+                responsePacket.flights[responsePacket.num_flights].heading = (uint16_t)f_track;
+
+
+                memset(responsePacket.flights[responsePacket.num_flights].callsign, 0, 8);
+                strncpy(responsePacket.flights[responsePacket.num_flights].callsign, cleanFlight.c_str(), 7);
+
+                memset(responsePacket.flights[responsePacket.num_flights].type, 0, 5);
+                strncpy(responsePacket.flights[responsePacket.num_flights].type, cleanType.c_str(), 4);
+
+                Serial.printf("callsign <%s> type <%s>\n", responsePacket.flights[responsePacket.num_flights].callsign, responsePacket.flights[responsePacket.num_flights].type);
+
+                // 4. Zet hoogte direct om naar Flight Level getal
+                responsePacket.flights[responsePacket.num_flights].altitude_ft = (uint16_t)(alt_baro);
+
+                responsePacket.num_flights++;
+            }
+
+            // Stuur de schone, compacte struct terug via je bestaande ESP-NOW zend-systeem
+           
+            AddToQueueForDisplay((char *)&responsePacket, MESSAGE_GET_FLIGHT_DATA);
+           
+            for(int n=0; n<responsePacket.num_flights; n++)
+            { Serial.printf("callsign <%s> type <%s>\n", responsePacket.flights[n].callsign, responsePacket.flights[n].type);
+            }
+           
+            Serial.printf("Radar: %d vluchten naar Puck gestuurd.\n", responsePacket.num_flights);
+        }
+    } 
+    else 
+    {  Serial.printf("Radar API Error: HTTP code %d\n", httpCode);
+    }
+    http.end();
+}
+
+float BerekenAfstandKm(float lat1, float lon1, float lat2, float lon2) {
+    // 1. Straal van de aarde in kilometers
+    const float R = 6371.0; 
+
+    // 2. Reken alle graden om naar radialen (graden * pi / 180)
+    float lat1_rad = lat1 * M_PI / 180.0;
+    float lat2_rad = lat2 * M_PI / 180.0;
+    float delta_lat_rad = (lat2 - lat1) * M_PI / 180.0;
+    float delta_lon_rad = (lon2 - lon1) * M_PI / 180.0;
+
+    // 3. De Haversine wiskunde
+    float a = sin(delta_lat_rad / 2.0) * sin(delta_lat_rad / 2.0) +
+              cos(lat1_rad) * cos(lat2_rad) *
+              sin(delta_lon_rad / 2.0) * sin(delta_lon_rad / 2.0);
+              
+    float c = 2.0 * atan2(sqrt(a), sqrt(1.0 - a));
+
+    // 4. Totale afstand in kilometers
+    return R * c; 
+}
 
 /*
 // exchange rates

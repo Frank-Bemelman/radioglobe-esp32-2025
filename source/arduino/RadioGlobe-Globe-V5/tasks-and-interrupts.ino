@@ -1,4 +1,4 @@
-// tasks
+// tasks - touch task is created early in setup() as I want to use the pixel led stuff early too
 
 void setup_tasks(void)
 { xTaskCreatePinnedToCore(
@@ -14,19 +14,9 @@ void setup_tasks(void)
                     "ReadAS5600Encoders",     /* name of task. */
                     5000,       /* Stack size of task */
                     NULL,        /* parameter of the task */
-                    1,           /* priority of the task */
+                    3,           /* was 1, changed to 3 29JUL26 priority of the task */
                     NULL,      /* Task handle to keep track of created task */
                     1);          /* pin task to core 0 */      
-  xTaskCreatePinnedToCore(
-                    TaskTouch,   /* Task function. */
-                    "TaskTouch",     /* name of task. */
-                    5000,       /* Stack size of task */
-                    NULL,        /* parameter of the task */
-                   2,           /* priority of the task */
-                    NULL,      /* Task handle to keep track of created task */
-                    1);          /* pin task to core 0 */      
-
-
 }
 
 // Task to read the globe encoders, roughly ten times a second
@@ -49,9 +39,11 @@ void ReadAS5600Encoders(void * pvParameters)
   static uint16_t stable100ms = 0;
   static bool EncoderReliable = false;  
   static uint8_t LedAnimationBrightness = 0;
+  static uint32_t EncoderTicker100mS = 0; 
   
   while(1)
-  { ReadEncoderTicker100mS++;
+  { EncoderTicker100mS = GlobalTicker100mS;
+    
     if(Timer100msSerialCanBeOpened)Timer100msSerialCanBeOpened--;
     if(Timer100msSerialIsOpen)
     { Timer100msSerialIsOpen--;
@@ -60,31 +52,34 @@ void ReadAS5600Encoders(void * pvParameters)
       }
     }
 
-    if(RefreshRatesCountDownTimer && (ReadEncoderTicker100mS%10)==0)RefreshRatesCountDownTimer--;
+    if(RefreshRatesCountDownTimer && (EncoderTicker100mS%10)==0)RefreshRatesCountDownTimer--;
     
     
-    // keep 4 last readings
     if(!EncoderReliable)
-    { if(ReadEncoderTicker100mS > 25)
+    { if(EncoderTicker100mS > 25)
       { EncoderReliable = true;
         DataFromGlobe.G_EncoderReliable = true;
       }
     }
+
+    // keep 4 last readings
     AverageIdx %= 4;
-    if(as5600_1.readAGC()<100)CurrentNS4096 = as5600_1.readAngle()-2048;
-    else CurrentNS4096 = 0;
+    //if(as5600_lat.readAGC()<100)
+    CurrentNS4096 = as5600_lat.readAngle()-2048;
+    // else CurrentNS4096 = 0;
     //Serial.println(CurrentNS4096);
 
-    if(as5600_2.readAGC()<100)CurrentEW4096 = as5600_2.readAngle()-2048;
-    else CurrentEW4096 = 0;
+    //if(as5600_lon.readAGC()<100)
+    CurrentEW4096 = as5600_lon.readAngle()-2048;
+    //else CurrentEW4096 = 0;
     //Serial.println(CurrentEW4096);
 
     AverageNS[AverageIdx] = CurrentNS4096;
     AverageEW[AverageIdx] = CurrentEW4096;
     AverageIdx++;
 
-    //Serial.print("ReadAGC NS = "); Serial.println(as5600_1.readAGC());
-    //Serial.print("ReadAGC EW = "); Serial.println(as5600_2.readAGC());
+    //Serial.print("ReadAGC NS = "); Serial.println(as5600_lat.readAGC());
+    //Serial.print("ReadAGC EW = "); Serial.println(as5600_lon.readAGC());
 
     // get the average
     if(!stable)
@@ -114,7 +109,8 @@ void ReadAS5600Encoders(void * pvParameters)
     
     // send new NS postion to puck if slightly changed
     if(OldCurrentNS4096 != CurrentNS4096)
-    { if(abs(((OldCurrentNS4096 - CurrentNS4096))%4096)>1)
+    { //if(abs(((OldCurrentNS4096 - CurrentNS4096))%4096)>1)
+      if(abs(OldCurrentNS4096 - CurrentNS4096)>1)
       { OldCurrentNS4096 = CurrentNS4096;
         NSDegLive10 = (CurrentNS4096) * 3600 / 4096; // convert to degrees times 10
         if((NSDegLive10>=-900) && (NSDegLive10<=900)) 
@@ -125,7 +121,8 @@ void ReadAS5600Encoders(void * pvParameters)
 
     // send new EW postion to puck if slightly changed
     if(OldCurrentEW4096 != CurrentEW4096)
-    { if(abs(((OldCurrentEW4096 - CurrentEW4096))%4096)>1)
+    { //if(abs(((OldCurrentEW4096 - CurrentEW4096))%4096)>1)
+      if(abs(OldCurrentEW4096 - CurrentEW4096)>1)
       { OldCurrentEW4096 = CurrentEW4096;
         EWDegLive10 = (CurrentEW4096) * 3600 / 4096; // convert to degrees times 10
         if((EWDegLive10>=-1800) && (EWDegLive10<=1800)) 
@@ -149,14 +146,15 @@ void ReadAS5600Encoders(void * pvParameters)
       }  
     }
 
-    if(((ReadEncoderTicker100mS % 1) == 0) && !Tuning)loop_esp_now();
+    //if(((EncoderTicker100mS % 1) == 0) && !Tuning)
+    if(!bPortalOpened)loop_esp_now();
+
     checkSpeakerToggleButton();
     //Serial.println("EFree Heap B4 we continue " + String(ESP.getFreeHeap()));  
 
-    if((ReadEncoderTicker100mS % 50)==0)DataFromGlobe.G_rssi_globe = WiFi.RSSI(); // every 5 seconds
+    if((EncoderTicker100mS % 50)==0)DataFromGlobe.G_rssi_globe = WiFi.RSSI(); // every 5 seconds
 
-    if((ReadEncoderTicker100mS % 3000)==0) // check every 5 minutes if battery needs recharge
-    // if((ReadEncoderTicker100mS % 100)==0) // check every 10 seconds (testing) if battery needs recharge
+    if((EncoderTicker100mS % 3000)==0) // check every 5 minutes if battery needs recharge
     { if((DataFromDisplay.D_BatteryVoltage > 30) && (DataFromDisplay.D_BatteryVoltage < 36)) // valid reading but below 3.6 volt
       { // Serial.printf("DataFromDisplay.D_BatteryVoltage = %d\n", DataFromDisplay.D_BatteryVoltage);
         PlaySoundBite((uint8_t *)mp3_please_recharge, sizeof(mp3_please_recharge), 0);
@@ -167,7 +165,7 @@ void ReadAS5600Encoders(void * pvParameters)
 }
 
 void TaskTouch(void * pvParameters)
-{ static uint32_t filtered[16];
+{ static uint32_t filtered[32];
   static uint8_t idx = 0;
   static uint32_t sum;
   static uint32_t average;
@@ -195,7 +193,7 @@ void TaskTouch(void * pvParameters)
   while(1)
   { if(IgnoreMqqtUpdates)IgnoreMqqtUpdates--;
     if(!erased) // only once after boot
-    { for(int n=0;n<16;n++)filtered[n] = 0;
+    { for(int n=0;n<32;n++)filtered[n] = 0;
       sum = 0;
       erased = true;
       
@@ -212,6 +210,7 @@ void TaskTouch(void * pvParameters)
     value = touchRead(8);
 
     //if(digitalRead(SPEAKER_TOGGLE_PIN) == false)
+    //if(DataFromDisplay.btmodule_power_on)
     //{ Serial.printf("Touchvalue = %ld average =%ld\n", value, average);
     //}
   
@@ -221,7 +220,7 @@ void TaskTouch(void * pvParameters)
     else
     { 
       
-      if(value > (average + (average/20))) // started with 16, try more sensitive with 20
+      if(value > (average + (average/5))) // started with 16, try more sensitive with 20, 21JUL26 less sensitive with 3
       { if(touch_status == false)
         { touch_started_at_mS = millis();
           if(recent_short_touches==1)long_press_up = true;
@@ -315,11 +314,11 @@ void TaskTouch(void * pvParameters)
     }
   
     if(!touch_status)
-    { sum -= filtered[idx%16];
+    { sum -= filtered[idx%32];
       sum += value;
-      filtered[idx%16] = value;
+      filtered[idx%32] = value;
       idx++;
-      average = sum / 16;
+      average = sum / 32;
     }  
 
     ticks++;

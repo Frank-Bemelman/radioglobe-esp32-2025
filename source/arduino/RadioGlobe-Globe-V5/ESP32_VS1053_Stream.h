@@ -127,6 +127,7 @@ private:
     void _handleMetadata(char *data, const size_t len);
     void _eofStream();
     bool _canRedirect();
+    void _resolveRedirect(const char *location, const char *base, char *result);
     bool _escapeUrl(const char *url, const size_t len);
     bool _isPlaylistContentType();
     const char *_parsePlaylist();
@@ -195,6 +196,7 @@ private:
     unsigned long _streamStallStartMS = 0;
     unsigned long _bufferStallStartMS = 0;
     uint8_t _redirectCount = 0;
+    bool _isHLS = false;
 
     const char *CONTENT_TYPE = "Content-Type";
     const char *ICY_NAME = "icy-name";
@@ -213,7 +215,7 @@ private:
     const char *ERROR_SYSTEM_ERROR = "System error";
     const char *ERROR_INVALID_URL = "Invalid URL";
     const char *ERROR_STREAM_SYNC_LOST = "Stream sync lost";
-    const char *ERROR_DECODER_NO_SYNC = "No decoder sync: ";
+    const char *ERROR_NO_DECODER_SYNC = "No decoder sync";
     const char *ERROR_NO_CONNECTION = "Could not connect";
     const char *ERROR_MAX_REDIRECT = "Too much redirection";
     const char *ERROR_REDIRECTING = "Redirection error";
@@ -223,7 +225,8 @@ private:
     const char *ERROR_CONNECTION_LOST = "Connection lost";
     const char *ERROR_STREAM_TIMEOUT = "Stream timeout";
     const char *ERROR_COULD_NOT_OPEN = "Could not open";
-    const char *ERROR_NOT_PLAYABLE = "Not playable: ";
+    const char *ERROR_NOT_PLAYABLE = "Not playable";
+    const char *ERROR_HLS_UNSUPPORTED = "HLS streams not supported";
     const char *ERROR_OUT_OF_RANGE = "Out of range offset";
     const char *ERROR_FILE_IO = "File i/o error";
 };

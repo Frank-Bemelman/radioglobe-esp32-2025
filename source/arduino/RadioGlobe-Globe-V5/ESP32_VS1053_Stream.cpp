@@ -123,10 +123,7 @@ void ESP32_VS1053_Stream::_handleMetadata(char *data, const size_t len)
 void ESP32_VS1053_Stream::_eofStream()
 {
     if (_codec == CODEC_UNKNOWN && _errorCallback)
-    {
-        char *buffer = reinterpret_cast<char *>(_localbuffer);
-        snprintf(buffer, sizeof(_localbuffer), "%s%s", ERROR_DECODER_NO_SYNC, _url);
-        _errorCallback(buffer);
+    {  _errorCallback(ERROR_NO_DECODER_SYNC);
     }
 
     stopSong();
@@ -203,6 +200,7 @@ bool ESP32_VS1053_Stream::_isPlaylistContentType()
            strcasestr(ct, "audio/scpls") ||
            strcasestr(ct, "audio/x-mpegurl") ||
            strcasestr(ct, "application/x-mpegurl") ||
+           strcasestr(ct, "application/vnd.apple.mpegurl") ||
            strcasestr(ct, "audio/mpegurl");
 }
 
@@ -236,7 +234,7 @@ const char *ESP32_VS1053_Stream::_parsePlaylist()
 
         if (strncmp(line, "#EXT-X-", 7) == 0)
         {
-            log_w("HLS playlists not supported");
+            _isHLS = true;
             return nullptr;
         }
 
@@ -259,6 +257,62 @@ const char *ESP32_VS1053_Stream::_parsePlaylist()
 bool ESP32_VS1053_Stream::isChipConnected()
 {
     return _vs1053 ? _vs1053->isChipConnected() : false;
+}
+
+void ESP32_VS1053_Stream::_resolveRedirect(const char *location, const char *base, char *result)
+{
+    // Absolute URL
+    if (!strncasecmp(location, "http://", 7) ||
+        !strncasecmp(location, "https://", 8))
+    {
+        snprintf(result, sizeof(_url), "%s", location);
+        return;
+    }
+
+    // Protocol-relative
+    if (!strncmp(location, "//", 2))
+    {
+        const char *scheme = !strncasecmp(base, "https://", 8) ? "https:" : "http:";
+
+        snprintf(result, sizeof(_url), "%s%s", scheme, location);
+        return;
+    }
+
+    // Find "scheme://host"
+    const char *p = strstr(base, "://");
+    if (!p)
+    {
+        snprintf(result, sizeof(_url), "%s", location);
+        return;
+    }
+
+    p += 3;
+    const char *hostEnd = strchr(p, '/');
+
+    // URL contains no path
+    if (!hostEnd)
+    {
+        if (location[0] == '/')
+            snprintf(result, sizeof(_url), "%s%s", base, location);
+        else
+            snprintf(result, sizeof(_url), "%s/%s", base, location);
+
+        return;
+    }
+
+    if (location[0] == '/')
+    {
+        // Root-relative
+        snprintf(result, sizeof(_url), "%.*s%s", int(hostEnd - base), base, location);
+        return;
+    }
+
+    // Relative to current directory
+    const char *lastSlash = strrchr(hostEnd, '/');
+    if (!lastSlash)
+        lastSlash = hostEnd;
+
+    snprintf(result, sizeof(_url), "%.*s/%s", int(lastSlash - base), base, location);
 }
 
 bool ESP32_VS1053_Stream::connectToHost(const char *url)
@@ -289,8 +343,11 @@ bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
     }
 
     const size_t length = strlen(url);
+
     if (strncasecmp(url, "http", 4) != 0 || length >= (sizeof(_url) - 1) || length < 8) // "http://"
-    {
+    {  
+        
+        Serial.printf("ERROR_INVALID_URL ERROR_INVALID_URL ERROR_INVALID_URL %s length = %d\n", url, length);
         log_v("Invalid URL");
         if (_errorCallback)
             _errorCallback(ERROR_INVALID_URL);
@@ -372,6 +429,17 @@ bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
             }
 
             const char *newUrl = _parsePlaylist();
+            if (_isHLS)
+            {
+                if (_errorCallback)
+                    _errorCallback(ERROR_HLS_UNSUPPORTED);
+
+                _isHLS = false;
+                stopSong();
+                _redirectCount = 0;
+                return false;
+            }
+            
             if (newUrl)
             {
                 log_d("playlist redirection to: %s", newUrl);
@@ -437,13 +505,37 @@ bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
             return false;
         }
 
+
         char *location = reinterpret_cast<char *>(_localbuffer);
+
+        //char *p;
+        // get host from url, unless url is bare host already like https://random.sp.radio.fm
+        //if((p=strchr(url+8, '/'))!=0)
+        //{ strncpy(location, url, p-url);
+       // }
+
+        //if(_http->header(LOCATION).c_str()[0]=='/')
+        //{ strcpy(location + (p-url), _http->header(LOCATION).c_str());
+        //}
+        //else  
         snprintf(location, sizeof(_localbuffer), "%s", _http->header(LOCATION).c_str());
 
+        //Serial.println(location);
+        //Serial.printf("DoubleCHECK %i redirection to: %s\n", HTTPresult, location);
+
+        _resolveRedirect(location, url, _url);
+
         stopSong();
-        log_i("%i redirection to: %s", HTTPresult, location);
-        return connectToHost(location, username, pwd, 0);
+        log_i("%i redirection to: %s", HTTPresult, _url);
+        Serial.printf("%i redirection to: %s\n", HTTPresult, _url);
+
+        return connectToHost(_url, username, pwd, 0);
     }
+
+//    https://lyd.nrk.no/nrk_radio_p1_ostfold_mp3_m     /icecast/mp3/high/s0w7hwn47m/p1_dk15/icecast/mp3/high/s0w7hwn47m/p1_dk15
+
+//    https://lyd.nrk.no//icecast/mp3/high/s0w7hwn47m/p1_dk15
+    
 
     default:
         if (_errorCallback)
@@ -891,11 +983,16 @@ void ESP32_VS1053_Stream::forceVolume(const uint8_t newVolume)
 
 uint8_t ESP32_VS1053_Stream::getVuMeter()
 { // read  VU-meter registers
-  // turn on Vu meter
+  // turn off/on Vu meter as required
+  uint16_t regvalue;
+  if(!_http && !_playingFile)
+  { // turn off vu meter since it consumes some processing power
+    regvalue = _vs1053->readRegister(SCI_STATUS); 
+    if((regvalue & 0x0200)!=0) _vs1053->writeRegister(SCI_STATUS, (regvalue ^ 0x200)); 
+    return 0;
+  }
 
-  if(!_http && !_playingFile)return 0;
-
-  uint16_t regvalue = _vs1053->readRegister(SCI_STATUS); 
+  regvalue = _vs1053->readRegister(SCI_STATUS); 
   if((regvalue & 0x0200)==0) _vs1053->writeRegister(SCI_STATUS, (regvalue | 0x200)); 
     
   uint16_t vu_values = _vs1053->readRegister(SCI_AICTRL3); 
@@ -962,17 +1059,7 @@ bool ESP32_VS1053_Stream::connectToFile(fs::FS &fs, const char *filename, const 
     if (!_isAudioFile(_file))
     {
         if (_errorCallback)
-        {
-            const char *name = filename;
-            const char *lastSlash = strrchr(filename, '/');
-
-            if (lastSlash && lastSlash[1])
-                name = lastSlash + 1;
-
-            char *buffer = reinterpret_cast<char *>(_localbuffer);
-            snprintf(buffer, sizeof(_localbuffer), "%s%s", ERROR_NOT_PLAYABLE, name);
-            _errorCallback(buffer);
-        }
+           _errorCallback(ERROR_NOT_PLAYABLE);
         _file.close();
         return false;
     }

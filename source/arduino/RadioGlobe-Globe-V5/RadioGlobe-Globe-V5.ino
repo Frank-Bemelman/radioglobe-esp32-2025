@@ -1,4 +1,4 @@
-// in arduino library manager....
+// in arduino library manager.....
 // install libs as shown here https://randomnerdtutorials.com/esp32-wi-fi-manager-asyncwebserver/
 // this is for the wifi manager portal
 
@@ -122,25 +122,24 @@ ESP32_VS1053_Stream stream;
 //VS1053 chunkplayer(VS1053_CS, VS1053_DCS, VS1053_DREQ); // made a playChunk member in ESP32_VS1053_Stream library
 
 // AS5600 encoders esp32-S3-N16R8 pin arrangement
-const int SCL_1 = 4; // &wire as5600_1 grey NS LAT
-const int SDA_1 = 5; // &wire as5600_1 brown NS LAT
-const int SCL_2 = 6; // &wire as5600_2 grey EW LON
-const int SDA_2 = 7; // &wire as5600_2 brown EW LON
+const int SCL_1 = 4; // &wire as5600_lat grey NS LAT
+const int SDA_1 = 5; // &wire as5600_lat brown NS LAT
+const int SCL_2 = 6; // &wire as5600_lon grey EW LON
+const int SDA_2 = 7; // &wire as5600_lon brown EW LON
 
 #define MUTE_AMPLIFIERS 14 // pin number
 #define SPEAKERS_OFF 0
 #define SPEAKERS_ON 1
 #define SPEAKERS_DELAYED_OFF 3
 
-AS5600 as5600_1(&Wire); // NS LAT Encoder
-AS5600 as5600_2(&Wire1); // EW LON Encoder
+AS5600 as5600_lat(&Wire); // NS LAT Encoder
+AS5600 as5600_lon(&Wire1); // EW LON Encoder
 
 static uint32_t startMillis;
 static uint32_t lapMillis;
 static uint32_t currentMillis;
 static uint32_t ConnectedInMillis;
 
-int16_t ReadEncoderTicker100mS = 0;
 int16_t PrevTick = 0;
 bool bPowerStatus = true;
 bool bVolumeToneControlsActive = false;
@@ -166,8 +165,8 @@ bool Tuning = false;
 #include <EEPROM.h>
 #define EEPROM_SIZE 512
 struct eepromData 
-{ int16_t Offset1;
-  int16_t Offset2;
+{ int16_t OffsetLat;
+  int16_t OffsetLon;
   uint16_t ee_volume; // 0-100 can be changed by display puck
   uint16_t ee_bass; // 0-f can be changed by display puck
   uint16_t ee_treble; // 0-f can be changed by display puck
@@ -225,6 +224,27 @@ const char* VS1053_connectResult;
 
 extern void setupwebserver(void);
 
+
+volatile uint32_t GlobalTicker100mS = 0;
+volatile bool Flag100mS = false; // will always reset to true within 100mS by timer interrupt
+
+void IRAM_ATTR onGlobalTimer100ms(void* arg) {
+    GlobalTicker100mS++;
+    Flag100mS = true; 
+}
+
+void SetupGlobalTimer(void) {
+    const esp_timer_create_args_t timer_args = {
+        .callback = &onGlobalTimer100ms,
+        .name = "global_100ms_ticker"
+    };
+
+    esp_timer_handle_t global_timer;
+    esp_timer_create(&timer_args, &global_timer);
+    // start timer every 100.000 microseconden -> 100 ms
+    esp_timer_start_periodic(global_timer, 100000); 
+}
+
 void readMacAddress()
 { esp_err_t ret = esp_wifi_get_mac(WIFI_IF_STA, GlobeMac);
   if (ret == ESP_OK) 
@@ -238,11 +258,15 @@ void readMacAddress()
   }
 }
 
+bool bPortalOpened = false; // to freeze loop_esp_now(); during portal, so wifi channel is more quiet
 
 void setup()
 { char message[64];
 
-  // replace !!!! characters in fetched api key (secrets.h)
+  SetupGlobalTimer();
+
+  // replace !!!! characters in fetched api key (from secrets.h, where it is stored slighly corrupted)
+  // basically to disguise apikey in final firmware
   google_api_key[0]='A';
   google_api_key[1]='I';
   google_api_key[2]='z';
@@ -281,6 +305,10 @@ void setup()
   pinMode(PORTALSWITCH_PIN, INPUT_PULLUP); // input to button for opening portal
 
   Serial.begin(115200);
+  //while (!Serial) 
+  //{ delay(10); // essentail for ESP32-S3
+  //}
+
   Serial.printf("GlobeSettings size = %d bytes\n", sizeof(GlobeSettings));
 
   //Start SPI bus
@@ -312,9 +340,9 @@ void setup()
   // Set the error callback
   stream.setErrorCB(VS1053error);    
     
-  delay(50);
+  delay(500);
 
-  stream.stopSong(); // also does a _vs1053->switchToMp3Mode() when things are still idle
+  stream.stopSong(); 
   PlaySoundBite((uint8_t *)mp3_happy_ping, sizeof(mp3_happy_ping), 0); 
 
   // start SD card
@@ -327,32 +355,32 @@ void setup()
   GlobeSettings.password[sizeof(GlobeSettings.password)-1]=0;
   //Serial.printf("Eeprom password: %s\n", GlobeSettings.password);
 
-  Serial.printf("Eeprom stored Offset1: %d\n", GlobeSettings.Offset1);
-  Serial.printf("Eeprom stored Offset2: %d\n", GlobeSettings.Offset2);
+  Serial.printf("Eeprom stored OffsetLat: %d\n", GlobeSettings.OffsetLat);
+  Serial.printf("Eeprom stored OffsetLon: %d\n", GlobeSettings.OffsetLon);
 
   Serial.printf("Mqtt Server set at %d.%d.%d.%d\n", (uint16_t)GlobeSettings.ee_mqttserver_ip[0], (uint16_t)GlobeSettings.ee_mqttserver_ip[1], (uint16_t)GlobeSettings.ee_mqttserver_ip[2], (uint16_t)GlobeSettings.ee_mqttserver_ip[3]);
 
-  // Initialise as5600_0 and as5600_0 connection
+  // Initialise as5600_lat and as5600_lon connection
   Wire.begin(SDA_1, SCL_1);
   Wire1.begin(SDA_2, SCL_2);
   
     // NS encoder
-  as5600_1.begin();  //  set direction pin.
-  as5600_1.setDirection(AS5600_CLOCK_WISE);
-  as5600_1.setOffset(GlobeSettings.Offset1 * AS5600_RAW_TO_DEGREES);
-  Serial.print("Connect device 0: ");
-  Serial.println(as5600_1.isConnected() ? "true" : "false");
+  as5600_lat.begin();  //  set direction pin.
+  as5600_lat.setDirection(AS5600_CLOCK_WISE);
+  as5600_lat.setOffset(GlobeSettings.OffsetLat * AS5600_RAW_TO_DEGREES);
+  Serial.print("Connect Encoder LAT: ");
+  Serial.println(as5600_lat.isConnected() ? "true" : "false");
 
-  as5600_2.begin();  //  set direction pin.
-  as5600_2.setDirection(AS5600_CLOCK_WISE);
-  as5600_2.setOffset(GlobeSettings.Offset2 * AS5600_RAW_TO_DEGREES);  
-  Serial.print("Connect device 1: ");
-  Serial.println(as5600_2.isConnected() ? "true" : "false");
+  as5600_lon.begin();  //  set direction pin.
+  as5600_lon.setDirection(AS5600_CLOCK_WISE);
+  as5600_lon.setOffset(GlobeSettings.OffsetLon * AS5600_RAW_TO_DEGREES);  
+  Serial.print("Connect Encoder LON: ");
+  Serial.println(as5600_lon.isConnected() ? "true" : "false");
 
-  Serial.print("readangle NS = "); Serial.println(as5600_1.readAngle() * AS5600_RAW_TO_DEGREES);
-  Serial.print("readangle EW = "); Serial.println(as5600_2.readAngle() * AS5600_RAW_TO_DEGREES);
-  Serial.print("ReadAGC NS = "); Serial.println(as5600_1.readAGC());
-  Serial.print("ReadAGC EW = "); Serial.println(as5600_2.readAGC());
+  Serial.print("readangle NS = "); Serial.println(as5600_lat.readAngle() * AS5600_RAW_TO_DEGREES);
+  Serial.print("readangle EW = "); Serial.println(as5600_lon.readAngle() * AS5600_RAW_TO_DEGREES);
+  Serial.print("ReadAGC NS = "); Serial.println(as5600_lat.readAGC());
+  Serial.print("ReadAGC EW = "); Serial.println(as5600_lon.readAGC());
 
   // set VS1053 volume and tone values from eeprom
   Serial.printf("Volume from eeprom -> %d\n", GlobeSettings.ee_volume);
@@ -413,7 +441,7 @@ void setup()
   else 
   { Serial.println("Try Connecting with WifiManager");
     // play it loud enough to be noticed
-    PlaySoundBite((uint8_t *)mp3_smartphone_portal, sizeof(mp3_smartphone_portal), 60); 
+    PlaySoundBite((uint8_t *)mp3_smartphone_portal, sizeof(mp3_smartphone_portal), 40); 
     AutoConnect(); // wifi auto connect with portal if need be
     if(WiFi.isConnected())
     { Serial.println("Connected with WifiManager stored credentials");
@@ -433,7 +461,7 @@ void setup()
   else
   { Serial.println(" wifi NOT connected.");
     // play it loud enough to be noticed
-    PlaySoundBite((uint8_t *)mp3_wifidisconnected, sizeof(mp3_wifidisconnected), 60); 
+    PlaySoundBite((uint8_t *)mp3_wifidisconnected, sizeof(mp3_wifidisconnected), 40); 
     while(1)
     { PixelUpdate(6, 0xFF0000, 0x000000, 5000); // flash, solid red   
       delay(5000);
@@ -535,6 +563,7 @@ void loop()
   static char PreviousUrl[QUEUEMESSAGELENGTH] =""; // holds the url requested by display
   static char StartThisStation[QUEUEMESSAGELENGTH] =""; // holds the url requested by display
   static bool bFirst = true;
+  static uint32_t LoopTicker100mS = 0;
   
   if(GlobeSettings.globe_sd_gb != 0)ftp.handleFTP();
    
@@ -548,7 +577,12 @@ void loop()
   { UpdateState = UpdateFirmware(UpdateState);
   } 
 
-  if((ReadEncoderTicker100mS % 50)==0) // every 5 seconds or so
+  if(Flag100mS)
+  { Flag100mS = false; 
+    LoopTicker100mS = GlobalTicker100mS;
+  }  
+
+  if((LoopTicker100mS % 50)==0) // every 5 seconds or so
   { if(WiFi.status() != WL_CONNECTED) 
     { Serial.println("Reconnecting to WiFi...");
       WiFi.disconnect();
@@ -634,20 +668,17 @@ void loop()
       }
     }
   }
-
-
   
-  // process messages from display
+  // process one or more queued messages from display
   while(FromDisplay.QueueIndexIn != FromDisplay.QueueIndexOut) // we have to catch up with new messages
-  {  Serial.printf("FromDisplay.QueueIndexIn = %d FromDisplay.QueueIndexOut = %d\n", FromDisplay.QueueIndexIn, FromDisplay.QueueIndexOut);
-     Serial.printf("Messages from display pending %d\n", FromDisplay.QueueCnt);
-
+  {  //Serial.printf("Messages from display pending %d\n", FromDisplay.QueueCnt);
      // copy the essential message info into a more readable variable
      QueueMessageType = FromDisplay.QueueMessageType[FromDisplay.QueueIndexOut];
      memcpy(QueueMessage, FromDisplay.QueueMessage[FromDisplay.QueueIndexOut], sizeof(QueueMessage));
+     QueueMessage[sizeof(QueueMessage) - 1] = '\0'; // make sure it's 0 terminated
 
      if((QueueMessageType>=0) && (QueueMessageType<=MESSAGE_MAX)) 
-     { Serial.printf("DISPLAY SAYS: %s >%s<\n", messagetexts[QueueMessageType], QueueMessage);  
+     { Serial.printf("PROCESS:%d %s >%s<\n", FromDisplay.QueueMessageSerialNumber[FromDisplay.QueueIndexOut], messagetexts[QueueMessageType], QueueMessage); 
      }
 
      // and now take care of it
@@ -895,9 +926,24 @@ void loop()
         if(UpdateState==0)UpdateState = 1; // triggers the update procedure, if procedure does not run yet
         break;
 
+      case MESSAGE_TEST_URL:
+        // QueueMessage is an url
+        // checks if a url connects, nothing more
+        // want to use this to check the entire database for bad urls
+        // Heap was always healthy, values between ~90K - ~150K 
+        // Serial.print("Free Heap: ");
+        // Serial.println(ESP.getFreeHeap());
+        if(TestUrl(QueueMessage))AddToQueueForDisplay("1", MESSAGE_TEST_URL);
+        else
+        { snprintf(message, sizeof(message), "%s -> %s", VS1053_connectResult, QueueMessage); 
+          AddToQueueForDisplay(message, MESSAGE_TEST_URL);
+        } 
+        break;  
+
       default:
         Serial.printf("Unsupported message type %d from display: >%s<\n", QueueMessageType, QueueMessage);  
-        AddToQueueForDisplay("Unsupported", MESSAGE_MAX); 
+        sprintf(message, "Message %d not supported %s max is %d", QueueMessageType, QueueMessage, MESSAGE_MAX);
+        AddToQueueForDisplay(message, MESSAGE_MAX); 
         break;
     }
 
@@ -924,7 +970,7 @@ void loop()
     AddToQueueForDisplay("", MESSAGE_SONG_TITLE); // remove 'song title'    
   }
   
-  if((ReadEncoderTicker100mS%10)==0)
+  if((LoopTicker100mS%10)==0)
   {
      //Serial.printf("Volume = %d\n", stream.getVuMeter());
   }
@@ -932,8 +978,8 @@ void loop()
 
   // volume and tone levels checking
   //if(bVolumeToneControlsActive == true)
-  { if(PrevTick != ReadEncoderTicker100mS)
-    { PrevTick = ReadEncoderTicker100mS;
+  { if(PrevTick != LoopTicker100mS)
+    { PrevTick = LoopTicker100mS;
       if((PrevDataFromDisplay.volumevalue != DataFromDisplay.volumevalue) || bFirst)
       { PrevDataFromDisplay.volumevalue = DataFromDisplay.volumevalue;
         SetVolumeMapped(DataFromDisplay.volumevalue);
@@ -1065,6 +1111,7 @@ bool StartNewStation(void)
 //  strcpy(TargetUrl, "http://178.19.58.119:1818/;"); // mime ="" ???? but plays when just assume MP3
 //  AI station from Andon labs, dit is de eerste, backlink broadcast
 //  strcpy(TargetUrl, "https://streaming.live365.com/a13541");
+//  strcpy(TargetUrl, "https://lyd.nrk.no/nrk_radio_p1_ostfold_mp3_m"); // test INVALID URL??
 
 
   lapMillis = millis(); 
@@ -1138,13 +1185,18 @@ void SetVolumeMapped(uint16_t volume)
 
 void audio_showstation(const char* info) 
 { char filtered[256];
-  static char previnfo[256];
+  static char currentinfo[QUEUEMESSAGELENGTH];
   char *p;
   int cnt;
 
-  if(strcmp(previnfo, info)==0)return; // once, not twice the same
+  if(!bPowerStatus)return;
 
-  strcpy(MetaDataRadioStation, info); // keep a local copy to mess around with
+  // info parameter can be extremely long
+  if(strncmp(currentinfo, info, (sizeof(currentinfo)-1)) ==0)return; // once, not twice the same
+  strncpy(currentinfo, info, sizeof(currentinfo)); 
+  currentinfo[QUEUEMESSAGELENGTH-1]=0;
+
+  strcpy(MetaDataRadioStation, currentinfo); // keep a local copy to mess around with
 
   Serial.printf("Station: %s\n", MetaDataRadioStation);
   // filter crap station naming, stick with our own name from the datebase
@@ -1183,13 +1235,18 @@ void audio_showstation(const char* info)
 
 void audio_showstreamtitle(const char* info) 
 { char filtered[256];
-  static char previnfo[256];
+  static char currentinfo[QUEUEMESSAGELENGTH];
   int cnt;
   char *p;
 
-  if(strcmp(previnfo, info)==0)return; // once, not twice the same
+  if(!bPowerStatus)return;
+  
+  // info parameter can be extremely long
+  if(strncmp(currentinfo, info, (sizeof(currentinfo)-1)) ==0)return; // once, not twice the same
+  strncpy(currentinfo, info, sizeof(currentinfo)); 
+  currentinfo[QUEUEMESSAGELENGTH-1]=0;
 
-  strcpy(MetaDataSongTitle, info); // keep a local copy to mess around with
+  strcpy(MetaDataSongTitle, currentinfo); // keep a local copy to mess around with
 
   //strcpy(MetaDataSongTitle, "VĚRA MARTINOVÁ - JEZDEC Z NEZNÁMA"); // test
   //strcpy(MetaDataSongTitle, "218.ÃÑ¡àÃÒäÁèà¡èÒàÅÂ - äÁèÁÕàËµØ¼Å - ã¤ÃÊÑ¡¤¹"); // test
@@ -1225,7 +1282,13 @@ void audio_eof_stream(const char* info)
 { char message[QUEUEMESSAGELENGTH];
 
   Speakers(SPEAKERS_DELAYED_OFF);
-  Serial.printf("End of stream  -> %s\n", info);
+  //Serial.printf("End of stream  -> %s\n", info); // seems to corrupt things when info is extremely long  
+  // 20:09:45.909 -> End of stream  -> https://d111.rndfnk.com/ard/swr/swr3/live/mp3/128/stream.mp3?aggregator=web&cid=01FC1X5J7PN2N3YQPZYT8YDM9M&sid=3Gp8w297GomV7g9sAEawLnCJB9k&token=FNSXoxwNS_9I-WNWgpXWWrhIiz4RK-_rtZ8ohh83DQs&tvf=4E4euBR0xBhkMTExLnJuZGZuay5jb20
+  // 20:09:47.829 -> FromDisplay.QueueIndexIn = 33 FromDisplay.QueueIndexOut = 32
+  // 20:09:47.829 -> Messages from display pending 1
+  // 20:09:47.829 -> DISPLAY SAYS: UNSUPPORTED MESSAGE ><
+  // 20:09:47.829 -> Unsupported message type 0 from display: ><
+  // 20:09:47.829 -> AddToQueueForDisplay -> Message 72 not defined!
 
   DataFromGlobe.D_QueueStationIndex = -1;
 
@@ -1427,11 +1490,14 @@ void checkSpeakerToggleButton(void)
 void PlaySoundBite(uint8_t *soundbite, unsigned long long length, uint16_t volumeoveride)
 {  uint16_t volume_to_use;
   
-  if((volumeoveride>0) && (volumeoveride<GlobeSettings.ee_volume))volume_to_use = volumeoveride;
+  //if((volumeoveride>0) && (volumeoveride>GlobeSettings.ee_volume))volume_to_use = volumeoveride; // huh ??? what was I thinking
+  if((volumeoveride>0) && (volumeoveride>GlobeSettings.ee_volume))volume_to_use = volumeoveride;
   else volume_to_use = GlobeSettings.ee_volume;
 
   if(volume_to_use<10)volume_to_use=10; 
   if(volume_to_use>70)volume_to_use=70; 
+
+  // soundbites will always play, regardless preferred interal speakers on/off setting
   Speakers(SPEAKERS_ON); 
   SetVolumeMapped(volume_to_use); 
   Serial.printf("PlaySoundBite playing with volume -> %d\n", volume_to_use);
@@ -1441,7 +1507,7 @@ void PlaySoundBite(uint8_t *soundbite, unsigned long long length, uint16_t volum
   SetVolumeMapped(GlobeSettings.ee_volume); // will enable amplifiers (if speaker switch == on) if radio stream running, else amplifiers off
   // did this soundbite played during radio playing (like battery low warning)
   if(stream.isRunning())return; // leave speakers on, radio stream continues
-  // all done 
+  // all done, nothing was streaming at this moment, speakers off 
   Speakers(SPEAKERS_DELAYED_OFF);
 }
 
@@ -1503,6 +1569,8 @@ void GlobePowerUp(void)
 
 
 #define SNIPLENGHT 1500
+// fun department
+// only once use case, triggered from the lat/lon encoders changing, play sound as if rotating the tuning knob on an old radio
 uint32_t PlayWhile(uint8_t *soundbite, unsigned long long length, bool playwhile)
 {  static size_t bytes_to_play;
    static uint32_t snippets_to_play;
@@ -1550,7 +1618,8 @@ uint32_t PlayWhile(uint8_t *soundbite, unsigned long long length, bool playwhile
        oldplaywhile = 0;
      }
    }
-   return (snippets_to_play - snippet);
+   if(oldplaywhile == 0)return 0;
+   else return (snippets_to_play - snippet);
 }
 
 
@@ -1626,7 +1695,8 @@ void Speakers(uint8_t mode)
 // Called when codec is detected
 void codecCallback(const char *codec)
 { Serial.printf("codec: %s\n", codec);
-  SetVolumeMapped(DataFromDisplay.volumevalue); // will also enable amplifiers
+  // during url test, ignore this
+  if(bPowerStatus)SetVolumeMapped(DataFromDisplay.volumevalue); // will also enable amplifiers
 }
 
 
@@ -1722,6 +1792,39 @@ int xxxxtest() {
     return 0;
 }
 
+bool TestUrl(char *url)
+{ bool return_result = false;
+  char message[QUEUEMESSAGELENGTH];
+
+  PixelUpdate(0, 0x000001, 0x000000, 10000); // solid blue
+
+  //Serial.printf("Test Url with %s\n", url);
+  //SetVolumeMapped(0);
+  if(stream.isRunning())
+  { //Serial.printf("First stop this one: %s\n", ActiveUrl);
+    stream.stopSong();
+  }
+  
+  Speakers(SPEAKERS_DELAYED_OFF);
+  
+  lapMillis = millis(); 
+  //Serial.printf("Now connect: %s\n", url);
+  stream.connectToHost(url);  
+
+  if(stream.isRunning()) 
+  { currentMillis = millis();
+    ConnectedInMillis = currentMillis - lapMillis;
+    //Serial.printf("Succesfully connected: %s -> time elapsed = %ld\n", url, ConnectedInMillis);
+    return_result = true;
+    PixelUpdate(0, 0x000100, 0x000000, 2000); // two seconds green
+  }
+  else
+  { Serial.printf("Could not connect: %s -> time elapsed = %ld\n", url, (currentMillis = millis()) - lapMillis);
+    PixelUpdate(0, 0x010000, 0x000000, 2000); // two seconds red
+  }  
+ 
+  return return_result;
+}
 
 
 
