@@ -2,7 +2,7 @@
 
 # radioglobe-esp32-2025
 Radio Globe using ESP32 and Waveshare round touch LCD 2.1 inch<br><br>
-UPDATE 2-AUG-2026<br>Improvements regarding fetching timezone(s) and updating the country flags. Should all be a liitle snappier now.<br><br>
+UPDATE 2-AUG-2026<br>Improvements regarding fetching timezone(s) and updating the country flags. Should all be a little snappier now.<br><br>
 UPDATE 1-AUG-2026<br>Added a new fun feature. When you touch the weather icon, a flight radar screen is shown, with airplanes in that area. Not much particulary usful, but just for fun.<br><br>
 UPDATE 27-JUL-2026<br>New station150K.json file upload. Removed all station url's that are no longer active. This also improves the experience with the globe, no more skipping of stations that are no longer active. Used a long running script to test all url's.<br><br>
 UPDATE 15-JUL-2026<br>Improved handling of retrieving timezone and geolocation. Race conditions could occur, now hopefully solved. Battery percentage indicator, better than that silly voltage level. <br><br>
