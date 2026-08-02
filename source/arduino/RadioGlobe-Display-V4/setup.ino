@@ -5,7 +5,7 @@ void RadarScreenOn(lv_event_t * e)
   // now screen can switch over
   extern lv_obj_t * uic_RadarScreen;
   lv_scr_load(uic_RadarScreen);
-  //beepforMs(50);
+  beepforMs(50);
 }
 
 // main screen unloaded
@@ -504,24 +504,30 @@ void ClockFlagToggle(lv_event_t * e)
     // use home location as stored in favorites.txt as 5th record to get timezone and place
     DataFromDisplay.D_StationGpsNS = Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].gps_ns;
     DataFromDisplay.D_StationGpsEW = Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].gps_ew;
-    sprintf(content, "%f-%f", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
+    sprintf(content, "%d %f %f", 9999, DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
     //AddToQueueForGlobe("DISPLAY WANTS MQTT STATUS", MESSAGE_MQTT_STATUS); 
     if(strncmp(DisplaySettings.home_tz_posix, "CUSTOM", 5)!=0)AddToQueueForGlobe(content, MESSAGE_HOME_TIMEZONE_NAME);  
-    else AddToQueueForGlobe(content, MESSAGE_HOME_TIMEZONE_NAME);  // todo -> change timezone system clock
+    else AddToQueueForGlobe(content, MESSAGE_HOME_TIMEZONE_NAME);  // todo -> change timezone system clock instead without requesting TZ everytime - is a brain breaker
+    //lv_obj_add_flag(ui_MinuteHand, LV_OBJ_FLAG_HIDDEN); // idea -> hide hands until timezone is refreshed - needs a bool bShowHandsAgain upopn TZ reception etc - leave it for now
+    //lv_obj_add_flag(ui_HourHand, LV_OBJ_FLAG_HIDDEN);
     lv_label_set_text(ui_Clock_Country, Home.CountryName);
     SetFlag(Home.CountryCode);
-    //lv_label_set_text(ui_Time_Zone_Clock, Home.TZname); // on clock screen
+    sprintf(content, "%s\n%s %d-%s-%d\n%s",  Home.TZname, weekdays[datetime.dotw%7], (size_t)datetime.day, monthnames[datetime.month%12],  (size_t)datetime.year%100, partofday[(datetime.hour/6)%4]);
+    lv_label_set_text(ui_Time_Zone_Clock, content); // on clock screen
   }
   else 
   { Serial.println("ClockFlagToggle = WORLD");
     DataFromDisplay.D_StationGpsNS = Stations.StationNUG[Stations.requested].gps_ns;
     DataFromDisplay.D_StationGpsEW = Stations.StationNUG[Stations.requested].gps_ew;
-    sprintf(content, "%f-%f", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
+    sprintf(content, "%d %f %f", 9999, DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
     //AddToQueueForGlobe("DISPLAY WANTS MQTT STATUS", MESSAGE_MQTT_STATUS); 
     AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_BY_GPS);  
+    //lv_obj_add_flag(ui_MinuteHand, LV_OBJ_FLAG_HIDDEN);
+    //lv_obj_add_flag(ui_HourHand, LV_OBJ_FLAG_HIDDEN);
     lv_label_set_text(ui_Clock_Country, World.CountryName);
-    SetFlag(Home.CountryCode);
-    //lv_label_set_text(ui_Time_Zone_Clock, World.TZname); // on clock screen
+    SetFlag(World.CountryCode);
+    sprintf(content, "%s\n%s %d-%s-%d\n%s",  World.TZname, weekdays[datetime.dotw%7], (size_t)datetime.day, monthnames[datetime.month%12],  (size_t)datetime.year%100, partofday[(datetime.hour/6)%4]);
+    lv_label_set_text(ui_Time_Zone_Clock, content); // on clock screen
   }
 
 }

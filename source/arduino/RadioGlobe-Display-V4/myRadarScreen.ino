@@ -220,6 +220,7 @@ static void radar_screen_event_cb(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) 
     { Serial.println("Radarscreen clicked for exit");
+      beepforMs(50);
       lv_scr_load(uic_Home); 
       return;
     }

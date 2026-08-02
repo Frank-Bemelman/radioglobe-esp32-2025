@@ -531,7 +531,7 @@ void setup()
   strcpy(World.CountryCode, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode); 
   strcpy(Home.CountryName, AllUpperCase(Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].town)); // home sweet home is a nicer alternative
   strcpy(World.CountryName, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countryname); 
-  sprintf(content, "%f-%f", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
+  sprintf(content, "%d %f %f", (MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1), DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
   AddToQueueForGlobe(content, MESSAGE_HOME_TIMEZONE_NAME);
   AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION_BY_GPS);
   
@@ -829,8 +829,14 @@ void loop()
           if(strlen(QueueMessage))
           { AllUpperCase(QueueMessage);
             
-            if(QueueMessageType == MESSAGE_HOME_TIMEZONE_NAME)strcpy(Home.TZname, QueueMessage);
-            else strcpy(World.TZname, QueueMessage);
+            if(QueueMessageType == MESSAGE_HOME_TIMEZONE_NAME)
+            { bClockHomeTime = true;
+              strcpy(Home.TZname, QueueMessage);
+            }  
+            else
+            { bClockHomeTime = false;
+              strcpy(World.TZname, QueueMessage);
+            }
 
             datetime.year = DataFromGlobe.timeinfo.tm_year; // years since 1900
             datetime.month = DataFromGlobe.timeinfo.tm_mon; 
@@ -1124,6 +1130,11 @@ void loop()
           }
           RemoveUTF8Unprintables(town); // arabic town names are not printable with extended ascii fonts
           Serial.printf("GPS Countrycode = %s and town = %s\n", countrycode, town);
+
+
+          if((strcmp(town, "???")!=0) && (strcmp(countrycode, "XX")==0)) // google does not give country name for disputed areas like NS = 42.061100, EW = 20.651199 which is Dragsh in Kosovo
+          { strcpy(countrycode, AllUpperCase(Stations.StationNUG[Stations.requested].countrycode));
+          } 
 
           // if this country code is our own home country, adjust clock status for that 
           if(strcmp(countrycode, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode) == 0)
@@ -1643,26 +1654,30 @@ void loop()
         uint16_t MinuteAngle = ((datetime.minute * 60) + datetime.second)%3600;
         uint16_t HourAngle = (((datetime.hour%12) * 300) + (datetime.minute * 5))%3600;
  
-        if(strcmp(OldClockTimeZoneName, World.TZname)!=0)
+        if(bClockHomeTime)
+        { if(PrevHour!=datetime.hour || strcmp(OldClockTimeZoneName, Home.TZname)!=0)
+          { PrevHour!=datetime.hour;
+            strcpy(OldClockTimeZoneName, Home.TZname);
+            sprintf(content, "%s\n%s %d-%s-%d\n%s",  Home.TZname, weekdays[datetime.dotw%7], (size_t)datetime.day, monthnames[datetime.month%12],  (size_t)datetime.year%100, partofday[(datetime.hour/6)%4]);
+            lv_label_set_text(ui_Time_Zone_Clock, content); // on clock screen
+          }
+        }
+        else if(PrevHour!=datetime.hour || strcmp(OldClockTimeZoneName, World.TZname)!=0)
         { strcpy(OldClockTimeZoneName, World.TZname);
           sprintf(content, "%s\n%s %d-%s-%d\n%s",  World.TZname, weekdays[datetime.dotw%7], (size_t)datetime.day, monthnames[datetime.month%12],  (size_t)datetime.year%100, partofday[(datetime.hour/6)%4]);
-          lv_label_set_text(ui_Time_Zone_Clock, content); // on clock screen
-        }
-
-        if(PrevHour!=datetime.hour) // as that might also change the day of week, date, nice evening text
-        { PrevHour=datetime.hour;
-          sprintf(content, "%s\n%s %d-%s-%d\n%s",  World.TZname, weekdays[datetime.dotw%7], (int)datetime.day, monthnames[datetime.month%12],  (int)datetime.year%100, partofday[(datetime.hour/6)%4]);
           lv_label_set_text(ui_Time_Zone_Clock, content); // on clock screen
         }
 
         if(PrevHourAngle != HourAngle)
         { PrevHourAngle = HourAngle;
           lv_img_set_angle(ui_HourHand, HourAngle);
+          lv_obj_clear_flag(ui_HourHand, LV_OBJ_FLAG_HIDDEN);
         }
 
         if(PrevMinuteAngle != MinuteAngle)
         { PrevMinuteAngle = MinuteAngle;
           lv_img_set_angle(ui_MinuteHand, MinuteAngle);
+          lv_obj_clear_flag(ui_MinuteHand, LV_OBJ_FLAG_HIDDEN);
         }
         // seconds always changed
         lv_img_set_angle(ui_SecondHand, SecondAngle);

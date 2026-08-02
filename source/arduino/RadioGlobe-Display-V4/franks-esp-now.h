@@ -82,7 +82,7 @@ const char * messagetexts[] = {
    { "UPDATE_PUCK 66"},
    { "GLOBE_HOSTNAME 67"},
    { "SILENT_POWER_DOWN 68"}, 
-   { "GET_HOME_TIMEZONE 69"},
+   { "HOME_TIMEZONE_NAME 69"},
    { "HOME_TIMEZONE_POSIX 70"},
    { "TEST_URL 71"},
    { "MESSAGE_MAX 72"}

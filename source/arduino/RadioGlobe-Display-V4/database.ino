@@ -976,12 +976,12 @@ void AddStationToQueueForGlobe(int16_t station)
 { // prepare gps position and url for the station we want to hear and get timezone for
   static char lastgpsrequest[32];
   char message[QUEUEMESSAGELENGTH];
-  char content[128];
+  char content[QUEUEMESSAGELENGTH];
 
   Stations.requested = station; 
   DataFromDisplay.D_RequestedStation = Stations.requested;
   
-  if(station < 0) // no actual station to play really, but will trigger timezone/geolocation requests
+  if(station < 0) // no actual station to play really, places with no stations, at sea perhaps, but will trigger timezone/geolocation requests
   { lv_label_set_text(uic_Home_City, "");
     lv_label_set_text(uic_Home_Country, "");
     //on map
@@ -989,8 +989,9 @@ void AddStationToQueueForGlobe(int16_t station)
     lv_label_set_text(ui_Database_GPS_Position, content);
     lv_obj_set_pos(uic_MapCursor, (int)DataFromDisplay.ew_cal/10 - 16, -(int)DataFromDisplay.ns_cal/10); // moved 16 to left, dot is painted left-top corner?
     lv_label_set_text(ui_Database_Output_File, ""); // remove typical "You are in ..." from map
-    sprintf(content, "Stations.requested = %d", Stations.requested); 
-    AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_NAME); // will use DataFromDisplay.ns_cal, DataFromDisplay.ew_cal as coordinates
+    
+    sprintf(content, "%d %f %f", station, (float)DataFromDisplay.ns_cal/10, (float)DataFromDisplay.ew_cal/10);
+    AddToQueueForGlobe(content, MESSAGE_TIMEZONE_NAME); // will use DataFromDisplay.ns_cal, DataFromDisplay.ew_cal as coordinates
     AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION); // will use DataFromDisplay.ns_cal, DataFromDisplay.ew_cal as coordinates
     loop_esp_now(); // send it now, before it gets old
     lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide flag
@@ -1004,7 +1005,7 @@ void AddStationToQueueForGlobe(int16_t station)
     if(station<MAX_STATIONS)Stations.connect_attempts++;
     DataFromDisplay.D_StationGpsNS = Stations.StationNUG[station].gps_ns;
     DataFromDisplay.D_StationGpsEW = Stations.StationNUG[station].gps_ew;
-    sprintf(message, "%f-%f", DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
+    sprintf(content, "%d %f %f", station, DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
 
     lv_label_set_text(ui_Station_Name, Stations.StationNUG[station].name);
     lv_label_set_text(ui_Status_Line, "CONNECTING");
@@ -1016,11 +1017,9 @@ void AddStationToQueueForGlobe(int16_t station)
     }
 
     // check if gps position is a new one
-    if(strcmp(lastgpsrequest, message) != NULL || (ForceGlobeStationGPSupdate == true))
-    { strcpy(lastgpsrequest, message);
+    if(strcmp(lastgpsrequest, content) != NULL || (ForceGlobeStationGPSupdate == true))
+    { strcpy(lastgpsrequest, content);
       ForceGlobeStationGPSupdate = false;
-
-      sprintf(content, "Stations.requested = %d", Stations.requested); 
       AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_BY_GPS);
       AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION_BY_GPS);
       loop_esp_now(); // send it now, before it gets old
