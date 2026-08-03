@@ -131,10 +131,3 @@ void Lvgl_Loop(void)
 }
 
 
-void My_Lvgl_Loop(void)
-{ if (xSemaphoreTake(lvgl_mutex, pdMS_TO_TICKS(50)) == pdTRUE) 
-  { Lvgl_Loop(); // Nu 100% veilig beschermd tegen de Driver_Loop task!
-    xSemaphoreGive(lvgl_mutex); // Geef de sleutel direct weer terug
-  }
-  vTaskDelay(pdMS_TO_TICKS(1));
-}   

@@ -442,6 +442,11 @@ void FindNewStation(void)
   Stations.requested -1;
   char firstcountrycode[3] = ""; // near borders, different countries can be in the directory, decided to stick with the first found
 
+  lv_label_set_text(ui_Station_Name, "SEARCHING");
+  lv_label_set_text(ui_Home_City, "");
+  lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); 
+  lv_label_set_text(ui_Home_Country, "");
+  
 
   search_mS = millis();
 
@@ -1011,25 +1016,37 @@ void AddStationToQueueForGlobe(int16_t station)
     lv_label_set_text(ui_Status_Line, "CONNECTING");
     lv_label_set_text(ui_Station_Title, "");
 
-    // if this country code is our own home country, adjust clock status for that 
+    // if this country code is our own home country, adjust clock mode for that 
     if(strcmp(Stations.StationNUG[station].countrycode, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode) == 0)
     { bClockHomeTime = true;
     }
+    else bClockHomeTime = false;
 
     // check if gps position is a new one
     if(strcmp(lastgpsrequest, content) != NULL || (ForceGlobeStationGPSupdate == true))
     { strcpy(lastgpsrequest, content);
       ForceGlobeStationGPSupdate = false;
-      AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_BY_GPS);
+      if(bClockHomeTime)AddToQueueForGlobe(content, MESSAGE_HOME_TIMEZONE_NAME);
+      else AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_BY_GPS);
       AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION_BY_GPS);
       loop_esp_now(); // send it now, before it gets old
     }
 
-    Serial.printf("Flag = %s\n", Stations.StationNUG[station].countrycode);
+    Serial.printf("Flag set early by AddStationToQueueForGlobe() = %s\n", Stations.StationNUG[station].countrycode);
 
     // show immedeately what is known
     // set flags early - possibly corrected later, when globe thinks it is different 
     SetFlag(Stations.StationNUG[station].countrycode);
+    if(bClockHomeTime)
+    { strcpy(Home.CountryCode, Stations.StationNUG[station].countrycode); // later used for clock face
+      // no country name copied, keep the HOME SWEET HOME text
+      //strcpy(Home.CountryName, AllUpperCase(Stations.StationNUG[Stations.requested].countryname)); 
+    }
+    else
+    { strcpy(World.CountryCode, Stations.StationNUG[station].countrycode); // later used for clock face
+      strcpy(World.CountryName, Stations.StationNUG[Stations.requested].countryname); // later used for clock face
+    }
+
     lv_obj_clear_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start
       
     // reposition flag vertically for preset stations
@@ -1047,16 +1064,13 @@ void AddStationToQueueForGlobe(int16_t station)
 
     Serial.printf("Country = %s\n", Stations.StationNUG[station].countryname);
     strcpy(content, Stations.StationNUG[station].countryname);
-    lv_label_set_text(uic_Home_Country, AllUpperCase(content));
+    lv_label_set_text(uic_Home_Country, content);
     lv_obj_clear_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
-    lv_label_set_text(uic_Clock_Country, AllUpperCase(content));
     lv_obj_clear_flag(uic_Clock_Country, LV_OBJ_FLAG_HIDDEN); // unhide country name 
 
-
-    strcpy(GlobePositionCountryCode, Stations.StationNUG[station].countrycode);
-
     // also update the world map screen
-    sprintf(content,"Greetings From  %s", AllUpperCase(Stations.StationNUG[station].countryname));
+//    sprintf(content,"Greetings From  %s", GetAllUpperCase(message, Stations.StationNUG[station].countryname));
+    sprintf(content,"Greetings From  %s", GetAllUpperCase(message, Stations.StationNUG[station].countryname));
     lv_label_set_text(ui_Database_Town_Name, content);
     lv_label_set_text(ui_Database_Progress, ""); // erase exchange currency and rate
     lv_obj_set_pos(uic_MapCursor, (int)Stations.StationNUG[station].gps_ew - 16, -(int)Stations.StationNUG[station].gps_ns); // moved 16 to left, dot is painted left-top corner?
@@ -1256,7 +1270,7 @@ Symbols : paste the above characters collections
 
 
 
-char * AllUpperCase(char *s)
+char * XXXXAllUpperCase(char *s)
 { int i, slash_count = 0;
   int len = strlen(s);
 
@@ -1292,3 +1306,42 @@ char * AllUpperCase(char *s)
   // Serial.println(s);
   return s;
 }
+
+char * GetAllUpperCase(char *t, char *s)
+{ int i, slash_count = 0;
+  int len = strlen(s);
+
+  // replace all occurencies of '/' with " / "
+  // and make all characters uppercase 
+  // example "TZ - Asia/Calcutta" becomes -> "TZ - ASIA / CALCUTTA"
+
+  // Serial.println(s);
+  // count occurencies of '/'
+  for (i = 0; i < len; i++) 
+  { if (s[i] == '/')
+    slash_count++;
+  }
+
+  // new length
+  int new_len = len + slash_count * 2;
+  t[new_len--] = '\0';
+
+  // Serial.println(new_len);
+
+  // work backwards
+  for (i = len - 1; i >= 0; i--) 
+  { //Serial.printf("%d = '%c'\n", i, s[i]);
+    if (s[i] == '/') 
+    { t[new_len--] = ' ';
+      t[new_len--] = '/';
+      t[new_len--] = ' ';
+    } 
+    else 
+    { t[new_len--] = toupper(s[i]);
+    }
+  }
+  // Serial.println(s);
+  return t;
+}
+
+

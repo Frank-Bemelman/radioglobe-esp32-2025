@@ -787,6 +787,12 @@ int16_t isLongPressedV2(lv_event_t * e)
   return longpressed;
 }
 
+// same as lv_label_set_text() but do it in all uppercase
+void lv_label_set_text_uppercase(lv_obj_t * label, char *text)
+{ char content[128];
+  GetAllUpperCase(content, text);
+  lv_label_set_text(label, content);
+}
 
 
 

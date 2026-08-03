@@ -43,7 +43,7 @@ const char * messagetexts[] = {
    { "GET_TIMEZONE_BY_GPS 27"},
    { "STREAMING_IDLE_MS 28"},
    { "NEW_LIST_LOADED 29"}, // after a succesful search
-   { "GET_TIMEZONE 30"},
+   { "EXPLORING 30"},
    { "POWERDOWN 31"},
    { "POWERUP 32"},
    { "VOLUME_AND_TONE 33"},
@@ -124,7 +124,7 @@ const char * messagetexts[] = {
 
 #define MESSAGE_NEW_LIST_LOADED 29 // after a succesful search
 
-#define MESSAGE_GET_TIMEZONEXXXXXXXXXXXXXXXX 30
+#define MESSAGE_EXPLORING 30
 
 #define MESSAGE_POWERDOWN 31
 #define MESSAGE_POWERUP 32
