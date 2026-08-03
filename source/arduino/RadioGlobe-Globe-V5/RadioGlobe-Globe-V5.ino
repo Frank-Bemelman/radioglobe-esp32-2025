@@ -968,6 +968,7 @@ void loop()
     AddToQueueForDisplay("", MESSAGE_STATION_NAME); // remove 'station name'
     AddToQueueForDisplay("EXPLORING", MESSAGE_STATUS_LINE); // remove 'station name'
     AddToQueueForDisplay("", MESSAGE_SONG_TITLE); // remove 'song title'    
+    AddToQueueForDisplay("", MESSAGE_EXPLORING); // remove 'song title'    
   }
   
   if((LoopTicker100mS%10)==0)
