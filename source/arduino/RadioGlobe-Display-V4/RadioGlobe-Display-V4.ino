@@ -829,6 +829,7 @@ void loop()
           lv_label_set_text(ui_Station_Title, "");
           lv_label_set_text(uic_Home_City, "EXPLORING");
           lv_label_set_text(uic_Home_Country, "GLOBETROTTER");      
+          lv_label_set_text(ui_Clock_Country, "EXPLORING");
           SetFlag("??");
           //lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); 
           break;

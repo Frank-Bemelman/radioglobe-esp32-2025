@@ -21,6 +21,7 @@ void OnClockScreenLoad(lv_event_t * e)
   lv_event_code_t code = lv_event_get_code(e);
 
   RTC_Loop(); // after a power on boot, fetch time early
+  lv_obj_clear_flag(ui_ClockFlag, LV_OBJ_FLAG_HIDDEN); // in case it was hidden by a search 
   ForceSetClockHands();
   
   if(code == LV_EVENT_SCREEN_LOAD_START)
@@ -492,7 +493,7 @@ void SpeakerToggle(lv_event_t * e)
 
 // Clock flag is a toggle to select between home location time and local time of globe position
 void ClockFlagToggle(lv_event_t * e)
-{ char content[64];
+{ char content64[64];
   bClockHomeTime = !bClockHomeTime;
   beepforMs(50);
 
@@ -504,30 +505,32 @@ void ClockFlagToggle(lv_event_t * e)
     // use home location as stored in favorites.txt as 5th record to get timezone and place
     DataFromDisplay.D_StationGpsNS = Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].gps_ns;
     DataFromDisplay.D_StationGpsEW = Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].gps_ew;
-    sprintf(content, "%d %f %f", 9999, DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
+    sprintf(content64, "%d %f %f", 9999, DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
     //AddToQueueForGlobe("DISPLAY WANTS MQTT STATUS", MESSAGE_MQTT_STATUS); 
-    if(strncmp(DisplaySettings.home_tz_posix, "CUSTOM", 5)!=0)AddToQueueForGlobe(content, MESSAGE_HOME_TIMEZONE_NAME);  
-    else AddToQueueForGlobe(content, MESSAGE_HOME_TIMEZONE_NAME);  // todo -> change timezone system clock instead without requesting TZ everytime - is a brain breaker
+    if(strncmp(DisplaySettings.home_tz_posix, "CUSTOM", 5)!=0)AddToQueueForGlobe(content64, MESSAGE_HOME_TIMEZONE_NAME);  
+    else AddToQueueForGlobe(content64, MESSAGE_HOME_TIMEZONE_NAME);  // todo -> change timezone system clock instead without requesting TZ everytime - is a brain breaker
     //lv_obj_add_flag(ui_MinuteHand, LV_OBJ_FLAG_HIDDEN); // idea -> hide hands until timezone is refreshed - needs a bool bShowHandsAgain upopn TZ reception etc - leave it for now
     //lv_obj_add_flag(ui_HourHand, LV_OBJ_FLAG_HIDDEN);
-    lv_label_set_text(ui_Clock_Country, Home.CountryName);
+    lv_label_set_text(ui_Clock_Country, GetAllUpperCase(content64, Home.CountryName));
     SetFlag(Home.CountryCode);
-    sprintf(content, "%s\n%s %d-%s-%d\n%s",  Home.TZname, weekdays[datetime.dotw%7], (size_t)datetime.day, monthnames[datetime.month%12],  (size_t)datetime.year%100, partofday[(datetime.hour/6)%4]);
-    lv_label_set_text(ui_Time_Zone_Clock, content); // on clock screen
+    lv_obj_clear_flag(ui_ClockFlag, LV_OBJ_FLAG_HIDDEN); // in case it was hidden by a search 
+    sprintf(content64, "%s\n%s %d-%s-%d\n%s",  Home.TZname, weekdays[datetime.dotw%7], (size_t)datetime.day, monthnames[datetime.month%12],  (size_t)datetime.year%100, partofday[(datetime.hour/6)%4]);
+    lv_label_set_text(ui_Time_Zone_Clock, content64); // on clock screen
   }
   else 
   { Serial.println("ClockFlagToggle = WORLD");
     DataFromDisplay.D_StationGpsNS = Stations.StationNUG[Stations.requested].gps_ns;
     DataFromDisplay.D_StationGpsEW = Stations.StationNUG[Stations.requested].gps_ew;
-    sprintf(content, "%d %f %f", 9999, DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
+    sprintf(content64, "%d %f %f", 9999, DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
     //AddToQueueForGlobe("DISPLAY WANTS MQTT STATUS", MESSAGE_MQTT_STATUS); 
-    AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_BY_GPS);  
+    AddToQueueForGlobe(content64, MESSAGE_GET_TIMEZONE_BY_GPS);  
     //lv_obj_add_flag(ui_MinuteHand, LV_OBJ_FLAG_HIDDEN);
     //lv_obj_add_flag(ui_HourHand, LV_OBJ_FLAG_HIDDEN);
-    lv_label_set_text(ui_Clock_Country, World.CountryName);
+    lv_label_set_text(ui_Clock_Country, GetAllUpperCase(content64, World.CountryName));
     SetFlag(World.CountryCode);
-    sprintf(content, "%s\n%s %d-%s-%d\n%s",  World.TZname, weekdays[datetime.dotw%7], (size_t)datetime.day, monthnames[datetime.month%12],  (size_t)datetime.year%100, partofday[(datetime.hour/6)%4]);
-    lv_label_set_text(ui_Time_Zone_Clock, content); // on clock screen
+    lv_obj_clear_flag(ui_ClockFlag, LV_OBJ_FLAG_HIDDEN); // in case it was hidden by a search 
+    sprintf(content64, "%s\n%s %d-%s-%d\n%s",  World.TZname, weekdays[datetime.dotw%7], (size_t)datetime.day, monthnames[datetime.month%12],  (size_t)datetime.year%100, partofday[(datetime.hour/6)%4]);
+    lv_label_set_text(ui_Time_Zone_Clock, content64); // on clock screen
   }
 
 }

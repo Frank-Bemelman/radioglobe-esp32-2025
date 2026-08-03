@@ -446,6 +446,9 @@ void FindNewStation(void)
   lv_label_set_text(ui_Home_City, "");
   lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); 
   lv_label_set_text(ui_Home_Country, "");
+  // also on clock, in case we play the globe while clock is shown
+  lv_obj_add_flag(ui_ClockFlag, LV_OBJ_FLAG_HIDDEN); 
+  lv_label_set_text(ui_Clock_Country, "");
   
 
   search_mS = millis();
@@ -1048,6 +1051,7 @@ void AddStationToQueueForGlobe(int16_t station)
     }
 
     lv_obj_clear_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start
+    lv_obj_clear_flag(ui_ClockFlag, LV_OBJ_FLAG_HIDDEN); 
       
     // reposition flag vertically for preset stations
     if(station>=MAX_STATIONS)
@@ -1065,6 +1069,7 @@ void AddStationToQueueForGlobe(int16_t station)
     Serial.printf("Country = %s\n", Stations.StationNUG[station].countryname);
     strcpy(content, Stations.StationNUG[station].countryname);
     lv_label_set_text(uic_Home_Country, content);
+    lv_label_set_text(uic_Clock_Country, GetAllUpperCase(message, content));
     lv_obj_clear_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
     lv_obj_clear_flag(uic_Clock_Country, LV_OBJ_FLAG_HIDDEN); // unhide country name 
 
