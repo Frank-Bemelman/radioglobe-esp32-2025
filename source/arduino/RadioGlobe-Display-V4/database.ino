@@ -990,7 +990,8 @@ void AddStationToQueueForGlobe(int16_t station)
   DataFromDisplay.D_RequestedStation = Stations.requested;
   
   if(station < 0) // no actual station to play really, places with no stations, at sea perhaps, but will trigger timezone/geolocation requests
-  { lv_label_set_text(uic_Home_City, "");
+  { // early setting
+    lv_label_set_text(uic_Home_City, "");
     lv_label_set_text(uic_Home_Country, "");
     //on map
     sprintf(content, "GPS NS %2.1f - EW %3.1f", (float)DataFromDisplay.ns_cal/10, (float)DataFromDisplay.ew_cal/10);
@@ -1004,6 +1005,11 @@ void AddStationToQueueForGlobe(int16_t station)
     loop_esp_now(); // send it now, before it gets old
     lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide flag
     lv_obj_add_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN);
+    SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
+
+    World.gps_ns = (float)DataFromDisplay.ns_cal/10;
+    World.gps_ew = (float)DataFromDisplay.ew_cal/10;
+    
   }
   else if(station<MAX_STATIONS+MAX_FAVORITES)
   { bMusicMode = false;
@@ -1019,11 +1025,22 @@ void AddStationToQueueForGlobe(int16_t station)
     lv_label_set_text(ui_Status_Line, "CONNECTING");
     lv_label_set_text(ui_Station_Title, "");
 
+    Serial.printf(" -----------------  AddStationToQueueForGlobe() station for country <%s>\n", Stations.StationNUG[station].countrycode);
+
     // if this country code is our own home country, adjust clock mode for that 
     if(strcmp(Stations.StationNUG[station].countrycode, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode) == 0)
     { bClockHomeTime = true;
+      Home.gps_ns = Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].gps_ns;
+      Home.gps_ew = Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].gps_ew;
+      World.gps_ns = 10000; // to prevent clockflagtoggle switch to world mode
+      World.gps_ew = 10000; // to prevent clockflagtoggle switch to world mode
+
     }
-    else bClockHomeTime = false;
+    else
+    { bClockHomeTime = false;
+      World.gps_ns = Stations.StationNUG[station].gps_ns;
+      World.gps_ew = Stations.StationNUG[station].gps_ew;
+    }
 
     // check if gps position is a new one
     if(strcmp(lastgpsrequest, content) != NULL || (ForceGlobeStationGPSupdate == true))
@@ -1053,15 +1070,6 @@ void AddStationToQueueForGlobe(int16_t station)
     lv_obj_clear_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start
     lv_obj_clear_flag(ui_ClockFlag, LV_OBJ_FLAG_HIDDEN); 
       
-    // reposition flag vertically for preset stations
-    if(station>=MAX_STATIONS)
-    { int16_t yc = ((station - MAX_STATIONS) * 70) - 104;
-      //Serial.printf("station=%d yc = %d\n", station, yc);
-      lv_obj_set_y(ui_PresetFlag, yc);  // -104 -34 34 104 
-      lv_obj_clear_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start
-      lv_event_send(ui_PresetFlag, LV_EVENT_REFRESH, NULL);
-    }  
-
     Serial.printf("Town = %s\n", Stations.StationNUG[station].town);
     lv_label_set_text(uic_Home_City, Stations.StationNUG[station].town);
     lv_obj_clear_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
@@ -1069,12 +1077,17 @@ void AddStationToQueueForGlobe(int16_t station)
     Serial.printf("Country = %s\n", Stations.StationNUG[station].countryname);
     strcpy(content, Stations.StationNUG[station].countryname);
     lv_label_set_text(uic_Home_Country, content);
-    lv_label_set_text(uic_Clock_Country, GetAllUpperCase(message, content));
+    
+    // when station is from home country, print the "HOME SWEET HOME" text
+//    if(bClockHomeTime)
+//    { lv_label_set_text_uppercase(ui_Clock_Country, Home.CountryName);
+//    }
+//    else lv_label_set_text_uppercase(uic_Clock_Country, content);
+
     lv_obj_clear_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
     lv_obj_clear_flag(uic_Clock_Country, LV_OBJ_FLAG_HIDDEN); // unhide country name 
 
     // also update the world map screen
-//    sprintf(content,"Greetings From  %s", GetAllUpperCase(message, Stations.StationNUG[station].countryname));
     sprintf(content,"Greetings From  %s", GetAllUpperCase(message, Stations.StationNUG[station].countryname));
     lv_label_set_text(ui_Database_Town_Name, content);
     lv_label_set_text(ui_Database_Progress, ""); // erase exchange currency and rate

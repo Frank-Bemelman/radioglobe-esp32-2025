@@ -279,12 +279,22 @@ void Driver_Loop(void *parameter) // runs on core 0
         if(ShowVolumeTimer == 1)
         { if (xSemaphoreTake(lvgl_mutex, pdMS_TO_TICKS(20)) == pdTRUE)
           { if(DataFromDisplay.volumevalue) // at zero volume, power off icon is shown, let's keep it that way
-            { lv_obj_add_state(ui_VolumeValue, LV_STATE_DISABLED); 
+            { if(!bMusicMode) // jukebox
+              {
+              lv_obj_add_state(ui_VolumeValue, LV_STATE_DISABLED); 
               lv_obj_add_flag(ui_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN); 
               lv_obj_add_flag(ui_mainscreen_speakeron, LV_OBJ_FLAG_HIDDEN); 
               lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); 
               lv_obj_clear_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); 
               lv_obj_clear_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN); 
+              }
+              else
+              { lv_obj_add_state(ui_VolumeValue, LV_STATE_DISABLED); 
+                lv_obj_add_flag(ui_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN); 
+                lv_obj_add_flag(ui_mainscreen_speakeron, LV_OBJ_FLAG_HIDDEN); 
+                lv_img_set_src(ui_Jukebox, &ui_img_jukebox128x128_png);
+                lv_obj_clear_flag(ui_Jukebox, LV_OBJ_FLAG_HIDDEN); 
+              }
             }
             ShowBatteryLevel(false); 
             ShowWeatherData(true);
@@ -347,6 +357,8 @@ typedef struct locationData
   char TZname[64]; // for clock face
   char DayAndDate[64]; // for clock face
   char HelloText[64]; // for clock face
+  float gps_ns;
+  float gps_ew;
 };
 
 locationData Home = {"CUSTOM0:00:00", "XX", "", "", "", ""};
@@ -528,6 +540,8 @@ void setup()
   // use home location as stored in favorites.txt as 5th record to get timezone and place
   DataFromDisplay.D_StationGpsNS = Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].gps_ns;
   DataFromDisplay.D_StationGpsEW = Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].gps_ew;
+  Home.gps_ns = DataFromDisplay.D_StationGpsNS;
+  Home.gps_ew = DataFromDisplay.D_StationGpsEW;
   
   strcpy(Home.CountryCode, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode); 
   strcpy(World.CountryCode, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode); 
@@ -554,7 +568,7 @@ char *partofday[4] = {"Sweet Night", "Good Morning", "Jolly Afternoon", "Nice Ev
 char *weekdays[7] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 char *monthnames[12] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
 char OldClockTimeZoneName[64] = "";
-
+char OldClockTimeCountryCode[16];
 
 void loop()
 { char content[256];
@@ -824,14 +838,22 @@ void loop()
 
         // globe statt moving
         case MESSAGE_EXPLORING:
+          //if(screen != ui_ClockScreen)lv_scr_load(ui_Home);
           lv_label_set_text(ui_Station_Name, "");
           lv_label_set_text(ui_Status_Line, "EXPLORING THE EARTH");
           lv_label_set_text(ui_Station_Title, "");
           lv_label_set_text(uic_Home_City, "EXPLORING");
-          lv_label_set_text(uic_Home_Country, "GLOBETROTTER");      
+          //lv_label_set_text(uic_Home_Country, "GLOBETROTTER");      
+          lv_obj_add_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); // hide flag
+          lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide flag
+          lv_obj_add_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide flag
+          
+          //lv_img_set_src(ui_Jukebox, &ui_img_earth128x128_png);
+          //lv_obj_clear_flag(ui_Jukebox, LV_OBJ_FLAG_HIDDEN);
+          
           lv_label_set_text(ui_Clock_Country, "EXPLORING");
-          SetFlag("??");
-          //lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); 
+          lv_refr_now(NULL);
+          // SetFlag("??");
           break;
 
         case MESSAGE_DESCRIPTION:
@@ -842,8 +864,11 @@ void loop()
         case MESSAGE_GET_TIMEZONE_BY_GPS:
         case MESSAGE_TIMEZONE_NAME:
         case MESSAGE_HOME_TIMEZONE_NAME:
+          PrevHour--; // forces instant update of clock, names of places, flags
+          PrevSecond--;
           if(strlen(QueueMessage))
           { GetAllUpperCase(QueueMessage, QueueMessage); // place in same string
+
             
             if(QueueMessageType == MESSAGE_HOME_TIMEZONE_NAME)
             { //bClockHomeTime = true;
@@ -854,6 +879,7 @@ void loop()
               strcpy(World.TZname, QueueMessage);
             }
 
+            Serial.printf("Hour is %d\n", datetime.hour);
             datetime.year = DataFromGlobe.timeinfo.tm_year; // years since 1900
             datetime.month = DataFromGlobe.timeinfo.tm_mon; 
             datetime.day = DataFromGlobe.timeinfo.tm_mday;
@@ -863,7 +889,10 @@ void loop()
             datetime.second = DataFromGlobe.timeinfo.tm_sec;
             PCF85063_Set_All(datetime); // this time is already TZ corrected
 
-            lv_label_set_text(ui_Time_Zone, World.TZname); // on home screen - clock screen does it's own updates every second
+            Serial.printf("AFTER MESSAGE_GET_TIMEZONE_BY_GPS -> Hour is %d\n", datetime.hour);
+
+            //if(bClockHomeTime)lv_label_set_text(ui_Time_Zone, Home.TZname); // on home screen - clock screen does it's own updates every second
+            //if(!bClockHomeTime)lv_label_set_text(ui_Time_Zone, World.TZname); // on home screen - clock screen does it's own updates every second
 
             struct timeval tv;
             tv.tv_sec = DataFromGlobe.G_now; // set our system clock to UTC received from globe
@@ -934,12 +963,16 @@ void loop()
          case MESSAGE_FINDNEWSTATION:
           // station or file already killed by globe
           bMusicMode = false;
+          lv_obj_add_flag(ui_Jukebox, LV_OBJ_FLAG_HIDDEN);
+          lv_obj_clear_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN);
+          lv_obj_clear_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN);
+
+
           if((screen != ui_CalibrationScreen) && (screen != ui_CalibrationScreenAdvanced))
           { // if in tone controle screen or preset screen, jump back to home screen
             if((screen != ui_DatabaseScreen) || (bInfoScreen==true))
             { if(screen==ui_ClockScreen) // clock screen
               { Serial.printf("Clock screen, find new station for flag and time update \n");
-                //bClockHomeTime = false;
                 FindNewStation();
                 ReloadScroll();
               }
@@ -1126,6 +1159,8 @@ void loop()
           // example: ","
           // example: ""
           // example: "XX,???"  // at sea
+          PrevHour--; // forces instant update of clock, names of places, flags
+          PrevSecond--;
 
           // check if the somewhat late arrived data is still applicable for the station most recently ordered
           Serial.printf("DataFromGlobe.D_ApisFetchedForStation %d<> Stations.requested -> %d\n", DataFromGlobe.D_ApisFetchedForStation, Stations.requested);
@@ -1148,21 +1183,27 @@ void loop()
           RemoveUTF8Unprintables(town); // arabic town names are not printable with extended ascii fonts
           Serial.printf("GPS Countrycode = %s and town = %s Stations.requested = %d\n", countrycode, town, Stations.requested);
 
-          if((strcmp(town, "???")!=0) && (strcmp(countrycode, "XX")==0)) // google does not give country name for disputed areas like NS = 42.061100, EW = 20.651199 which is Dragsh in Kosovo
-          { GetAllUpperCase(countrycode, Stations.StationNUG[Stations.requested].countrycode);
-          } 
+          if(Stations.requested>=0)
+          { if((strcmp(town, "???")!=0) && (strcmp(countrycode, "XX")==0)) // google does not give country name for disputed areas like NS = 42.061100, EW = 20.651199 which is Dragsh in Kosovo
+            { GetAllUpperCase(countrycode, Stations.StationNUG[Stations.requested].countrycode);
+            } 
+          }  
 
           // if this country code is our own home country, adjust clock status for that 
           if(strcmp(countrycode, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode) == 0)
           { bClockHomeTime = true;
+            strcpy(Home.CountryCode, countrycode);
           }
-          else bClockHomeTime = false;
+          else
+          { bClockHomeTime = false;
+            strcpy(World.CountryCode, countrycode);
+          }
 
           // maybe this is not needed anymore once database is 100% cleaned up with correct country names
           // but leave it for now to see if we still accumulate alarming messages
           if(QueueMessageType == MESSAGE_GET_GEOLOCATION_BY_GPS)
           { // check if country code is different from database, log when mismatch
-            { if(Stations.requested<MAX_STATIONS+MAX_FAVORITES) // skip MAX_HOMES here
+            { if(Stations.requested >=0 && Stations.requested<MAX_STATIONS+MAX_FAVORITES) // skip MAX_HOMES here
               { if(strlen(Stations.StationNUG[Stations.requested].countrycode)==2) // not empty
                 { if(strcmp(Stations.StationNUG[Stations.requested].countrycode, countrycode)!=NULL) // country different from expected
                   { // must write to file for later examination
@@ -1207,64 +1248,68 @@ void loop()
           } // end error logging
 
           if(strlen(countrycode)==2) // && (strcmp(countrycode, "XX")!=NULL)) // XX is impossible for a radiostation
-          { strcpy(Stations.StationNUG[Stations.requested].countrycode, countrycode); // only when a positive result was returned (Google does not report on palestine and some others)
-            if(FindCountryNameByCode(Stations.StationNUG[Stations.requested].countryname, Stations.StationNUG[Stations.requested].countrycode))
-            { Serial.printf("Called from radioglobe-display.ino line ~1068\n");
+          { if(strcmp(town, "???")==NULL)
+            { if(Stations.requested>=0 && Stations.requested<MAX_STATIONS+MAX_FAVORITES)
+              { strcpy(town, Stations.StationNUG[Stations.requested].town);
+              } 
+              //else strcpy(town, "zandvoort aan zee");
+              else strcpy(town, "Waves");
+            }
+            
+            char FoundCountryName[64];
+            if(FindCountryNameByCode(FoundCountryName, countrycode))
+            { Serial.printf("Called from radioglobe-display.ino line ~1228\n");
               SetFlag(countrycode); // just do it - flag isn't always early loaded, for instance if no stations were found, or XX result
               if(bClockHomeTime)
               { strcpy(Home.CountryCode, countrycode); // later used for clock face
                 // do not copy countryname, keep the HOME SWEET HOME text
-                //strcpy(Home.CountryName, AllUpperCase(Stations.StationNUG[Stations.requested].countryname)); // later used for clock face
-                // use official country name on main screen
-                lv_label_set_text(ui_Home_Country, Stations.StationNUG[Stations.requested].countryname);
-              
+                // strcpy(Home.CountryName, FoundCountryName); // later used for clock face
               }
               else
               { strcpy(World.CountryCode, countrycode); // later used for clock face
-                strcpy(World.CountryName, Stations.StationNUG[Stations.requested].countryname); // later used for clock face
-                lv_label_set_text(ui_Home_Country, World.CountryName);
+                strcpy(World.CountryName, FoundCountryName); // later used for clock face
+                //lv_label_set_text(ui_Home_Country, World.CountryName);
+                //lv_label_set_text(ui_Clock_Country, GetAllUpperCase(content64, Stations.StationNUG[Stations.requested].countryname));
               }
-              lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // show flag 
-              //lv_obj_clear_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
-              lv_label_set_text(ui_Clock_Country, GetAllUpperCase(content64, Stations.StationNUG[Stations.requested].countryname));
-              //lv_obj_clear_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
+              if(!bMusicMode)
+              { lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // show flag, perhaps was hidden by a new search start
+                lv_obj_clear_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start 
+                lv_obj_clear_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start 
+                lv_obj_clear_flag(ui_ClockFlag, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
+              }
               
-              if(Stations.requested<MAX_STATIONS+MAX_FAVORITES) 
+              if(Stations.requested>=0 && Stations.requested<MAX_STATIONS+MAX_FAVORITES) 
               { sprintf(content, "%s  -  %s", Stations.StationNUG[Stations.requested].town, GetAllUpperCase(content64, Stations.StationNUG[Stations.requested].countryname));
                 lv_label_set_text(ui_StationRollerPlace, content);
+                // on world map screen
+                lv_label_set_text(ui_GlobeCurrentCountry, GetAllUpperCase(content64, Stations.StationNUG[Stations.requested].countryname));
               }  
               
               // on setup screen (as the place where you are on the globe)
               lv_label_set_text(ui_GlobeCurrentCountry, GetAllUpperCase(content64, Stations.StationNUG[Stations.requested].countryname));
               
-              if(strcmp(town, "???")==NULL) // use country name from initial data
-              { sprintf(content, "%s", GetAllUpperCase(content64, Stations.StationNUG[Stations.requested].countryname));
-                Serial.printf("content = <%s>\n", content);
-                lv_label_set_text(ui_Home_City, "");
+              sprintf(content, "%s", GetAllUpperCase(content64, FoundCountryName));
+              Serial.printf("content = <%s>\n", content);
+              lv_label_set_text(ui_Home_City, town);
                 // on map
-                sprintf(content,"Greetings From  %s", GetAllUpperCase(content64, Stations.StationNUG[Stations.requested].countryname));
-                lv_label_set_text(ui_Database_Town_Name, content);
-              } 
-              else 
-              { // on map
-                sprintf(content,"Greetings From  %s", GetAllUpperCase(content64, Stations.StationNUG[Stations.requested].countryname));
-                lv_label_set_text(ui_Database_Town_Name, content);
-                if(strlen(town)>3)sprintf(content,"You Are In  %s", town);
-                else sprintf(content,"You Are In  %s", GetAllUpperCase(content64, Stations.StationNUG[Stations.requested].countryname));
-                lv_label_set_text(ui_Database_Output_File, content);
+              sprintf(content,"Greetings From %s", GetAllUpperCase(content64, FoundCountryName));
+              lv_label_set_text(ui_Database_Town_Name, content);
+              sprintf(content,"You Are In %s", town);
+              lv_label_set_text(ui_Database_Output_File, content);
                 
-                if(strlen(town)>3)sprintf(content, "%s  -  %s", town, GetAllUpperCase(content64, Stations.StationNUG[Stations.requested].countryname));
-                else sprintf(content, "%s", GetAllUpperCase(content64, Stations.StationNUG[Stations.requested].countryname));
-                Serial.printf("content2 = <%s>\n", content);
-                Serial.printf("content2 = <%s>\n", town);
-                lv_label_set_text(ui_Home_City, town);
-              }
+              sprintf(content, "%s  -  %s", town, FoundCountryName);
+              Serial.printf("content2 = <%s>\n", content);
+              
               lv_label_set_text(ui_StationRollerPlace, content);
               lv_label_set_text(ui_Database_Progress, ""); // exchange rate on map sceen, will be refreshed when globe answers with fresh exchange data
               AddToQueueForGlobe(countrycode, MESSAGE_EX_CHANGE_RATE);
             }
-            else
+            else // country code not in list - must be a database error
             { sprintf(content, "Countrycode %s Not In List", QueueMessage);
+              // log this issue
+              strcpy(logfile, "/database-error.log");
+              AppendToLogFile(logfile, content);
+              // and display it
               lv_label_set_text(ui_Home_Country, content);
               sprintf(content, "%s", Stations.StationNUG[Stations.requested].town);
               lv_label_set_text(ui_StationRollerPlace, content);
@@ -1441,7 +1486,16 @@ void loop()
             Stations.count = 0;
             Stations.requested -1;
             ReloadScroll();
-            lv_label_set_text(ui_Home_City, "SD-Card");
+            lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(ui_Jukebox, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN);
+          }
+          else
+          { lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(ui_Jukebox, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN);
           }
           break;
 
@@ -1512,7 +1566,7 @@ void loop()
           break;
       }
 
-      Serial.printf(" AT switch(QueueMessageType) break; -> %d-%s-%d %02d:%02d:%02d\n", (int)datetime.day, monthnames[datetime.month],  (int)datetime.year%100, datetime.hour, (int)datetime.minute, (int)datetime.second);
+      Serial.printf(" AT switch(QueueMessageType) break; -> %d-%s-%d %02d:%02d:%02d\n", (int)datetime.day, monthnames[datetime.month%12],  (int)datetime.year%100, datetime.hour, (int)datetime.minute, (int)datetime.second);
      
 
       FromGlobe.QueueIndexOut++;
@@ -1534,6 +1588,8 @@ void loop()
       lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide flag
       lv_obj_add_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); // hide town
       lv_obj_add_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide country name
+      lv_obj_add_flag(ui_Jukebox, LV_OBJ_FLAG_HIDDEN); // hide jukebox icon
+      
       ShowWeatherData(false); // hide weather status
       ShowBatteryLevel(true); // show battery level
       if(newvolumevalue) // and show it
@@ -1693,7 +1749,7 @@ void loop()
 
     
     if(PrevSecond != datetime.second)
-    { if(screen == ui_ClockScreen) // we are on clock screen
+    { //if(screen == ui_ClockScreen) // we are on clock screen
       { PrevSecond = datetime.second;
 
         // angles in 0-3599 tenth of degrees
@@ -1702,17 +1758,28 @@ void loop()
         uint16_t HourAngle = (((datetime.hour%12) * 300) + (datetime.minute * 5))%3600;
  
         if(bClockHomeTime)
-        { if(PrevHour!=datetime.hour || strcmp(OldClockTimeZoneName, Home.TZname)!=0)
-          { PrevHour!=datetime.hour;
+        { if(PrevHour!=datetime.hour || strcmp(OldClockTimeZoneName, Home.TZname)!=0 || strcmp(OldClockTimeCountryCode, Home.CountryCode)!=0)
+          { PrevHour=datetime.hour;
             strcpy(OldClockTimeZoneName, Home.TZname);
+            strcpy(OldClockTimeCountryCode, Home.CountryCode);
             sprintf(content, "%s\n%s %d-%s-%d\n%s",  Home.TZname, weekdays[datetime.dotw%7], (size_t)datetime.day, monthnames[datetime.month%12],  (size_t)datetime.year%100, partofday[(datetime.hour/6)%4]);
             lv_label_set_text(ui_Time_Zone_Clock, content); // on clock screen
+            lv_label_set_text(ui_Time_Zone, Home.TZname); // on home screen - clock screen does it's own updates every second
+            SetFlag(Home.CountryCode);
+            lv_label_set_text_uppercase(ui_Clock_Country, Home.CountryName);
+            lv_label_set_text(ui_Home_Country, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countryname); // use original country name
           }
         }
-        else if(PrevHour!=datetime.hour || strcmp(OldClockTimeZoneName, World.TZname)!=0)
-        { strcpy(OldClockTimeZoneName, World.TZname);
+        else if(PrevHour!=datetime.hour || strcmp(OldClockTimeZoneName, World.TZname)!=0 || strcmp(OldClockTimeCountryCode, World.CountryCode)!=0)
+        { PrevHour=datetime.hour;
+          strcpy(OldClockTimeZoneName, World.TZname);
+          strcpy(OldClockTimeCountryCode, World.CountryCode);
           sprintf(content, "%s\n%s %d-%s-%d\n%s",  World.TZname, weekdays[datetime.dotw%7], (size_t)datetime.day, monthnames[datetime.month%12],  (size_t)datetime.year%100, partofday[(datetime.hour/6)%4]);
           lv_label_set_text(ui_Time_Zone_Clock, content); // on clock screen
+          lv_label_set_text(ui_Time_Zone, World.TZname); // on home screen - clock screen does it's own updates every second
+          SetFlag(World.CountryCode);
+          lv_label_set_text_uppercase(ui_Clock_Country, World.CountryName);
+          lv_label_set_text(ui_Home_Country, World.CountryName);
         }
 
         if(PrevHourAngle != HourAngle)
@@ -1730,28 +1797,27 @@ void loop()
         lv_img_set_angle(ui_SecondHand, SecondAngle);
       }
       
-      if(bPrevClockHomeTime!=bClockHomeTime)
-      { bPrevClockHomeTime = bClockHomeTime;
-        if(bClockHomeTime)Serial.println("Clock is NOW on HOME TIME");
-        if(!bClockHomeTime)Serial.println("Clock is NOW on WORLD TIME");
-        if(bClockHomeTime)
-        { strcpy(ClockFlagCountryCode, Home.CountryCode);
-          lv_label_set_text(ui_Clock_Country, GetAllUpperCase(content64, Home.CountryName));
-         //Serial.printf("ClockFlagCountryCode from Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode = %s\n", ClockFlagCountryCode);
-        }
-        else
-        { strcpy(ClockFlagCountryCode, World.CountryCode);
-          lv_label_set_text(ui_Clock_Country, GetAllUpperCase(content64, World.CountryName));
-        }
-        if(strcmp(OldClockFlagCountryCode, ClockFlagCountryCode) != 0)
-        { strcpy(OldClockFlagCountryCode, ClockFlagCountryCode);
+//      if(bPrevClockHomeTime!=bClockHomeTime)
+//      { bPrevClockHomeTime = bClockHomeTime;
+//        if(bClockHomeTime)Serial.println("Clock is NOW on HOME TIME");
+//        if(!bClockHomeTime)Serial.println("Clock is NOW on WORLD TIME");
+//        if(bClockHomeTime)
+//        { strcpy(ClockFlagCountryCode, Home.CountryCode);
+//          lv_label_set_text(ui_Clock_Country, GetAllUpperCase(content64, Home.CountryName));
+//         //Serial.printf("ClockFlagCountryCode from Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode = %s\n", ClockFlagCountryCode);
+//        }
+//        else
+//        { strcpy(ClockFlagCountryCode, World.CountryCode);
+//          lv_label_set_text(ui_Clock_Country, GetAllUpperCase(content64, World.CountryName));
+//        }
+//        if(strcmp(OldClockFlagCountryCode, ClockFlagCountryCode) != 0)
+//        { strcpy(OldClockFlagCountryCode, ClockFlagCountryCode);
           // set flag
-          Serial.printf("New ClockFlagCountryCode = %s\n", ClockFlagCountryCode);
-          //if(screen == ui_Power)
-          SetFlag(ClockFlagCountryCode);
-          lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN);
-        }
-      }
+ //         Serial.printf("New ClockFlagCountryCode = %s\n", ClockFlagCountryCode);
+ //         SetFlag(ClockFlagCountryCode);
+ //         lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN);
+ //       }
+  //    }
     }  
      
     // let's do a flashing semicolon between hours an minutes of clock HH:MM

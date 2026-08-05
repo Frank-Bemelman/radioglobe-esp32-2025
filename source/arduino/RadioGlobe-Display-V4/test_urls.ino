@@ -204,7 +204,8 @@ void RemoveNSdirectories(void)
   }  
 }
 
-
+// tradiitonal remove of directory tree
+// could probably made faster if we use the worldmap with the dots to find them
 bool DeleteDir(fs::FS &fs, const char *dirname) 
 { File root = fs.open(dirname);
   if (!root) {

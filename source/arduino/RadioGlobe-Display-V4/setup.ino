@@ -274,12 +274,20 @@ void SerialNumberButton(lv_event_t * e)
   }
 }
 
+// power button on main screen, only visible with volume at zero
 void PowerCycle(lv_event_t * e)
-{ if(isLongPressed(e)==2)
-  { //Serial.printf("Power button long pressed\n");
-    //handlePowerCycle();
-    if(!trigger_power_cycle_flag) // prevent double triggers with repeat
-    { Serial.printf("Power button long pressed\n");
+{ lv_event_code_t event_code = lv_event_get_code(e);
+  if(event_code == LV_EVENT_CLICKED) // 7
+  { Serial.println("Powerbutton Mainscreen clicked");
+    if(bPowerStatus && !trigger_power_cycle_flag) // prevent double triggers with repeated clicks
+    { Serial.println("trigger_power_cycle_flag activated");
+      trigger_power_cycle_flag = true; // to be satisfied in main loop()
+    }
+  }
+  if(isLongPressed(e)==2)
+  { Serial.printf("Power button long pressed\n");
+    if(bPowerStatus && !trigger_power_cycle_flag) // prevent double triggers with repeat
+    { Serial.println("trigger_power_cycle_flag activated");
       trigger_power_cycle_flag = true; // to be satisfied in main loop()
     }
   }
@@ -299,6 +307,7 @@ void handlePowerCycle(void)
       ui_object_set_themeable_style_property(ui_Home_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_red);
       ui_object_set_themeable_style_property(ui_Home_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_red);
       lv_obj_invalidate(ui_Home_Power_Off_Icon);
+      lv_refr_now(NULL); // quick update to see it go red
       
       if(AutoSleepTimer) AddToQueueForGlobe("OFF", MESSAGE_POWERDOWN); // initiated by user
       else AddToQueueForGlobe("OFF", MESSAGE_SILENT_POWER_DOWN); // intiated by countdown of AutoSleepTimer
@@ -494,6 +503,9 @@ void SpeakerToggle(lv_event_t * e)
 // Clock flag is a toggle to select between home location time and local time of globe position
 void ClockFlagToggle(lv_event_t * e)
 { char content64[64];
+  
+  if(World.gps_ns>9999)return;
+
   bClockHomeTime = !bClockHomeTime;
   beepforMs(50);
 
@@ -503,34 +515,41 @@ void ClockFlagToggle(lv_event_t * e)
   if(bClockHomeTime)
   { Serial.println("ClockFlagToggle = HOME");
     // use home location as stored in favorites.txt as 5th record to get timezone and place
-    DataFromDisplay.D_StationGpsNS = Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].gps_ns;
-    DataFromDisplay.D_StationGpsEW = Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].gps_ew;
+    DataFromDisplay.D_StationGpsNS = Home.gps_ns;
+    DataFromDisplay.D_StationGpsEW = Home.gps_ew;
     sprintf(content64, "%d %f %f", 9999, DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
     //AddToQueueForGlobe("DISPLAY WANTS MQTT STATUS", MESSAGE_MQTT_STATUS); 
     if(strncmp(DisplaySettings.home_tz_posix, "CUSTOM", 5)!=0)AddToQueueForGlobe(content64, MESSAGE_HOME_TIMEZONE_NAME);  
     else AddToQueueForGlobe(content64, MESSAGE_HOME_TIMEZONE_NAME);  // todo -> change timezone system clock instead without requesting TZ everytime - is a brain breaker
     //lv_obj_add_flag(ui_MinuteHand, LV_OBJ_FLAG_HIDDEN); // idea -> hide hands until timezone is refreshed - needs a bool bShowHandsAgain upopn TZ reception etc - leave it for now
     //lv_obj_add_flag(ui_HourHand, LV_OBJ_FLAG_HIDDEN);
+
+    // do it quick
     lv_label_set_text(ui_Clock_Country, GetAllUpperCase(content64, Home.CountryName));
     SetFlag(Home.CountryCode);
-    lv_obj_clear_flag(ui_ClockFlag, LV_OBJ_FLAG_HIDDEN); // in case it was hidden by a search 
+    lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // in case it was hidden by a search 
     sprintf(content64, "%s\n%s %d-%s-%d\n%s",  Home.TZname, weekdays[datetime.dotw%7], (size_t)datetime.day, monthnames[datetime.month%12],  (size_t)datetime.year%100, partofday[(datetime.hour/6)%4]);
     lv_label_set_text(ui_Time_Zone_Clock, content64); // on clock screen
+    Serial.println("ClockFlagToggle = HOME & DONE");
+    
   }
   else 
   { Serial.println("ClockFlagToggle = WORLD");
-    DataFromDisplay.D_StationGpsNS = Stations.StationNUG[Stations.requested].gps_ns;
-    DataFromDisplay.D_StationGpsEW = Stations.StationNUG[Stations.requested].gps_ew;
+    DataFromDisplay.D_StationGpsNS = World.gps_ns;
+    DataFromDisplay.D_StationGpsEW = World.gps_ew;
     sprintf(content64, "%d %f %f", 9999, DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
     //AddToQueueForGlobe("DISPLAY WANTS MQTT STATUS", MESSAGE_MQTT_STATUS); 
     AddToQueueForGlobe(content64, MESSAGE_GET_TIMEZONE_BY_GPS);  
     //lv_obj_add_flag(ui_MinuteHand, LV_OBJ_FLAG_HIDDEN);
     //lv_obj_add_flag(ui_HourHand, LV_OBJ_FLAG_HIDDEN);
+
+    // do it quick
     lv_label_set_text(ui_Clock_Country, GetAllUpperCase(content64, World.CountryName));
     SetFlag(World.CountryCode);
     lv_obj_clear_flag(ui_ClockFlag, LV_OBJ_FLAG_HIDDEN); // in case it was hidden by a search 
     sprintf(content64, "%s\n%s %d-%s-%d\n%s",  World.TZname, weekdays[datetime.dotw%7], (size_t)datetime.day, monthnames[datetime.month%12],  (size_t)datetime.year%100, partofday[(datetime.hour/6)%4]);
     lv_label_set_text(ui_Time_Zone_Clock, content64); // on clock screen
+    Serial.println("ClockFlagToggle = WORLD & DONE");
   }
 
 }
@@ -547,12 +566,12 @@ void ClockHomePower(lv_event_t * e)
 { beepforMs(50);
 
   if(bPowerStatus == true) // the icon is a home icon
-  { // Serial.printf("Clock Home/Power clicked while power is on\n");
+  { Serial.printf("Clock Home/Power clicked while power is on\n");
     if(bClockHomeTime) // set back to world status
     { ClockFlagToggle(e);
-      if(strcmp(ClockFlagCountryCode, Stations.StationNUG[Stations.requested].countrycode)!=0)
-      { lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN);
-      }
+    //  if(strcmp(ClockFlagCountryCode, Stations.StationNUG[Stations.requested].countrycode)!=0)
+    //  { lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN);
+    //  }
     }
     lv_scr_load(ui_Home);
   }
@@ -749,24 +768,6 @@ uint16_t ShowBatteryLevel(int request) // 0 -> hide, 1 -> show hide weather icon
   return currentbatteryvoltage/10;
 }
 
-
-
-// put the globe in 'play from SD' mode
-void GlobePlaySD(lv_event_t * e)
-{ char content[128];
-  lv_event_code_t event_code = lv_event_get_code(e);
-
-  if(event_code == LV_EVENT_CLICKED) 
-  { SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
-    AddToQueueForGlobe("", MESSAGE_GLOBE_PLAY_SD);
-  }
-
-  if(event_code == LV_EVENT_LONG_PRESSED_REPEAT) 
-  { if(isLongPressed(e)==5)
-    { // beepforMs(1000);
-    }
-  }  
-}
 
 // returns higher value when longer pressed
 int16_t isLongPressedV2(lv_event_t * e)
