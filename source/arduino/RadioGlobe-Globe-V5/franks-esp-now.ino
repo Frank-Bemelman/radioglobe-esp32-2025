@@ -47,12 +47,27 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
     DataFromGlobe.D_QueueSerialNumberReceived = MessageSerialNumberApi; // echo back
     if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_TIMEZONE_BY_GPS || DataFromDisplay.D_QueueMessageType == MESSAGE_HOME_TIMEZONE_NAME)
     { Serial.printf("PUCK SAYS -> MESSAGE_GET_TIMEZONE_BY_GPS <%s>\n", DataFromDisplay.D_QueueMessage);
+      //PUCK SAYS -> MESSAGE_GET_TIMEZONE_BY_GPS <25 52.813301 6.090900>
+      int16_t station;
+      float nsGps;
+      float ewGps;
+      sscanf(DataFromDisplay.D_QueueMessage, "%d %f %f", &station, &nsGps, &ewGps);
+      Serial.printf("  SSCANF-ED AS %d %f %f\n", station, nsGps, ewGps);
+
       CancelApiType(MESSAGE_GET_TIMEZONE_BY_GPS); // cancel previous ones
       CancelApiType(MESSAGE_HOME_TIMEZONE_NAME); // cancel previous ones
+
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
-      ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsNS;
-      ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsEW;
-      ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_RequestedStation;
+      
+      //ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsNS;
+      //ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsEW;
+      //ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_RequestedStation;
+      
+      ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = station;
+      ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = nsGps;
+      ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = ewGps;
+
+      
       ApiCallsToDo.ApiQueueIndexIn++;
       ApiCallsToDo.ApiQueueIndexIn %= APIQUEUESIZE;
       ApiCallsToDo.ApiQueueCnt++;
@@ -62,9 +77,11 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
     { Serial.printf("PUCK SAYS -> MESSAGE_GET_TIMEZONE <%s>\n", DataFromDisplay.D_QueueMessage);
       CancelApiType(MESSAGE_TIMEZONE_NAME);
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
+
       ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ns_cal/10.0;
       ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ew_cal/10.0;
       ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_RequestedStation;
+
       ApiCallsToDo.ApiQueueIndexIn++;
       ApiCallsToDo.ApiQueueIndexIn %= APIQUEUESIZE;
       ApiCallsToDo.ApiQueueCnt++;

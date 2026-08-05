@@ -1,4 +1,4 @@
-// in arduino library manager.....
+// in arduino library manager......
 // install libs as shown here https://randomnerdtutorials.com/esp32-wi-fi-manager-asyncwebserver/
 // this is for the wifi manager portal
 
@@ -228,6 +228,12 @@ extern void setupwebserver(void);
 volatile uint32_t GlobalTicker100mS = 0;
 volatile bool Flag100mS = false; // will always reset to true within 100mS by timer interrupt
 
+char PrevStreamType[64]="";
+char StreamType[64]="";
+char StreamCodec[16]="";
+char StreamBitrate[16]="";
+
+
 void IRAM_ATTR onGlobalTimer100ms(void* arg) {
     GlobalTicker100mS++;
     Flag100mS = true; 
@@ -330,7 +336,7 @@ void setup()
   // Set the codec callback
   stream.setCodecCB(codecCallback);
   // Set the bitrate callback
-  // stream.setBitrateCB(bitrateCallback);   
+  stream.setBitrateCB(bitrateCallback);   
   // Set the station name callback
   stream.setStationCB(audio_showstation);
   // Set the stream metadata callback
@@ -1066,6 +1072,10 @@ bool StartNewStation(void)
     AddToQueueForDisplay("0", MESSAGE_MUSIC_MODE);
   }  
 
+  strcpy(PrevStreamType, ""); // assures that new received stream info gets send to puck
+  AddToQueueForDisplay("", MESSAGE_STATUS_LINE);
+  
+
   PixelUpdate(0, 0xFF00FF, 0x000000, 10000); // solid purple
 
   Serial.printf("StartNewStation with %s\n", TargetUrl);
@@ -1080,7 +1090,7 @@ bool StartNewStation(void)
   strcpy(ActiveUrl, "");
   strcpy(ActiveStationTitle, "");
   strcpy(ActiveSongTitle, "");
-  AddToQueueForDisplay("", MESSAGE_SONG_TITLE); // remove 'now playing title'
+  AddToQueueForDisplay("", MESSAGE_SONG_TITLE); 
 
   
 //  interesting - these url play fine in chrome browser, but not here, unless you change https to http
@@ -1338,27 +1348,26 @@ void ReplaceHtmlEntities(char *name) {
   char *p = name;
   
   // Find the next occurrence of an ampersand
-  while ((p = strchr(p, '&')) != 0) {
-    
-    // Check for NUMERIC entities (starts with &#)
-    if (strncmp(p, "&#", 2) == 0) {
-      int val = 0;
+  while ((p = strchr(p, '&')) != 0) 
+  { // first Check for NUMERIC entities (starts with &#)
+    if (strncmp(p, "&#", 2) == 0) 
+    { int val = 0;
       int charsRead = 0;
       
       // Handle hexadecimal values (e.g., &#x20;)
-      if (*(p + 2) == 'x' || *(p + 2) == 'X') {
-        sscanf(p + 3, "%x;%n", &val, &charsRead);
+      if (*(p + 2) == 'x' || *(p + 2) == 'X') 
+      { sscanf(p + 3, "%x;%n", &val, &charsRead);
         if (charsRead > 0) charsRead += 3; // Account for the "&#x" prefix
       } 
       // Handle decimal values (e.g., &#32;)
-      else {
-        sscanf(p + 2, "%d;%n", &val, &charsRead);
+      else  
+      { sscanf(p + 2, "%d;%n", &val, &charsRead);
         if (charsRead > 0) charsRead += 2; // Account for the "&#" prefix
       }
       
       // If parsing succeeded and the value fits inside a standard ASCII char
-      if (charsRead > 0 && val > 0 && val <= 255) {
-        *p = (char)val; // Overwrite '&' with the converted byte
+      if (charsRead > 0 && val > 0 && val <= 255) 
+      { *p = (char)val; // Overwrite '&' with the converted byte
         // Shift the rest of the string to the left (including the null terminator)
         memmove(p + 1, p + charsRead, strlen(p + charsRead) + 1);
         continue; // Keep processing from the same position
@@ -1384,9 +1393,9 @@ void ReplaceHtmlEntities(char *name) {
       }
     }
     
-    // If no known entity was matched (like a lone "Piet & Kees"), skip this ampersand
-    if (!found) {
-      p++; 
+    // If no known entity was matched (like a lone "Johnny & Friends"), skip this ampersand
+    if (!found) 
+    { p++; 
     }
   }
 }
@@ -1522,7 +1531,10 @@ void GlobePowerDown(uint16_t silentmode)
   strcpy(ActiveStationTitle, "");
   strcpy(ActiveSongTitle, "");
   AddToQueueForDisplay(ActiveStationTitle, MESSAGE_STATION_NAME);
+  
+  strcpy(PrevStreamType, ""); // assures that new received stream info gets send to puck
   AddToQueueForDisplay("", MESSAGE_STATUS_LINE);
+  
   AddToQueueForDisplay(ActiveSongTitle, MESSAGE_SONG_TITLE);
   loopMQTT();
   DataFromGlobe.D_QueueStationIndex = -1;
@@ -1693,18 +1705,37 @@ void Speakers(uint8_t mode)
   }  
 }
 
+
+  
 // Called when codec is detected
 void codecCallback(const char *codec)
 { Serial.printf("codec: %s\n", codec);
   // during url test, ignore this
-  if(bPowerStatus)SetVolumeMapped(DataFromDisplay.volumevalue); // will also enable amplifiers
+  if(bPowerStatus)
+  { SetVolumeMapped(DataFromDisplay.volumevalue); // will also enable amplifiers
+    strcpy(StreamCodec, codec);
+    sprintf(StreamType, "Streaming %s - %s", StreamCodec, StreamBitrate);
+    if(strcmp(PrevStreamType, StreamType)!=0)
+    { strcpy(PrevStreamType, StreamType);
+      AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
+    }
+  }  
 }
 
 
 // Called when bitrate is detected (cbr) and changes (vbr)
 void bitrateCallback(uint32_t bitrate)
-{ Serial.printf("bitrate: %lu kbps\n", bitrate);
-}
+{   // during url test, ignore this
+  if(bPowerStatus)
+  { Serial.printf("bitrate: %lu kbps\n", bitrate);
+    sprintf(StreamBitrate, "%lu kbps", bitrate);
+    sprintf(StreamType, "Streaming %s - %s", StreamCodec, StreamBitrate);
+    if(strcmp(PrevStreamType, StreamType)!=0)
+    { strcpy(PrevStreamType, StreamType);
+      AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
+    }
+  }
+}  
 
 // called from VS1053 driver
 void audio_fail(void) 
