@@ -83,13 +83,15 @@ void BuildDatabaseNow(void)
 
   if(Puck_SD_GB == 0)
   { lv_label_set_text(ui_Database_Dir_Path, "No SD Card Found!");
-    Lvgl_Loop();
+    //Lvgl_Loop();
+    lv_refr_now(NULL); // seems a better choice
     delay(1000);
     while(timeout)
     {  delay(1000);
        sprintf(content, "leaving in %d seconds", timeout);
        lv_label_set_text(ui_Database_Dir_Path, content);
-       Lvgl_Loop();
+       //Lvgl_Loop();
+       lv_refr_now(NULL); // seems a better choice
        timeout --;
     }
     delay(1000);
@@ -98,7 +100,8 @@ void BuildDatabaseNow(void)
   }
   else
   { lv_label_set_text(ui_Database_Dir_Path, "SD Card Found!");
-    Lvgl_Loop();
+    //Lvgl_Loop();
+    lv_refr_now(NULL); // seems a better choice
   
     //strcpy(filename, "/stations.json"); // don't fortget the forward slash
     //strcpy(filename, "/stations1K.json"); // don't fortget the forward slash
@@ -127,6 +130,7 @@ void ReadDatabase(fs::FS &fs, char *filename)
   uint32_t currentMillis;
   uint16_t parsefase = 0;
   uint32_t urlcount = 0;
+  uint32_t filecount = 0;
   float floatn;
   float floate;
   int16_t ns=0;
@@ -138,14 +142,16 @@ void ReadDatabase(fs::FS &fs, char *filename)
     if (!root) 
     { sprintf(sometext, "Failed To Open %s", filename);
       lv_label_set_text(ui_Database_Dir_Path, sometext);
-      Lvgl_Loop();
+      //Lvgl_Loop();
+      lv_refr_now(NULL); // seems a better choice
       Serial.println(sometext);
       delay(2000); 
       return;
     }
     sprintf(sometext, "Succes opening %s", filename);
     lv_label_set_text(ui_Database_Dir_Path, sometext);
-    Lvgl_Loop();
+    //Lvgl_Loop();
+    lv_refr_now(NULL); // seems a better choice
     delay(2000); 
   
     filesize = root.size(); // used for progress percentage calculation
@@ -169,7 +175,8 @@ void ReadDatabase(fs::FS &fs, char *filename)
         percentagedone = fileposition * 100 / filesize;
         sprintf(sometext, "Done %d%% urls=%ld", percentagedone, urlcount);
         lv_label_set_text(ui_Database_Progress, sometext);
-        Lvgl_Loop();
+        //Lvgl_Loop();
+        lv_refr_now(NULL); // seems a better choice
       }
 
       bytesread = root.readBytesUntil(0x0a, oneline, sizeof(oneline)-1);
@@ -227,6 +234,7 @@ void ReadDatabase(fs::FS &fs, char *filename)
             sprintf(sometext, "/%s/%s", dirpath, outputfilename);
             // SD_MMC.remove(sometext); // delete old file
             urls = SD_MMC.open(sometext, FILE_WRITE);
+            filecount++;
             parsefase = 4;
           }
           break;
@@ -269,9 +277,10 @@ void ReadDatabase(fs::FS &fs, char *filename)
     percentagedone = 100;
     sprintf(sometext, "Done %d%% urls=%ld", percentagedone, urlcount);
     lv_label_set_text(ui_Database_Progress, sometext);
-    sprintf(sometext, "- %d Files Created -", urlcount);
+    sprintf(sometext, "%d Locations Created", filecount);
     lv_label_set_text(ui_Database_Dir_Path, sometext);
-    Lvgl_Loop();
+    //Lvgl_Loop();
+    lv_refr_now(NULL); // seems a better choice
 
   }
 
@@ -407,7 +416,9 @@ bool SnapToNearestStation(int16_t for_ns, int16_t for_ew, int16_t *to_ns, int16_
   return true;
 }
 
+
 // find stations at current calibrated position
+int32_t search_mS;
 void FindNewStation(void)
 { bool dirscan = true;
   bool dirfound = false;
@@ -425,15 +436,14 @@ void FindNewStation(void)
   int16_t mapfind_ns;
   int16_t mapfind_ew;
 
-  int32_t search_mS;
- 
   char dirpath[64];
   File root;
   File file;
   char content[64];
   
   
-
+  search_mS = 0;
+ 
   // convert to whole degrees to be used for finding directory path to url file
   ns = (DataFromDisplay.ns_cal+5)/10; // from tenths of degrees to whole degrees
   ew = (DataFromDisplay.ew_cal+5)/10; // from tenths of degrees to whole degrees
@@ -463,7 +473,7 @@ void FindNewStation(void)
       break;
     }
     CollectStationsAtGps(mapfind_ns, mapfind_ew, firstcountrycode);
-    Serial.printf("Collecting Attempt %d gave %d stations\n", hitcount, Stations.count);
+    Serial.printf("Collecting Attempt %d gave %d stations in %ld mS\n", hitcount, Stations.count, (millis() - search_mS));
   }
 
   
@@ -487,8 +497,8 @@ void FindNewStation(void)
     random_station = random(0,Stations.count);
     
     Stations.connect_attempts = 0;
-    ForceGlobeStationGPSupdate = true; 
-    AddStationToQueueForGlobe(random_station);
+    //ForceGlobeStationGPSupdate = true; 
+    //AddStationToQueueForGlobe(random_station);
   }  
   else
   { lv_label_set_text(ui_Station_Name, "No Stations Found");
@@ -529,8 +539,8 @@ void CollectStationsAtGps(int16_t mapfind_ns, int16_t mapfind_ew, char *firstcou
     sprintf(dirpath, "/%c/%d/%d/%c/%d/%d", (dir_ns<0)?'S':'N', abs(dir_ns)/10, abs(dir_ns)%10, (dir_ew<0)?'W':'E', abs(dir_ew)/10, abs(dir_ew)%10);
     Serial.println(dirpath);
     //lv_label_set_text(ui_Station_Title, dirpath);
-  
-    Lvgl_Loop();
+    //Lvgl_Loop();
+    //lv_refr_now(NULL); // seems a better choice
 
     root = SD_MMC.open(dirpath);
     if (!root) 
@@ -551,12 +561,17 @@ void CollectStationsAtGps(int16_t mapfind_ns, int16_t mapfind_ew, char *firstcou
         // dit gaat op tilt, met name bij de reload scroll als meer dan ?? stations, zeker geen 100 of 150 mogelijk 
         // dus even naar 25 max
 
+        Serial.printf("File with stations (=%d) opened in %ld mS\n", Stations.count, (millis() - search_mS));
+
         if (Stations.count >= MAX_STATIONS) 
         { file.close();
-          break; // Verlaat de lus netjes
+          break; // done, get out og here
         }
         
         lv_label_set_text(ui_Station_Title, file.name());
+        //Lvgl_Loop();  //  maybe not - crshes on tapping world map 
+        lv_refr_now(NULL); // seems a better choice
+        delay(1); // give OS some time, just a gut feeling
         
         strcpy(town, file.name());
         // filenames are constructed from name of town, underscore, and 2 letter country code, like -> Amsterdam_NL.txt
@@ -571,11 +586,9 @@ void CollectStationsAtGps(int16_t mapfind_ns, int16_t mapfind_ew, char *firstcou
           if(!FindCountryNameByCode(countryname, countrycode))
           { Serial.printf("Not a valid countrycode %s !!!!!!!!!!!!!!!\n", countrycode);
           }
-          //Serial.printf("Found country: <%s>\n", countryname);
+          Serial.printf("Found country: <%s>\n", countryname);
         }
 
-        Lvgl_Loop();
-        delay(1); // Geef het OS even tijd na de eerste UI-loop
 
         if(strcmp(firstcountrycode, countrycode) == 0) // same country
         {
@@ -598,31 +611,37 @@ void CollectStationsAtGps(int16_t mapfind_ns, int16_t mapfind_ew, char *firstcou
               strcpy(Stations.StationNUG[Stations.count].url, p);
             }  
             else if((p = strstr(oneline, "\"gps\": \"")) != NULL)
-            { // example:  "url": "https://stream.radio-fratz.de/stream_high.mp3"
-              // Serial.println(p+8);
+            { // Serial.println(p+8);
               p+=8; // jump forward to start of gps coordinates
               sscanf(p, "%f,%f", &Stations.StationNUG[Stations.count].gps_ns, &Stations.StationNUG[Stations.count].gps_ew);
-
-              //if((p = strstr(StationArray[stationsfound].url, ".m3u")) == NULL) // no links to m3u file
-              //{ if((p = strstr(StationArray[stationsfound].url, ".pls")) == NULL) // no links in pls file
-              //  { if((p = strstr(oneline, "mp3")) != NULL)stationsfound++; 
-              //    else if((p = strstr(oneline, "MP3")) != NULL)stationsfound++;
-              //  }  
-              //}
-              //else if((p = strstr(oneline, "aac")) != NULL)
 
               strcpy(Stations.StationNUG[Stations.count].town, town);
               strcpy(Stations.StationNUG[Stations.count].countrycode, countrycode);
               strcpy(Stations.StationNUG[Stations.count].countryname, countryname);
-              // in all honesty, ignore if country and ignore this url if already in list
+
+              // play first one found, for snappy feeling
+              if(Stations.count==0)
+              { ForceGlobeStationGPSupdate = true; 
+                AddStationToQueueForGlobe(Stations.count);
+                loop_esp_now(); // send it out immediately 
+                loop_esp_now(); // send it out immediately, check for more
+                loop_esp_now(); // send it out immediately, check for more
+              }  
+
+              // in all honesty, ignore if country not the same as first one found and also ignore this url if already in list
               if(strcmp(firstcountrycode, countrycode) == 0) // same country
               { //Serial.printf("%s same as %s\n", firstcountrycode, countrycode);
-                if(CheckIfUniqueUrl())Stations.count++;
+                if(CheckIfUniqueUrl())
+                { Stations.count++;
+                  Serial.printf("Station %d (country %s )found in %ld mS\n", Stations.count, Stations.StationNUG[Stations.count].countryname, (millis() - search_mS));
+                }  
               }
               else
               { Serial.printf("%s differs from %s\n", firstcountrycode, countrycode);
                 //if(CheckIfUniqueUrl())Stations.count++;
               }
+
+
             }
           } 
         }
@@ -723,7 +742,8 @@ void RadioGlobeClick(lv_event_t * e)
 
         //lv_label_set_text(ui_Station_Name, "Searching..."); // pointless, searching goes so fast you won't see this
         lv_label_set_text(ui_Station_Title, "");
-        Lvgl_Loop();  
+        // Lvgl_Loop();  // maybe not good
+        lv_refr_now(NULL); // seems a better choice
         FindNewStation();
         ReloadScroll();
       }
@@ -980,6 +1000,9 @@ void RollDown(lv_event_t * e)
 }
 
 
+
+uint16_t PuckApiRequest; // value to check if arriving result can be discarded, as it could perhaps belongs to previous request
+
 void AddStationToQueueForGlobe(int16_t station)
 { // prepare gps position and url for the station we want to hear and get timezone for
   static char lastgpsrequest[32];
@@ -999,7 +1022,8 @@ void AddStationToQueueForGlobe(int16_t station)
     lv_obj_set_pos(uic_MapCursor, (int)DataFromDisplay.ew_cal/10 - 16, -(int)DataFromDisplay.ns_cal/10); // moved 16 to left, dot is painted left-top corner?
     lv_label_set_text(ui_Database_Output_File, ""); // remove typical "You are in ..." from map
     
-    sprintf(content, "%d %f %f", station, (float)DataFromDisplay.ns_cal/10, (float)DataFromDisplay.ew_cal/10);
+    PuckApiRequest++; // value to check if arriving result can be discarded, as it could perhaps belongs to previous request
+    sprintf(content, "%d %f %f %d", station, (float)DataFromDisplay.ns_cal/10, (float)DataFromDisplay.ew_cal/10, PuckApiRequest);
     AddToQueueForGlobe(content, MESSAGE_TIMEZONE_NAME); // will use DataFromDisplay.ns_cal, DataFromDisplay.ew_cal as coordinates
     AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION); // will use DataFromDisplay.ns_cal, DataFromDisplay.ew_cal as coordinates
     loop_esp_now(); // send it now, before it gets old
@@ -1016,14 +1040,14 @@ void AddStationToQueueForGlobe(int16_t station)
     DataFromDisplay.D_QueueStationIndex = station;
     Stations.playing = -1;
 
-    if(station<MAX_STATIONS)Stations.connect_attempts++;
-    DataFromDisplay.D_StationGpsNS = Stations.StationNUG[station].gps_ns;
-    DataFromDisplay.D_StationGpsEW = Stations.StationNUG[station].gps_ew;
-    sprintf(content, "%d %f %f", station, DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
-
     lv_label_set_text(ui_Station_Name, Stations.StationNUG[station].name);
     lv_label_set_text(ui_Status_Line, "CONNECTING");
     lv_label_set_text(ui_Station_Title, "");
+
+    if(station<MAX_STATIONS)Stations.connect_attempts++;
+    DataFromDisplay.D_StationGpsNS = Stations.StationNUG[station].gps_ns;
+    DataFromDisplay.D_StationGpsEW = Stations.StationNUG[station].gps_ew;
+
 
     Serial.printf(" -----------------  AddStationToQueueForGlobe() station for country <%s>\n", Stations.StationNUG[station].countrycode);
 
@@ -1046,6 +1070,8 @@ void AddStationToQueueForGlobe(int16_t station)
     if(strcmp(lastgpsrequest, content) != NULL || (ForceGlobeStationGPSupdate == true))
     { strcpy(lastgpsrequest, content);
       ForceGlobeStationGPSupdate = false;
+      PuckApiRequest++; // value to check if arriving result can be discarded, as it could perhaps belongs to previous request
+      sprintf(content, "%d %f %f %d", station, DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW, PuckApiRequest);
       if(bClockHomeTime)AddToQueueForGlobe(content, MESSAGE_HOME_TIMEZONE_NAME);
       else AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_BY_GPS);
       AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION_BY_GPS);

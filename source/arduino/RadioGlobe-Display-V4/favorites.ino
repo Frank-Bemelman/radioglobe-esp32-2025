@@ -317,8 +317,7 @@ void SetLed(int16_t preset, int16_t themecolor)
 
 
 void LoadApiKeys(void)
-{ File favfile;
-  char favfilename[] = {"/api-keys.txt"};
+{ File apifile;
   char *p;
   char text[140];  
   char googlekey[64];  
@@ -329,18 +328,17 @@ void LoadApiKeys(void)
   // char google_api_key[] = "YOUR-API-KEY"; // free, get your own at google developer platform, used for timezone retrieval
   // char open_weather_map_api_key[] = "YOUR-API-KEY"; // free, get your own at https://openweathermap.org/api
 
-  strcpy(googlekey, google_api_key);
-  strcpy(weatherkey, open_weather_map_api_key);
+  strcpy(googlekey, google_api_key); // copy the hard coded api first
+  strcpy(weatherkey, open_weather_map_api_key); // copy the hard coded api first
 
   if(Puck_SD_GB)
-  {  // file content is like this:
+  {  // api-keys.txt file content is like this:
      // char google_api_key[] = "YOURAPIKEY";
      // char open_weather_map_api_key[] = "YOURAPIKEY";
-
-     favfile = SD_MMC.open(favfilename, FILE_READ);
-     if(favfile)
-     { while(favfile.available()) 
-       { String data = favfile.readStringUntil('\n');
+     apifile = SD_MMC.open("/api-keys.txt", FILE_READ);
+     if(apifile)
+     { while(apifile.available()) 
+       { String data = apifile.readStringUntil('\n');
          strcpy(text, data.c_str());
          if((p=strchr(text, '\n'))!=0)*p=0;
          if((p=strchr(text, '\r'))!=0)*p=0;
@@ -365,17 +363,17 @@ void LoadApiKeys(void)
          }
        }
      }
-     favfile.close();
+     apifile.close();
   }
 
   // local keys now filled with defaults from ..\secrets.h or fetched from api-keys.txt
   if(strcmp(DisplaySettings.google_api_key, googlekey) != 0)
   { strcpy(DisplaySettings.google_api_key, googlekey);
-    SaveDisplaySettings();
+    //SaveDisplaySettings(); // don't save, volume is still at zero and will be saved too. Need a more sophisticated method of saving parameters
   }
   if(strcmp(DisplaySettings.open_weather_map_api_key, weatherkey) != 0)
   { strcpy(DisplaySettings.open_weather_map_api_key, weatherkey);
-    SaveDisplaySettings();
+    //SaveDisplaySettings(); // don't save, volume is still at zero and will be saved too. Need a more sophisticated method of saving parameters
   }
 
   Serial.printf("Currently stored in eeprom google_api_key  = %s\n", DisplaySettings.google_api_key);

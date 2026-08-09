@@ -22,6 +22,7 @@ SET(SOURCES ui_Home.c
     ui_img_11d_70x60_png.c
     ui_img_arrow_left_bold_32x32_png.c
     ui_img_arrow_right_bold_32x32_png.c
+    ui_img_jukebox128x128_png.c
     ui_img_home_png.c
     ui_img_worldmap_bw_360x180_png.c
     ui_img_circle16x16_png.c

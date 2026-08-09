@@ -211,7 +211,7 @@ void ui_Favorites_screen_init(void)
     lv_obj_set_y(ui_StationPresetName1, -105);
     lv_obj_set_align(ui_StationPresetName1, LV_ALIGN_CENTER);
     lv_label_set_long_mode(ui_StationPresetName1, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_label_set_text(ui_StationPresetName1, "FAVORITE STATION 1");
+    lv_label_set_text(ui_StationPresetName1, "STATION 1");
     lv_obj_set_style_text_color(ui_StationPresetName1, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_StationPresetName1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui_StationPresetName1, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -224,7 +224,7 @@ void ui_Favorites_screen_init(void)
     lv_obj_set_y(ui_StationPresetName2, -35);
     lv_obj_set_align(ui_StationPresetName2, LV_ALIGN_CENTER);
     lv_label_set_long_mode(ui_StationPresetName2, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_label_set_text(ui_StationPresetName2, "FAVORITE STATION 2");
+    lv_label_set_text(ui_StationPresetName2, "STATION 2");
     lv_obj_set_style_text_color(ui_StationPresetName2, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_StationPresetName2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui_StationPresetName2, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -237,7 +237,7 @@ void ui_Favorites_screen_init(void)
     lv_obj_set_y(ui_StationPresetName3, 35);
     lv_obj_set_align(ui_StationPresetName3, LV_ALIGN_CENTER);
     lv_label_set_long_mode(ui_StationPresetName3, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_label_set_text(ui_StationPresetName3, "FAVORITE STATION 3");
+    lv_label_set_text(ui_StationPresetName3, "STATION 3");
     lv_obj_set_style_text_color(ui_StationPresetName3, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_StationPresetName3, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui_StationPresetName3, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -250,7 +250,7 @@ void ui_Favorites_screen_init(void)
     lv_obj_set_y(ui_StationPresetName4, 105);
     lv_obj_set_align(ui_StationPresetName4, LV_ALIGN_CENTER);
     lv_label_set_long_mode(ui_StationPresetName4, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_label_set_text(ui_StationPresetName4, "FAVORITE STATION 4");
+    lv_label_set_text(ui_StationPresetName4, "STATION 4");
     lv_obj_set_style_text_color(ui_StationPresetName4, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_StationPresetName4, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui_StationPresetName4, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -272,7 +272,7 @@ void ui_Favorites_screen_init(void)
     lv_obj_set_y(ui_FavoritesStoreHint, -160);
     lv_obj_set_align(ui_FavoritesStoreHint, LV_ALIGN_CENTER);
     lv_label_set_long_mode(ui_FavoritesStoreHint, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_label_set_text(ui_FavoritesStoreHint, "Long Press To Store Current Station As Favorite  ---");
+    lv_label_set_text(ui_FavoritesStoreHint, "Long Press To Store Current Station As Favorite   ---");
     lv_obj_set_style_text_font(ui_FavoritesStoreHint, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_led1 = lv_img_create(ui_Favorites);

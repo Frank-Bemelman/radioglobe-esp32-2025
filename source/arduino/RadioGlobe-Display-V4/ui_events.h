@@ -18,6 +18,7 @@ void SetupEnter(lv_event_t * e);
 void PowerCycle(lv_event_t * e);
 void StationInfo(lv_event_t * e);
 void RadarScreenOn(lv_event_t * e);
+void JukeboxClicked(lv_event_t * e);
 void CalibrationEnter(lv_event_t * e);
 void DatabaseEnter(lv_event_t * e);
 void ResetAllEnter(lv_event_t * e);

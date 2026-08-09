@@ -2319,7 +2319,7 @@ int32_t FtpServer::readChar()
 }
 
 bool FtpServer::haveParameter()
-{ Serial.printf("parameter=<%s>", parameter);
+{ Serial.printf("parameter=<%s>\n", parameter);
   if( parameter != nullptr && strlen( parameter ) > 0 )
     return true;
   client.println(F("501 No file name") );

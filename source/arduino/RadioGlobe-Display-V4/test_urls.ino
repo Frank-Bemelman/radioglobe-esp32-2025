@@ -230,7 +230,8 @@ bool DeleteDir(fs::FS &fs, const char *dirname)
 
       snprintf(message, sizeof(message), "Deleting %s", path);
       lv_label_set_text(ui_Station_Name, message);
-      Lvgl_Loop();
+      //Lvgl_Loop();
+      lv_refr_now(NULL); // seems a better choice
 
       if (!DeleteDir(fs, path)) 
       { root.close();

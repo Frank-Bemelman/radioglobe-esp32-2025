@@ -78,7 +78,7 @@ void ui_ClockScreen_screen_init(void)
     lv_obj_add_flag(ui_ClockFace, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
     lv_obj_clear_flag(ui_ClockFace, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_img_recolor(ui_ClockFace, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor_opa(ui_ClockFace, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_img_recolor_opa(ui_ClockFace, 15, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_ClockFlag = lv_img_create(ui_ClockScreen);
     lv_img_set_src(ui_ClockFlag, &ui_img_xx_png);

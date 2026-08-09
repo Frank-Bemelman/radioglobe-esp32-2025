@@ -94,7 +94,7 @@ void ui_DatabaseScreen_screen_init(void)
     lv_obj_set_x(ui_RebuildDatabaseButtonText, 0);
     lv_obj_set_y(ui_RebuildDatabaseButtonText, -170);
     lv_obj_set_align(ui_RebuildDatabaseButtonText, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_RebuildDatabaseButtonText, "UPDATE DATABASE");
+    lv_label_set_text(ui_RebuildDatabaseButtonText, "REBUILD DATABASE");
     lv_obj_set_style_text_color(ui_RebuildDatabaseButtonText, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_RebuildDatabaseButtonText, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui_RebuildDatabaseButtonText, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);

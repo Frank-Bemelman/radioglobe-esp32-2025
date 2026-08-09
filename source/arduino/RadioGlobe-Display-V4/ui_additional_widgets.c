@@ -13,6 +13,7 @@ lv_obj_t * uic_Text_Volume;
 lv_obj_t * uic_ToneControlInstruction;
 lv_obj_t * uic_TextSecretCodeToUnlock;
 lv_obj_t * uic_Text_Bass;
+lv_obj_t * uic_Text_Treble;
 lv_obj_t * uic_SetFuzzinessButtonTextL;
 lv_obj_t * uic_SetFuzzinessButtonL;
 lv_obj_t * uic_SetFuzzinessButtonTextR;
@@ -51,6 +52,7 @@ lv_obj_t * ui_Text_Volume = NULL;
 lv_obj_t * ui_ToneControlInstruction = NULL;
 lv_obj_t * ui_TextSecretCodeToUnlock = NULL;
 lv_obj_t * ui_Text_Bass = NULL;
+lv_obj_t * ui_Text_Treble = NULL;
 lv_obj_t * ui_SetFuzzinessButtonTextL = NULL;
 lv_obj_t * ui_SetFuzzinessButtonL = NULL;
 lv_obj_t * ui_SetFuzzinessButtonTextR = NULL;
@@ -58,7 +60,6 @@ lv_obj_t * ui_SetFuzzinessButtonR = NULL;
 lv_obj_t * ui_SetFuzzinessValue = NULL;
 lv_obj_t * ui_mainscreen_speakeron = NULL;
 lv_obj_t * ui_mainscreen_speakeroff = NULL;
-//lv_obj_t * ui_MusicLibraryButton = NULL;
 
 lv_obj_t * ui_PresetFlag1 = NULL;
 lv_obj_t * ui_PresetFlag2 = NULL;
@@ -132,17 +133,7 @@ void ui_event_SetFuzzinessButtonR(lv_event_t * e)
   }
 }
 
-//void ui_event_MusicLibraryButton(lv_event_t * e)
-//{
-//    lv_event_code_t event_code = lv_event_get_code(e);
-//
-//    if(event_code == LV_EVENT_CLICKED) {
-//        GlobePlaySD(e);
-//        beep(e);
-//    }
-//}
 
-// not used anymore
 void ui_additional_widgets_init(void)
 {   ui_Open_Portal_Text = lv_label_create(ui_SetupScreen);
     lv_obj_set_width(ui_Open_Portal_Text, 140);
@@ -250,6 +241,18 @@ void ui_additional_text_init(void)
   lv_obj_set_style_text_opa(ui_Text_Bass, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
   lv_obj_set_style_text_font(ui_Text_Bass, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
   uic_Text_Bass = ui_Text_Bass;
+
+  ui_Text_Treble = lv_label_create(ui_ToneControlScreen);
+  lv_obj_set_width(ui_Text_Treble, LV_SIZE_CONTENT);   /// 1
+  lv_obj_set_height(ui_Text_Treble, LV_SIZE_CONTENT);    /// 1
+  lv_obj_set_x(ui_Text_Treble, 120);
+  lv_obj_set_y(ui_Text_Treble, 25);
+  lv_obj_set_align(ui_Text_Treble, LV_ALIGN_CENTER);
+  lv_label_set_text(ui_Text_Treble, "TREBLE");
+  lv_obj_set_style_text_color(ui_Text_Treble, lv_color_hex(0xCCCCCC), LV_PART_MAIN | LV_STATE_DEFAULT);
+  lv_obj_set_style_text_opa(ui_Text_Treble, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+  lv_obj_set_style_text_font(ui_Text_Treble, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+  uic_Text_Treble = ui_Text_Treble;
 
 
   ui_SetFuzzinessButtonL = lv_btn_create(ui_SetupScreen);
@@ -363,24 +366,6 @@ void ui_additional_text_init(void)
  
   uic_mainscreen_speakeron = ui_mainscreen_speakeron;
   uic_mainscreen_speakeroff = ui_mainscreen_speakeroff;
-
-//  ui_MusicLibraryButton = lv_img_create(ui_Favorites);
-//  lv_img_set_src(ui_MusicLibraryButton, &icon_musiclib75x75_png);
-//  lv_obj_set_width(ui_MusicLibraryButton, LV_SIZE_CONTENT);   /// 1
-//  lv_obj_set_height(ui_MusicLibraryButton, LV_SIZE_CONTENT);    /// 1
-//  lv_obj_set_x(ui_MusicLibraryButton, 170);
-//  lv_obj_set_y(ui_MusicLibraryButton, 0);
-//  lv_obj_set_align(ui_MusicLibraryButton, LV_ALIGN_CENTER);
-//  lv_obj_add_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
-//  lv_obj_clear_flag(ui_MusicLibraryButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-//  ui_object_set_themeable_style_property(ui_MusicLibraryButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
-//                                         _ui_theme_color_turquoise);
-//  ui_object_set_themeable_style_property(ui_MusicLibraryButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
-//                                         _ui_theme_alpha_turquoise);
-//  lv_obj_add_event_cb(ui_MusicLibraryButton, ui_event_MusicLibraryButton, LV_EVENT_ALL, NULL);   // in calibration.ino                                         
-//
-//  uic_MusicLibraryButton = ui_MusicLibraryButton;
-
 
   ui_PresetFlag = lv_img_create(ui_Favorites);
   lv_img_set_src(ui_PresetFlag, &ui_img_xx_png);

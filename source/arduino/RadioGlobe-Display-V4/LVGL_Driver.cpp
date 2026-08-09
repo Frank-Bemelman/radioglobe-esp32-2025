@@ -123,7 +123,7 @@ void Lvgl_Init(void)
 extern SemaphoreHandle_t lvgl_mutex;
 
 void Lvgl_Loop(void)
-{ if (xSemaphoreTake(lvgl_mutex, pdMS_TO_TICKS(50)) == pdTRUE) 
+{ if (xSemaphoreTake(lvgl_mutex, pdMS_TO_TICKS(50)) == pdTRUE)  // maybe not - crashes worldmap when touched multiple times
   { lv_timer_handler(); /* let the GUI do its work */
     xSemaphoreGive(lvgl_mutex); // Geef de sleutel direct weer terug
   }

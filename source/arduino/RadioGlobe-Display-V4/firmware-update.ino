@@ -10,10 +10,7 @@
 //#include <Updater_Signing.h>
 
 
-//#include <WiFi.h>
 #include <HTTPClient.h>
-
-
 #include <WiFi.h>
 #include <NetworkClient.h>
 #include <ESP_SSLClient.h>
@@ -27,10 +24,6 @@ String serverTimestamp = "";
 //#include <esp_now.h>
 
 uint16_t UpdateState = 0;
-char Wifi_SSID[64] = "WNAP10";
-char Wifi_PASSWORD[64] ="ALIBABA4711";
-
-const char firmware_file[] = "/firmware.bin";
 
 // Target file in Github release
 char file_url[] = "https://github.com/Frank-Bemelman/radioglobe-esp32-2025/releases/download/RadioGlobe-Firmware/RadioGlobe-Display.bin";
@@ -65,8 +58,11 @@ uint8_t UpdateFirmware(uint8_t state)
          lv_label_set_text(ui_Station_Name, "");
          lv_label_set_text(ui_Status_Line, "");
          lv_label_set_text(ui_Station_Title, "");
-         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_turquoise);
-         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_turquoise);
+//         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_turquoise);
+//         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_turquoise);
+         lv_obj_set_style_img_recolor(ui_SettingButton, lv_color_hex(0x6060FF), LV_PART_MAIN | LV_STATE_DEFAULT);
+         lv_obj_set_style_img_recolor_opa(ui_SettingButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
          lv_obj_set_style_bg_color(ui_SerialNumberButton, lv_color_hex(0x404040), LV_PART_MAIN | LV_STATE_DEFAULT);
          lv_obj_set_style_bg_opa(ui_SerialNumberButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
          return 0;
@@ -86,8 +82,11 @@ uint8_t UpdateFirmware(uint8_t state)
          delay(2000);
          lv_label_set_text(ui_Station_Name, "");
          lv_label_set_text(ui_Station_Title, "");
-         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_turquoise);
-         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_turquoise);
+//         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_turquoise);
+//         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_turquoise);
+         lv_obj_set_style_img_recolor(ui_SettingButton, lv_color_hex(0x6060FF), LV_PART_MAIN | LV_STATE_DEFAULT);
+         lv_obj_set_style_img_recolor_opa(ui_SettingButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
          lv_obj_set_style_bg_color(ui_SerialNumberButton, lv_color_hex(0x404040), LV_PART_MAIN | LV_STATE_DEFAULT);
          lv_obj_set_style_bg_opa(ui_SerialNumberButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);         
          return 0;
@@ -101,8 +100,11 @@ uint8_t UpdateFirmware(uint8_t state)
          delay(2000);
          lv_label_set_text(ui_Station_Name, "");
          lv_label_set_text(ui_Station_Title, "");
-         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_turquoise);
-         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_turquoise);
+//         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_turquoise);
+//         ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_turquoise);
+         lv_obj_set_style_img_recolor(ui_SettingButton, lv_color_hex(0x6060FF), LV_PART_MAIN | LV_STATE_DEFAULT);
+         lv_obj_set_style_img_recolor_opa(ui_SettingButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
          lv_obj_set_style_bg_color(ui_SerialNumberButton, lv_color_hex(0x404040), LV_PART_MAIN | LV_STATE_DEFAULT);
          lv_obj_set_style_bg_opa(ui_SerialNumberButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);         
          return 0;

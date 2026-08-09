@@ -1,12 +1,9 @@
-// Using LVGL with Arduino requires some extra steps :
+// Using LVGL with Arduino requires some extra steps.......
 // Be sure to read the docs here: https://docs.lvgl.io/master/get-started/platforms/arduino.html  */
-// #include "lv_conf.h" (root lib folder)
-// #include "lvgl.h" (loaded elsewere)
-// In lv_conf.h (root lib folder) -> #define LV_MEM_SIZE (60U * 1024U)  /*[bytes]*/  // FB was 48U - remember to change to 60U
-// lvgl by kisvegaborn 8.3.10 , not a more recent version, SquareLine Studio only does 8.3.11
-// Boards manager, esp32 by Expressif Systems, V3.3.3 with ESP32S3 Dev Module 
+// Place lv_conf.h (in arduino sketch folder) -> #define LV_MEM_SIZE (68U * 1024U)  /*[bytes]*/  // FB was 48U - remember to change to 68U
+// lvgl by kisvegaborn 8.3.11 , not a more recent version, SquareLine Studio only does 8.3.11
+// Boards manager, esp32 by Expressif Systems, V3.3.7 with ESP32S3 Dev Module 
 // 10APR2026 Boards Manager (trying 3.3.7 now, Waveshare ESP32-S3-Touch-LCD-2.1)
-// 10APR2025 Library Manager - trying now - lvgl by kisvegaborn 8.3.11 , not a more recent version, SquareLine Studio only does 8.1.11
 // 10APR2025 In lv_conf.h (root lib folder)-> #define LV_MEM_SIZE (60U * 1024U)  /*[bytes]*/  // FB was 48U - display crashes with 48, maybe increase even more if we keep adding objects???
 // 14APR2026 Boards Manager (trying 3.3.8 now, Waveshare ESP32-S3-Touch-LCD-2.1) -> graphics (flag and other things) go bad
 // 14APR2026 Boards Manager (back to 3.3.7, Waveshare ESP32-S3-Touch-LCD-2.1) (seems to give glitches in display brightness)
@@ -14,16 +11,16 @@
 // 14APR2026 Boards Manager (back to 3.3.6, ESP32S3 Dev Module 16MB 3MB app PSRAM OPI) (testing, also still gives glitches in display brightness)
 // 14APR2026 Boards Manager (back to 3.3.3, ESP32S3 Dev Module 16MB 3MB app PSRAM OPI) (testing..., also still gives glitches in display brightness)
 // 14APR2026 Boards Manager (back to 3.3.7, Waveshare ESP32-S3-Touch-LCD-2.1) (seems to give gfixedsplay luminance)brightness
-// 14APR2026 Boards Manager (back to 3.3.7, ESP32S3 Dev Module 16MB 4MB app (custom partition) PSRAM OPI)) 
+// 14APR2026 Boards Manager (back to 3.3.7, ESP32S3 Dev Module 16MB 4MB app (custom partition, as program grew > 3MB) PSRAM OPI)) 
 
-
+// 7 AUG 26 -> pimped colors, MUSIC GLOBE mode (long press RADIO GLOBE to enter) with funny image of jukebox. Tap jukebox to skip to next song
+// 1 AUG 26 -> added a flight radar for fun, open it by touching weather icon
 // 14 JUL 26 -> added battery level status on preset screen
 // 4 JUL 26 -> changed lcd driver frequency from 16Mhz to 14Mhz (hope it fixes the odd screen glithtes) in Display_7701.h
 // 4 JUL 26 -> greater click area around flag and power icon on clock face
 // 29 JUN 26 -> update and FTP features added
-
 // 28 JUN 26 Changed to custom partition table 4MB APP0 / 4MB APP1 / 8MB FFAT
-// had to increase as 3MB was too small for the github download feature, went from 98% to 103% -> compiler now reports as 19% from 16MB but we need to stay below 25% (4MB)
+// had to increase as 3MB was too small with the github update/download feature, went from 98% to 103% -> compiler now reports as 19% from 16MB but we need to stay below 25% (4MB)
 // stored in project folder as partitions.csv
 // choose custom partition in Arduino IDE
 // # Name,   Type, SubType, Offset,  Size, Flags
@@ -46,17 +43,20 @@
 // 11 MAR 26 -> IMPROVEMENT improved click/longpressed algoritm
 // 11 MAR 26 -> BUG improved roller setting in calibration menu
 // 14 FEB 26 -> FEATURE now has wifi channel updated by globe wifi connection
-// LVGL_Driver.cpp line 101 -> eeprom screen glitch fix attempt
+
+// note to self
+// LVGL_Driver.cpp line 101 -> eeprom screen glitch fix attempt -> didn't hurt and didn't fix it
+
 #define LCD_DIAMETER_2P1
 
 #define MBEDTLS_SSL_MAX_CONTENT_LEN 4096
 
 #define BUILD_LABEL "Puck Build"
-// make this -> Puck Build Jun 23 2026 - 21:08:50
+// want a string like this -> Puck Build Jun 23 2026 - 21:08:50
 #define BUILD_TIMESTAMP  BUILD_LABEL " " __DATE__ " - " __TIME__
 #define BUILD_TIMESTAMP_ONLY __DATE__ " - " __TIME__
 const char build_label[] =  BUILD_LABEL;
-const char build_timestamp[] =  BUILD_TIMESTAMP;
+const char build_timestamp[] PROGMEM =  BUILD_TIMESTAMP;
 const char build_timestamp_only[] =  BUILD_TIMESTAMP_ONLY;
 extern uint8_t UpdateFirmware(uint8_t state); // start with 1 for a full date/time check and update
 extern char Wifi_SSID[];
@@ -74,8 +74,8 @@ extern char Wifi_PASSWORD[];
 // https://console.cloud.google.com/apis/dashboard?project=subtle-backup-498313-s5
 // char open_weather_map_api_key[] = "YOUR-API-KEY"; // free, get  your own at https://openweathermap.org/api
 
-#define LV_CONF_INCLUDE_SIMPLE // Dwingt LVGL om lokaal in de projectmap te zoeken
-#include "lv_conf.h"           // Laad EERST jouw specifieke configuratie in
+#define LV_CONF_INCLUDE_SIMPLE // forces LVGL to search for lv_conf.h in sketch folder
+#include "lv_conf.h"          
 #include <lvgl.h>    
 
 #include "Wireless.h"
@@ -85,7 +85,6 @@ extern char Wifi_PASSWORD[];
 #include "LVGL_Driver.h"
 #include "BAT_Driver.h"
 
-//#include "lv_conf.h"
 #include "ui.h"
 #include "ui_additional_widgets.h"
 
@@ -205,6 +204,7 @@ uint8_t PrevBacklightValue = 255;
 uint8_t HoldBacklight = 0;
 #define DEFAULT_SHOW_VOLUME_TIMER 3 // seconds
 uint16_t ShowVolumeTimer = 0;
+bool bInternalSpeakerStatusValid = false;
 
 
 lv_mem_monitor_t mon_p; // for lvgl memory info
@@ -321,6 +321,7 @@ void Driver_Init()
 { //Flash_test();
   BAT_Init();
   I2C_Init();
+  delay(120); // saw that when comparing waveshare example for 2.8 inch display - think that is nonsense
   TCA9554PWR_Init(0x00); // io extender  
   Set_EXIO(EXIO_PIN8,Low); // buzzer off
   PCF85063_Init(); // rtc
@@ -431,6 +432,7 @@ void setup()
   lv_obj_add_flag(ui_Database_Flag, LV_OBJ_FLAG_HIDDEN); // hide country flag until new country code is received
   lv_obj_add_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); // hide city name until new country code is received
   lv_obj_add_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide country name until new country code is received
+  lv_obj_add_flag(ui_Jukebox, LV_OBJ_FLAG_HIDDEN);
   lv_label_set_text(ui_Home_City, "");
   lv_label_set_text(ui_Home_Country, "");
   lv_label_set_text(ui_Station_Name, "");
@@ -547,7 +549,10 @@ void setup()
   strcpy(World.CountryCode, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countrycode); 
   strcpy(Home.CountryName, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].town); // home sweet home is a nicer alternative
   strcpy(World.CountryName, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countryname); 
-  sprintf(content, "%d %f %f", (MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1), DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW);
+
+  extern uint16_t PuckApiRequest;
+  PuckApiRequest++;
+  sprintf(content, "%d %f %f %d", (MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1), DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW, PuckApiRequest);
   AddToQueueForGlobe(content, MESSAGE_HOME_TIMEZONE_NAME);
   AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION_BY_GPS);
   
@@ -713,8 +718,8 @@ void loop()
           AddToQueueForGlobe("https://stream.zeno.fm/dahlxvtaz1guv", MESSAGE_START_THIS_STATION); https://stream.zeno.fm/dahlxvtaz1guv
         }
         else if(receivedMessage.c_str()[0]=='R')
-        { DisplaySettings.magicnumber = 0; // reset
-          InitializeDisplaySettings();
+        { //DisplaySettings.magicnumber = 0; // reset
+          //InitializeDisplaySettings();
           ESP.restart();
         }
         else if(receivedMessage.c_str()[0]=='U')
@@ -746,6 +751,11 @@ void loop()
         else if(receivedMessage.c_str()[0]=='E')
         { Save_Settings_Without_Flicker();
         } 
+        else if(receivedMessage.c_str()[0]=='B')
+        { bCheckDatabase = true;
+        } 
+
+        
 
      
 
@@ -808,15 +818,22 @@ void loop()
           break;
         case MESSAGE_GLOBE_UPDATE_AVAILABLE:
           if(QueueMessage[0]=='1')
-          { ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_red);
-            ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_red);
+          { //ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_red);
+            //ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_red);
+            lv_obj_set_style_img_recolor(ui_SettingButton, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_img_recolor_opa(ui_SettingButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    
+
             lv_obj_set_style_bg_color(ui_SerialNumberButton, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_bg_opa(ui_SerialNumberButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_label_set_text(ui_TextSecretCodeToUnlock, "LONG PRESS ^ TO UPDATE");
           }
           else
-          { ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_turquoise);
-            ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_turquoise);
+          { //ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_turquoise);
+            //ui_object_set_themeable_style_property(ui_SettingButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_turquoise);
+            lv_obj_set_style_img_recolor(ui_SettingButton, lv_color_hex(0x6060FF), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_img_recolor_opa(ui_SettingButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    
             lv_obj_set_style_bg_color(ui_SerialNumberButton, lv_color_hex(0x404040), LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_bg_opa(ui_SerialNumberButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
           }
@@ -1093,6 +1110,7 @@ void loop()
              }
              else // after power up, and globe moved to other place/timezone -> find a station for that 
              { FindNewStation();
+               ReloadScroll();
              }
            }
            else
@@ -1130,6 +1148,7 @@ void loop()
                  lv_obj_clear_flag(ui_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN);
                }  
              }
+             bInternalSpeakerStatusValid = true;
              sprintf(content, "%ld", volume);
              lv_label_set_text(ui_VolumeValue, content); 
              sprintf(content, "%ld", bass);
@@ -1152,39 +1171,26 @@ void loop()
         
         case MESSAGE_GET_GEOLOCATION_BY_GPS: // in response to request using database station gps coordinates
         case MESSAGE_GET_GEOLOCATION: // in response to request using calibrated NS/EW coordinates
-          // example: "NL"
-          // example: "NL,"
-          // example: "NL,Amsterdam"
-          // example: ",Amsterdam"
-          // example: ","
-          // example: ""
-          // example: "XX,???"  // at sea
+          uint16_t puckrequest;
+          // example: "NL,Amsterdam,12345" which is country code, town, original puck api request serial number
+
           PrevHour--; // forces instant update of clock, names of places, flags
           PrevSecond--;
 
           // check if the somewhat late arrived data is still applicable for the station most recently ordered
-          Serial.printf("DataFromGlobe.D_ApisFetchedForStation %d<> Stations.requested -> %d\n", DataFromGlobe.D_ApisFetchedForStation, Stations.requested);
-          if(DataFromGlobe.D_ApisFetchedForStation != Stations.requested)break;
+          //Serial.printf("DataFromGlobe.D_ApisFetchedForStation %d<> Stations.requested -> %d\n", DataFromGlobe.D_ApisFetchedForStation, Stations.requested);
+          //if(DataFromGlobe.D_ApisFetchedForStation != Stations.requested)break;
 
-          // yes, this data belongs to the last station ordered, lets take it seriously 
-          strcpy(town, "");
-          strcpy(countrycode, "");
-          if((p1=strchr(QueueMessage, ','))!= NULL)strcpy(town, p1+1);
-          
-          if(isalpha(QueueMessage[0]))
-          { countrycode[0] = QueueMessage[0];
-            if(isalpha(QueueMessage[1]))
-            { countrycode[1] = QueueMessage[1];
-              countrycode[2] = 0;
-            }
-            else countrycode[0] = 0;
-          }
-          
+          // yes, perhaps this data belongs to the last station geodata ordered, lets take it seriously or discard it
+          sscanf(QueueMessage, "%2[^,],%60[^,],%d", &countrycode, &town, &puckrequest);
+          extern uint16_t PuckApiRequest;
+          Serial.printf("QueueMessage = <%s> Countrycode = <%s> Town = <%s> puckrequest = %d Expected PuckRequest = %d\n", QueueMessage, countrycode, town, puckrequest, PuckApiRequest);
+          if(puckrequest != PuckApiRequest)break; // this result was arriving late and meant for an older request
+
           RemoveUTF8Unprintables(town); // arabic town names are not printable with extended ascii fonts
-          Serial.printf("GPS Countrycode = %s and town = %s Stations.requested = %d\n", countrycode, town, Stations.requested);
 
           if(Stations.requested>=0)
-          { if((strcmp(town, "???")!=0) && (strcmp(countrycode, "XX")==0)) // google does not give country name for disputed areas like NS = 42.061100, EW = 20.651199 which is Dragsh in Kosovo
+          { if((strcmp(town, "???")!=0) && (strcmp(countrycode, "XX")==0)) // google does not give country code for disputed areas like NS = 42.061100, EW = 20.651199 which is Dragsh in Kosovo
             { GetAllUpperCase(countrycode, Stations.StationNUG[Stations.requested].countrycode);
             } 
           }  
@@ -1224,7 +1230,9 @@ void loop()
                     Serial.println(content);
                   }
                   // check town name
-                  if(strncmp(Stations.StationNUG[Stations.requested].town, town, strlen(town))!=NULL) // town different from expected, but "Canton" for "Canton OH" is ok
+                  uint16_t strcmplen = strlen(Stations.StationNUG[Stations.requested].town);
+                  if(strlen(town)<strcmplen)strcmplen = strlen(town);
+                  if(strncmp(Stations.StationNUG[Stations.requested].town, town, strcmplen)!=NULL) // town different from expected, but "Canton" for "Canton OH" is ok
                   { // must write to file for later examination
                     Serial.printf("Problem with Stations.requested = %d\n", Stations.requested);
                     strcpy(logfile, "/database-error.log");
@@ -1268,8 +1276,6 @@ void loop()
               else
               { strcpy(World.CountryCode, countrycode); // later used for clock face
                 strcpy(World.CountryName, FoundCountryName); // later used for clock face
-                //lv_label_set_text(ui_Home_Country, World.CountryName);
-                //lv_label_set_text(ui_Clock_Country, GetAllUpperCase(content64, Stations.StationNUG[Stations.requested].countryname));
               }
               if(!bMusicMode)
               { lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // show flag, perhaps was hidden by a new search start
@@ -1288,8 +1294,6 @@ void loop()
               // on setup screen (as the place where you are on the globe)
               lv_label_set_text(ui_GlobeCurrentCountry, GetAllUpperCase(content64, Stations.StationNUG[Stations.requested].countryname));
               
-              sprintf(content, "%s", GetAllUpperCase(content64, FoundCountryName));
-              Serial.printf("content = <%s>\n", content);
               lv_label_set_text(ui_Home_City, town);
                 // on map
               sprintf(content,"Greetings From %s", GetAllUpperCase(content64, FoundCountryName));
@@ -1304,7 +1308,7 @@ void loop()
               lv_label_set_text(ui_Database_Progress, ""); // exchange rate on map sceen, will be refreshed when globe answers with fresh exchange data
               AddToQueueForGlobe(countrycode, MESSAGE_EX_CHANGE_RATE);
             }
-            else // country code not in list - must be a database error
+            else // country code not in list - must be a database error - or some authority created a new country code not known by me
             { sprintf(content, "Countrycode %s Not In List", QueueMessage);
               // log this issue
               strcpy(logfile, "/database-error.log");
@@ -1595,8 +1599,10 @@ void loop()
       if(newvolumevalue) // and show it
       { lv_obj_add_flag(ui_Home_Power_Off_Icon, LV_OBJ_FLAG_HIDDEN); // hide power off icon
         lv_obj_clear_state(ui_VolumeValue, LV_STATE_DISABLED); // show volume value
-        if(DataFromDisplay.internalspeakeron == 1)lv_obj_add_flag(ui_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN); 
-        else lv_obj_clear_flag(ui_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN);
+        if(bInternalSpeakerStatusValid)
+        { if(DataFromDisplay.internalspeakeron == 1)lv_obj_add_flag(ui_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN); 
+          else lv_obj_clear_flag(ui_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN);
+        }
       }
       else // hide volume value
       { lv_obj_add_state(ui_VolumeValue, LV_STATE_DISABLED); // hide volume value
@@ -1767,7 +1773,7 @@ void loop()
             lv_label_set_text(ui_Time_Zone, Home.TZname); // on home screen - clock screen does it's own updates every second
             SetFlag(Home.CountryCode);
             lv_label_set_text_uppercase(ui_Clock_Country, Home.CountryName);
-            lv_label_set_text(ui_Home_Country, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countryname); // use original country name
+            //lv_label_set_text(ui_Home_Country, Stations.StationNUG[(MAX_STATIONS+MAX_FAVORITES+MAX_HOMES-1)].countryname); // use original country name
           }
         }
         else if(PrevHour!=datetime.hour || strcmp(OldClockTimeZoneName, World.TZname)!=0 || strcmp(OldClockTimeCountryCode, World.CountryCode)!=0)

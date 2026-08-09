@@ -54,7 +54,8 @@ void CalibrationLatitudes(lv_event_t *e)
     // early initialization of CalToGps label
     lv_event_t * e;
     RollerNSorEWChanged(e); 
-    Lvgl_Loop();
+    //Lvgl_Loop();
+    lv_refr_now(NULL); // seems a better choice
   }
 }
 
@@ -71,7 +72,8 @@ void CalibrationLongitudes(lv_event_t *e)
     // early initialization of CalToGps label
     lv_event_t * e;
     RollerNSorEWChanged(e); 
-    Lvgl_Loop();
+    //Lvgl_Loop();
+    lv_refr_now(NULL); // seems a better choice
   }  
 }
 
@@ -88,7 +90,8 @@ void CalibrationAdvanced(lv_event_t * e)
     // early initialization of CalToGps label
     lv_event_t * e;
     RollerNSorEWChanged(e); 
-    Lvgl_Loop();
+    //Lvgl_Loop();
+    lv_refr_now(NULL); // seems a better choice
   }  
 }
 
@@ -281,11 +284,12 @@ void remap_ns_ew(int16_t from_globe_ns, int16_t from_globe_ew)
   roller_ew = ((from_globe_ew + 1800+75) / 150);
   //Serial.printf("roller_ns =%d roller_ew =%d\n", roller_ns, roller_ew);
 
-  if(roller_ns>=0) // north pole is not to be calibrated, all others are
+  if(roller_ns>=0) // north pole is not to be calibrated, all others are ok
   { // sync NS and EW rollers used in the calibration menus
     lv_roller_set_selected(uic_RollerNS, roller_ns, LV_ANIM_ON); 
     lv_roller_set_selected(uic_RollerEW, roller_ew, LV_ANIM_ON); 
-    Lvgl_Loop();
+    //Lvgl_Loop();
+    lv_refr_now(NULL); // seems a better choice
     lv_event_t * e;
     RollerNSorEWChanged(e); 
   }
@@ -294,7 +298,8 @@ void remap_ns_ew(int16_t from_globe_ns, int16_t from_globe_ew)
     lv_obj_add_state(uic_CalibrationPointText, LV_STATE_DISABLED);
     CalibrationSpinLock = true; // keep the button locked
     lv_label_set_text(ui_SpinLock, "- North Pole Is Fixed -"); 
-    Lvgl_Loop();
+    //Lvgl_Loop();
+    lv_refr_now(NULL); // seems a better choice
     lv_event_t * e;
     RollerNSorEWChanged(e); 
   }

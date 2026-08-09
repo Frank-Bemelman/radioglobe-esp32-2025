@@ -1,5 +1,60 @@
 // handling of events on various screens, beeps and long button presses
 
+void JukeboxClicked(lv_event_t * e)
+{ static uint16_t longpressed=0;
+  lv_event_code_t code = lv_event_get_code(e);
+  
+  longpressed = ShortOrLongPressed(e);
+  //Serial.printf("longpressed is %d\n", longpressed);
+
+  if(longpressed==5)
+  { beepforMs(50);
+    return;
+  }
+  else if(longpressed==0)
+  { AddToQueueForGlobe("", MESSAGE_GLOBE_PLAY_SD); // next song in list
+    beepforMs(50);
+  }
+}
+
+// returns 0 for click, 1-?? for longer pressed
+uint16_t ShortOrLongPressed(lv_event_t * e)
+{ static uint16_t longpressed=0;
+
+  lv_event_code_t event_code = lv_event_get_code(e);
+  if(event_code == LV_EVENT_LONG_PRESSED_REPEAT) // 6
+  { //Serial.printf("Eventcode = LV_EVENT_LONG_PRESSED_REPEAT\n");
+    longpressed++;
+  }
+  
+  if(event_code == LV_EVENT_CLICKED) // 7
+  { //Serial.printf("Eventcode = LV_EVENT_CLICKED\n");
+    if(longpressed>1)longpressed = 1;
+    else longpressed = 0;
+  }
+  //Serial.printf("longpressed = %d\n", longpressed);
+  return longpressed;
+}
+
+
+// returns higher value when longer pressed
+uint16_t isLongPressed(lv_event_t * e)
+{ static uint16_t longpressed=0;
+
+  lv_event_code_t event_code = lv_event_get_code(e);
+  if(event_code == LV_EVENT_LONG_PRESSED_REPEAT) // 6
+  { //Serial.printf("Eventcode = LV_EVENT_LONG_PRESSED_REPEAT\n");
+    longpressed++;
+  }
+  else if(event_code == LV_EVENT_CLICKED) // 7
+  { //Serial.printf("Eventcode = LV_EVENT_CLICKED\n");
+    longpressed = 0;
+  }
+  //Serial.printf("longpressed = %d\n", longpressed);
+  return longpressed;
+}
+
+
 void RadarScreenOn(lv_event_t * e)
 { // let's do a flight radar
   // now screen can switch over
@@ -28,10 +83,8 @@ void OnClockScreenLoad(lv_event_t * e)
   { // set icon to home icon or power off switch icon
     if(bPowerStatus)
     { lv_img_set_src(ui_Clock_Power_Off_Icon, &ui_img_home_png);
-      ui_object_set_themeable_style_property(ui_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
-                                             _ui_theme_color_turquoise);
-      ui_object_set_themeable_style_property(ui_Clock_Power_Off_Icon, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
-                                             _ui_theme_alpha_turquoise);
+      lv_obj_set_style_img_recolor(ui_Clock_Power_Off_Icon, lv_color_hex(0x0098EC), LV_PART_MAIN | LV_STATE_DEFAULT); // blue as used on the watch face
+      lv_obj_set_style_img_recolor_opa(ui_Clock_Power_Off_Icon, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     }
     else 
     { lv_img_set_src(ui_Clock_Power_Off_Icon, &ui_img_power75x75_png); // icon on clock face
@@ -194,22 +247,6 @@ void SetHomeEnter(lv_event_t * e)
   }
 }
 
-// returns higher value when longer pressed
-uint16_t isLongPressed(lv_event_t * e)
-{ static uint16_t longpressed=0;
-
-  lv_event_code_t event_code = lv_event_get_code(e);
-  if(event_code == LV_EVENT_LONG_PRESSED_REPEAT) // 6
-  { //Serial.printf("Eventcode = LV_EVENT_LONG_PRESSED_REPEAT\n");
-    longpressed++;
-  }
-  else if(event_code == LV_EVENT_CLICKED) // 7
-  { //Serial.printf("Eventcode = LV_EVENT_CLICKED\n");
-    longpressed = 0;
-  }
-  //Serial.printf("longpressed = %d\n", longpressed);
-  return longpressed;
-}
 
 void beep(lv_event_t * e)
 { beepforMs(50);
@@ -645,10 +682,11 @@ void SetWeatherData(char *settings)
   int humidity;
   char icon[8];
   char content[32];
+  uint16_t apirequest;
   
   // example, setting = "Temp 25.3 Rh 8 Icon 01d"
 
-  sscanf(settings, "Temp %f Rh %d Icon %3s", &temperature, &humidity, &icon[0]);
+  sscanf(settings, "Temp %f Rh %d Icon %3s %d", &temperature, &humidity, &icon[0], apirequest);
 
   int temperaturerounded = (int)round(temperature);
   sprintf(content, "%d °C", temperaturerounded); 

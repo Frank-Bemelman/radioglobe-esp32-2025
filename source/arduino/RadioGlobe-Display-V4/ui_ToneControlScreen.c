@@ -14,7 +14,6 @@ lv_obj_t * uic_bluetoothswitch;
 lv_obj_t * uic_InternalSpeaker;
 lv_obj_t * uic_SaveToneVolText;
 lv_obj_t * uic_SaveToneVol;
-lv_obj_t * uic_Text_Treble;
 lv_obj_t * uic_TrebleValue;
 lv_obj_t * uic_TrebleArc;
 lv_obj_t * uic_BassValue;
@@ -25,7 +24,6 @@ lv_obj_t * ui_BassArc = NULL;
 lv_obj_t * ui_BassValue = NULL;
 lv_obj_t * ui_TrebleArc = NULL;
 lv_obj_t * ui_TrebleValue = NULL;
-lv_obj_t * ui_Text_Treble = NULL;
 lv_obj_t * ui_SaveToneVol = NULL;
 lv_obj_t * ui_SaveToneVolText = NULL;
 lv_obj_t * ui_InternalSpeaker = NULL;
@@ -157,17 +155,6 @@ void ui_ToneControlScreen_screen_init(void)
     lv_obj_set_style_text_opa(ui_TrebleValue, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_TrebleValue, &lv_font_montserrat_48, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_opa(ui_TrebleValue, 0, LV_PART_MAIN | LV_STATE_DISABLED);
-
-    ui_Text_Treble = lv_label_create(ui_ToneControlScreen);
-    lv_obj_set_width(ui_Text_Treble, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Text_Treble, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Text_Treble, 120);
-    lv_obj_set_y(ui_Text_Treble, 25);
-    lv_obj_set_align(ui_Text_Treble, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Text_Treble, "TREBLE");
-    lv_obj_set_style_text_color(ui_Text_Treble, lv_color_hex(0xCCCCCC), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_Text_Treble, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Text_Treble, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_SaveToneVol = lv_btn_create(ui_ToneControlScreen);
     lv_obj_set_width(ui_SaveToneVol, 200);
@@ -308,7 +295,6 @@ void ui_ToneControlScreen_screen_init(void)
     uic_BassValue = ui_BassValue;
     uic_TrebleArc = ui_TrebleArc;
     uic_TrebleValue = ui_TrebleValue;
-    uic_Text_Treble = ui_Text_Treble;
     uic_SaveToneVol = ui_SaveToneVol;
     uic_SaveToneVolText = ui_SaveToneVolText;
     uic_InternalSpeaker = ui_InternalSpeaker;
@@ -336,8 +322,6 @@ void ui_ToneControlScreen_screen_destroy(void)
     ui_TrebleArc = NULL;
     uic_TrebleValue = NULL;
     ui_TrebleValue = NULL;
-    uic_Text_Treble = NULL;
-    ui_Text_Treble = NULL;
     uic_SaveToneVol = NULL;
     ui_SaveToneVol = NULL;
     uic_SaveToneVolText = NULL;

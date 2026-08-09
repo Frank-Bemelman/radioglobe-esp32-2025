@@ -26,9 +26,10 @@ extern lv_obj_t * ui_Text_Radio_Globe;
 extern lv_obj_t * ui_Station_Name;
 extern lv_obj_t * ui_Status_Line;
 extern lv_obj_t * ui_Station_Title;
-extern lv_obj_t * ui_VolumeValue;
+extern lv_obj_t * ui_VolumeBackground;
 extern void ui_event_VolumeArc(lv_event_t * e);
 extern lv_obj_t * ui_VolumeArc;
+extern lv_obj_t * ui_VolumeValue;
 extern void ui_event_SettingButton(lv_event_t * e);
 extern lv_obj_t * ui_SettingButton;
 extern lv_obj_t * ui_Battery_Icon_Low;
@@ -48,6 +49,8 @@ extern void ui_event_arrowleft(lv_event_t * e);
 extern lv_obj_t * ui_arrowleft;
 extern void ui_event_arrowright(lv_event_t * e);
 extern lv_obj_t * ui_arrowright;
+extern void ui_event_Jukebox(lv_event_t * e);
+extern lv_obj_t * ui_Jukebox;
 // CUSTOM VARIABLES
 extern lv_obj_t * uic_Home;
 extern lv_obj_t * uic_HomeGps;
@@ -56,8 +59,8 @@ extern lv_obj_t * uic_Time_Zone;
 extern lv_obj_t * uic_Station_Name;
 extern lv_obj_t * uic_Status_Line;
 extern lv_obj_t * uic_Station_Title;
-extern lv_obj_t * uic_VolumeValue;
 extern lv_obj_t * uic_VolumeArc;
+extern lv_obj_t * uic_VolumeValue;
 extern lv_obj_t * uic_SettingButton;
 extern lv_obj_t * uic_Battery_Icon_Low;
 extern lv_obj_t * uic_Battery_Icon_Medium;
@@ -71,6 +74,7 @@ extern lv_obj_t * uic_Weather_Temperature;
 extern lv_obj_t * uic_Weather_Humidity;
 extern lv_obj_t * uic_arrowleft;
 extern lv_obj_t * uic_arrowright;
+extern lv_obj_t * uic_Jukebox;
 
 #ifdef __cplusplus
 } /*extern "C"*/
