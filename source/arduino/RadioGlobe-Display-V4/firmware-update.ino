@@ -11,6 +11,7 @@
 
 
 #include <HTTPClient.h>
+
 #include <WiFi.h>
 #include <NetworkClient.h>
 #include <ESP_SSLClient.h>
@@ -24,6 +25,8 @@ String serverTimestamp = "";
 //#include <esp_now.h>
 
 uint16_t UpdateState = 0;
+char Wifi_SSID[64] = "";
+char Wifi_PASSWORD[64] ="";
 
 // Target file in Github release
 char file_url[] = "https://github.com/Frank-Bemelman/radioglobe-esp32-2025/releases/download/RadioGlobe-Firmware/RadioGlobe-Display.bin";
