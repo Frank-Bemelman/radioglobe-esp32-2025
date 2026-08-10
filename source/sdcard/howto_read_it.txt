@@ -1,1 +1,18 @@
+Why replacing it? Newer stations150K.json files have less dead stations. Makes the globe snappier if it does not have to try stations that no longer exist.
 
+There are two ways of doing it. You can open the puck and fiddle with the SD card or use the FTP server.
+
+Using the FTP server saves you the hassle of opening the puck.
+
+1) Install Filezilla FTP on your PC.
+2) On the puck, enter secret code BOBOB. This will launch a FTP server and IP address is shown
+3) Using Filezilla, use sitemanager, create a new site, for host use the IP address shown on puck.
+4) IMPORTANT - under transfer settings, limit number connections to 1.
+5) User&password is globe, globe.
+6) Delete the stations150K.json file on the puck.
+7) Reset/reboot puck, it will then delete all N/S direcotries - their content is outdated. This can easily take 10 minutes, there are thousands of directories to delete.
+8) Restart the FTP server on puck, BOBOB, and upload the new stations150K.json
+9) Enter secret code globe, go in setup again, database, and rebuild the database.
+10) All done.
+
+All done is well done.
