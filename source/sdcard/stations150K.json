@@ -64,10 +64,6 @@
       {
         "name": "Rad Xallas",
         "url": "http://radioserver11.profesionalhosting.com:9458/;stream"
-      },
-      {
-        "name": "Rad Lider 97.7 F",
-        "url": "https://server8.emitironline.com:18520/stream"
       }
     ]
   },
@@ -84,10 +80,6 @@
       {
         "name": "Rad Municipal De",
         "url": "https://srv7021.dns-lcinternet.com/8070/stream"
-      },
-      {
-        "name": "Rad Lider 97.7 F",
-        "url": "https://server8.emitironline.com:18520/stream"
       },
       {
         "name": "Radiovoz 103.8",
@@ -514,10 +506,6 @@
     },
     "urls": [
       {
-        "name": "Hellenic Media V",
-        "url": "http://us3.internet-radio.com:8090/live"
-      },
-      {
         "name": "Cksr - Star 98.3",
         "url": "https://rogers.leanstream.co/rogers/chi983.stream/icy"
       },
@@ -644,10 +632,6 @@
       {
         "name": "Maverick 105.5 -",
         "url": "https://ice24.securenetsystems.net/KMOM"
-      },
-      {
-        "name": "Ksdj New Rk 90.7",
-        "url": "https://ksdj.stream.creek.fm/stream"
       },
       {
         "name": "Krvx-Hd2 97.1 -",
@@ -1482,10 +1466,6 @@
         "url": "https://yayin.radyoakdeniz.com/9470/stream"
       },
       {
-        "name": "Bizim Ller Radyo",
-        "url": "http://yayin.yayindakiler.com:4078/index.html/;"
-      },
-      {
         "name": "Damar Trk Fm",
         "url": "https://live.radyositesihazir.com/7000/stream"
       }
@@ -1838,10 +1818,6 @@
         "url": "https://stream.zeno.fm/542gubz258quv"
       },
       {
-        "name": "Taem Rad",
-        "url": "https://stream.zeno.fm/ffg8htkh1k0uv"
-      },
-      {
         "name": "Ahadu Rad Fm 94.",
         "url": "https://stream.zeno.fm/txxpndf1wwzuv"
       }
@@ -2114,10 +2090,6 @@
         "url": "https://nrf1.newradio.it/stream/9894"
       },
       {
-        "name": "Rad Agira",
-        "url": "https://nrf1.newradio.it:9618/stream.mp3"
-      },
-      {
         "name": "Rad Antenna Uno",
         "url": "https://server.bellaradio.it:8091/a1.mp3"
       }
@@ -2378,10 +2350,6 @@
         "url": "http://bilecikfm.kesintisizyayin.com:9980/;"
       },
       {
-        "name": "Bizim Ller Radyo",
-        "url": "http://yayin.yayindakiler.com:4078/index.html/;"
-      },
-      {
         "name": "Damar Trk Fm",
         "url": "https://live.radyositesihazir.com/7000/stream"
       }
@@ -2566,10 +2534,6 @@
     },
     "urls": [
       {
-        "name": "Lato 103.3 Fm",
-        "url": "https://stream.latofm.gr/latofm"
-      },
-      {
         "name": "Style 100 Fm",
         "url": "http://eco.onestreaming.com:8576/stream/;"
       },
@@ -2589,10 +2553,6 @@
       "e": 14.519
     },
     "urls": [
-      {
-        "name": "Rad Agira",
-        "url": "https://nrf1.newradio.it:9618/stream.mp3"
-      },
       {
         "name": "Rad Onda Due Fm",
         "url": "https://onair18.xdevel.com/proxy/ondadue?mp=/;stream/;"
@@ -2657,10 +2617,6 @@
       "e": 1.098
     },
     "urls": [
-      {
-        "name": "Rdio Juneda 107.",
-        "url": "https://stream.zeno.fm/tnnxu39g4p8uv"
-      },
       {
         "name": "Rdio Lleida Cade",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_LLEIDA.mp3"
@@ -2764,10 +2720,6 @@
       {
         "name": "Rad Bebe Televis",
         "url": "https://max.miradio.in/proxy/radiobebetv/stream"
-      },
-      {
-        "name": "Exa Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/XHQT_SC"
       },
       {
         "name": "La Fq - Xhfq Fm",
@@ -4302,10 +4254,6 @@
         "url": "https://radiobim-danidi01.radioca.st/stream"
       },
       {
-        "name": "Rad Studio 93",
-        "url": "https://onair15.xdevel.com/proxy/radiostudio93?mp=/;stream/;"
-      },
-      {
         "name": "Solo Rad",
         "url": "https://soloradio.sailweb.cloud/soloradio256.mp3"
       },
@@ -4668,10 +4616,6 @@
       {
         "name": "Qd Rad",
         "url": "https://radios.lamaster.es:8010/qdradio"
-      },
-      {
-        "name": "Rad Cullar Fm 10",
-        "url": "https://streaming2.elitecomunicacion.es:8120/stream?type=.mp3/;"
       }
     ]
   },
@@ -5674,10 +5618,6 @@
     },
     "urls": [
       {
-        "name": "Nrk P1 Mre Og Ro",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_more_og_romsdal_mp3_h"
-      },
-      {
         "name": "Rad Lesund Fm 10",
         "url": "https://audio.jaerradiogruppen.no/aalesund_hq"
       },
@@ -5688,10 +5628,6 @@
       {
         "name": "Vers Libre",
         "url": "https://vers-libre.radiocult.fm/stream"
-      },
-      {
-        "name": "Nrk P1 Sogn Og F",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_sogn_og_fjordane_aac_h"
       },
       {
         "name": "Ksu 24/7",
@@ -6430,10 +6366,6 @@
     },
     "urls": [
       {
-        "name": "Choc 88.7",
-        "url": "https://stream2.statsradio.com:8110/stream"
-      },
-      {
         "name": "Ckaj 92,5",
         "url": "https://stream.statsradio.com:8060/stream"
       },
@@ -7002,10 +6934,6 @@
     },
     "urls": [
       {
-        "name": "Rdio Juneda 107.",
-        "url": "https://stream.zeno.fm/tnnxu39g4p8uv"
-      },
-      {
         "name": "Rad Fraga Fm 107",
         "url": "https://streaming.enacast.com/radiofraga128.mp3"
       },
@@ -7264,10 +7192,6 @@
       {
         "name": "Rad Tierra Desea",
         "url": "https://whmsonic.playerfullhd.com:7026/;"
-      },
-      {
-        "name": "Nova Hts Rad",
-        "url": "https://centova.hostingtico.com:7006/stream"
       }
     ]
   },
@@ -7909,10 +7833,6 @@
       "e": -75.0745
     },
     "urls": [
-      {
-        "name": "Impacto Estereo",
-        "url": "https://cloudstream2036.conectarhosting.com/8206/stream"
-      },
       {
         "name": "Nare Stereo",
         "url": "https://play8.tikast.com/proxy/nare?mp=/stream"
@@ -8606,10 +8526,6 @@
         "url": "https://us3.streamingpulse.com/ssl/CoveFM"
       },
       {
-        "name": "Cjlu 93.9 Fm",
-        "url": "https://harvestersfm.radioca.st/NB"
-      },
-      {
         "name": "Kiss Fm 103.7",
         "url": "https://a8.asurahosting.com:8020/radio.mp3"
       },
@@ -8876,10 +8792,6 @@
       {
         "name": "Rvr Amplepuis Fm",
         "url": "https://live.aurafm.org:7443/rvr-tarareplata"
-      },
-      {
-        "name": "Project Xy",
-        "url": "https://flux.saaslys.com:8000/radio.mp3"
       },
       {
         "name": "Activ Rad Fm 101",
@@ -9217,10 +9129,6 @@
       {
         "name": "Rad Anaas",
         "url": "https://ice03.fluidstream.net/fluid04.mp3"
-      },
-      {
-        "name": "Rad City Light F",
-        "url": "http://nr5.newradio.it:8651/stream"
       }
     ]
   },
@@ -9487,10 +9395,6 @@
         "url": "https://antenne.pyreneesfm.com/direct.mp3"
       },
       {
-        "name": "Rad Transparence",
-        "url": "http://37.187.77.45:9000/;"
-      },
-      {
         "name": "Rad Couserans",
         "url": "https://stream.rcs.revma.com/w6u9tk4a6nhvv"
       },
@@ -9577,10 +9481,6 @@
       {
         "name": "Rad New Sound",
         "url": "http://nr8.newradio.it:9205/stream?type=http&nocache=94918/;"
-      },
-      {
-        "name": "Ritmo 80",
-        "url": "https://ice02.fluidstream.net/ritmo80.aac"
       },
       {
         "name": "Rm Centro Fm 103",
@@ -10151,10 +10051,6 @@
         "url": "https://frontend.streamonkey.net/vr-vogtland?aggregator=radiogarden"
       },
       {
-        "name": "Rad Chemnitz - W",
-        "url": "https://web.radio.radiochemnitz.de/radiochemnitz-weihnachten?aggregator=radiogarden"
-      },
-      {
         "name": "Antenne Sachsen",
         "url": "https://web.radio.antennesachsen.de/antsa-dresden?aggregator=radiogarden"
       }
@@ -10371,10 +10267,6 @@
         "url": "https://stream.zeno.fm/x7bboxazwdytv"
       },
       {
-        "name": "Impacto Estereo",
-        "url": "https://cloudstream2036.conectarhosting.com/8206/stream"
-      },
-      {
         "name": "Briceo Stereo Fm",
         "url": "https://streamingmediaradio.live/8040/stream"
       },
@@ -10537,10 +10429,6 @@
       {
         "name": "Gn Fm",
         "url": "https://ssl120.radyotelekom.com.tr/8130/stream"
-      },
-      {
-        "name": "Bizim Ller Radyo",
-        "url": "http://yayin.yayindakiler.com:4078/index.html/;"
       },
       {
         "name": "Damar Trk Fm",
@@ -11515,10 +11403,6 @@
     },
     "urls": [
       {
-        "name": "Rad Studio 93",
-        "url": "https://onair15.xdevel.com/proxy/radiostudio93?mp=/;stream/;"
-      },
-      {
         "name": "Rad Bimbo",
         "url": "https://radiobim-danidi01.radioca.st/stream"
       },
@@ -12079,10 +11963,6 @@
         "url": "https://sonicpanel.streamsolutions.us/8004/;"
       },
       {
-        "name": "Anda Onda Lerma",
-        "url": "https://topradio.uno:8006/stream"
-      },
-      {
         "name": "Rad Soto",
         "url": "https://cast.direcnode.com/proxy/qradiomn/stream"
       },
@@ -12577,10 +12457,6 @@
       {
         "name": "Humboldt Hot Air",
         "url": "https://hha.streamguys1.com/live"
-      },
-      {
-        "name": "Kxcj-Lp 105.7 Fm",
-        "url": "http://216.115.15.236:8888/KXCJ"
       },
       {
         "name": "Kpht-Lp 99.9 Fm",
@@ -13242,10 +13118,6 @@
       "e": 22.061
     },
     "urls": [
-      {
-        "name": "Life 106.3",
-        "url": "http://cast.streams.ovh:9130/live"
-      },
       {
         "name": "Energy 88,3",
         "url": "http://s1.onweb.gr:8412/;"
@@ -14723,10 +14595,6 @@
         "url": "https://ice09.fluidstream.net/r_giulianova.mp3"
       },
       {
-        "name": "Rad City Light F",
-        "url": "http://nr5.newradio.it:8651/stream"
-      },
-      {
         "name": "Rad Fm Faleria",
         "url": "https://nr6.newradio.it/proxy/radiofal?mp=/stream"
       }
@@ -15007,10 +14875,6 @@
         "url": "https://streams.radiomast.io/517bd02e-89a3-46aa-83ec-a49122a08c4a"
       },
       {
-        "name": "Kxcj-Lp 105.7 Fm",
-        "url": "http://216.115.15.236:8888/KXCJ"
-      },
-      {
         "name": "The Rogue 96.9 -",
         "url": "https://www.streamvortex.com:8444/s/10710"
       },
@@ -15155,16 +15019,8 @@
         "url": "https://lyd.radioene.no/solor.mp3"
       },
       {
-        "name": "Nrk P1 Mre Og Ro",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_more_og_romsdal_mp3_h"
-      },
-      {
         "name": "The Ferry",
         "url": "http://6471.cloudrad.io:8178/theferry.mp3"
-      },
-      {
-        "name": "Nrk P1 Sogn Og F",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_sogn_og_fjordane_aac_h"
       },
       {
         "name": "Rad Haugaland",
@@ -16859,10 +16715,6 @@
         "url": "https://direct.maxfm.be:8000/maxfm"
       },
       {
-        "name": "Mrc Rad",
-        "url": "https://www.radioking.com/play/mrcradio"
-      },
-      {
         "name": "Echo Fm",
         "url": "https://radio5.pro-fhi.net/flux-ghergigw/stream"
       }
@@ -16885,10 +16737,6 @@
       {
         "name": "Rdio Valira",
         "url": "https://mars.streamerr.co/8192/stream"
-      },
-      {
-        "name": "Rad Transparence",
-        "url": "http://37.187.77.45:9000/;"
       },
       {
         "name": "Rad Couserans",
@@ -17221,10 +17069,6 @@
       {
         "name": "Nevers Fm 99.0",
         "url": "https://hosting.studioradiomedia.fr:2125/stream"
-      },
-      {
-        "name": "Latitude 95.8",
-        "url": "https://latitude.ice.infomaniak.ch/troyes.aac?ver=829176"
       }
     ]
   },
@@ -17385,10 +17229,6 @@
       {
         "name": "Rgz-Radio",
         "url": "https://listen.radioking.com/radio/295573/stream/380212"
-      },
-      {
-        "name": "Mrc Rad",
-        "url": "https://www.radioking.com/play/mrcradio"
       },
       {
         "name": "Rad Zinzine",
@@ -18435,10 +18275,6 @@
     },
     "urls": [
       {
-        "name": "Bnr Burgas",
-        "url": "http://stream.bnr.bg:8037/radio-burgas.aac"
-      },
-      {
         "name": "Rad Methorios Fm",
         "url": "https://sc2.streamwithq.com:2000/stream/radiomethorios/stream"
       },
@@ -18501,10 +18337,6 @@
       {
         "name": "Novoe Rad Fm 98.",
         "url": "https://live.novoeradio.by:444/live/novoeradio_aac128/icecast.audio"
-      },
-      {
-        "name": "Legendy Fm | Fm",
-        "url": "http://live.legendy.by:8000/legendyfm"
       }
     ]
   },
@@ -18530,10 +18362,6 @@
       "e": 120.6085
     },
     "urls": [
-      {
-        "name": "Banna-Tiran Inte",
-        "url": "https://stream.zeno.fm/ywptdatt40duv"
-      },
       {
         "name": "Power Jz Ilocos",
         "url": "https://stream.zeno.fm/u26mf5z3f4duv"
@@ -19479,10 +19307,6 @@
         "url": "https://stream.zeno.fm/s7scdp65puquv"
       },
       {
-        "name": "Taem Rad",
-        "url": "https://stream.zeno.fm/ffg8htkh1k0uv"
-      },
-      {
         "name": "Ahadu Rad Fm 94.",
         "url": "https://stream.zeno.fm/txxpndf1wwzuv"
       },
@@ -19910,10 +19734,6 @@
       "e": 0.806
     },
     "urls": [
-      {
-        "name": "Rdio Juneda 107.",
-        "url": "https://stream.zeno.fm/tnnxu39g4p8uv"
-      },
       {
         "name": "Rad Fraga Fm 107",
         "url": "https://streaming.enacast.com/radiofraga128.mp3"
@@ -21175,10 +20995,6 @@
         "url": "https://tx.radyonatinfm.com:8030/bangued"
       },
       {
-        "name": "Banna-Tiran Inte",
-        "url": "https://stream.zeno.fm/ywptdatt40duv"
-      },
-      {
         "name": "Power Jz Ilocos",
         "url": "https://stream.zeno.fm/u26mf5z3f4duv"
       },
@@ -21398,10 +21214,6 @@
       "e": 120.643
     },
     "urls": [
-      {
-        "name": "Banna-Tiran Inte",
-        "url": "https://stream.zeno.fm/ywptdatt40duv"
-      },
       {
         "name": "Power Jz Ilocos",
         "url": "https://stream.zeno.fm/u26mf5z3f4duv"
@@ -21715,16 +21527,8 @@
     },
     "urls": [
       {
-        "name": "Rockin' Eagle 98",
-        "url": "http://stream.up.net:8000/WGLI"
-      },
-      {
         "name": "The Mix 93 - Wkm",
         "url": "http://audio.pasty.net:8000/mix93"
-      },
-      {
-        "name": "Wcup Fm 105.7",
-        "url": "http://stream.up.net:8000/WCUP"
       }
     ]
   },
@@ -21789,10 +21593,6 @@
       {
         "name": "Novoe Rad Fm 98.",
         "url": "https://live.novoeradio.by:444/live/novoeradio_aac128/icecast.audio"
-      },
-      {
-        "name": "Legendy Fm | Fm",
-        "url": "http://live.legendy.by:8000/legendyfm"
       }
     ]
   },
@@ -22515,10 +22315,6 @@
         "url": "http://audio1.meway.tv:8013/;"
       },
       {
-        "name": "Ritmo 80",
-        "url": "https://ice02.fluidstream.net/ritmo80.aac"
-      },
-      {
         "name": "Rm Centro Fm 103",
         "url": "https://nr11.newradio.it/proxy/rmcentro?mp=/stream"
       },
@@ -22913,10 +22709,6 @@
       {
         "name": "Rad Luce Classic",
         "url": "https://c30.radioboss.fm:18467/luceclassics"
-      },
-      {
-        "name": "Rad Agira",
-        "url": "https://nrf1.newradio.it:9618/stream.mp3"
       },
       {
         "name": "Rad Onda Due Fm",
@@ -23547,10 +23339,6 @@
         "url": "https://stream.zeno.fm/e83h8rpbm1duv"
       },
       {
-        "name": "Banna-Tiran Inte",
-        "url": "https://stream.zeno.fm/ywptdatt40duv"
-      },
-      {
         "name": "Power Jz Ilocos",
         "url": "https://stream.zeno.fm/u26mf5z3f4duv"
       },
@@ -23857,10 +23645,6 @@
       {
         "name": "Power Jz Ilocos",
         "url": "https://stream.zeno.fm/u26mf5z3f4duv"
-      },
-      {
-        "name": "Banna-Tiran Inte",
-        "url": "https://stream.zeno.fm/ywptdatt40duv"
       },
       {
         "name": "Laoag City Rad",
@@ -24278,10 +24062,6 @@
       "e": -1.6351
     },
     "urls": [
-      {
-        "name": "Al Mubarak Rad",
-        "url": "https://relay.emasjidlive.uk/almubarakradio"
-      },
       {
         "name": "Phoenix Rad 96.7",
         "url": "http://live.canstream.co.uk:8000/phoenix.mp3"
@@ -24869,10 +24649,6 @@
       {
         "name": "Rad Berja 107.6",
         "url": "https://broadcast.radioponiente.org:8072/;"
-      },
-      {
-        "name": "Rad Cullar Fm 10",
-        "url": "https://streaming2.elitecomunicacion.es:8120/stream?type=.mp3/;"
       }
     ]
   },
@@ -25103,10 +24879,6 @@
     },
     "urls": [
       {
-        "name": "Kd 101 - Kayd-Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KAYDFMAAC.aac"
-      },
-      {
         "name": "Klvu 91.3 Fm",
         "url": "https://kvlustream.lamar.edu:8443/stream"
       },
@@ -25301,10 +25073,6 @@
       {
         "name": "Fidele Au Poste",
         "url": "https://radio.fideleauposte.com:8443/stream.ogg"
-      },
-      {
-        "name": "Choc 88.7",
-        "url": "https://stream2.statsradio.com:8110/stream"
       }
     ]
   },
@@ -25525,18 +25293,6 @@
       {
         "name": "Xtrafm Costa Bra",
         "url": "http://stream.internetgirona.com:8000/onair"
-      }
-    ]
-  },
-  "Beijing,CN": {
-    "coords": {
-      "n": 39.9042,
-      "e": 116.4074
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -26223,10 +25979,6 @@
         "url": "https://live.radiolaguna.rs/laguna"
       },
       {
-        "name": "Rad Novosti Fm 1",
-        "url": "https://novosti.radiostreaming.rs/novosti_1"
-      },
-      {
         "name": "Svetski Rad",
         "url": "https://s1.skeletor.rs/svetski"
       },
@@ -26330,10 +26082,6 @@
       "e": -126.7539
     },
     "urls": [
-      {
-        "name": "Tuff City Rad 90",
-        "url": "https://stream.aiir.com/zzrrqgywgaptv"
-      },
       {
         "name": "95.7 Coast Fm",
         "url": "https://vistaradio.streamb.live/SB00082"
@@ -27411,10 +27159,6 @@
         "url": "https://streamingcwsradio30.com/8164/stream"
       },
       {
-        "name": "Exa Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/XHQT_SC"
-      },
-      {
         "name": "Poderosa 104.7 F",
         "url": "https://stream.freepi.io/8400/live"
       }
@@ -27909,10 +27653,6 @@
       {
         "name": "Vers Libre",
         "url": "https://vers-libre.radiocult.fm/stream"
-      },
-      {
-        "name": "Nrk P1 Sogn Og F",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_sogn_og_fjordane_aac_h"
       },
       {
         "name": "Rad102",
@@ -29868,10 +29608,6 @@
         "url": "https://streaming12.elitecomunicacion.es:8085/stream"
       },
       {
-        "name": "Bizkaia Irratia",
-        "url": "http://79.137.33.224:8000/bizkaiairratia2"
-      },
-      {
         "name": "Gaztea",
         "url": "http://mp3-eitb.stream.flumotion.com/eitb/gaztea.mp3"
       },
@@ -29942,10 +29678,6 @@
       {
         "name": "Planet 106.7",
         "url": "https://desertmountainbroadcasting.streamguys1.com/KPLN"
-      },
-      {
-        "name": "Ypr Jz",
-        "url": "https://ypr.streamguys1.com/live-3"
       },
       {
         "name": "Ypr2 Nws And Tk",
@@ -30320,10 +30052,6 @@
         "url": "https://ec1.yesstreaming.net:1780/stream"
       },
       {
-        "name": "Get Ready To Roc",
-        "url": "https://streamer.radio.co/s24ae1285c/listen"
-      },
-      {
         "name": "Wirral Wave",
         "url": "https://wirralwave.out.airtime.pro/wirralwave_a"
       },
@@ -30536,10 +30264,6 @@
         "url": "https://streamingcwsradio30.com/8164/stream"
       },
       {
-        "name": "Exa Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/XHQT_SC"
-      },
-      {
         "name": "Poderosa 104.7 F",
         "url": "https://stream.freepi.io/8400/live"
       }
@@ -30582,10 +30306,6 @@
       {
         "name": "Rad Selene",
         "url": "http://audio1.meway.tv:8013/;"
-      },
-      {
-        "name": "Ritmo 80",
-        "url": "https://ice02.fluidstream.net/ritmo80.aac"
       },
       {
         "name": "Rad Altamura Uno",
@@ -30858,10 +30578,6 @@
       {
         "name": "Rad 106 Bitola",
         "url": "http://stream.zemi.mk:8003/1"
-      },
-      {
-        "name": "Life 106.3",
-        "url": "http://cast.streams.ovh:9130/live"
       },
       {
         "name": "Ntennes 93.6",
@@ -31335,10 +31051,6 @@
       "e": -57.1313
     },
     "urls": [
-      {
-        "name": "Cjtb 93.1 Fm",
-        "url": "https://stream2.statsradio.com:8112/stream"
-      },
       {
         "name": "Chev Exploits Co",
         "url": "http://janus.shoutca.st:8538/stream"
@@ -31854,10 +31566,6 @@
       {
         "name": "Mountain Cntry 1",
         "url": "https://wppl.streamguys1.com/live"
-      },
-      {
-        "name": "Wngu 89.5 Fm",
-        "url": "https://gpb-geo.streamguys1.com/gpb/gpb-radio-wngu-mp3-radiogarden"
       }
     ]
   },
@@ -32346,10 +32054,6 @@
       {
         "name": "Eldoradio 93.0",
         "url": "http://sender.eldoradio.de:8000/128?.mp3/;"
-      },
-      {
-        "name": "Kick Fm",
-        "url": "https://icecast.kickfm.eu/mp3-high"
       }
     ]
   },
@@ -32616,10 +32320,6 @@
         "url": "https://www.radioking.com/play/go-boulot-la-radio"
       },
       {
-        "name": "Mrc Rad",
-        "url": "https://www.radioking.com/play/mrcradio"
-      },
-      {
         "name": "Rad Zinzine",
         "url": "http://91.121.65.189:8000/zinzine-aix"
       },
@@ -32690,10 +32390,6 @@
       {
         "name": "Rad Xallas",
         "url": "http://radioserver11.profesionalhosting.com:9458/;stream"
-      },
-      {
-        "name": "Rad Lider 97.7 F",
-        "url": "https://server8.emitironline.com:18520/stream"
       }
     ]
   },
@@ -32714,10 +32410,6 @@
       {
         "name": "Krbx 89.9 Fm Boi",
         "url": "http://radioboise-ice.streamguys1.com/live"
-      },
-      {
-        "name": "Salt & Light Cat",
-        "url": "http://salt-light-stream-01.miriamtech.net:8000/live"
       },
       {
         "name": "The Ticket - Kti",
@@ -34564,10 +34256,6 @@
         "url": "http://188.93.231.97:9300/;"
       },
       {
-        "name": "Rdio Montalegre",
-        "url": "http://centova.radios.pt:9566/;"
-      },
-      {
         "name": "Rdio Voz De Bast",
         "url": "https://radios.justweb.pt/8018/;"
       },
@@ -35042,10 +34730,6 @@
       {
         "name": "Rad Armenie Fm 1",
         "url": "http://direct.radioarmenie.com:9029/stream/;"
-      },
-      {
-        "name": "Project Xy",
-        "url": "https://flux.saaslys.com:8000/radio.mp3"
       },
       {
         "name": "Jz Rad Groov'Up",
@@ -35696,10 +35380,6 @@
         "url": "https://solid2.streamupsolutions.com/proxy/mqxncdsf?mp=/stream"
       },
       {
-        "name": "Al Mubarak Rad",
-        "url": "https://relay.emasjidlive.uk/almubarakradio"
-      },
-      {
         "name": "Drystone Rad Fm",
         "url": "https://uksoutha.streaming.broadcast.radio/drystoneradio"
       },
@@ -36328,10 +36008,6 @@
         "url": "http://live.slovakradio.sk:8000/Litera_128.mp3"
       },
       {
-        "name": "Tlis Rdio",
-        "url": "https://stream.tlis.sk/tlis.mp3"
-      },
-      {
         "name": "Rdio Vlna",
         "url": "https://stream.radiovlna.sk/vlna-hi.mp3"
       },
@@ -36946,10 +36622,6 @@
       {
         "name": "Novoe Rad Fm 98.",
         "url": "https://live.novoeradio.by:444/live/novoeradio_aac128/icecast.audio"
-      },
-      {
-        "name": "Legendy Fm | Fm",
-        "url": "http://live.legendy.by:8000/legendyfm"
       }
     ]
   },
@@ -37140,10 +36812,6 @@
         "url": "https://streamingmediaradio.live/8040/stream"
       },
       {
-        "name": "Impacto Estereo",
-        "url": "https://cloudstream2036.conectarhosting.com/8206/stream"
-      },
-      {
         "name": "Bella Mira Streo",
         "url": "https://icecasthd.net/proxy/bellamira/stream"
       }
@@ -37322,10 +36990,6 @@
       {
         "name": "Cove Fm 88.7",
         "url": "https://us3.streamingpulse.com/ssl/CoveFM"
-      },
-      {
-        "name": "Avr 97.7 Fm",
-        "url": "https://mbsradio.leanstream.co/CKENFM-MP3"
       }
     ]
   },
@@ -37534,10 +37198,6 @@
       {
         "name": "Frquence Mistral",
         "url": "https://azuracast.fmistral-serveur.com/listen/fm_manosque/radio.mp3"
-      },
-      {
-        "name": "Antithse Rad",
-        "url": "https://listen.radioking.com/radio/11549/stream/63448"
       },
       {
         "name": "Rad Active",
@@ -37852,10 +37512,6 @@
         "url": "https://icecast1.play.cz/kisshady256.mp3?.mp3"
       },
       {
-        "name": "Radioypsilon Fm",
-        "url": "http://mp3.radioypsilon.at:8000/mp3-160"
-      },
-      {
         "name": "Rad Arabella Hol",
         "url": "https://frontend.streams.arabella.at/arabella-holiday/stream/mp3"
       },
@@ -38052,10 +37708,6 @@
         "url": "https://stream2.xdevel.com/audio5s194-48/stream/icecast.audio"
       },
       {
-        "name": "Rad Agira",
-        "url": "https://nrf1.newradio.it:9618/stream.mp3"
-      },
-      {
         "name": "Rad Castell'Umbe",
         "url": "https://eu1.fastcast4u.com/proxy/discorin?mp=/;"
       }
@@ -38135,10 +37787,6 @@
       "e": -96.7984
     },
     "urls": [
-      {
-        "name": "Ksdj New Rk 90.7",
-        "url": "https://ksdj.stream.creek.fm/stream"
-      },
       {
         "name": "Kxlg 99.1 Fm - K",
         "url": "https://crystalout.surfernetwork.com:8001/KXLG-FM_MP3"
@@ -39536,10 +39184,6 @@
         "url": "https://ice5.securenetsystems.net/KXCM"
       },
       {
-        "name": "Jack Fm 95.7",
-        "url": "https://stream.affordablestreaming.com/KPKR.mp3"
-      },
-      {
         "name": "Rdio Krajan",
         "url": "http://usa19.fastcast4u.com:6820/;"
       }
@@ -39722,10 +39366,6 @@
       {
         "name": "Maia Fm 103.9",
         "url": "https://radio.rn-tv.com:8000/stream/1/;"
-      },
-      {
-        "name": "Bnr Burgas",
-        "url": "http://stream.bnr.bg:8037/radio-burgas.aac"
       },
       {
         "name": "Rad Folk Fm 91.6",
@@ -40623,10 +40263,6 @@
       {
         "name": "Pirate Rad 1250",
         "url": "https://das-edge15-live365-dal02.cdnstream.com/a89337"
-      },
-      {
-        "name": "Fbn Rad",
-        "url": "https://ice8.securenetsystems.net/WOTJ"
       }
     ]
   },
@@ -41063,10 +40699,6 @@
       {
         "name": "Rdio Voz De Bast",
         "url": "https://radios.justweb.pt/8018/;"
-      },
-      {
-        "name": "Rdio Montalegre",
-        "url": "http://centova.radios.pt:9566/;"
       },
       {
         "name": "Rdio Nove3Cinco",
@@ -42525,20 +42157,8 @@
         "url": "http://live.radio-cakovec.hr:7020/;"
       },
       {
-        "name": "Rad 1 Fm 105.6",
-        "url": "https://azuracast.novi-net.net/radio/8020/radio1.aac"
-      },
-      {
         "name": "Rad Ludbreg",
         "url": "https://a1.asurahosting.com/listen/radioludbreg/radio.mp3"
-      },
-      {
-        "name": "Rad Max Fm 99.3",
-        "url": "https://azuracast.novi-net.net/radio/8010/radiomax.aac"
-      },
-      {
-        "name": "Rad 105 Selnica",
-        "url": "https://azuracast.novi-net.net/radio/8050/radio105.aac"
       },
       {
         "name": "Rad Banovina 96.",
@@ -43365,10 +42985,6 @@
       {
         "name": "Rad Rete Central",
         "url": "https://streaming.radioretecentrale.it:8000/stream"
-      },
-      {
-        "name": "Rad Agira",
-        "url": "https://nrf1.newradio.it:9618/stream.mp3"
       },
       {
         "name": "Rad Onda Due Fm",
@@ -44287,10 +43903,6 @@
         "url": "http://198.204.234.10:8011/stream"
       },
       {
-        "name": "Impacto Estereo",
-        "url": "https://cloudstream2036.conectarhosting.com/8206/stream"
-      },
-      {
         "name": "Bella Mira Streo",
         "url": "https://icecasthd.net/proxy/bellamira/stream"
       },
@@ -44377,10 +43989,6 @@
       {
         "name": "99.7 Fm The Rive",
         "url": "https://vistaradio.streamb.live/SB00078"
-      },
-      {
-        "name": "Tuff City Rad 90",
-        "url": "https://stream.aiir.com/zzrrqgywgaptv"
       },
       {
         "name": "95.7 Coast Fm",
@@ -45667,10 +45275,6 @@
         "url": "https://io.radyonatinfm.com:8030/candon"
       },
       {
-        "name": "Banna-Tiran Inte",
-        "url": "https://stream.zeno.fm/ywptdatt40duv"
-      },
-      {
         "name": "Power Jz Ilocos",
         "url": "https://stream.zeno.fm/u26mf5z3f4duv"
       },
@@ -46051,10 +45655,6 @@
         "url": "https://ice02.fluidstream.net/lattemielepuglia.aac"
       },
       {
-        "name": "Ritmo 80",
-        "url": "https://ice02.fluidstream.net/ritmo80.aac"
-      },
-      {
         "name": "Rad Selene",
         "url": "http://audio1.meway.tv:8013/;"
       },
@@ -46241,10 +45841,6 @@
       {
         "name": "Christ Unveiled",
         "url": "https://cast5.asurahosting.com/proxy/charles3/stream"
-      },
-      {
-        "name": "Keom 88.5 Fm",
-        "url": "https://live.amperwave.net/direct/mesquite-keomfmmp3-ibc4"
       }
     ]
   },
@@ -46954,10 +46550,6 @@
       "e": 14.7427
     },
     "urls": [
-      {
-        "name": "Rad Agira",
-        "url": "https://nrf1.newradio.it:9618/stream.mp3"
-      },
       {
         "name": "Rad Castell'Umbe",
         "url": "https://eu1.fastcast4u.com/proxy/discorin?mp=/;"
@@ -49943,10 +49535,6 @@
         "url": "https://str0.creacast.com/pharefm"
       },
       {
-        "name": "Rad Transparence",
-        "url": "http://37.187.77.45:9000/;"
-      },
-      {
         "name": "Rad De La Save F",
         "url": "https://sd-151888.dedibox.fr/proxy/radiodelasave/rdls"
       },
@@ -50013,10 +49601,6 @@
       {
         "name": "Rad Gamma Stereo",
         "url": "http://audio1.meway.tv:8030/;"
-      },
-      {
-        "name": "Rad Studio 93",
-        "url": "https://onair15.xdevel.com/proxy/radiostudio93?mp=/;stream/;"
       },
       {
         "name": "Art Rad",
@@ -50205,10 +49789,6 @@
       {
         "name": "Rad Castell'Umbe",
         "url": "https://eu1.fastcast4u.com/proxy/discorin?mp=/;"
-      },
-      {
-        "name": "Rad Agira",
-        "url": "https://nrf1.newradio.it:9618/stream.mp3"
       }
     ]
   },
@@ -50273,10 +49853,6 @@
       {
         "name": "Mosaque Fm 89.5",
         "url": "https://mosaiquefm.potin.xyz:8443/stream"
-      },
-      {
-        "name": "Antithse Rad",
-        "url": "https://listen.radioking.com/radio/11549/stream/63448"
       }
     ]
   },
@@ -50715,10 +50291,6 @@
     },
     "urls": [
       {
-        "name": "Ckqr Fm 99.3 The",
-        "url": "https://vistaradio.streamb.live/SB00085"
-      },
-      {
         "name": "Juice Fm 94.1",
         "url": "https://vistaradio.streamb.live/SB00087"
       },
@@ -51001,10 +50573,6 @@
       {
         "name": "Ct Das Radio",
         "url": "https://live.ctdasradio.de/web"
-      },
-      {
-        "name": "Kick Fm",
-        "url": "https://icecast.kickfm.eu/mp3-high"
       }
     ]
   },
@@ -51564,10 +51132,6 @@
     },
     "urls": [
       {
-        "name": "Mrc Rad",
-        "url": "https://www.radioking.com/play/mrcradio"
-      },
-      {
         "name": "Rad Zinzine",
         "url": "http://91.121.65.189:8000/zinzine-aix"
       },
@@ -51774,10 +51338,6 @@
       {
         "name": "102.7 The Drive",
         "url": "https://www.streamvortex.com:8444/s/10740"
-      },
-      {
-        "name": "Kxcj-Lp 105.7 Fm",
-        "url": "http://216.115.15.236:8888/KXCJ"
       },
       {
         "name": "Ktee 94.7 Fm",
@@ -52066,10 +51626,6 @@
       {
         "name": "Rad Bimbo",
         "url": "https://radiobim-danidi01.radioca.st/stream"
-      },
-      {
-        "name": "Rad Studio 93",
-        "url": "https://onair15.xdevel.com/proxy/radiostudio93?mp=/;stream/;"
       },
       {
         "name": "Solo Rad",
@@ -52486,10 +52042,6 @@
       {
         "name": "Rad Flash",
         "url": "https://stream2.xdevel.com/audio5s194-48/stream/icecast.audio"
-      },
-      {
-        "name": "Rad Agira",
-        "url": "https://nrf1.newradio.it:9618/stream.mp3"
       },
       {
         "name": "Rad Antenna Uno",
@@ -53602,10 +53154,6 @@
         "url": "https://hosting.studioradiomedia.fr:1265/stream"
       },
       {
-        "name": "Latitude 95.8",
-        "url": "https://latitude.ice.infomaniak.ch/troyes.aac?ver=829176"
-      },
-      {
         "name": "Selectro Rad",
         "url": "https://radio7.pro-fhi.net/live/Selectro%20Radio"
       }
@@ -53708,10 +53256,6 @@
       {
         "name": "R Les Arcs",
         "url": "https://hosting.studioradiomedia.fr:1775/stream"
-      },
-      {
-        "name": "Sensations Alpes",
-        "url": "https://sensationsalpes.ice.infomaniak.ch/sensationsalpes-128.mp3"
       }
     ]
   },
@@ -53923,34 +53467,6 @@
       }
     ]
   },
-  "Changchun,CN": {
-    "coords": {
-      "n": 43.8171,
-      "e": 125.3236
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
-  "Changde,CN": {
-    "coords": {
-      "n": 29.0316,
-      "e": 111.6985
-    },
-    "urls": [
-      {
-        "name": "Chongqing Rgd Nw",
-        "url": "https://lhttp.qingting.fm/live/1498/64k.mp3"
-      },
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
   "Changsha,CN": {
     "coords": {
       "n": 28.2278,
@@ -53960,10 +53476,6 @@
       {
         "name": "Happiness Rad Fm",
         "url": "https://lhttp.qingting.fm/live/20847/64k.mp3"
-      },
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -53973,10 +53485,6 @@
       "e": 24.018
     },
     "urls": [
-      {
-        "name": "Chania Rad 99.6",
-        "url": "http://s4.onweb.gr:8434/;"
-      },
       {
         "name": "Dromos Fm 105.4",
         "url": "https://sc2.streamwithq.com:2000/stream/DromosFm1054"
@@ -54023,18 +53531,6 @@
       }
     ]
   },
-  "Chaozhou,CN": {
-    "coords": {
-      "n": 23.6567,
-      "e": 116.6228
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
   "Chaozhou,TW": {
     "coords": {
       "n": 22.5505,
@@ -54064,10 +53560,6 @@
       {
         "name": "Supreme Master T",
         "url": "http://radio.suprememastertv.com:9001/1/;"
-      },
-      {
-        "name": "I Like Rad",
-        "url": "https://stream.rcs.revma.com/aw9uqyxy2tzuv"
       },
       {
         "name": "Icrt Fm100",
@@ -54510,10 +54002,6 @@
     },
     "urls": [
       {
-        "name": "Soggy Dollar Rad",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SAM06AAC287.mp3"
-      },
-      {
         "name": "Z Gospel Rad",
         "url": "https://aud1.sjamz.com/8208/stream"
       },
@@ -54648,10 +54136,6 @@
       {
         "name": "Kmp3.Ca",
         "url": "http://s40.myradiostream.com:13002/listen.mp3"
-      },
-      {
-        "name": "Cjlu 93.9 Fm",
-        "url": "https://harvestersfm.radioca.st/NB"
       }
     ]
   },
@@ -54912,10 +54396,6 @@
       {
         "name": "Rad Onattukara",
         "url": "https://stream.zeno.fm/fu94u25kqd0uv"
-      },
-      {
-        "name": "Fm Kottarakkara",
-        "url": "https://stream.zeno.fm/gqdb1rev5s8uv"
       }
     ]
   },
@@ -54966,10 +54446,6 @@
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WSKZFMAAC.aac"
       },
       {
-        "name": "Nash Icon 107.9",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WOGTFMAAC_SC"
-      },
-      {
         "name": "Wawl",
         "url": "https://s32.myradiostream.com/:9204/listen.mp3"
       },
@@ -55012,10 +54488,6 @@
       {
         "name": "Rdio Chaves Fm 9",
         "url": "https://radios2.justweb.pt:8050/;"
-      },
-      {
-        "name": "Rdio Montalegre",
-        "url": "http://centova.radios.pt:9566/;"
       },
       {
         "name": "Rdio Forum Botic",
@@ -55378,10 +54850,6 @@
         "url": "https://web.radio.radiochemnitz.de/radiochemnitz-sommerradio?aggregator=radiogarden"
       },
       {
-        "name": "Rad Chemnitz - W",
-        "url": "https://web.radio.radiochemnitz.de/radiochemnitz-weihnachten?aggregator=radiogarden"
-      },
-      {
         "name": "Rad Unicc",
         "url": "https://stream.radio-unicc.de:8000/unicc_xq.mp3"
       },
@@ -55434,28 +54902,12 @@
     },
     "urls": [
       {
-        "name": "Ckqr Fm 99.3 The",
-        "url": "https://vistaradio.streamb.live/SB00085"
-      },
-      {
         "name": "Kuoi-Fm 89.3",
         "url": "https://s2.radio.co/sedf30688d/listen"
       },
       {
         "name": "Krfy Fm 88.5 Pan",
         "url": "http://199.231.117.18:8004/listen"
-      }
-    ]
-  },
-  "Chengdu,CN": {
-    "coords": {
-      "n": 30.5728,
-      "e": 104.0668
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -55496,18 +54948,6 @@
       {
         "name": "Tamilar Rad",
         "url": "https://stream.zeno.fm/fef5f0avy7zuv"
-      }
-    ]
-  },
-  "Chenzhou,CN": {
-    "coords": {
-      "n": 25.7706,
-      "e": 113.0149
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -55906,10 +55346,6 @@
         "url": "https://radio.canstream.co.uk:8120/live.aac"
       },
       {
-        "name": "Get Ready To Roc",
-        "url": "https://streamer.radio.co/s24ae1285c/listen"
-      },
-      {
         "name": "Wirral Wave",
         "url": "https://wirralwave.out.airtime.pro/wirralwave_a"
       },
@@ -56096,10 +55532,6 @@
       {
         "name": "Kchw 102.7 Fm",
         "url": "https://s46.myradiostream.com/:6306/listen.mp3"
-      },
-      {
-        "name": "Ckqr Fm 99.3 The",
-        "url": "https://vistaradio.streamb.live/SB00085"
       },
       {
         "name": "Juice Fm 94.1",
@@ -56380,10 +55812,6 @@
       {
         "name": "Supreme Master T",
         "url": "http://radio.suprememastertv.com:9001/1/;"
-      },
-      {
-        "name": "I Like Rad",
-        "url": "https://stream.rcs.revma.com/aw9uqyxy2tzuv"
       },
       {
         "name": "Icrt Fm100",
@@ -56836,10 +56264,6 @@
       {
         "name": "Cksr - Star 98.3",
         "url": "https://rogers.leanstream.co/rogers/chi983.stream/icy"
-      },
-      {
-        "name": "Hellenic Media V",
-        "url": "http://us3.internet-radio.com:8090/live"
       },
       {
         "name": "Connect Fm 91.5",
@@ -57759,28 +57183,12 @@
       }
     ]
   },
-  "Chongqing,CN": {
-    "coords": {
-      "n": 29.4316,
-      "e": 106.9123
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
   "Chonhar,UA": {
     "coords": {
       "n": 46.0295,
       "e": 34.5455
     },
     "urls": [
-      {
-        "name": "Fm 104.4",
-        "url": "https://stream.topradio.in.ua/topradio.mp3"
-      },
       {
         "name": "102.3 Fm",
         "url": "https://onair.kryvbas.fm/RadioKryvbas"
@@ -57936,10 +57344,6 @@
       {
         "name": "104.9 The Mongoo",
         "url": "https://stream.aiir.com/7m9xaaa0kbkvv"
-      },
-      {
-        "name": "Soggy Dollar Rad",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SAM06AAC287.mp3"
       },
       {
         "name": "Z Gospel Rad",
@@ -58822,10 +58226,6 @@
         "url": "https://play8.tikast.com/proxy/nare?mp=/stream"
       },
       {
-        "name": "Impacto Estereo",
-        "url": "https://cloudstream2036.conectarhosting.com/8206/stream"
-      },
-      {
         "name": "Rad Fnix Am 1330",
         "url": "http://163.172.198.16:8174/;"
       }
@@ -58844,10 +58244,6 @@
       {
         "name": "Rad Gamma Stereo",
         "url": "http://audio1.meway.tv:8030/;"
-      },
-      {
-        "name": "Rad Studio 93",
-        "url": "https://onair15.xdevel.com/proxy/radiostudio93?mp=/;stream/;"
       },
       {
         "name": "Solo Rad",
@@ -59468,10 +58864,6 @@
       {
         "name": "Rad Id7 Tampico",
         "url": "https://stream9.mexiserver.com/8350/stream.mp3"
-      },
-      {
-        "name": "Espectacular Fm",
-        "url": "http://hd.digitalradio.mx:5980/;stream/1"
       }
     ]
   },
@@ -59496,10 +58888,6 @@
       {
         "name": "Los 40 97.7 Fm",
         "url": "https://stream.zeno.fm/10qjwgihzqavv"
-      },
-      {
-        "name": "Espectacular Fm",
-        "url": "http://hd.digitalradio.mx:5980/;stream/1"
       }
     ]
   },
@@ -59716,10 +59104,6 @@
       {
         "name": "Tonic Fitness Ra",
         "url": "http://radioserver-professional.it:8000/radio-008"
-      },
-      {
-        "name": "Rad City Light F",
-        "url": "http://nr5.newradio.it:8651/stream"
       }
     ]
   },
@@ -59760,10 +59144,6 @@
       {
         "name": "Tonic Fitness Ra",
         "url": "http://radioserver-professional.it:8000/radio-008"
-      },
-      {
-        "name": "Rad City Light F",
-        "url": "http://nr5.newradio.it:8651/stream"
       },
       {
         "name": "Rad Cerrano Web",
@@ -60174,10 +59554,6 @@
         "url": "https://vps.cbad.fr/logosclermont"
       },
       {
-        "name": "Mcradio",
-        "url": "https://icecast.mcradio.fr/stream"
-      },
-      {
         "name": "Rad Rva",
         "url": "https://rva.ice.infomaniak.ch/rva-high.mp3?.mp3"
       },
@@ -60264,10 +59640,6 @@
       {
         "name": "Mountain Cntry 1",
         "url": "https://wppl.streamguys1.com/live"
-      },
-      {
-        "name": "Wngu 89.5 Fm",
-        "url": "https://gpb-geo.streamguys1.com/gpb/gpb-radio-wngu-mp3-radiogarden"
       }
     ]
   },
@@ -60360,10 +59732,6 @@
       {
         "name": "Mountain Cntry 1",
         "url": "https://wppl.streamguys1.com/live"
-      },
-      {
-        "name": "Nash Icon 107.9",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WOGTFMAAC_SC"
       }
     ]
   },
@@ -60784,10 +60152,6 @@
       {
         "name": "Mg Rad Misionera",
         "url": "https://sp5.servidorrprivado.com/6394/stream"
-      },
-      {
-        "name": "El Rocanrosaurio",
-        "url": "https://rocanrosaurio-mayeutica.radioca.st/;"
       },
       {
         "name": "Mexiquense Rad 1",
@@ -61896,10 +61260,6 @@
       {
         "name": "Mountain Cntry 1",
         "url": "https://wppl.streamguys1.com/live"
-      },
-      {
-        "name": "Nash Icon 107.9",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WOGTFMAAC_SC"
       }
     ]
   },
@@ -62381,10 +61741,6 @@
       "e": -76.9636
     },
     "urls": [
-      {
-        "name": "Wwer 88.1Fm",
-        "url": "https://listen.wwer.org/stream"
-      },
       {
         "name": "Rad America",
         "url": "https://s6.yesstreaming.net:18003/ra1"
@@ -62886,10 +62242,6 @@
         "url": "https://media-sov.musicradio.com/CapitalCymruMP3"
       },
       {
-        "name": "Get Ready To Roc",
-        "url": "https://streamer.radio.co/s24ae1285c/listen"
-      },
-      {
         "name": "Rhyl Rad",
         "url": "https://a4.asurahosting.com:7120/radio.mp3"
       },
@@ -63154,10 +62506,6 @@
         "url": "https://funasia.streamguys1.com/live-1"
       },
       {
-        "name": "Keom 88.5 Fm",
-        "url": "https://live.amperwave.net/direct/mesquite-keomfmmp3-ibc4"
-      },
-      {
         "name": "Kmoo Fm 99.9",
         "url": "https://crystalout.surfernetwork.com:8001/KMOO_MP3"
       }
@@ -63256,10 +62604,6 @@
       {
         "name": "98.9 Jet Fm",
         "url": "https://vistaradio.streamb.live/SB00079"
-      },
-      {
-        "name": "Tuff City Rad 90",
-        "url": "https://stream.aiir.com/zzrrqgywgaptv"
       },
       {
         "name": "95.7 Coast Fm",
@@ -64542,10 +63886,6 @@
         "url": "https://us9.maindigitalstream.com/ssl/KTEE"
       },
       {
-        "name": "Kxcj-Lp 105.7 Fm",
-        "url": "http://216.115.15.236:8888/KXCJ"
-      },
-      {
         "name": "104.7 Kduk Fm",
         "url": "https://us9.maindigitalstream.com/ssl/KDUK"
       },
@@ -65364,10 +64704,6 @@
       {
         "name": "N' Rad",
         "url": "https://nradio.ice.infomaniak.ch/nradio-32.aac"
-      },
-      {
-        "name": "Latitude 95.8",
-        "url": "https://latitude.ice.infomaniak.ch/troyes.aac?ver=829176"
       }
     ]
   },
@@ -65380,10 +64716,6 @@
       {
         "name": "Wuga Fm 91.7",
         "url": "https://wuga-ice.streamguys1.com/live-mp3"
-      },
-      {
-        "name": "Wngu 89.5 Fm",
-        "url": "https://gpb-geo.streamguys1.com/gpb/gpb-radio-wngu-mp3-radiogarden"
       }
     ]
   },
@@ -65420,10 +64752,6 @@
       {
         "name": "100.1 Bayfm",
         "url": "https://stream.statsradio.com:8148/stream"
-      },
-      {
-        "name": "Cjtb 93.1 Fm",
-        "url": "https://stream2.statsradio.com:8112/stream"
       },
       {
         "name": "Chev Exploits Co",
@@ -66910,10 +66238,6 @@
         "url": "https://s2.radio.co/s230f7656a/listen"
       },
       {
-        "name": "Tuff City Rad 90",
-        "url": "https://stream.aiir.com/zzrrqgywgaptv"
-      },
-      {
         "name": "95.7 Coast Fm",
         "url": "https://vistaradio.streamb.live/SB00082"
       },
@@ -67324,10 +66648,6 @@
       {
         "name": "Chmn - Mountain",
         "url": "https://rogers.leanstream.co/rogers/can1065.stream/icy"
-      },
-      {
-        "name": "Ckqr Fm 99.3 The",
-        "url": "https://vistaradio.streamb.live/SB00085"
       }
     ]
   },
@@ -67680,10 +67000,6 @@
       {
         "name": "Juice Fm 94.1",
         "url": "https://vistaradio.streamb.live/SB00087"
-      },
-      {
-        "name": "Ckqr Fm 99.3 The",
-        "url": "https://vistaradio.streamb.live/SB00085"
       },
       {
         "name": "107.5 2Day Fm",
@@ -68040,10 +67356,6 @@
       {
         "name": "Wihg Fm 105.7 Th",
         "url": "http://69.8.162.164:8000/hog.mp3"
-      },
-      {
-        "name": "Nash Icon 107.9",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WOGTFMAAC_SC"
       },
       {
         "name": "Tiki Man Rad",
@@ -68650,10 +67962,6 @@
     },
     "urls": [
       {
-        "name": "Antithse Rad",
-        "url": "https://listen.radioking.com/radio/11549/stream/63448"
-      },
-      {
         "name": "Rad Active",
         "url": "http://radio-active.net:8000/active"
       }
@@ -68845,10 +68153,6 @@
       "e": -2.5706
     },
     "urls": [
-      {
-        "name": "Rad Cullar Fm 10",
-        "url": "https://streaming2.elitecomunicacion.es:8120/stream?type=.mp3/;"
-      },
       {
         "name": "Rad Guadix Caden",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_ASO_GUADIXAAC.aac"
@@ -69938,10 +69242,6 @@
     },
     "urls": [
       {
-        "name": "Wngu 89.5 Fm",
-        "url": "https://gpb-geo.streamguys1.com/gpb/gpb-radio-wngu-mp3-radiogarden"
-      },
-      {
         "name": "Mountain Cntry 1",
         "url": "https://wppl.streamguys1.com/live"
       },
@@ -70133,10 +69433,6 @@
       "e": 100.2676
     },
     "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      },
       {
         "name": "Lokoratnagarbhaa",
         "url": "http://85.25.185.202:8118/stream?1568101614244.aac"
@@ -70360,10 +69656,6 @@
       {
         "name": "Wccv Fm 91.7 The",
         "url": "https://a3.asurahosting.com:6890/radio.mp3"
-      },
-      {
-        "name": "Nash Icon 107.9",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WOGTFMAAC_SC"
       }
     ]
   },
@@ -71654,10 +70946,6 @@
         "url": "https://radio8.pro-fhi.net/live/M38%20radio"
       },
       {
-        "name": "Project Xy",
-        "url": "https://flux.saaslys.com:8000/radio.mp3"
-      },
-      {
         "name": "Jz Rad Groov'Up",
         "url": "https://jazz-wr13.ice.infomaniak.ch/jazz-wr13-128.mp3"
       },
@@ -72248,10 +71536,6 @@
       {
         "name": "Wuga Fm 91.7",
         "url": "https://wuga-ice.streamguys1.com/live-mp3"
-      },
-      {
-        "name": "Wngu 89.5 Fm",
-        "url": "https://gpb-geo.streamguys1.com/gpb/gpb-radio-wngu-mp3-radiogarden"
       }
     ]
   },
@@ -72456,10 +71740,6 @@
       {
         "name": "Radyo Arkista",
         "url": "http://andromeda.shoutca.st:8357/;"
-      },
-      {
-        "name": "Bizim Ller Radyo",
-        "url": "http://yayin.yayindakiler.com:4078/index.html/;"
       },
       {
         "name": "Ert Notio Aigaio",
@@ -73346,10 +72626,6 @@
         "url": "https://solid2.streamupsolutions.com/proxy/mqxncdsf?mp=/stream"
       },
       {
-        "name": "Al Mubarak Rad",
-        "url": "https://relay.emasjidlive.uk/almubarakradio"
-      },
-      {
         "name": "Vibez Urban",
         "url": "https://listentomystream.com:8019/stream"
       },
@@ -73404,10 +72680,6 @@
       {
         "name": "Fnf.Fm Bangla Ra",
         "url": "http://eu6.fastcast4u.com:5099/;stream"
-      },
-      {
-        "name": "Rad Shadhin 92.4",
-        "url": "https://stream.zeno.fm/eabgu655puquv"
       },
       {
         "name": "Young Leaders Fo",
@@ -74419,10 +73691,6 @@
         "url": "https://radio.ukr.radio/ur1-dp-mp3-m"
       },
       {
-        "name": "Fm 104.4",
-        "url": "https://stream.topradio.in.ua/topradio.mp3"
-      },
-      {
         "name": "Golos Donbasu",
         "url": "http://91.218.213.49:8000/golosdonbasu-mp3"
       }
@@ -74482,10 +73750,6 @@
       "e": 27.8273
     },
     "urls": [
-      {
-        "name": "Bnr Burgas",
-        "url": "http://stream.bnr.bg:8037/radio-burgas.aac"
-      },
       {
         "name": "Orv Media",
         "url": "http://radio.orvmedia.com:8005/stream"
@@ -75400,18 +74664,6 @@
       }
     ]
   },
-  "Dongguan,CN": {
-    "coords": {
-      "n": 23.0207,
-      "e": 113.7518
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
   "Donja Stubica,HR": {
     "coords": {
       "n": 45.98,
@@ -75425,10 +74677,6 @@
       {
         "name": "Sjeverni Fm 92.8",
         "url": "https://live.sjeverni.fm/radio/8000/radio.mp3"
-      },
-      {
-        "name": "Rad Max Fm 99.3",
-        "url": "https://azuracast.novi-net.net/radio/8010/radiomax.aac"
       },
       {
         "name": "Rad Samobor Fm 9",
@@ -75455,10 +74703,6 @@
     },
     "urls": [
       {
-        "name": "Rad 1 Fm 105.6",
-        "url": "https://azuracast.novi-net.net/radio/8020/radio1.aac"
-      },
-      {
         "name": "Rad Drava Fm 92.",
         "url": "https://streaming.radio-drava.hr/live"
       },
@@ -75469,10 +74713,6 @@
       {
         "name": "Rad Ludbreg",
         "url": "https://a1.asurahosting.com/listen/radioludbreg/radio.mp3"
-      },
-      {
-        "name": "Rad Max Fm 99.3",
-        "url": "https://azuracast.novi-net.net/radio/8010/radiomax.aac"
       },
       {
         "name": "Rad Banovina 96.",
@@ -77476,10 +76716,6 @@
         "url": "http://centova.radioservers.biz:8004/;"
       },
       {
-        "name": "Hellenic Media V",
-        "url": "http://us3.internet-radio.com:8090/live"
-      },
-      {
         "name": "Cfax 1070 Am",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/CFAXAMAAC.aac"
       }
@@ -78696,10 +77932,6 @@
         "url": "https://us3.streamingpulse.com/ssl/CoveFM"
       },
       {
-        "name": "Avr 97.7 Fm",
-        "url": "https://mbsradio.leanstream.co/CKENFM-MP3"
-      },
-      {
         "name": "Ckbw 98.1 Fm",
         "url": "https://ais-sa1.streamon.fm/7239_128k.aac"
       }
@@ -78806,10 +78038,6 @@
       {
         "name": "Mg Rad Misionera",
         "url": "https://sp5.servidorrprivado.com/6394/stream"
-      },
-      {
-        "name": "El Rocanrosaurio",
-        "url": "https://rocanrosaurio-mayeutica.radioca.st/;"
       },
       {
         "name": "Mexiquense Rad 1",
@@ -79840,10 +79068,6 @@
         "url": "https://orf-live.ors-shoutcast.at/bgl-q1a"
       },
       {
-        "name": "Radioypsilon Fm",
-        "url": "http://mp3.radioypsilon.at:8000/mp3-160"
-      },
-      {
         "name": "Musikwelle Fm 10",
         "url": "https://stream.stadtradio.at:8000/live"
       },
@@ -80067,10 +79291,6 @@
       "e": -103.6952
     },
     "urls": [
-      {
-        "name": "Valles Digital R",
-        "url": "https://shoutcast.uplinkmx.com:8000/;stream/1"
-      },
       {
         "name": "La Lider Xeed",
         "url": "https://sp3.servidorrprivado.com:10865/sid=1/;"
@@ -82404,10 +81624,6 @@
         "url": "https://antenne.pyreneesfm.com/direct.mp3"
       },
       {
-        "name": "Rad Transparence",
-        "url": "http://37.187.77.45:9000/;"
-      },
-      {
         "name": "Rad Couserans",
         "url": "https://stream.rcs.revma.com/w6u9tk4a6nhvv"
       },
@@ -83784,10 +83000,6 @@
         "url": "https://us9.maindigitalstream.com/ssl/WYKX"
       },
       {
-        "name": "Public Rad 90 Wn",
-        "url": "https://wnmu.streamguys1.com/wnmu-fm"
-      },
-      {
         "name": "Wupf 107.3 Fm Ea",
         "url": "https://ice64.securenetsystems.net/WUPF"
       }
@@ -83984,10 +83196,6 @@
         "url": "http://radio2.sikhnet.com:8016/autodj"
       },
       {
-        "name": "Sikhnet 08 - Gur",
-        "url": "http://radio2.sikhnet.com:8013/autodj"
-      },
-      {
         "name": "Sikhnet 10 - Sto",
         "url": "http://radio2.sikhnet.com:8017/autodj"
       },
@@ -84110,10 +83318,6 @@
       {
         "name": "Pyrnes Fm",
         "url": "https://antenne.pyreneesfm.com/direct.mp3"
-      },
-      {
-        "name": "Rad Transparence",
-        "url": "http://37.187.77.45:9000/;"
       }
     ]
   },
@@ -84246,10 +83450,6 @@
       {
         "name": "Campus Fm 105.6",
         "url": "http://5.9.16.111:8510/campusfm"
-      },
-      {
-        "name": "Kick Fm",
-        "url": "https://icecast.kickfm.eu/mp3-high"
       },
       {
         "name": "Rad Bochum",
@@ -85336,10 +84536,6 @@
         "url": "https://ice5.securenetsystems.net/KXLR"
       },
       {
-        "name": "Magic 98.9 - Kym",
-        "url": "https://n15b-e2.revma.ihrhls.com/zc3018"
-      },
-      {
         "name": "Kcam Am 790",
         "url": "https://streams.radiomast.io/kcam"
       },
@@ -85930,10 +85126,6 @@
       {
         "name": "Radiofanos",
         "url": "https://sh.onweb.gr:7007/;"
-      },
-      {
-        "name": "Life 106.3",
-        "url": "http://cast.streams.ovh:9130/live"
       },
       {
         "name": "City 106.1 Fm",
@@ -87048,10 +86240,6 @@
         "url": "http://radioserver-professional.it:8000/radio-008"
       },
       {
-        "name": "Rad City Light F",
-        "url": "http://nr5.newradio.it:8651/stream"
-      },
-      {
         "name": "Skyline Rad - So",
         "url": "https://rblive.it:8040/radio.mp3"
       }
@@ -87154,10 +86342,6 @@
       {
         "name": "Khsu Fm 90.5",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KHSUFMAAC.aac"
-      },
-      {
-        "name": "Kxcj-Lp 105.7 Fm",
-        "url": "http://216.115.15.236:8888/KXCJ"
       },
       {
         "name": "Kzzh-Lp 96.7",
@@ -87984,10 +87168,6 @@
         "url": "https://radio.canstream.co.uk:8120/live.aac"
       },
       {
-        "name": "Get Ready To Roc",
-        "url": "https://streamer.radio.co/s24ae1285c/listen"
-      },
-      {
         "name": "Rhyl Rad",
         "url": "https://a4.asurahosting.com:7120/radio.mp3"
       },
@@ -88034,10 +87214,6 @@
       {
         "name": "Rdio Flix 107.4",
         "url": "https://server8.emitironline.com:18940/stream"
-      },
-      {
-        "name": "Rdio Juneda 107.",
-        "url": "https://stream.zeno.fm/tnnxu39g4p8uv"
       },
       {
         "name": "Rdio Hospitalet",
@@ -88448,10 +87624,6 @@
         "url": "http://s4.onweb.gr:8468/;"
       },
       {
-        "name": "Life 106.3",
-        "url": "http://cast.streams.ovh:9130/live"
-      },
-      {
         "name": "Pure Rad",
         "url": "https://azuralive.streams.ovh/listen/radiopure/radio.mp3"
       },
@@ -88563,10 +87735,6 @@
       "e": 1.6052
     },
     "urls": [
-      {
-        "name": "Rad Transparence",
-        "url": "http://37.187.77.45:9000/;"
-      },
       {
         "name": "Rdio Valira",
         "url": "https://mars.streamerr.co/8192/stream"
@@ -88775,14 +87943,6 @@
       "e": 5.8497
     },
     "urls": [
-      {
-        "name": "Nrk P1 Sogn Og F",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_sogn_og_fjordane_aac_h"
-      },
-      {
-        "name": "Nrk P1 Mre Og Ro",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_more_og_romsdal_mp3_h"
-      },
       {
         "name": "The Ferry",
         "url": "http://6471.cloudrad.io:8178/theferry.mp3"
@@ -89805,18 +88965,6 @@
       }
     ]
   },
-  "Foshan,CN": {
-    "coords": {
-      "n": 23.0219,
-      "e": 113.1219
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
   "Fours,FR": {
     "coords": {
       "n": 45.1724,
@@ -89870,10 +89018,6 @@
       {
         "name": "Rad Fraga Fm 107",
         "url": "https://streaming.enacast.com/radiofraga128.mp3"
-      },
-      {
-        "name": "Rdio Juneda 107.",
-        "url": "https://stream.zeno.fm/tnnxu39g4p8uv"
       }
     ]
   },
@@ -90680,10 +89824,6 @@
         "url": "https://s6.yesstreaming.net:18003/ra1"
       },
       {
-        "name": "Wwer 88.1Fm",
-        "url": "https://listen.wwer.org/stream"
-      },
-      {
         "name": "La Ley 1460 Am -",
         "url": "https://audio.livecastnet.com:2555/stream"
       },
@@ -90870,10 +90010,6 @@
       {
         "name": "Nrg Online Rad",
         "url": "https://usa19.fastcast4u.com/nrgonlineradio"
-      },
-      {
-        "name": "1540 The Nationa",
-        "url": "https://radiostreams.streamcomedia.com:8008/zns1540am"
       },
       {
         "name": "Guardian Tk Rad",
@@ -91078,10 +90214,6 @@
       {
         "name": "Poptastic Rad",
         "url": "https://s7.everestcast.com:8191/stream"
-      },
-      {
-        "name": "Antithse Rad",
-        "url": "https://listen.radioking.com/radio/11549/stream/63448"
       }
     ]
   },
@@ -91254,10 +90386,6 @@
       {
         "name": "Klbs 1330 Am",
         "url": "http://war.str3am.com:7770/klbs"
-      },
-      {
-        "name": "La Mejor 106.3 K",
-        "url": "https://stream.zeno.fm/tli7ww6epazuv"
       },
       {
         "name": "The Yosemite Bre",
@@ -92010,10 +91138,6 @@
       {
         "name": "Ic Fm97.5",
         "url": "https://stream.rcs.revma.com/7mnq8rt7k5zuv"
-      },
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -92310,10 +91434,6 @@
       {
         "name": "J947",
         "url": "https://fast.citrus3.com:8496/stream"
-      },
-      {
-        "name": "Wngu 89.5 Fm",
-        "url": "https://gpb-geo.streamguys1.com/gpb/gpb-radio-wngu-mp3-radiogarden"
       }
     ]
   },
@@ -92626,10 +91746,6 @@
       {
         "name": "M80 Rad Andaluci",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/M80RADIO.mp3"
-      },
-      {
-        "name": "Rad Cullar Fm 10",
-        "url": "https://streaming2.elitecomunicacion.es:8120/stream?type=.mp3/;"
       },
       {
         "name": "Rad La Comarca 1",
@@ -93506,10 +92622,6 @@
       {
         "name": "Rad Alpenwelle",
         "url": "https://live.alpenwelle.de/alpenwelle128.mp3"
-      },
-      {
-        "name": "Rad Schwaben - T",
-        "url": "https://s35.derstream.net/top50radio.mp3"
       }
     ]
   },
@@ -93770,14 +92882,6 @@
       {
         "name": "Rad Luster Fm 10",
         "url": "https://edge.mixlr.com/channel/obrtv"
-      },
-      {
-        "name": "Nrk P1 Mre Og Ro",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_more_og_romsdal_mp3_h"
-      },
-      {
-        "name": "Nrk P1 Sogn Og F",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_sogn_og_fjordane_aac_h"
       },
       {
         "name": "Ksu 24/7",
@@ -94346,10 +93450,6 @@
       {
         "name": "Ct Das Radio",
         "url": "https://live.ctdasradio.de/web"
-      },
-      {
-        "name": "Kick Fm",
-        "url": "https://icecast.kickfm.eu/mp3-high"
       },
       {
         "name": "Breakz.Fm - Hous",
@@ -95009,10 +94109,6 @@
         "url": "https://radiobim-danidi01.radioca.st/stream"
       },
       {
-        "name": "Rad Studio 93",
-        "url": "https://onair15.xdevel.com/proxy/radiostudio93?mp=/;stream/;"
-      },
-      {
         "name": "Solo Rad",
         "url": "https://soloradio.sailweb.cloud/soloradio256.mp3"
       },
@@ -95457,10 +94553,6 @@
         "url": "https://frontend.streamonkey.net/rt1-ch03/stream/aacp"
       },
       {
-        "name": "Rad Schwaben - T",
-        "url": "https://s35.derstream.net/top50radio.mp3"
-      },
-      {
         "name": "Top Fm",
         "url": "http://mp3.topfm.c.nmdn.net/ps-topfm/livestream.mp3"
       }
@@ -95555,10 +94647,6 @@
       {
         "name": "Rad Time Fm",
         "url": "https://s2.free-shoutcast.com/stream/18058"
-      },
-      {
-        "name": "Life 106.3",
-        "url": "http://cast.streams.ovh:9130/live"
       },
       {
         "name": "City 106.1 Fm",
@@ -95767,10 +94855,6 @@
       {
         "name": "Fm 103.3",
         "url": "https://i7.streams.ovh/sc/pellafm/stream"
-      },
-      {
-        "name": "Life 106.3",
-        "url": "http://cast.streams.ovh:9130/live"
       },
       {
         "name": "City 106.1 Fm",
@@ -97691,10 +96775,6 @@
       {
         "name": "Novoe Rad Fm 98.",
         "url": "https://live.novoeradio.by:444/live/novoeradio_aac128/icecast.audio"
-      },
-      {
-        "name": "Legendy Fm | Fm",
-        "url": "http://live.legendy.by:8000/legendyfm"
       }
     ]
   },
@@ -98957,10 +98037,6 @@
     },
     "urls": [
       {
-        "name": "Rad Cntry Acadie",
-        "url": "https://shout.radiocountryacadienne.com:8004/;stream"
-      },
-      {
         "name": "Cknb",
         "url": "https://mbsradio.leanstream.co/CKNBAM-MP3?args=web_01&uid=2d54defb-1752-4269-8679-8604a4bb7796&user_hash=zkP9tPCiKIGOARw9ErwCM4jXyIdEvOFo&gdpr=false"
       },
@@ -99035,10 +98111,6 @@
       {
         "name": "Cfuz-Fm Peach Ci",
         "url": "http://167.114.11.80:5073/peachcityradio"
-      },
-      {
-        "name": "Ckqr Fm 99.3 The",
-        "url": "https://vistaradio.streamb.live/SB00085"
       },
       {
         "name": "Ckvs-Fm 93.7",
@@ -99123,10 +98195,6 @@
       {
         "name": "Cfqk - Energy Fm",
         "url": "https://cfqk.streamon.fm/CFQK-32k.aac?starttime=1537904819"
-      },
-      {
-        "name": "Rockin' Eagle 98",
-        "url": "http://stream.up.net:8000/WGLI"
       },
       {
         "name": "The Mix 93 - Wkm",
@@ -99349,10 +98417,6 @@
         "url": "https://www.streamvortex.com:8444/s/10710"
       },
       {
-        "name": "Kxcj-Lp 105.7 Fm",
-        "url": "http://216.115.15.236:8888/KXCJ"
-      },
-      {
         "name": "Ktee 94.7 Fm",
         "url": "https://us9.maindigitalstream.com/ssl/KTEE"
       },
@@ -99571,18 +98635,6 @@
       {
         "name": "Ipr Nws Fm 90.1",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WICAFM.mp3"
-      }
-    ]
-  },
-  "Grayslake IL,US": {
-    "coords": {
-      "n": 42.3445,
-      "e": -88.0418
-    },
-    "urls": [
-      {
-        "name": "Wyml Fm 99.9",
-        "url": "https://seahorse.juststreamwith.us:8000/stream"
       }
     ]
   },
@@ -99935,10 +98987,6 @@
       {
         "name": "Dj Utahpablo Str",
         "url": "http://149.56.157.81:8093/stream/;"
-      },
-      {
-        "name": "Kpcw 91.7 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KPCWFM.mp3"
       }
     ]
   },
@@ -100127,10 +99175,6 @@
       {
         "name": "Todd Rundgren Mu",
         "url": "https://usa7.fastcast4u.com/proxy/alcann00?mp=/1"
-      },
-      {
-        "name": "Fbn Rad",
-        "url": "https://ice8.securenetsystems.net/WOTJ"
       },
       {
         "name": "Savage Rad",
@@ -100703,10 +99747,6 @@
       {
         "name": "Novoe Rad Fm 98.",
         "url": "https://live.novoeradio.by:444/live/novoeradio_aac128/icecast.audio"
-      },
-      {
-        "name": "Legendy Fm | Fm",
-        "url": "http://live.legendy.by:8000/legendyfm"
       }
     ]
   },
@@ -101691,10 +100731,6 @@
       {
         "name": "Fm102.7",
         "url": "https://lhttp.qingting.fm/live/20192/64k.mp3"
-      },
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -102300,10 +101336,6 @@
       "e": -108.4673
     },
     "urls": [
-      {
-        "name": "La Ke Buena 88.9",
-        "url": "http://audioout.gvstream.net/gpm-kbuena889.aac"
-      },
       {
         "name": "Exa 98.1 Fm - Xh",
         "url": "https://sp2.servidorrprivado.com:10958/;"
@@ -103023,10 +102055,6 @@
       {
         "name": "Fm Highway 104.7",
         "url": "https://ice41.securenetsystems.net/WJSH"
-      },
-      {
-        "name": "Rk 104 Fm",
-        "url": "https://ice64.securenetsystems.net/WXRR"
       },
       {
         "name": "Wrbe Fm 106.9",
@@ -104056,18 +103084,6 @@
       }
     ]
   },
-  "Haikou,CN": {
-    "coords": {
-      "n": 20.0442,
-      "e": 110.1999
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
   "Hailsham,GB": {
     "coords": {
       "n": 50.8646,
@@ -104121,10 +103137,6 @@
       {
         "name": "Kcam Am 790",
         "url": "https://streams.radiomast.io/kcam"
-      },
-      {
-        "name": "Ksup Mix 106",
-        "url": "https://19.shoutstreams.com/proxy/juneau2/ksup"
       }
     ]
   },
@@ -104183,10 +103195,6 @@
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/CKDOFMAAC.aac"
       },
       {
-        "name": "105.5 The Moose",
-        "url": "https://vistaradio.streamb.live/SB00116"
-      },
-      {
         "name": "Chms Moose Fm 97",
         "url": "https://vistaradio.streamb.live/SB00110"
       }
@@ -104229,10 +103237,6 @@
       {
         "name": "Phoenix Rad 96.7",
         "url": "http://live.canstream.co.uk:8000/phoenix.mp3"
-      },
-      {
-        "name": "Al Mubarak Rad",
-        "url": "https://relay.emasjidlive.uk/almubarakradio"
       },
       {
         "name": "Drystone Rad Fm",
@@ -105017,10 +104021,6 @@
       {
         "name": "Cilu 102.7 Fm",
         "url": "http://luradio-server.lakeheadu.ca:8000/stereo128/;"
-      },
-      {
-        "name": "Rockin' Eagle 98",
-        "url": "http://stream.up.net:8000/WGLI"
       }
     ]
   },
@@ -105061,10 +104061,6 @@
       {
         "name": "Fm88.9",
         "url": "http://211.20.119.103:8081/"
-      },
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -105309,10 +104305,6 @@
       {
         "name": "(909Fm 90.9",
         "url": "https://lhttp.qingting.fm/live/839/64k.mp3"
-      },
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -105637,10 +104629,6 @@
       {
         "name": "Tiki Man Rad",
         "url": "https://ice64.securenetsystems.net/TIKIMAN"
-      },
-      {
-        "name": "Nash Icon 107.9",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WOGTFMAAC_SC"
       }
     ]
   },
@@ -105685,10 +104673,6 @@
       {
         "name": "Phoenix Rad 96.7",
         "url": "http://live.canstream.co.uk:8000/phoenix.mp3"
-      },
-      {
-        "name": "Al Mubarak Rad",
-        "url": "https://relay.emasjidlive.uk/almubarakradio"
       },
       {
         "name": "Bitr Breakfast I",
@@ -106227,10 +105211,6 @@
     },
     "urls": [
       {
-        "name": "Rk 104 Fm",
-        "url": "https://ice64.securenetsystems.net/WXRR"
-      },
-      {
         "name": "Wusm Fm 88.5 Sou",
         "url": "http://wusm-stream.usm.edu:8000/wusm"
       },
@@ -106313,10 +105293,6 @@
       {
         "name": "The Ferry",
         "url": "http://6471.cloudrad.io:8178/theferry.mp3"
-      },
-      {
-        "name": "Nrk P1 Sogn Og F",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_sogn_og_fjordane_aac_h"
       },
       {
         "name": "Rad Lyngdal",
@@ -107725,18 +106701,6 @@
       }
     ]
   },
-  "Hengyang,CN": {
-    "coords": {
-      "n": 26.8932,
-      "e": 112.572
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
   "Heniches'k,UA": {
     "coords": {
       "n": 46.1784,
@@ -107746,10 +106710,6 @@
       {
         "name": "Rad Tavria 103.5",
         "url": "https://tavria.hostingradio.ru/tavria192.mp3"
-      },
-      {
-        "name": "Fm 104.4",
-        "url": "https://stream.topradio.in.ua/topradio.mp3"
       },
       {
         "name": "Megapolis Fm 105",
@@ -108162,10 +107122,6 @@
       {
         "name": "Poderosa 88.9 Fm",
         "url": "https://stream.freepi.io/8404/live"
-      },
-      {
-        "name": "Rad Formula 91.5",
-        "url": "https://n12.radiojar.com/damv7e1g4p8uv"
       },
       {
         "name": "Rad Vida Fm 105.",
@@ -108759,10 +107715,6 @@
       "e": -85.6164
     },
     "urls": [
-      {
-        "name": "Nash Icon 107.9",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WOGTFMAAC_SC"
-      },
       {
         "name": "Wgpb 97.7 Fm",
         "url": "https://gpb-geo.streamguys1.com/gpb/gpb-radio-wgpb-mp3-radiogarden"
@@ -110052,10 +109004,6 @@
     },
     "urls": [
       {
-        "name": "Radioypsilon Fm",
-        "url": "http://mp3.radioypsilon.at:8000/mp3-160"
-      },
-      {
         "name": "Orf Rad Burgenla",
         "url": "https://orf-live.ors-shoutcast.at/bgl-q1a"
       },
@@ -110492,10 +109440,6 @@
     },
     "urls": [
       {
-        "name": "Rad Catskill - W",
-        "url": "https://stream.rcast.net/69645"
-      },
-      {
         "name": "Wvos.95.9 Fm",
         "url": "https://ice66.securenetsystems.net/WVOS"
       }
@@ -110860,10 +109804,6 @@
     },
     "urls": [
       {
-        "name": "Wwer 88.1Fm",
-        "url": "https://listen.wwer.org/stream"
-      },
-      {
         "name": "Positive Hts Per",
         "url": "https://positivealtradio.streamguys1.com/wpermp3"
       },
@@ -110886,10 +109826,6 @@
       {
         "name": "Kool 1180 - Wskp",
         "url": "https://crystalout.surfernetwork.com:8001/WSKP-AM_MP3"
-      },
-      {
-        "name": "Jammin 107.7 - W",
-        "url": "https://crystalout.surfernetwork.com:8001/WWRX_MP3"
       },
       {
         "name": "Wdup 92.9Fm",
@@ -111264,10 +110200,6 @@
         "url": "https://cfqk.streamon.fm/CFQK-32k.aac?starttime=1537904819"
       },
       {
-        "name": "Rockin' Eagle 98",
-        "url": "http://stream.up.net:8000/WGLI"
-      },
-      {
         "name": "The Mix 93 - Wkm",
         "url": "http://audio.pasty.net:8000/mix93"
       }
@@ -111498,10 +110430,6 @@
       {
         "name": "Supreme Master T",
         "url": "http://radio.suprememastertv.com:9001/1/;"
-      },
-      {
-        "name": "I Like Rad",
-        "url": "https://stream.rcs.revma.com/aw9uqyxy2tzuv"
       },
       {
         "name": "Icrt Fm100",
@@ -112020,14 +110948,6 @@
         "url": "https://s15.myradiostream.com/:14808/stream.mp3?_=1"
       },
       {
-        "name": "Cjlu 93.9 Fm",
-        "url": "https://harvestersfm.radioca.st/NB"
-      },
-      {
-        "name": "Avr 97.7 Fm",
-        "url": "https://mbsradio.leanstream.co/CKENFM-MP3"
-      },
-      {
         "name": "Ckbw 98.1 Fm",
         "url": "https://ais-sa1.streamon.fm/7239_128k.aac"
       }
@@ -112110,10 +111030,6 @@
       {
         "name": "Phoenix Rad 96.7",
         "url": "http://live.canstream.co.uk:8000/phoenix.mp3"
-      },
-      {
-        "name": "Al Mubarak Rad",
-        "url": "https://relay.emasjidlive.uk/almubarakradio"
       },
       {
         "name": "Drystone Rad Fm",
@@ -112368,10 +111284,6 @@
         "url": "https://stream.produccionesdale.com/listen/lafresca/moviles"
       },
       {
-        "name": "Rad Cullar Fm 10",
-        "url": "https://streaming2.elitecomunicacion.es:8120/stream?type=.mp3/;"
-      },
-      {
         "name": "Rad La Comarca 1",
         "url": "https://online.vibacomunicacion.com:9304/stream"
       }
@@ -112410,10 +111322,6 @@
       {
         "name": "Klbs 1330 Am",
         "url": "http://war.str3am.com:7770/klbs"
-      },
-      {
-        "name": "La Mejor 106.3 K",
-        "url": "https://stream.zeno.fm/tli7ww6epazuv"
       }
     ]
   },
@@ -112458,18 +111366,6 @@
       {
         "name": "Dorpsradio Laren",
         "url": "https://dorpsradio-presenterenmeer.radioca.st/autodj"
-      }
-    ]
-  },
-  "Huizhou,CN": {
-    "coords": {
-      "n": 23.1123,
-      "e": 114.4158
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -112780,10 +111676,6 @@
         "url": "https://thebay887.ca:8002/;stream.mp3"
       },
       {
-        "name": "105.5 The Moose",
-        "url": "https://vistaradio.streamb.live/SB00116"
-      },
-      {
         "name": "89.1 Max Fm",
         "url": "https://bayshore-ais.leanstream.co/CISOFM?args=web_01&uid=5e9d1fa7-8bf7-4ac0-aec3-610e9efd21b6&user_hash=gFLC4LqoM3CDKR8gUUbG5otgBV2XoDLh&gdpr=true&aw_0_req.gdpr=true&listenerid=6cfa54807b2234df3d9c7f96963422d5&awparams=companionAds%3Atrue"
       },
@@ -113063,10 +111955,6 @@
       "e": 6.1315
     },
     "urls": [
-      {
-        "name": "Antithse Rad",
-        "url": "https://listen.radioking.com/radio/11549/stream/63448"
-      },
       {
         "name": "Rad Active",
         "url": "http://radio-active.net:8000/active"
@@ -113916,10 +112804,6 @@
         "url": "http://s7.onweb.gr:8044/;stream"
       },
       {
-        "name": "Lato 103.3 Fm",
-        "url": "https://stream.latofm.gr/latofm"
-      },
-      {
         "name": "Style 100 Fm",
         "url": "http://eco.onestreaming.com:8576/stream/;"
       },
@@ -114406,10 +113290,6 @@
       {
         "name": "Cele Rad",
         "url": "https://studio24.radiolize.com/radio/8070/radio.mp3"
-      },
-      {
-        "name": "Dclm Rad French",
-        "url": "https://airtime.dclm.org/radio/8050/french"
       },
       {
         "name": "Worldbeat Rad",
@@ -115614,10 +114494,6 @@
       {
         "name": "Cims-Fm 103.9",
         "url": "https://stream2.statsradio.com:8068/stream"
-      },
-      {
-        "name": "Cjlu 93.9 Fm",
-        "url": "https://harvestersfm.radioca.st/NB"
       }
     ]
   },
@@ -116657,26 +115533,6 @@
       }
     ]
   },
-  "Iron Mountain,US": {
-    "coords": {
-      "n": 45.8202,
-      "e": -88.066
-    },
-    "urls": [
-      {
-        "name": "Rockin' Eagle 98",
-        "url": "http://stream.up.net:8000/WGLI"
-      },
-      {
-        "name": "Wcup Fm 105.7",
-        "url": "http://stream.up.net:8000/WCUP"
-      },
-      {
-        "name": "Public Rad 90 Wn",
-        "url": "https://wnmu.streamguys1.com/wnmu-fm"
-      }
-    ]
-  },
   "Irondale AL,US": {
     "coords": {
       "n": 33.5382,
@@ -117295,10 +116151,6 @@
       {
         "name": "Gn Fm",
         "url": "https://ssl120.radyotelekom.com.tr/8130/stream"
-      },
-      {
-        "name": "Bizim Ller Radyo",
-        "url": "http://yayin.yayindakiler.com:4078/index.html/;"
       },
       {
         "name": "Damar Trk Fm",
@@ -118945,10 +117797,6 @@
         "url": "http://radiostubica.hc.hr:7010/;"
       },
       {
-        "name": "Rad Max Fm 99.3",
-        "url": "https://azuracast.novi-net.net/radio/8010/radiomax.aac"
-      },
-      {
         "name": "Rad Megaton Fm 1",
         "url": "https://chopin.bizmusic.net/radio/8030/radio.mp3"
       },
@@ -119763,10 +118611,6 @@
       {
         "name": "Wjmf-Lp Fm 87.7",
         "url": "https://ice-1.streamhoster.com/lv_wfs_043--broadcast1"
-      },
-      {
-        "name": "Rk 104 Fm",
-        "url": "https://ice64.securenetsystems.net/WXRR"
       }
     ]
   },
@@ -121022,10 +119866,6 @@
     },
     "urls": [
       {
-        "name": "Kd 101 - Kayd-Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KAYDFMAAC.aac"
-      },
-      {
         "name": "Houston Rad Plat",
         "url": "https://ais-edge37-live365-dal02.cdnstream.com/a83297"
       },
@@ -121425,10 +120265,6 @@
       "e": -74.9338
     },
     "urls": [
-      {
-        "name": "Rad Catskill - W",
-        "url": "https://stream.rcast.net/69645"
-      },
       {
         "name": "Wfso Olivebridge",
         "url": "http://www.redeemerbroadcasting.org:8000/;"
@@ -122163,18 +120999,6 @@
       }
     ]
   },
-  "Jiangmen,CN": {
-    "coords": {
-      "n": 22.7654,
-      "e": 112.9645
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
   "Jihlava,CZ": {
     "coords": {
       "n": 49.3984,
@@ -122184,10 +121008,6 @@
       {
         "name": "Ro Vysocina",
         "url": "https://rozhlas.stream/vysocina_high.aac"
-      },
-      {
-        "name": "Radioypsilon Fm",
-        "url": "http://mp3.radioypsilon.at:8000/mp3-160"
       },
       {
         "name": "Musikwelle Fm 10",
@@ -122224,18 +121044,6 @@
       {
         "name": "Rad Casares",
         "url": "http://srv0435.lcinternet.com:9507/stream"
-      }
-    ]
-  },
-  "Jinan,CN": {
-    "coords": {
-      "n": 36.6512,
-      "e": 117.1201
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -122978,10 +121786,6 @@
     },
     "urls": [
       {
-        "name": "Choc 88.7",
-        "url": "https://stream2.statsradio.com:8110/stream"
-      },
-      {
         "name": "Ckaj 92,5",
         "url": "https://stream.statsradio.com:8060/stream"
       },
@@ -123161,10 +121965,6 @@
       "e": -64.7573
     },
     "urls": [
-      {
-        "name": "Soggy Dollar Rad",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SAM06AAC287.mp3"
-      },
       {
         "name": "Inspira 88.1 Fm",
         "url": "https://stream.aiir.com/rublzaim1cyvv"
@@ -123710,10 +122510,6 @@
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KRNNFMAAC.aac"
       },
       {
-        "name": "Ksup Mix 106",
-        "url": "https://19.shoutstreams.com/proxy/juneau2/ksup"
-      },
-      {
         "name": "Ktoo-Fm 104.3",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KTOOFMAAC.aac"
       },
@@ -123745,10 +122541,6 @@
       "e": 0.8234
     },
     "urls": [
-      {
-        "name": "Rdio Juneda 107.",
-        "url": "https://stream.zeno.fm/tnnxu39g4p8uv"
-      },
       {
         "name": "Rdio Lleida Cade",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_LLEIDA.mp3"
@@ -125131,10 +123923,6 @@
     },
     "urls": [
       {
-        "name": "Fm 104.4",
-        "url": "https://stream.topradio.in.ua/topradio.mp3"
-      },
-      {
         "name": "Golos Donbasu",
         "url": "http://91.218.213.49:8000/golosdonbasu-mp3"
       },
@@ -125545,10 +124333,6 @@
       {
         "name": "Supreme Master T",
         "url": "http://radio.suprememastertv.com:9001/1/;"
-      },
-      {
-        "name": "I Like Rad",
-        "url": "https://stream.rcs.revma.com/aw9uqyxy2tzuv"
       },
       {
         "name": "Icrt Fm100",
@@ -126207,10 +124991,6 @@
         "url": "https://stream.zeno.fm/fu94u25kqd0uv"
       },
       {
-        "name": "Fm Kottarakkara",
-        "url": "https://stream.zeno.fm/gqdb1rev5s8uv"
-      },
-      {
         "name": "Maac Rad",
         "url": "https://s5.radio.co/s6372f685b/listen"
       }
@@ -126253,10 +125033,6 @@
       {
         "name": "Radyo Akdeniz Fm",
         "url": "https://yayin.radyoakdeniz.com/9470/stream"
-      },
-      {
-        "name": "Bizim Ller Radyo",
-        "url": "http://yayin.yayindakiler.com:4078/index.html/;"
       },
       {
         "name": "Damar Trk Fm",
@@ -126955,10 +125731,6 @@
         "url": "https://stream.zeno.fm/epyhxgc1y8huv"
       },
       {
-        "name": "Fm Kottarakkara",
-        "url": "https://stream.zeno.fm/gqdb1rev5s8uv"
-      },
-      {
         "name": "Maac Rad",
         "url": "https://s5.radio.co/s6372f685b/listen"
       }
@@ -127191,10 +125963,6 @@
         "url": "http://radio.suprememastertv.com:9001/1/;"
       },
       {
-        "name": "I Like Rad",
-        "url": "https://stream.rcs.revma.com/aw9uqyxy2tzuv"
-      },
-      {
         "name": "Icrt Fm100",
         "url": "https://stream.rcs.revma.com/18pd8tztxp3vv"
       },
@@ -127413,10 +126181,6 @@
       {
         "name": "Chnl Am 610",
         "url": "https://newcap.leanstream.co/CHNLAM"
-      },
-      {
-        "name": "Ckqr Fm 99.3 The",
-        "url": "https://vistaradio.streamb.live/SB00085"
       }
     ]
   },
@@ -127935,10 +126699,6 @@
     },
     "urls": [
       {
-        "name": "Avr 97.7 Fm",
-        "url": "https://mbsradio.leanstream.co/CKENFM-MP3"
-      },
-      {
         "name": "Magic 94.9",
         "url": "https://mbsradio.leanstream.co/CKWMFM-MP3"
       },
@@ -127953,10 +126713,6 @@
       {
         "name": "Cove Fm 88.7",
         "url": "https://us3.streamingpulse.com/ssl/CoveFM"
-      },
-      {
-        "name": "Cjlu 93.9 Fm",
-        "url": "https://harvestersfm.radioca.st/NB"
       },
       {
         "name": "Ckbw 98.1 Fm",
@@ -128557,10 +127313,6 @@
       {
         "name": "True Black Metal",
         "url": "https://trueblackmetalradio.com:666/radio"
-      },
-      {
-        "name": "Fm 104.4",
-        "url": "https://stream.topradio.in.ua/topradio.mp3"
       }
     ]
   },
@@ -129207,10 +127959,6 @@
         "url": "https://rogers.leanstream.co/rogers/can1065.stream/icy"
       },
       {
-        "name": "Ckqr Fm 99.3 The",
-        "url": "https://vistaradio.streamb.live/SB00085"
-      },
-      {
         "name": "107.5 2Day Fm",
         "url": "https://vistaradio.streamb.live/SB00075"
       }
@@ -129469,10 +128217,6 @@
       {
         "name": "Kool 1180 - Wskp",
         "url": "https://crystalout.surfernetwork.com:8001/WSKP-AM_MP3"
-      },
-      {
-        "name": "Jammin 107.7 - W",
-        "url": "https://crystalout.surfernetwork.com:8001/WWRX_MP3"
       }
     ]
   },
@@ -129669,10 +128413,6 @@
       {
         "name": "Orf Rad Burgenla",
         "url": "https://orf-live.ors-shoutcast.at/bgl-q1a"
-      },
-      {
-        "name": "Radioypsilon Fm",
-        "url": "http://mp3.radioypsilon.at:8000/mp3-160"
       },
       {
         "name": "Orf Rad Niederst",
@@ -132073,10 +130813,6 @@
         "url": "https://mcp1.mydataknox.com:8010/stream"
       },
       {
-        "name": "Rad 1 Fm 105.6",
-        "url": "https://azuracast.novi-net.net/radio/8020/radio1.aac"
-      },
-      {
         "name": "Podravski Rad Fm",
         "url": "https://streaming.podravskiradio.hr/live"
       },
@@ -132167,14 +130903,6 @@
       {
         "name": "Krmend Fm 99.8",
         "url": "https://online.kormendfm.hu/kormendlive"
-      },
-      {
-        "name": "Rad 1 Fm 105.6",
-        "url": "https://azuracast.novi-net.net/radio/8020/radio1.aac"
-      },
-      {
-        "name": "Rad 105 Selnica",
-        "url": "https://azuracast.novi-net.net/radio/8050/radio105.aac"
       },
       {
         "name": "Momo Rdi - Child",
@@ -132649,10 +131377,6 @@
     },
     "urls": [
       {
-        "name": "Fm Kottarakkara",
-        "url": "https://stream.zeno.fm/gqdb1rev5s8uv"
-      },
-      {
         "name": "Rad Onattukara",
         "url": "https://stream.zeno.fm/fu94u25kqd0uv"
       }
@@ -132883,10 +131607,6 @@
       {
         "name": "99 Fm",
         "url": "http://hyades.shoutca.st:8770/;"
-      },
-      {
-        "name": "Life 106.3",
-        "url": "http://cast.streams.ovh:9130/live"
       },
       {
         "name": "Party 97.1",
@@ -133257,10 +131977,6 @@
         "url": "https://live.sjeverni.fm/radio/8000/radio.mp3"
       },
       {
-        "name": "Rad Max Fm 99.3",
-        "url": "https://azuracast.novi-net.net/radio/8010/radiomax.aac"
-      },
-      {
         "name": "Zagorski Rad Fm",
         "url": "https://s8.iqstreaming.com:2020/stream/zagorski/stream"
       },
@@ -133510,10 +132226,6 @@
         "url": "http://develop.servus.at:8000/radius"
       },
       {
-        "name": "Radioypsilon Fm",
-        "url": "http://mp3.radioypsilon.at:8000/mp3-160"
-      },
-      {
         "name": "Musikwelle Fm 10",
         "url": "https://stream.stadtradio.at:8000/live"
       },
@@ -133584,10 +132296,6 @@
       {
         "name": "Super Rad 89.0 F",
         "url": "https://mcp1.mydataknox.com:8010/stream"
-      },
-      {
-        "name": "Rad 1 Fm 105.6",
-        "url": "https://azuracast.novi-net.net/radio/8020/radio1.aac"
       },
       {
         "name": "Obiteljski Rad I",
@@ -133666,14 +132374,6 @@
         "url": "https://utmothavet.ksu247.no/192"
       },
       {
-        "name": "Nrk P1 Mre Og Ro",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_more_og_romsdal_mp3_h"
-      },
-      {
-        "name": "Nrk P1 Sogn Og F",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_sogn_og_fjordane_aac_h"
-      },
-      {
         "name": "1Fm Gull",
         "url": "https://lyd.1fm.no/1fmgull_hq"
       },
@@ -133729,10 +132429,6 @@
       "e": 21.3292
     },
     "urls": [
-      {
-        "name": "Life 106.3",
-        "url": "http://cast.streams.ovh:9130/live"
-      },
       {
         "name": "Rad Orbis",
         "url": "https://stream.zeno.fm/84tbtg5wcg0uv"
@@ -133956,10 +132652,6 @@
       {
         "name": "Bohuslav Fm 97.7",
         "url": "https://complex.in.ua/b128"
-      },
-      {
-        "name": "Fm 104.4",
-        "url": "https://stream.topradio.in.ua/topradio.mp3"
       },
       {
         "name": "More.Fm - More O",
@@ -134524,10 +133216,6 @@
       {
         "name": "Buengkan Radio",
         "url": "https://c16.radioboss.fm:8332/stream"
-      },
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -135346,14 +134034,6 @@
     },
     "urls": [
       {
-        "name": "Wcup Fm 105.7",
-        "url": "http://stream.up.net:8000/WCUP"
-      },
-      {
-        "name": "Rockin' Eagle 98",
-        "url": "http://stream.up.net:8000/WGLI"
-      },
-      {
         "name": "The Mix 93 - Wkm",
         "url": "http://audio.pasty.net:8000/mix93"
       }
@@ -135820,10 +134500,6 @@
       {
         "name": "La Rad Plus - 10",
         "url": "https://laradioplus.ice.infomaniak.ch/laradioplus-high.aac"
-      },
-      {
-        "name": "Sensations Alpes",
-        "url": "https://sensationsalpes.ice.infomaniak.ch/sensationsalpes-128.mp3"
       }
     ]
   },
@@ -136080,10 +134756,6 @@
       {
         "name": "Rad Maria France",
         "url": "https://dreamsiteradiocp6.com/proxy/rmfrance1?mp=/stream"
-      },
-      {
-        "name": "Antithse Rad",
-        "url": "https://listen.radioking.com/radio/11549/stream/63448"
       },
       {
         "name": "Rad Top Fm",
@@ -137622,10 +136294,6 @@
         "url": "http://149.56.234.138:8149/stream"
       },
       {
-        "name": "Choc 88.7",
-        "url": "https://stream2.statsradio.com:8110/stream"
-      },
-      {
         "name": "Cjlm - M103.5",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/CJLM_FM.mp3"
       }
@@ -137968,10 +136636,6 @@
       {
         "name": "Rad Qubec Cntry",
         "url": "https://play.quebec-country.com/"
-      },
-      {
-        "name": "Choc 88.7",
-        "url": "https://stream2.statsradio.com:8110/stream"
       },
       {
         "name": "Chox",
@@ -138860,10 +137524,6 @@
         "url": "http://cbnradio.streamguys1.com/contemporary-128K"
       },
       {
-        "name": "Kd 101 - Kayd-Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KAYDFMAAC.aac"
-      },
-      {
         "name": "Kajn Rad - Kajn-",
         "url": "https://ice41.securenetsystems.net/KAJN"
       }
@@ -138960,10 +137620,6 @@
         "url": "http://s7.viastreaming.net:8285/;"
       },
       {
-        "name": "Wyml Fm 99.9",
-        "url": "https://seahorse.juststreamwith.us:8000/stream"
-      },
-      {
         "name": "La Red De Pedro",
         "url": "http://149.56.157.81/proxy/pedro?mp=/stream"
       }
@@ -139002,10 +137658,6 @@
       {
         "name": "Knlb Christian R",
         "url": "https://das-edge11-live365-dal03.cdnstream.com/a72595"
-      },
-      {
-        "name": "Jack Fm 95.7",
-        "url": "https://stream.affordablestreaming.com/KPKR.mp3"
       },
       {
         "name": "Pat Hobbs",
@@ -139250,10 +137902,6 @@
       {
         "name": "Eco Fm Ribeira S",
         "url": "https://stream.zeno.fm/p708zapa04zuv"
-      },
-      {
-        "name": "Rad Lider 97.7 F",
-        "url": "https://server8.emitironline.com:18520/stream"
       }
     ]
   },
@@ -140364,10 +139012,6 @@
         "url": "https://stream.zeno.fm/y8v8f967k1duv"
       },
       {
-        "name": "Banna-Tiran Inte",
-        "url": "https://stream.zeno.fm/ywptdatt40duv"
-      },
-      {
         "name": "Power Jz Ilocos",
         "url": "https://stream.zeno.fm/u26mf5z3f4duv"
       }
@@ -140391,10 +139035,6 @@
       {
         "name": "N' Rad",
         "url": "https://nradio.ice.infomaniak.ch/nradio-32.aac"
-      },
-      {
-        "name": "Mrc Rad",
-        "url": "https://www.radioking.com/play/mrcradio"
       },
       {
         "name": "Rad Vie Fm",
@@ -141289,10 +139929,6 @@
         "url": "https://ice5.securenetsystems.net/KXCM"
       },
       {
-        "name": "Jack Fm 95.7",
-        "url": "https://stream.affordablestreaming.com/KPKR.mp3"
-      },
-      {
         "name": "Ktox Am 1340",
         "url": "http://streaming.rubinbroadcasting.com/ktox"
       }
@@ -141469,10 +140105,6 @@
         "url": "http://nr8.newradio.it:9095/;"
       },
       {
-        "name": "Rad Studio 93",
-        "url": "https://onair15.xdevel.com/proxy/radiostudio93?mp=/;stream/;"
-      },
-      {
         "name": "Art Rad",
         "url": "https://dreamsiteradiocp3.com/proxy/artradio?mp=/stream"
       },
@@ -141627,10 +140259,6 @@
       {
         "name": "Wroa Am 1390",
         "url": "https://ice9.securenetsystems.net/WROA"
-      },
-      {
-        "name": "Rk 104 Fm",
-        "url": "https://ice64.securenetsystems.net/WXRR"
       },
       {
         "name": "Wtwz-Am 1120",
@@ -142391,10 +141019,6 @@
       {
         "name": "Rockenfolie",
         "url": "https://player.rockenfolie.com/;"
-      },
-      {
-        "name": "Sensations Alpes",
-        "url": "https://sensationsalpes.ice.infomaniak.ch/sensationsalpes-128.mp3"
       }
     ]
   },
@@ -142829,10 +141453,6 @@
     },
     "urls": [
       {
-        "name": "Jammin 107.7 - W",
-        "url": "https://crystalout.surfernetwork.com:8001/WWRX_MP3"
-      },
-      {
         "name": "Gdradio - Gratef",
         "url": "http://108.163.245.230:8100/stream"
       },
@@ -142879,10 +141499,6 @@
       {
         "name": "Phoenix Rad 96.7",
         "url": "http://live.canstream.co.uk:8000/phoenix.mp3"
-      },
-      {
-        "name": "Al Mubarak Rad",
-        "url": "https://relay.emasjidlive.uk/almubarakradio"
       },
       {
         "name": "Marefa Rad",
@@ -143167,10 +141783,6 @@
       {
         "name": "Dj Utahpablo Str",
         "url": "http://149.56.157.81:8093/stream/;"
-      },
-      {
-        "name": "Kpcw 91.7 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KPCWFM.mp3"
       }
     ]
   },
@@ -143766,20 +142378,8 @@
         "url": "https://mp3.rtvslo.si/mmr"
       },
       {
-        "name": "Rad 1 Fm 105.6",
-        "url": "https://azuracast.novi-net.net/radio/8020/radio1.aac"
-      },
-      {
         "name": "Rad Ludbreg",
         "url": "https://a1.asurahosting.com/listen/radioludbreg/radio.mp3"
-      },
-      {
-        "name": "Rad Max Fm 99.3",
-        "url": "https://azuracast.novi-net.net/radio/8010/radiomax.aac"
-      },
-      {
-        "name": "Rad 105 Selnica",
-        "url": "https://azuracast.novi-net.net/radio/8050/radio105.aac"
       },
       {
         "name": "Rad Aktual",
@@ -144110,10 +142710,6 @@
         "url": "https://stream2.xdevel.com/audio5s194-48/stream/icecast.audio"
       },
       {
-        "name": "Rad Agira",
-        "url": "https://nrf1.newradio.it:9618/stream.mp3"
-      },
-      {
         "name": "Rad Onda Due Fm",
         "url": "https://onair18.xdevel.com/proxy/ondadue?mp=/;stream/;"
       },
@@ -144205,10 +142801,6 @@
       "e": -3.76
     },
     "urls": [
-      {
-        "name": "Anda Onda Lerma",
-        "url": "https://topradio.uno:8006/stream"
-      },
       {
         "name": "Rad Aguilar 107.",
         "url": "https://pr1cen101.emisionlocal.com/proxy/radioaguilar?mp=/stream"
@@ -144404,10 +142996,6 @@
       {
         "name": "Pyrnes Fm",
         "url": "https://antenne.pyreneesfm.com/direct.mp3"
-      },
-      {
-        "name": "Rad Transparence",
-        "url": "http://37.187.77.45:9000/;"
       },
       {
         "name": "Rad Couserans",
@@ -144952,10 +143540,6 @@
       {
         "name": "Rad Touristique",
         "url": "http://slmusic.info:9984/;"
-      },
-      {
-        "name": "Choc 88.7",
-        "url": "https://stream2.statsradio.com:8110/stream"
       }
     ]
   },
@@ -145284,10 +143868,6 @@
       {
         "name": "Fete Life Stn",
         "url": "http://cassini.shoutca.st:9859/stream"
-      },
-      {
-        "name": "Wwer 88.1Fm",
-        "url": "https://listen.wwer.org/stream"
       },
       {
         "name": "Goldenrb",
@@ -145696,10 +144276,6 @@
       {
         "name": "Novoe Rad Fm 98.",
         "url": "https://live.novoeradio.by:444/live/novoeradio_aac128/icecast.audio"
-      },
-      {
-        "name": "Legendy Fm | Fm",
-        "url": "http://live.legendy.by:8000/legendyfm"
       }
     ]
   },
@@ -146568,10 +145144,6 @@
       {
         "name": "Supreme Master T",
         "url": "http://radio.suprememastertv.com:9001/1/;"
-      },
-      {
-        "name": "I Like Rad",
-        "url": "https://stream.rcs.revma.com/aw9uqyxy2tzuv"
       },
       {
         "name": "Icrt Fm100",
@@ -147762,10 +146334,6 @@
         "url": "https://us3.streamingpulse.com/ssl/CoveFM"
       },
       {
-        "name": "Avr 97.7 Fm",
-        "url": "https://mbsradio.leanstream.co/CKENFM-MP3"
-      },
-      {
         "name": "Ckbw 98.1 Fm",
         "url": "https://ais-sa1.streamon.fm/7239_128k.aac"
       },
@@ -147808,10 +146376,6 @@
       {
         "name": "Rad Verbum Tv",
         "url": "https://ec1.yesstreaming.net:1780/stream"
-      },
-      {
-        "name": "Get Ready To Roc",
-        "url": "https://streamer.radio.co/s24ae1285c/listen"
       },
       {
         "name": "Wirral Wave",
@@ -148078,20 +146642,8 @@
         "url": "https://live.radio.si/Maxi"
       },
       {
-        "name": "Rad 1 Fm 105.6",
-        "url": "https://azuracast.novi-net.net/radio/8020/radio1.aac"
-      },
-      {
         "name": "Sjeverni Fm 92.8",
         "url": "https://live.sjeverni.fm/radio/8000/radio.mp3"
-      },
-      {
-        "name": "Rad Max Fm 99.3",
-        "url": "https://azuracast.novi-net.net/radio/8010/radiomax.aac"
-      },
-      {
-        "name": "Rad 105 Selnica",
-        "url": "https://azuracast.novi-net.net/radio/8050/radio105.aac"
       },
       {
         "name": "Rad Aktual",
@@ -148364,10 +146916,6 @@
       {
         "name": "Ipopfm",
         "url": "https://radioserver11.profesionalhosting.com/proxy/pkg81305?mp=/stream"
-      },
-      {
-        "name": "Rdio Juneda 107.",
-        "url": "https://stream.zeno.fm/tnnxu39g4p8uv"
       },
       {
         "name": "Rad Fraga Fm 107",
@@ -148756,10 +147304,6 @@
       {
         "name": "Dj Utahpablo Str",
         "url": "http://149.56.157.81:8093/stream/;"
-      },
-      {
-        "name": "Kpcw 91.7 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KPCWFM.mp3"
       }
     ]
   },
@@ -149658,10 +148202,6 @@
     },
     "urls": [
       {
-        "name": "Antithse Rad",
-        "url": "https://listen.radioking.com/radio/11549/stream/63448"
-      },
-      {
         "name": "Mosaque Fm 89.5",
         "url": "https://mosaiquefm.potin.xyz:8443/stream"
       },
@@ -150311,18 +148851,6 @@
       }
     ]
   },
-  "Loudi,CN": {
-    "coords": {
-      "n": 27.6973,
-      "e": 111.9946
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
   "Loudon TN,US": {
     "coords": {
       "n": 35.7329,
@@ -150812,10 +149340,6 @@
       {
         "name": "Rad Armenie Fm 1",
         "url": "http://direct.radioarmenie.com:9029/stream/;"
-      },
-      {
-        "name": "Project Xy",
-        "url": "https://flux.saaslys.com:8000/radio.mp3"
       }
     ]
   },
@@ -151186,10 +149710,6 @@
         "url": "https://ice9.securenetsystems.net/WROA"
       },
       {
-        "name": "Rk 104 Fm",
-        "url": "https://ice64.securenetsystems.net/WXRR"
-      },
-      {
         "name": "104.1 Wdlt - Wdl",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WDLTFMAAC.aac"
       }
@@ -151304,16 +149824,8 @@
         "url": "https://a1.asurahosting.com/listen/radioludbreg/radio.mp3"
       },
       {
-        "name": "Rad 1 Fm 105.6",
-        "url": "https://azuracast.novi-net.net/radio/8020/radio1.aac"
-      },
-      {
         "name": "Narodni Rad Goga",
         "url": "http://cmr-hosting.com:8440/;"
-      },
-      {
-        "name": "Rad 105 Selnica",
-        "url": "https://azuracast.novi-net.net/radio/8050/radio105.aac"
       },
       {
         "name": "Rad Banovina 96.",
@@ -152681,10 +151193,6 @@
         "url": "http://direct.radioarmenie.com:9029/stream/;"
       },
       {
-        "name": "Project Xy",
-        "url": "https://flux.saaslys.com:8000/radio.mp3"
-      },
-      {
         "name": "Crock Rad",
         "url": "https://stric6.streamakaci.com/crock.mp3"
       }
@@ -153117,10 +151625,6 @@
         "url": "http://sonic.mediatelekom.net:8150/;"
       },
       {
-        "name": "Rdio Montalegre",
-        "url": "http://centova.radios.pt:9566/;"
-      },
-      {
         "name": "Rdio Forum Botic",
         "url": "http://188.93.231.97:9300/;"
       },
@@ -153235,10 +151739,6 @@
       {
         "name": "Rad Ascoli Fm 87",
         "url": "https://ice09.fluidstream.net/fluid0909.mp3"
-      },
-      {
-        "name": "Rad City Light F",
-        "url": "http://nr5.newradio.it:8651/stream"
       }
     ]
   },
@@ -154358,10 +152858,6 @@
         "url": "https://streamingcwsradio30.com/8164/stream"
       },
       {
-        "name": "Exa Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/XHQT_SC"
-      },
-      {
         "name": "La Fq - Xhfq Fm",
         "url": "https://s2.mexside.net/8056/stream"
       }
@@ -155041,10 +153537,6 @@
       "e": -15.0239
     },
     "urls": [
-      {
-        "name": "Rad As Samadiyya",
-        "url": "https://betelgeuse.dribbcast.com/proxy/assamadyya?mp=/stream"
-      },
       {
         "name": "Dakar Fm 94.5",
         "url": "https://stream.zeno.fm/cbff588f03duv"
@@ -156136,10 +154628,6 @@
       {
         "name": "Tonic Fitness Ra",
         "url": "http://radioserver-professional.it:8000/radio-008"
-      },
-      {
-        "name": "Rad City Light F",
-        "url": "http://nr5.newradio.it:8651/stream"
       }
     ]
   },
@@ -157863,10 +156351,6 @@
         "url": "https://s5.voscast.com:8219/stream.mp3"
       },
       {
-        "name": "Tuff City Rad 90",
-        "url": "https://stream.aiir.com/zzrrqgywgaptv"
-      },
-      {
         "name": "Cjmp 90.1 Fm",
         "url": "https://usa2.fastcast4u.com/proxy/terjoyce?mp=/1&1584650169522"
       },
@@ -158335,10 +156819,6 @@
         "url": "http://aler.org:8000/maracaibofm.aac"
       },
       {
-        "name": "Kiss Fm 105.5",
-        "url": "https://sp4.colombiatelecom.com.co:10979/stream"
-      },
-      {
         "name": "La Voz Que Clama",
         "url": "https://guri.tepuyserver.net/8158/stream"
       },
@@ -158661,10 +157141,6 @@
       {
         "name": "Cfno Fm 93.1",
         "url": "https://ais-sa1.streamon.fm/7032_32k.aac"
-      },
-      {
-        "name": "Rockin' Eagle 98",
-        "url": "http://stream.up.net:8000/WGLI"
       },
       {
         "name": "Wmpl Am 920",
@@ -159661,10 +158137,6 @@
       {
         "name": "Klbs 1330 Am",
         "url": "http://war.str3am.com:7770/klbs"
-      },
-      {
-        "name": "La Mejor 106.3 K",
-        "url": "https://stream.zeno.fm/tli7ww6epazuv"
       }
     ]
   },
@@ -160147,16 +158619,8 @@
     },
     "urls": [
       {
-        "name": "Public Rad 90 Wn",
-        "url": "https://wnmu.streamguys1.com/wnmu-fm"
-      },
-      {
         "name": "Whwl-Fm 95.7",
         "url": "http://audio.pasty.net:8000/whwl"
-      },
-      {
-        "name": "Rockin' Eagle 98",
-        "url": "http://stream.up.net:8000/WGLI"
       },
       {
         "name": "Wmpl Am 920",
@@ -160791,20 +159255,8 @@
     },
     "urls": [
       {
-        "name": "Rad Max Fm 99.3",
-        "url": "https://azuracast.novi-net.net/radio/8010/radiomax.aac"
-      },
-      {
-        "name": "Rad 1 Fm 105.6",
-        "url": "https://azuracast.novi-net.net/radio/8020/radio1.aac"
-      },
-      {
         "name": "Sjeverni Fm 92.8",
         "url": "https://live.sjeverni.fm/radio/8000/radio.mp3"
-      },
-      {
-        "name": "Rad 105 Selnica",
-        "url": "https://azuracast.novi-net.net/radio/8050/radio105.aac"
       },
       {
         "name": "Rad Megaton Fm 1",
@@ -162423,10 +160875,6 @@
         "url": "https://n02.radiojar.com/z86v178e3p8uv"
       },
       {
-        "name": "La Nueva Rj 107.",
-        "url": "http://audioout.gvstream.net/gpm-rj.aac"
-      },
-      {
         "name": "Hd3 Neo 100.3 Fm",
         "url": "https://audiostreaming.luz.network/stream/15/;?type=http&nocache=312912"
       },
@@ -162457,10 +160905,6 @@
       {
         "name": "Rad Onda Due Fm",
         "url": "https://onair18.xdevel.com/proxy/ondadue?mp=/;stream/;"
-      },
-      {
-        "name": "Rad Agira",
-        "url": "https://nrf1.newradio.it:9618/stream.mp3"
       },
       {
         "name": "Rad Luce Inblu",
@@ -163059,10 +161503,6 @@
         "url": "http://cassini.shoutca.st:9859/stream"
       },
       {
-        "name": "Wwer 88.1Fm",
-        "url": "https://listen.wwer.org/stream"
-      },
-      {
         "name": "Slmtv Rad",
         "url": "http://s1.streamaudio.de:8000/slmtv-radio"
       },
@@ -163425,10 +161865,6 @@
       {
         "name": "Kyrs Fm 88.1",
         "url": "https://stream.pacificaservice.org:9000/kyrs_128"
-      },
-      {
-        "name": "Ckqr Fm 99.3 The",
-        "url": "https://vistaradio.streamb.live/SB00085"
       }
     ]
   },
@@ -163629,18 +162065,6 @@
       {
         "name": "Tros Fm",
         "url": "https://s16.myradiostream.com/:9362/;"
-      }
-    ]
-  },
-  "Meizhou,CN": {
-    "coords": {
-      "n": 24.2886,
-      "e": 116.1225
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -164511,10 +162935,6 @@
     },
     "urls": [
       {
-        "name": "La Mejor 106.3 K",
-        "url": "https://stream.zeno.fm/tli7ww6epazuv"
-      },
-      {
         "name": "K 97.5",
         "url": "https://ice9.securenetsystems.net/KABX"
       },
@@ -165073,10 +163493,6 @@
       {
         "name": "Rad Vie Fm",
         "url": "https://hosting.studioradiomedia.fr:1265/stream"
-      },
-      {
-        "name": "Latitude 95.8",
-        "url": "https://latitude.ice.infomaniak.ch/troyes.aac?ver=829176"
       }
     ]
   },
@@ -165166,10 +163582,6 @@
       "e": -96.5992
     },
     "urls": [
-      {
-        "name": "Keom 88.5 Fm",
-        "url": "https://live.amperwave.net/direct/mesquite-keomfmmp3-ibc4"
-      },
       {
         "name": "Rad Maranatha Li",
         "url": "https://sonicpanel.us/8032/stream"
@@ -165385,10 +163797,6 @@
       {
         "name": "Yugotopia Beat C",
         "url": "https://yugotopia-beat-club.stream.laut.fm/yugotopia-beat-club"
-      },
-      {
-        "name": "Kick Fm",
-        "url": "https://icecast.kickfm.eu/mp3-high"
       }
     ]
   },
@@ -165573,10 +163981,6 @@
       {
         "name": "Mg Rad Misionera",
         "url": "https://sp5.servidorrprivado.com/6394/stream"
-      },
-      {
-        "name": "El Rocanrosaurio",
-        "url": "https://rocanrosaurio-mayeutica.radioca.st/;"
       },
       {
         "name": "Mexiquense Rad 1",
@@ -165817,10 +164221,6 @@
       {
         "name": "Supreme Master T",
         "url": "http://radio.suprememastertv.com:9001/1/;"
-      },
-      {
-        "name": "I Like Rad",
-        "url": "https://stream.rcs.revma.com/aw9uqyxy2tzuv"
       },
       {
         "name": "Icrt Fm100",
@@ -166257,10 +164657,6 @@
       {
         "name": "Rk 92.3 Wxrk",
         "url": "https://ice64.securenetsystems.net/WXRK"
-      },
-      {
-        "name": "Wwer 88.1Fm",
-        "url": "https://listen.wwer.org/stream"
       },
       {
         "name": "Positive Hts Per",
@@ -166715,10 +165111,6 @@
         "url": "https://crystalout.surfernetwork.com:8001/KXLG-FM_MP3"
       },
       {
-        "name": "Ksdj New Rk 90.7",
-        "url": "https://ksdj.stream.creek.fm/stream"
-      },
-      {
         "name": "Kscr 93.5 Fm",
         "url": "https://ice10.securenetsystems.net/KSCR"
       },
@@ -166973,10 +165365,6 @@
       {
         "name": "Dj Utahpablo Str",
         "url": "http://149.56.157.81:8093/stream/;"
-      },
-      {
-        "name": "Kpcw 91.7 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KPCWFM.mp3"
       }
     ]
   },
@@ -167371,10 +165759,6 @@
     },
     "urls": [
       {
-        "name": "Onda Joven Rad 1",
-        "url": "https://stream.zeno.fm/migskzd5wcitv"
-      },
-      {
         "name": "Locaptiva Rad Fm",
         "url": "https://pr1cen101.emisionlocal.com/proxy/locactivaradio?mp=/stream"
       },
@@ -167529,10 +165913,6 @@
       {
         "name": "Ketr Fm 88.9",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KETRFMAAC.aac"
-      },
-      {
-        "name": "Keom 88.5 Fm",
-        "url": "https://live.amperwave.net/direct/mesquite-keomfmmp3-ibc4"
       }
     ]
   },
@@ -167705,10 +166085,6 @@
       {
         "name": "Novoe Rad Fm 98.",
         "url": "https://live.novoeradio.by:444/live/novoeradio_aac128/icecast.audio"
-      },
-      {
-        "name": "Legendy Fm | Fm",
-        "url": "http://live.legendy.by:8000/legendyfm"
       },
       {
         "name": "Dushevnoe Rad",
@@ -168013,10 +166389,6 @@
       {
         "name": "Cims-Fm 103.9",
         "url": "https://stream2.statsradio.com:8068/stream"
-      },
-      {
-        "name": "Cjlu 93.9 Fm",
-        "url": "https://harvestersfm.radioca.st/NB"
       },
       {
         "name": "Cknb",
@@ -168644,10 +167016,6 @@
     },
     "urls": [
       {
-        "name": "Ksdj New Rk 90.7",
-        "url": "https://ksdj.stream.creek.fm/stream"
-      },
-      {
         "name": "Krgt Rk Garden T",
         "url": "https://stream.radio.co/s291300354/listen"
       },
@@ -168730,10 +167098,6 @@
       {
         "name": "Rad Erzgebirge -",
         "url": "https://web.radio.radioerzgebirge.de/radioerzgebirge-tophits?aggregator=radiogarden"
-      },
-      {
-        "name": "Rad Chemnitz - W",
-        "url": "https://web.radio.radiochemnitz.de/radiochemnitz-weihnachten?aggregator=radiogarden"
       },
       {
         "name": "Rad Zwickau - We",
@@ -169030,10 +167394,6 @@
       {
         "name": "Coast 102.3 Fm",
         "url": "https://ice42.securenetsystems.net/WGCMFM"
-      },
-      {
-        "name": "Rk 104 Fm",
-        "url": "https://ice64.securenetsystems.net/WXRR"
       },
       {
         "name": "Wrbe Fm 106.9",
@@ -169530,10 +167890,6 @@
       {
         "name": "Novoe Rad Fm 98.",
         "url": "https://live.novoeradio.by:444/live/novoeradio_aac128/icecast.audio"
-      },
-      {
-        "name": "Legendy Fm | Fm",
-        "url": "http://live.legendy.by:8000/legendyfm"
       }
     ]
   },
@@ -169944,14 +168300,6 @@
         "url": "https://lyd.1fm.no/1fmjazz_hq"
       },
       {
-        "name": "Nrk P1 Mre Og Ro",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_more_og_romsdal_mp3_h"
-      },
-      {
-        "name": "Nrk P1 Sogn Og F",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_sogn_og_fjordane_aac_h"
-      },
-      {
         "name": "Ksu 24/7",
         "url": "https://utmothavet.ksu247.no/192"
       },
@@ -170098,10 +168446,6 @@
       {
         "name": "Rad Ponent Fm 10",
         "url": "https://enacast.com/radioponent/streams/HD"
-      },
-      {
-        "name": "Rdio Juneda 107.",
-        "url": "https://stream.zeno.fm/tnnxu39g4p8uv"
       }
     ]
   },
@@ -170486,10 +168830,6 @@
       {
         "name": "Eco Fm Ribeira S",
         "url": "https://stream.zeno.fm/p708zapa04zuv"
-      },
-      {
-        "name": "Rdio Montalegre",
-        "url": "http://centova.radios.pt:9566/;"
       },
       {
         "name": "Rdio Forum Botic",
@@ -170906,10 +169246,6 @@
       {
         "name": "Rdio Valira",
         "url": "https://mars.streamerr.co/8192/stream"
-      },
-      {
-        "name": "Rad Transparence",
-        "url": "http://37.187.77.45:9000/;"
       }
     ]
   },
@@ -170943,10 +169279,6 @@
       "e": -7.7881
     },
     "urls": [
-      {
-        "name": "Rdio Montalegre",
-        "url": "http://centova.radios.pt:9566/;"
-      },
       {
         "name": "Rdio Forum Botic",
         "url": "http://188.93.231.97:9300/;"
@@ -171383,10 +169715,6 @@
       "e": 13.5931
     },
     "urls": [
-      {
-        "name": "Rad City Light F",
-        "url": "http://nr5.newradio.it:8651/stream"
-      },
       {
         "name": "Black And White",
         "url": "https://cast3.server89.com:8030/radio.mp3"
@@ -172020,10 +170348,6 @@
     },
     "urls": [
       {
-        "name": "Ksdj New Rk 90.7",
-        "url": "https://ksdj.stream.creek.fm/stream"
-      },
-      {
         "name": "Kscr 93.5 Fm",
         "url": "https://ice10.securenetsystems.net/KSCR"
       },
@@ -172162,10 +170486,6 @@
       {
         "name": "Wrmdj",
         "url": "http://serveur2.wanastream.com:25000/;"
-      },
-      {
-        "name": "Sensations Alpes",
-        "url": "https://sensationsalpes.ice.infomaniak.ch/sensationsalpes-128.mp3"
       },
       {
         "name": "Nov Fm 93.1",
@@ -172308,10 +170628,6 @@
         "url": "https://play.quebec-country.com/"
       },
       {
-        "name": "Choc 88.7",
-        "url": "https://stream2.statsradio.com:8110/stream"
-      },
-      {
         "name": "Hts Mus Rad Queb",
         "url": "https://hitsmusicradio.out.airtime.pro/hitsmusicradio_a://hitsmusicradio_a"
       },
@@ -172334,10 +170650,6 @@
       {
         "name": "Rad Armenie Fm 1",
         "url": "http://direct.radioarmenie.com:9029/stream/;"
-      },
-      {
-        "name": "Project Xy",
-        "url": "https://flux.saaslys.com:8000/radio.mp3"
       }
     ]
   },
@@ -173666,10 +171978,6 @@
       {
         "name": "Rad Krimi",
         "url": "http://radio13.pro-fhi.net:9240/stream"
-      },
-      {
-        "name": "Sensations Alpes",
-        "url": "https://sensationsalpes.ice.infomaniak.ch/sensationsalpes-128.mp3"
       }
     ]
   },
@@ -175468,10 +173776,6 @@
         "url": "https://live.sjeverni.fm/radio/8000/radio.mp3"
       },
       {
-        "name": "Rad Max Fm 99.3",
-        "url": "https://azuracast.novi-net.net/radio/8010/radiomax.aac"
-      },
-      {
         "name": "Rad Maxi",
         "url": "https://live.radio.si/Maxi"
       },
@@ -175778,10 +174082,6 @@
       {
         "name": "Mountain Cntry 1",
         "url": "https://wppl.streamguys1.com/live"
-      },
-      {
-        "name": "Wngu 89.5 Fm",
-        "url": "https://gpb-geo.streamguys1.com/gpb/gpb-radio-wngu-mp3-radiogarden"
       }
     ]
   },
@@ -175878,18 +174178,6 @@
       {
         "name": "Rad Murski Val 9",
         "url": "https://stream.murskival.si/"
-      },
-      {
-        "name": "Rad 1 Fm 105.6",
-        "url": "https://azuracast.novi-net.net/radio/8020/radio1.aac"
-      },
-      {
-        "name": "Rad Max Fm 99.3",
-        "url": "https://azuracast.novi-net.net/radio/8010/radiomax.aac"
-      },
-      {
-        "name": "Rad 105 Selnica",
-        "url": "https://azuracast.novi-net.net/radio/8050/radio105.aac"
       },
       {
         "name": "Rad Megaton Fm 1",
@@ -177435,18 +175723,6 @@
       }
     ]
   },
-  "Nanjing,CN": {
-    "coords": {
-      "n": 32.0603,
-      "e": 118.7969
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
   "Nanning,CN": {
     "coords": {
       "n": 22.8167,
@@ -177456,10 +175732,6 @@
       {
         "name": "Guangxi Rgd Mus",
         "url": "https://lhttp.qingting.fm/live/4875/64k.mp3"
-      },
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -178166,16 +176438,8 @@
     },
     "urls": [
       {
-        "name": "1540 The Nationa",
-        "url": "https://radiostreams.streamcomedia.com:8008/zns1540am"
-      },
-      {
         "name": "Bahamian Or Nutt",
         "url": "https://s2.reliastream.com/proxy/rumcayme?mp=/stream"
-      },
-      {
-        "name": "Global 99.5 Fm",
-        "url": "https://ice64.securenetsystems.net/GLOBALBS"
       },
       {
         "name": "Guardian Tk Rad",
@@ -178334,10 +176598,6 @@
       "e": -61.8315
     },
     "urls": [
-      {
-        "name": "Cjtb 93.1 Fm",
-        "url": "https://stream2.statsradio.com:8112/stream"
-      },
       {
         "name": "Cile Havre-Saint",
         "url": "https://arcq.streamb.live/SB00263"
@@ -178915,10 +177175,6 @@
         "url": "https://server10.reliastream.com/proxy/damiller?mp=/stream"
       },
       {
-        "name": "Kd 101 - Kayd-Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KAYDFMAAC.aac"
-      },
-      {
         "name": "Rad Amistad - Kh",
         "url": "https://khcb.streamguys1.com/spanish-128k-mp3"
       }
@@ -178969,10 +177225,6 @@
       {
         "name": "Kix 96 - Kkcm",
         "url": "https://ice5.securenetsystems.net/KXCM"
-      },
-      {
-        "name": "Jack Fm 95.7",
-        "url": "https://stream.affordablestreaming.com/KPKR.mp3"
       }
     ]
   },
@@ -179149,10 +177401,6 @@
       {
         "name": "103.5 The Bridge",
         "url": "https://vistaradio.streamb.live/SB00086"
-      },
-      {
-        "name": "Ckqr Fm 99.3 The",
-        "url": "https://vistaradio.streamb.live/SB00085"
       },
       {
         "name": "107.5 2Day Fm",
@@ -179479,10 +177727,6 @@
     },
     "urls": [
       {
-        "name": "Get Ready To Roc",
-        "url": "https://streamer.radio.co/s24ae1285c/listen"
-      },
-      {
         "name": "Arrowe Sound Hos",
         "url": "https://arrowestream.radioca.st/stream"
       },
@@ -179589,10 +177833,6 @@
       {
         "name": "Rad Volere E Vol",
         "url": "https://bay1.streamfm.it:8010/aacp"
-      },
-      {
-        "name": "Rad Studio 93",
-        "url": "https://onair15.xdevel.com/proxy/radiostudio93?mp=/;stream/;"
       },
       {
         "name": "Solo Rad",
@@ -180225,10 +178465,6 @@
       {
         "name": "Todd Rundgren Mu",
         "url": "https://usa7.fastcast4u.com/proxy/alcann00?mp=/1"
-      },
-      {
-        "name": "Fbn Rad",
-        "url": "https://ice8.securenetsystems.net/WOTJ"
       }
     ]
   },
@@ -180493,10 +178729,6 @@
       {
         "name": "Kool 1180 - Wskp",
         "url": "https://crystalout.surfernetwork.com:8001/WSKP-AM_MP3"
-      },
-      {
-        "name": "Jammin 107.7 - W",
-        "url": "https://crystalout.surfernetwork.com:8001/WWRX_MP3"
       },
       {
         "name": "Wlng 92.1 Fm",
@@ -180806,10 +179038,6 @@
       {
         "name": "Kool 1180 - Wskp",
         "url": "https://crystalout.surfernetwork.com:8001/WSKP-AM_MP3"
-      },
-      {
-        "name": "Jammin 107.7 - W",
-        "url": "https://crystalout.surfernetwork.com:8001/WWRX_MP3"
       }
     ]
   },
@@ -181351,10 +179579,6 @@
       "e": -76.8591
     },
     "urls": [
-      {
-        "name": "Fbn Rad",
-        "url": "https://ice8.securenetsystems.net/WOTJ"
-      },
       {
         "name": "Rad Hatteras Whd",
         "url": "https://ice64.securenetsystems.net/WHDZ"
@@ -182816,10 +181040,6 @@
       {
         "name": "Rad Morvan 95.8",
         "url": "https://hosting.studioradiomedia.fr:1385/stream"
-      },
-      {
-        "name": "Latitude 95.8",
-        "url": "https://latitude.ice.infomaniak.ch/troyes.aac?ver=829176"
       }
     ]
   },
@@ -183112,10 +181332,6 @@
       {
         "name": "Rad Ues",
         "url": "https://streamingcwsradio30.com/8164/stream"
-      },
-      {
-        "name": "Exa Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/XHQT_SC"
       },
       {
         "name": "Rad Bebe Televis",
@@ -183622,16 +181838,8 @@
         "url": "https://lyd.nnr1987.no/nnr_hq"
       },
       {
-        "name": "Nrk P1 Mre Og Ro",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_more_og_romsdal_mp3_h"
-      },
-      {
         "name": "Thean Tamil Osai",
         "url": "http://centova71.instainternet.com:9100/stream"
-      },
-      {
-        "name": "Nrk P1 Sogn Og F",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_sogn_og_fjordane_aac_h"
       },
       {
         "name": "1Fm Jz",
@@ -183830,10 +182038,6 @@
         "url": "https://cast6.asurahosting.com/proxy/voiceofb/stream"
       },
       {
-        "name": "Cjtb 93.1 Fm",
-        "url": "https://stream2.statsradio.com:8112/stream"
-      },
-      {
         "name": "Chev Exploits Co",
         "url": "http://janus.shoutca.st:8538/stream"
       },
@@ -183996,10 +182200,6 @@
       {
         "name": "Moose Fm 99.3 -",
         "url": "https://vistaradio.streamb.live/SB00102"
-      },
-      {
-        "name": "105.5 The Moose",
-        "url": "https://vistaradio.streamb.live/SB00116"
       },
       {
         "name": "Cntry 102",
@@ -184184,10 +182384,6 @@
       {
         "name": "La Mexicana Rad",
         "url": "https://www.ophanim.net:8444/s/7220"
-      },
-      {
-        "name": "Kpcw 91.7 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KPCWFM.mp3"
       }
     ]
   },
@@ -184550,10 +182746,6 @@
         "url": "https://stream.radio.co/s291300354/listen"
       },
       {
-        "name": "Ksdj New Rk 90.7",
-        "url": "https://ksdj.stream.creek.fm/stream"
-      },
-      {
         "name": "Kisd Oldies Chan",
         "url": "https://crystalout.surfernetwork.com:8001/KISD-FM_MP3"
       },
@@ -184588,10 +182780,6 @@
       {
         "name": "Kool 1180 - Wskp",
         "url": "https://crystalout.surfernetwork.com:8001/WSKP-AM_MP3"
-      },
-      {
-        "name": "Jammin 107.7 - W",
-        "url": "https://crystalout.surfernetwork.com:8001/WWRX_MP3"
       },
       {
         "name": "Wdup 92.9Fm",
@@ -185446,10 +183634,6 @@
         "url": "https://ec2s.crolive.com.hr:1295/stream"
       },
       {
-        "name": "Rad 1 Fm 105.6",
-        "url": "https://azuracast.novi-net.net/radio/8020/radio1.aac"
-      },
-      {
         "name": "Sjeverni Fm 92.8",
         "url": "https://live.sjeverni.fm/radio/8000/radio.mp3"
       },
@@ -185460,10 +183644,6 @@
       {
         "name": "Rad Ludbreg",
         "url": "https://a1.asurahosting.com/listen/radioludbreg/radio.mp3"
-      },
-      {
-        "name": "Rad Max Fm 99.3",
-        "url": "https://azuracast.novi-net.net/radio/8010/radiomax.aac"
       },
       {
         "name": "Rad Banovina 96.",
@@ -186578,14 +184758,6 @@
     },
     "urls": [
       {
-        "name": "Kalaallit Nunaat",
-        "url": "https://ice.cr1.streamzilla.xlcdn.com:8000/sz=knr=audio192"
-      },
-      {
-        "name": "Cjtb 93.1 Fm",
-        "url": "https://stream2.statsradio.com:8112/stream"
-      },
-      {
         "name": "Chev Exploits Co",
         "url": "http://janus.shoutca.st:8538/stream"
       },
@@ -187688,10 +185860,6 @@
       {
         "name": "Forkstalk 96.7 H",
         "url": "https://ice5.securenetsystems.net/KBDB"
-      },
-      {
-        "name": "Oly Clsic Rk 100",
-        "url": "https://s9.reliastream.com/proxy/mike?mp=/stream"
       }
     ]
   },
@@ -187954,10 +186122,6 @@
         "url": "http://6471.cloudrad.io:8178/theferry.mp3"
       },
       {
-        "name": "Nrk P1 Sogn Og F",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_sogn_og_fjordane_aac_h"
-      },
-      {
         "name": "Rad102",
         "url": "https://stream.radio102.no/radio102_hq"
       },
@@ -188025,10 +186189,6 @@
       "e": 30.7233
     },
     "urls": [
-      {
-        "name": "Fm1 Pershe Rad 8",
-        "url": "http://radio.grad.ua:8000/radio1-128"
-      },
       {
         "name": "Garmonia Mira",
         "url": "https://garmonia-stream.fakel.com.ua/1"
@@ -188304,10 +186464,6 @@
       {
         "name": "Dj Utahpablo Str",
         "url": "http://149.56.157.81:8093/stream/;"
-      },
-      {
-        "name": "Kpcw 91.7 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KPCWFM.mp3"
       }
     ]
   },
@@ -189686,10 +187842,6 @@
         "url": "http://205.134.192.90:8930/;"
       },
       {
-        "name": "Oly Clsic Rk 100",
-        "url": "https://s9.reliastream.com/proxy/mike?mp=/stream"
-      },
-      {
         "name": "Kbrd Rad Am 680",
         "url": "http://205.134.192.90:680/;"
       },
@@ -189720,10 +187872,6 @@
       {
         "name": "Rad Olympos 100.",
         "url": "http://eco.onestreaming.com:8146/;"
-      },
-      {
-        "name": "Lato 103.3 Fm",
-        "url": "https://stream.latofm.gr/latofm"
       },
       {
         "name": "Rad 1",
@@ -190236,10 +188384,6 @@
       {
         "name": "Cilu 102.7 Fm",
         "url": "http://luradio-server.lakeheadu.ca:8000/stereo128/;"
-      },
-      {
-        "name": "Rockin' Eagle 98",
-        "url": "http://stream.up.net:8000/WGLI"
       },
       {
         "name": "Wmpl Am 920",
@@ -190910,10 +189054,6 @@
     },
     "urls": [
       {
-        "name": "Rad Color 90.3 F",
-        "url": "https://a3.asurahosting.com:7540/radio.mp3"
-      },
-      {
         "name": "Ebs Nouvelle Vag",
         "url": "https://azura.ebsmedia.ro/radio/8130/nouvelle128.mp3"
       }
@@ -191208,10 +189348,6 @@
       {
         "name": "Fm 92 South Simc",
         "url": "https://localradio.streamb.live/SB00097?args=web_01&player_type=popup&uid=abd37260-4635-470e-9076-0d9182c15afb&user_hash=4aByicH96zTlTGZdbImnd0BDKR7xoaLa&gdpr=true&aw_0_req.gdpr=true&listenerid=521e22561bd51ce6ed7217e8dae1b7d8&awparams=companionAds%3Atrue"
-      },
-      {
-        "name": "105.5 The Moose",
-        "url": "https://vistaradio.streamb.live/SB00116"
       },
       {
         "name": "Whistle Fm 102.9",
@@ -191514,20 +189650,8 @@
         "url": "http://86.61.68.81:8000/;stream.nsv"
       },
       {
-        "name": "Rad 1 Fm 105.6",
-        "url": "https://azuracast.novi-net.net/radio/8020/radio1.aac"
-      },
-      {
         "name": "Sjeverni Fm 92.8",
         "url": "https://live.sjeverni.fm/radio/8000/radio.mp3"
-      },
-      {
-        "name": "Rad Max Fm 99.3",
-        "url": "https://azuracast.novi-net.net/radio/8010/radiomax.aac"
-      },
-      {
-        "name": "Rad 105 Selnica",
-        "url": "https://azuracast.novi-net.net/radio/8050/radio105.aac"
       },
       {
         "name": "Rad Aktual",
@@ -191634,10 +189758,6 @@
     },
     "urls": [
       {
-        "name": "Wmeb 91.9 Fm",
-        "url": "http://wmeb-stream.maine.edu:8000/wmeb?a=b"
-      },
-      {
         "name": "Wbfy Fm 100.9 Be",
         "url": "https://ice66.securenetsystems.net/WBFY"
       },
@@ -191728,10 +189848,6 @@
       {
         "name": "Novoe Rad Fm 98.",
         "url": "https://live.novoeradio.by:444/live/novoeradio_aac128/icecast.audio"
-      },
-      {
-        "name": "Legendy Fm | Fm",
-        "url": "http://live.legendy.by:8000/legendyfm"
       }
     ]
   },
@@ -193086,10 +191202,6 @@
     },
     "urls": [
       {
-        "name": "Project Xy",
-        "url": "https://flux.saaslys.com:8000/radio.mp3"
-      },
-      {
         "name": "Rad Armenie Fm 1",
         "url": "http://direct.radioarmenie.com:9029/stream/;"
       },
@@ -193216,10 +191328,6 @@
       {
         "name": "Ourense Si Rad",
         "url": "http://82.223.29.65:8080/Ourense"
-      },
-      {
-        "name": "Rdio Montalegre",
-        "url": "http://centova.radios.pt:9566/;"
       },
       {
         "name": "Rdio Forum Botic",
@@ -194904,10 +193012,6 @@
       {
         "name": "Rad Aguilar 107.",
         "url": "https://pr1cen101.emisionlocal.com/proxy/radioaguilar?mp=/stream"
-      },
-      {
-        "name": "Anda Onda Lerma",
-        "url": "https://topradio.uno:8006/stream"
       }
     ]
   },
@@ -195480,10 +193584,6 @@
       {
         "name": "Big Cabbage Rad",
         "url": "https://radiofreepalmer.streamguys1.com/live"
-      },
-      {
-        "name": "Magic 98.9 - Kym",
-        "url": "https://n15b-e2.revma.ihrhls.com/zc3018"
       },
       {
         "name": "Khcx 90.9 Fm",
@@ -197358,10 +195458,6 @@
     },
     "urls": [
       {
-        "name": "Kpcw 91.7 Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KPCWFM.mp3"
-      },
-      {
         "name": "97.1 Zht",
         "url": "https://stream.revma.ihrhls.com/zc2405"
       },
@@ -197440,10 +195536,6 @@
       {
         "name": "Pat Hobbs",
         "url": "http://janus.cdnstream.com:5575/stream"
-      },
-      {
-        "name": "Jack Fm 95.7",
-        "url": "https://stream.affordablestreaming.com/KPKR.mp3"
       }
     ]
   },
@@ -198184,10 +196276,6 @@
       {
         "name": "Rad Ues",
         "url": "https://streamingcwsradio30.com/8164/stream"
-      },
-      {
-        "name": "Exa Fm",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/XHQT_SC"
       },
       {
         "name": "Poderosa 104.7 F",
@@ -198992,10 +197080,6 @@
       {
         "name": "Ptrk Rad",
         "url": "https://radio.ptrk.tv/PTRK"
-      },
-      {
-        "name": "Fm 104.4",
-        "url": "https://stream.topradio.in.ua/topradio.mp3"
       }
     ]
   },
@@ -199248,10 +197332,6 @@
       {
         "name": "Wjmf-Lp Fm 87.7",
         "url": "https://ice-1.streamhoster.com/lv_wfs_043--broadcast1"
-      },
-      {
-        "name": "Rk 104 Fm",
-        "url": "https://ice64.securenetsystems.net/WXRR"
       },
       {
         "name": "Wjsu-Fm 88.5",
@@ -199636,10 +197716,6 @@
       {
         "name": "Rad Alpenwelle",
         "url": "https://live.alpenwelle.de/alpenwelle128.mp3"
-      },
-      {
-        "name": "Rad Schwaben - T",
-        "url": "https://s35.derstream.net/top50radio.mp3"
       },
       {
         "name": "Top Fm",
@@ -200074,10 +198150,6 @@
         "url": "https://streaming.viveradio.es/viveburgos"
       },
       {
-        "name": "Anda Onda Lerma",
-        "url": "https://topradio.uno:8006/stream"
-      },
-      {
         "name": "La Voz De Medina",
         "url": "https://s28.myradiostream.com:13006/listen.mp3"
       }
@@ -200394,10 +198466,6 @@
         "url": "http://live.canstream.co.uk:8000/phoenix.mp3"
       },
       {
-        "name": "Al Mubarak Rad",
-        "url": "https://relay.emasjidlive.uk/almubarakradio"
-      },
-      {
         "name": "Marefa Rad",
         "url": "http://philae.shoutca.st:8054/;"
       },
@@ -200640,10 +198708,6 @@
       {
         "name": "Chnl Am 610",
         "url": "https://newcap.leanstream.co/CHNLAM"
-      },
-      {
-        "name": "Ckqr Fm 99.3 The",
-        "url": "https://vistaradio.streamb.live/SB00085"
       },
       {
         "name": "Ckvs-Fm 93.7",
@@ -204100,10 +202164,6 @@
       {
         "name": "Novoe Rad Fm 98.",
         "url": "https://live.novoeradio.by:444/live/novoeradio_aac128/icecast.audio"
-      },
-      {
-        "name": "Legendy Fm | Fm",
-        "url": "http://live.legendy.by:8000/legendyfm"
       }
     ]
   },
@@ -204188,10 +202248,6 @@
       {
         "name": "Kisd Oldies Chan",
         "url": "https://crystalout.surfernetwork.com:8001/KISD-FM_MP3"
-      },
-      {
-        "name": "Ksdj New Rk 90.7",
-        "url": "https://ksdj.stream.creek.fm/stream"
       },
       {
         "name": "Kxlg 99.1 Fm - K",
@@ -204806,10 +202862,6 @@
     },
     "urls": [
       {
-        "name": "Nova Hts Rad",
-        "url": "https://centova.hostingtico.com:7006/stream"
-      },
-      {
         "name": "Reggae Mstico Ra",
         "url": "https://stream.zeno.fm/nt3g6u0pe6quv"
       }
@@ -205017,10 +203069,6 @@
       "e": -79.9959
     },
     "urls": [
-      {
-        "name": "Kih35 Noaa Weath",
-        "url": "https://radio.weatherusa.net/NWR/KIH35.mp3"
-      },
       {
         "name": "Static X Rad Rel",
         "url": "http://162.244.80.106:10859/stream/"
@@ -206478,10 +204526,6 @@
         "url": "http://radioservis.me:8010/antenamlive"
       },
       {
-        "name": "Play Montenegro",
-        "url": "http://stream.playradio.me:8001/play-me.aac"
-      },
-      {
         "name": "Rad Budva Fm 98.",
         "url": "https://c8.radioboss.fm:18199/stream"
       },
@@ -207083,10 +205127,6 @@
         "url": "http://sh.onweb.gr:8816/;stream"
       },
       {
-        "name": "Life 106.3",
-        "url": "http://cast.streams.ovh:9130/live"
-      },
-      {
         "name": "City 106.1 Fm",
         "url": "https://radio.lancom.gr:9012/stream5"
       },
@@ -207161,10 +205201,6 @@
       {
         "name": "Rad Bimbo",
         "url": "https://radiobim-danidi01.radioca.st/stream"
-      },
-      {
-        "name": "Rad Studio 93",
-        "url": "https://onair15.xdevel.com/proxy/radiostudio93?mp=/;stream/;"
       },
       {
         "name": "Solo Rad",
@@ -207395,10 +205431,6 @@
     },
     "urls": [
       {
-        "name": "Choc 88.7",
-        "url": "https://stream2.statsradio.com:8110/stream"
-      },
-      {
         "name": "Rad Qubec Cntry",
         "url": "https://play.quebec-country.com/"
       },
@@ -207442,10 +205474,6 @@
       "e": 4.0986
     },
     "urls": [
-      {
-        "name": "Latitude 95.8",
-        "url": "https://latitude.ice.infomaniak.ch/troyes.aac?ver=829176"
-      },
       {
         "name": "Selectro Rad",
         "url": "https://radio7.pro-fhi.net/live/Selectro%20Radio"
@@ -208631,10 +206659,6 @@
     },
     "urls": [
       {
-        "name": "Tuff City Rad 90",
-        "url": "https://stream.aiir.com/zzrrqgywgaptv"
-      },
-      {
         "name": "Cjmp 90.1 Fm",
         "url": "https://usa2.fastcast4u.com/proxy/terjoyce?mp=/1&1584650169522"
       }
@@ -208657,18 +206681,6 @@
       {
         "name": "Hit Mix 106",
         "url": "https://bayshore-ais.leanstream.co/CIXKFM"
-      }
-    ]
-  },
-  "Port Jervis N,US": {
-    "coords": {
-      "n": 41.3751,
-      "e": -74.6927
-    },
-    "urls": [
-      {
-        "name": "Rad Catskill - W",
-        "url": "https://stream.rcast.net/69645"
       }
     ]
   },
@@ -209677,10 +207689,6 @@
       {
         "name": "Rad Stereo Sound",
         "url": "http://162.244.80.30:8043/stream"
-      },
-      {
-        "name": "Rad City Light F",
-        "url": "http://nr5.newradio.it:8651/stream"
       }
     ]
   },
@@ -210343,10 +208351,6 @@
         "url": "http://nr8.newradio.it:9205/stream?type=http&nocache=94918/;"
       },
       {
-        "name": "Ritmo 80",
-        "url": "https://ice02.fluidstream.net/ritmo80.aac"
-      },
-      {
         "name": "Maratea Web Rad",
         "url": "http://148.251.43.231:8042/stream"
       },
@@ -210733,10 +208737,6 @@
       {
         "name": "Wupf 107.3 Fm Ea",
         "url": "https://ice64.securenetsystems.net/WUPF"
-      },
-      {
-        "name": "Public Rad 90 Wn",
-        "url": "https://wnmu.streamguys1.com/wnmu-fm"
       }
     ]
   },
@@ -210845,10 +208845,6 @@
       {
         "name": "M80 Rad Andaluci",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/M80RADIO.mp3"
-      },
-      {
-        "name": "Rad Cullar Fm 10",
-        "url": "https://streaming2.elitecomunicacion.es:8120/stream?type=.mp3/;"
       }
     ]
   },
@@ -211138,10 +209134,6 @@
       "e": -88.2609
     },
     "urls": [
-      {
-        "name": "Wyml Fm 99.9",
-        "url": "https://seahorse.juststreamwith.us:8000/stream"
-      },
       {
         "name": "Fire 65 Alternat",
         "url": "https://streaming.live365.com/a24922"
@@ -211753,10 +209745,6 @@
       {
         "name": "Rad Holidej Fm 1",
         "url": "https://stream.zeno.fm/3mdkkf9hgg0uv"
-      },
-      {
-        "name": "Life 106.3",
-        "url": "http://cast.streams.ovh:9130/live"
       },
       {
         "name": "Rad Lehovo 97.1",
@@ -212735,10 +210723,6 @@
         "url": "https://s17.myradiostream.com/8742/listen.mp3"
       },
       {
-        "name": "Life 106.3",
-        "url": "http://cast.streams.ovh:9130/live"
-      },
-      {
         "name": "Party 97.1",
         "url": "http://s1.onweb.gr:8824/;"
       },
@@ -212765,10 +210749,6 @@
       {
         "name": "Sjeverni Fm 92.8",
         "url": "https://live.sjeverni.fm/radio/8000/radio.mp3"
-      },
-      {
-        "name": "Rad Max Fm 99.3",
-        "url": "https://azuracast.novi-net.net/radio/8010/radiomax.aac"
       },
       {
         "name": "Rad Megaton Fm 1",
@@ -213261,10 +211241,6 @@
       {
         "name": "Nare Stereo",
         "url": "https://play8.tikast.com/proxy/nare?mp=/stream"
-      },
-      {
-        "name": "Impacto Estereo",
-        "url": "https://cloudstream2036.conectarhosting.com/8206/stream"
       },
       {
         "name": "Voz Claveriana",
@@ -215191,10 +213167,6 @@
     },
     "urls": [
       {
-        "name": "Sawt Al Hayat",
-        "url": "https://sawtalhayat-rojavaradio.radioca.st/stream"
-      },
-      {
         "name": "Yagrto Rad Duhok",
         "url": "https://stream.zeno.fm/ud0wera9hy2vv"
       },
@@ -215209,30 +213181,6 @@
       {
         "name": "Farah Fm 97.3",
         "url": "https://radio.farah.fm/?type=http"
-      }
-    ]
-  },
-  "Qingdao,CN": {
-    "coords": {
-      "n": 36.0671,
-      "e": 120.3826
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
-  "Qingyuan,CN": {
-    "coords": {
-      "n": 23.6818,
-      "e": 113.056
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -215413,10 +213361,6 @@
       {
         "name": "Rad Touristique",
         "url": "http://slmusic.info:9984/;"
-      },
-      {
-        "name": "Choc 88.7",
-        "url": "https://stream2.statsradio.com:8110/stream"
       },
       {
         "name": "Cool Fm 103.5",
@@ -218550,10 +216494,6 @@
       {
         "name": "Rad Wattenscheid",
         "url": "https://mkotko00-radiohosting.radioca.st/1"
-      },
-      {
-        "name": "Kick Fm",
-        "url": "https://icecast.kickfm.eu/mp3-high"
       }
     ]
   },
@@ -220204,10 +218144,6 @@
     },
     "urls": [
       {
-        "name": "Rad Agira",
-        "url": "https://nrf1.newradio.it:9618/stream.mp3"
-      },
-      {
         "name": "Rad Onda Due Fm",
         "url": "https://onair18.xdevel.com/proxy/ondadue?mp=/;stream/;"
       },
@@ -220238,10 +218174,6 @@
       {
         "name": "Fm 89.8",
         "url": "https://rdst.win:48980/"
-      },
-      {
-        "name": "Lato 103.3 Fm",
-        "url": "https://stream.latofm.gr/latofm"
       },
       {
         "name": "Kpax",
@@ -220426,10 +218358,6 @@
       {
         "name": "X-I Fm 97.7",
         "url": "http://icecast.365net.is:8000/orbXid.aac"
-      },
-      {
-        "name": "Rv Rs 2",
-        "url": "http://netradio.ruv.is/ras2.mp3"
       },
       {
         "name": "Tvarp Saga Fm 99",
@@ -220672,10 +218600,6 @@
         "url": "https://radio.canstream.co.uk:8120/live.aac"
       },
       {
-        "name": "Get Ready To Roc",
-        "url": "https://streamer.radio.co/s24ae1285c/listen"
-      },
-      {
         "name": "Rhyl Rad",
         "url": "https://a4.asurahosting.com:7120/radio.mp3"
       },
@@ -220702,10 +218626,6 @@
       {
         "name": "Flame Ccr",
         "url": "https://radio.canstream.co.uk:8120/live.aac"
-      },
-      {
-        "name": "Get Ready To Roc",
-        "url": "https://streamer.radio.co/s24ae1285c/listen"
       },
       {
         "name": "Wirral Wave",
@@ -221380,10 +219300,6 @@
         "url": "https://stream.radio.co/sfa8057238/listen"
       },
       {
-        "name": "Wwer 88.1Fm",
-        "url": "https://listen.wwer.org/stream"
-      },
-      {
         "name": "Positive Hts Per",
         "url": "https://positivealtradio.streamguys1.com/wpermp3"
       }
@@ -221575,10 +219491,6 @@
       "e": 1.2032
     },
     "urls": [
-      {
-        "name": "Rad Transparence",
-        "url": "http://37.187.77.45:9000/;"
-      },
       {
         "name": "Rad De La Save F",
         "url": "https://sd-151888.dedibox.fr/proxy/radiodelasave/rdls"
@@ -222872,10 +220784,6 @@
     },
     "urls": [
       {
-        "name": "Espectacular Fm",
-        "url": "http://hd.digitalradio.mx:5980/;stream/1"
-      },
-      {
         "name": "Rad Universidad",
         "url": "https://radio15.servidorderadio.net/8226/stream"
       },
@@ -223220,10 +221128,6 @@
         "url": "https://radio7.pro-fhi.net/listen/altospxi/stream.mp3"
       },
       {
-        "name": "Project Xy",
-        "url": "https://flux.saaslys.com:8000/radio.mp3"
-      },
-      {
         "name": "Rad Scoop Vienne",
         "url": "https://radioscoopvienne.ice.infomaniak.ch/radioscoop-vienne-128.mp3"
       },
@@ -223464,20 +221368,12 @@
     },
     "urls": [
       {
-        "name": "Cjlu 93.9 Fm",
-        "url": "https://harvestersfm.radioca.st/NB"
-      },
-      {
         "name": "Harvesters Fm",
         "url": "https://harvestersciog.radioca.st/CIOG"
       },
       {
         "name": "Kmp3.Ca",
         "url": "http://s40.myradiostream.com:13002/listen.mp3"
-      },
-      {
-        "name": "Avr 97.7 Fm",
-        "url": "https://mbsradio.leanstream.co/CKENFM-MP3"
       },
       {
         "name": "Oldies 96",
@@ -225688,10 +223584,6 @@
         "url": "https://streaming.enacast.com/radiorosselloSD.mp3"
       },
       {
-        "name": "Rdio Juneda 107.",
-        "url": "https://stream.zeno.fm/tnnxu39g4p8uv"
-      },
-      {
         "name": "Rad Fraga Fm 107",
         "url": "https://streaming.enacast.com/radiofraga128.mp3"
       }
@@ -225834,14 +223726,6 @@
       {
         "name": "Oldies 96",
         "url": "https://us9.streamingpulse.com/ssl/oldies96"
-      },
-      {
-        "name": "Cjlu 93.9 Fm",
-        "url": "https://harvestersfm.radioca.st/NB"
-      },
-      {
-        "name": "Avr 97.7 Fm",
-        "url": "https://mbsradio.leanstream.co/CKENFM-MP3"
       },
       {
         "name": "K100 Ciok-Fm 100",
@@ -226150,10 +224034,6 @@
       {
         "name": "La Red De Pedro",
         "url": "http://149.56.157.81/proxy/pedro?mp=/stream"
-      },
-      {
-        "name": "Wyml Fm 99.9",
-        "url": "https://seahorse.juststreamwith.us:8000/stream"
       }
     ]
   },
@@ -227824,10 +225704,6 @@
         "url": "https://dayv2.meway.host/live"
       },
       {
-        "name": "Rad Studio 93",
-        "url": "https://onair15.xdevel.com/proxy/radiostudio93?mp=/;stream/;"
-      },
-      {
         "name": "Art Rad",
         "url": "https://dreamsiteradiocp3.com/proxy/artradio?mp=/stream"
       },
@@ -228120,10 +225996,6 @@
         "url": "https://us3.streamingpulse.com/ssl/CoveFM"
       },
       {
-        "name": "Cjlu 93.9 Fm",
-        "url": "https://harvestersfm.radioca.st/NB"
-      },
-      {
         "name": "Kiss Fm 103.7",
         "url": "https://a8.asurahosting.com:8020/radio.mp3"
       },
@@ -228312,10 +226184,6 @@
         "url": "http://108.163.245.230:8100/stream"
       },
       {
-        "name": "Jammin 107.7 - W",
-        "url": "https://crystalout.surfernetwork.com:8001/WWRX_MP3"
-      },
-      {
         "name": "Sports Cntry Rad",
         "url": "https://streaming.live365.com/a02612"
       },
@@ -228408,10 +226276,6 @@
         "url": "https://stream.statsradio.com:8060/stream"
       },
       {
-        "name": "Choc 88.7",
-        "url": "https://stream2.statsradio.com:8110/stream"
-      },
-      {
         "name": "Chox",
         "url": "https://stream.statsradio.com:8052/stream"
       }
@@ -228475,10 +226339,6 @@
       "e": -2.7967
     },
     "urls": [
-      {
-        "name": "Star St. Andrews",
-        "url": "https://stream.standrewsradio.com/stream.mp3"
-      },
       {
         "name": "Rad North Angus",
         "url": "http://uk3-vn.mixstream.net:8192/stream"
@@ -228776,14 +226636,6 @@
         "url": "https://stream2.statsradio.com:8026/stream"
       },
       {
-        "name": "Cjlu 93.9 Fm",
-        "url": "https://harvestersfm.radioca.st/NB"
-      },
-      {
-        "name": "Avr 97.7 Fm",
-        "url": "https://mbsradio.leanstream.co/CKENFM-MP3"
-      },
-      {
         "name": "Oldies 96",
         "url": "https://us9.streamingpulse.com/ssl/oldies96"
       },
@@ -228840,14 +226692,6 @@
         "url": "https://mbsradio-ais.leanstream.co/CIOKFM-MP3"
       },
       {
-        "name": "Cjlu 93.9 Fm",
-        "url": "https://harvestersfm.radioca.st/NB"
-      },
-      {
-        "name": "Avr 97.7 Fm",
-        "url": "https://mbsradio.leanstream.co/CKENFM-MP3"
-      },
-      {
         "name": "Oldies 96",
         "url": "https://us9.streamingpulse.com/ssl/oldies96"
       },
@@ -228866,10 +226710,6 @@
       {
         "name": "Hippie Soul Cafe",
         "url": "https://ec2.yesstreaming.net:2350/;"
-      },
-      {
-        "name": "Soggy Dollar Rad",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SAM06AAC287.mp3"
       },
       {
         "name": "Z Gospel Rad",
@@ -229324,10 +227164,6 @@
         "url": "https://orf-live.ors-shoutcast.at/bgl-q1a"
       },
       {
-        "name": "Radioypsilon Fm",
-        "url": "http://mp3.radioypsilon.at:8000/mp3-160"
-      },
-      {
         "name": "Musikwelle Fm 10",
         "url": "https://stream.stadtradio.at:8000/live"
       },
@@ -229428,10 +227264,6 @@
         "url": "http://8500.go2stream.fr:8000/stream"
       },
       {
-        "name": "Mrc Rad",
-        "url": "https://www.radioking.com/play/mrcradio"
-      },
-      {
         "name": "Rad Zinzine",
         "url": "http://91.121.65.189:8000/zinzine-aix"
       },
@@ -229478,10 +227310,6 @@
       {
         "name": "Thme Rad 90.3 &",
         "url": "https://stream.votreradiosurlenet.eu/themeradio.mp3"
-      },
-      {
-        "name": "Latitude 95.8",
-        "url": "https://latitude.ice.infomaniak.ch/troyes.aac?ver=829176"
       },
       {
         "name": "Selectro Rad",
@@ -229818,10 +227646,6 @@
       {
         "name": "Active Rad",
         "url": "http://manager.streaming-ingenierie.fr:8028/;"
-      },
-      {
-        "name": "Latitude 95.8",
-        "url": "https://latitude.ice.infomaniak.ch/troyes.aac?ver=829176"
       }
     ]
   },
@@ -229874,10 +227698,6 @@
       {
         "name": "Rad Touristique",
         "url": "http://slmusic.info:9984/;"
-      },
-      {
-        "name": "Choc 88.7",
-        "url": "https://stream2.statsradio.com:8110/stream"
       }
     ]
   },
@@ -229970,10 +227790,6 @@
       {
         "name": "Kw Rock_!",
         "url": "http://usa7.fastcast4u.com:5230/stream"
-      },
-      {
-        "name": "Rad Transparence",
-        "url": "http://37.187.77.45:9000/;"
       },
       {
         "name": "Notylus",
@@ -230166,10 +227982,6 @@
       {
         "name": "Rad Zinzine",
         "url": "http://91.121.65.189:8000/3"
-      },
-      {
-        "name": "Antithse Rad",
-        "url": "https://listen.radioking.com/radio/11549/stream/63448"
       }
     ]
   },
@@ -230182,10 +227994,6 @@
       {
         "name": "Rdb Rad Des Bout",
         "url": "https://vps.cbad.fr/rdb.mp3"
-      },
-      {
-        "name": "Project Xy",
-        "url": "https://flux.saaslys.com:8000/radio.mp3"
       },
       {
         "name": "Crock Rad",
@@ -230382,10 +228190,6 @@
       {
         "name": "Rad Krimi",
         "url": "http://radio13.pro-fhi.net:9240/stream"
-      },
-      {
-        "name": "Sensations Alpes",
-        "url": "https://sensationsalpes.ice.infomaniak.ch/sensationsalpes-128.mp3"
       },
       {
         "name": "Nov Fm 93.1",
@@ -230662,10 +228466,6 @@
       {
         "name": "Couleurs Fm 97.1",
         "url": "http://mixie.fr:8000/Couleursfm"
-      },
-      {
-        "name": "Project Xy",
-        "url": "https://flux.saaslys.com:8000/radio.mp3"
       }
     ]
   },
@@ -230726,10 +228526,6 @@
       {
         "name": "Mixaradio",
         "url": "https://manager7.streamradio.fr:2485/stream"
-      },
-      {
-        "name": "Mrc Rad",
-        "url": "https://www.radioking.com/play/mrcradio"
       },
       {
         "name": "Graf'Hit Fm 94.9",
@@ -230808,10 +228604,6 @@
         "url": "https://radioscoopsaintetienne.ice.infomaniak.ch/radioscoop-stetienne-128.mp3"
       },
       {
-        "name": "Project Xy",
-        "url": "https://flux.saaslys.com:8000/radio.mp3"
-      },
-      {
         "name": "Crock Rad",
         "url": "https://stric6.streamakaci.com/crock.mp3"
       }
@@ -230880,10 +228672,6 @@
         "url": "http://149.56.234.138:8149/stream"
       },
       {
-        "name": "Choc 88.7",
-        "url": "https://stream2.statsradio.com:8110/stream"
-      },
-      {
         "name": "Chox",
         "url": "https://stream.statsradio.com:8052/stream"
       }
@@ -230930,10 +228718,6 @@
       {
         "name": "Notylus",
         "url": "https://radio.notylus.fr:8001/notylusradio.mp3"
-      },
-      {
-        "name": "Rad Transparence",
-        "url": "http://37.187.77.45:9000/;"
       },
       {
         "name": "Rad De La Save F",
@@ -231716,10 +229500,6 @@
     },
     "urls": [
       {
-        "name": "B106.1 Wbbx",
-        "url": "https://ice66.securenetsystems.net/WBBX"
-      },
-      {
         "name": "Dpr - Wscl 89.5",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WSCLFM_SC"
       },
@@ -231935,10 +229715,6 @@
       "e": -111.891
     },
     "urls": [
-      {
-        "name": "America'S Cntry",
-        "url": "https://ais-sa2.cdnstream1.com/1976_128.mp3"
-      },
       {
         "name": "Kkat",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KKATAMAAC.aac"
@@ -232622,10 +230398,6 @@
       {
         "name": "Rad Krimi",
         "url": "http://radio13.pro-fhi.net:9240/stream"
-      },
-      {
-        "name": "Sensations Alpes",
-        "url": "https://sensationsalpes.ice.infomaniak.ch/sensationsalpes-128.mp3"
       }
     ]
   },
@@ -233139,10 +230911,6 @@
       "e": -98.2021
     },
     "urls": [
-      {
-        "name": "Rad Uaeh Fm 99.7",
-        "url": "https://www.uaeh.edu.mx/radio-shoutcast-sanbartolo/;"
-      },
       {
         "name": "Rad Crystal Fm 1",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/XHMYFMAAC.aac"
@@ -235708,10 +233476,6 @@
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/XHXFAAC.aac"
       },
       {
-        "name": "Espectacular Fm",
-        "url": "http://hd.digitalradio.mx:5980/;stream/1"
-      },
-      {
         "name": "Rad San Miguel -",
         "url": "https://stream.zeno.fm/nefa2awy55vtv"
       },
@@ -236486,10 +234250,6 @@
       {
         "name": "Rad Nova Ions 97",
         "url": "http://nr8.newradio.it:9099/stream/;"
-      },
-      {
-        "name": "Ritmo 80",
-        "url": "https://ice02.fluidstream.net/ritmo80.aac"
       },
       {
         "name": "Rad S. Maria Dei",
@@ -237524,10 +235284,6 @@
         "url": "https://dc5.serverse.com/proxy/pbmhbvxs/stream"
       },
       {
-        "name": "Sawtalshaab Fm 9",
-        "url": "http://sirius.shoutca.st:8390/index"
-      },
-      {
         "name": "Mix Fm 105.5",
         "url": "https://s1.voscast.com:11377/live.mp3"
       },
@@ -237792,10 +235548,6 @@
         "url": "http://199.231.117.18:8004/listen"
       },
       {
-        "name": "Ckqr Fm 99.3 The",
-        "url": "https://vistaradio.streamb.live/SB00085"
-      },
-      {
         "name": "107.5 2Day Fm",
         "url": "https://vistaradio.streamb.live/SB00075"
       },
@@ -237934,10 +235686,6 @@
       {
         "name": "Radius 106,6",
         "url": "http://develop.servus.at:8000/radius"
-      },
-      {
-        "name": "Radioypsilon Fm",
-        "url": "http://mp3.radioypsilon.at:8000/mp3-160"
       },
       {
         "name": "Musikwelle Fm 10",
@@ -238608,10 +236356,6 @@
         "url": "https://stream2.xdevel.com/audio5s194-48/stream/icecast.audio"
       },
       {
-        "name": "Rad Agira",
-        "url": "https://nrf1.newradio.it:9618/stream.mp3"
-      },
-      {
         "name": "Rad Castell'Umbe",
         "url": "https://eu1.fastcast4u.com/proxy/discorin?mp=/;"
       }
@@ -238702,10 +236446,6 @@
       {
         "name": "Rad Ascoli Fm 87",
         "url": "https://ice09.fluidstream.net/fluid0909.mp3"
-      },
-      {
-        "name": "Rad City Light F",
-        "url": "http://nr5.newradio.it:8651/stream"
       }
     ]
   },
@@ -240424,10 +238164,6 @@
         "url": "http://163.172.198.16:8322/;stream.nsv"
       },
       {
-        "name": "Voces 89.4 Fm",
-        "url": "https://sonic.paulatina.co/8084/stream"
-      },
-      {
         "name": "Popular Stereo F",
         "url": "https://radio30.virtualtronics.com/proxy/popularst?mp=/stream"
       },
@@ -241226,10 +238962,6 @@
       {
         "name": "Rad Galicia Cade",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_GALICIAAAC.aac"
-      },
-      {
-        "name": "Rad Lider 97.7 F",
-        "url": "https://server8.emitironline.com:18520/stream"
       },
       {
         "name": "Radiovoz Compost",
@@ -245256,10 +242988,6 @@
     },
     "urls": [
       {
-        "name": "Scariff Bay Cr F",
-        "url": "https://s4.radio.co/s87ac5cf5a/listen"
-      },
-      {
         "name": "Athlone Communit",
         "url": "http://89.101.31.98:88/broadwave.mp3"
       }
@@ -245726,10 +243454,6 @@
       {
         "name": "Rad Schwaben",
         "url": "https://s35.derstream.net/radioschwaben.mp3"
-      },
-      {
-        "name": "Rad Schwaben - T",
-        "url": "https://s35.derstream.net/top50radio.mp3"
       },
       {
         "name": "Rad Schwaben - L",
@@ -246892,10 +244616,6 @@
         "url": "https://hb.trolli.is/stream"
       },
       {
-        "name": "Rv Rs 2",
-        "url": "http://netradio.ruv.is/ras2.mp3"
-      },
-      {
         "name": "Tvarp Saga Fm 99",
         "url": "https://stream.utvarpsaga.is/Hljodver"
       },
@@ -246956,20 +244676,8 @@
     },
     "urls": [
       {
-        "name": "Rad 105 Selnica",
-        "url": "https://azuracast.novi-net.net/radio/8050/radio105.aac"
-      },
-      {
-        "name": "Rad 1 Fm 105.6",
-        "url": "https://azuracast.novi-net.net/radio/8020/radio1.aac"
-      },
-      {
         "name": "Rad Ludbreg",
         "url": "https://a1.asurahosting.com/listen/radioludbreg/radio.mp3"
-      },
-      {
-        "name": "Rad Max Fm 99.3",
-        "url": "https://azuracast.novi-net.net/radio/8010/radiomax.aac"
       },
       {
         "name": "Rad Banovina 96.",
@@ -248628,10 +246336,6 @@
         "url": "http://live.canstream.co.uk:8000/phoenix.mp3"
       },
       {
-        "name": "Al Mubarak Rad",
-        "url": "https://relay.emasjidlive.uk/almubarakradio"
-      },
-      {
         "name": "Vibez Urban",
         "url": "https://listentomystream.com:8019/stream"
       },
@@ -248718,10 +246422,6 @@
       {
         "name": "Fm90.3",
         "url": "http://211.72.230.118:8081/"
-      },
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -248738,30 +246438,6 @@
       {
         "name": "Rcb Rad",
         "url": "http://178.33.135.245:3074/stream/;"
-      }
-    ]
-  },
-  "Shantou,CN": {
-    "coords": {
-      "n": 23.4667,
-      "e": 116.756
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
-  "Shaoyang,CN": {
-    "coords": {
-      "n": 27.2389,
-      "e": 111.4677
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -248898,14 +246574,6 @@
       {
         "name": "Cfta Fm 107.9",
         "url": "https://s15.myradiostream.com/:14808/stream.mp3?_=1"
-      },
-      {
-        "name": "Cjlu 93.9 Fm",
-        "url": "https://harvestersfm.radioca.st/NB"
-      },
-      {
-        "name": "Avr 97.7 Fm",
-        "url": "https://mbsradio.leanstream.co/CKENFM-MP3"
       },
       {
         "name": "Q93",
@@ -249142,30 +246810,6 @@
       {
         "name": "My 95.7 Fm - Kda",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KDALFMAAC.aac"
-      }
-    ]
-  },
-  "Shenyang,CN": {
-    "coords": {
-      "n": 41.8057,
-      "e": 123.4315
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
-  "Shenzhen,CN": {
-    "coords": {
-      "n": 22.5431,
-      "e": 114.0579
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -249519,10 +247163,6 @@
       "e": 22.1997
     },
     "urls": [
-      {
-        "name": "Life 106.3",
-        "url": "http://cast.streams.ovh:9130/live"
-      },
       {
         "name": "Rad Time Fm",
         "url": "https://s2.free-shoutcast.com/stream/18058"
@@ -250168,10 +247808,6 @@
         "url": "https://ice-11.spilarinn.is/zfmextra"
       },
       {
-        "name": "Rv Rs 2",
-        "url": "http://netradio.ruv.is/ras2.mp3"
-      },
-      {
         "name": "Tvarp Saga Fm 99",
         "url": "https://stream.utvarpsaga.is/Hljodver"
       },
@@ -250642,10 +248278,6 @@
       {
         "name": "Kastamonu 105 Fm",
         "url": "https://radyo.yayin.com.tr:4264/;"
-      },
-      {
-        "name": "Fm 104.4",
-        "url": "https://stream.topradio.in.ua/topradio.mp3"
       },
       {
         "name": "Megapolis Fm 105",
@@ -251314,10 +248946,6 @@
       {
         "name": "Wnox Fm 98.7",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WOKIFMAAC.aac"
-      },
-      {
-        "name": "Ksdj New Rk 90.7",
-        "url": "https://ksdj.stream.creek.fm/stream"
       },
       {
         "name": "Krgt Rk Garden T",
@@ -252082,10 +249710,6 @@
       {
         "name": "Lake 96.1 - Wlkg",
         "url": "http://us2.maindigitalstream.com:7230/stream"
-      },
-      {
-        "name": "Wyml Fm 99.9",
-        "url": "https://seahorse.juststreamwith.us:8000/stream"
       }
     ]
   },
@@ -252186,10 +249810,6 @@
       {
         "name": "Kjoe Rad 106.1 F",
         "url": "https://crystalout.surfernetwork.com:8001/KJOE-FM_MP3"
-      },
-      {
-        "name": "Ksdj New Rk 90.7",
-        "url": "https://ksdj.stream.creek.fm/stream"
       },
       {
         "name": "Krgt Rk Garden T",
@@ -253416,10 +251036,6 @@
         "url": "https://firstfm.stream.laut.fm/firstfm"
       },
       {
-        "name": "Kick Fm",
-        "url": "https://icecast.kickfm.eu/mp3-high"
-      },
-      {
         "name": "Rad Paindusoir L",
         "url": "http://usa15.fastcast4u.com:8069/stream/;"
       }
@@ -253772,10 +251388,6 @@
         "url": "https://nradio.ice.infomaniak.ch/nradio-32.aac"
       },
       {
-        "name": "Latitude 95.8",
-        "url": "https://latitude.ice.infomaniak.ch/troyes.aac?ver=829176"
-      },
-      {
         "name": "Dubissimo",
         "url": "https://stream.zeno.fm/bq72xm4z61zuv"
       }
@@ -253948,10 +251560,6 @@
         "url": "https://pavo.prostreaming.net:8034/stream"
       },
       {
-        "name": "La Mejor 106.3 K",
-        "url": "https://stream.zeno.fm/tli7ww6epazuv"
-      },
-      {
         "name": "The Yosemite Bre",
         "url": "https://ais-edge09-live365-dal02.cdnstream.com/a69632"
       }
@@ -254094,10 +251702,6 @@
       {
         "name": "Orf Rad Burgenla",
         "url": "https://orf-live.ors-shoutcast.at/bgl-q1a"
-      },
-      {
-        "name": "Radioypsilon Fm",
-        "url": "http://mp3.radioypsilon.at:8000/mp3-160"
       },
       {
         "name": "Rve Viena Live",
@@ -254970,10 +252574,6 @@
       {
         "name": "Moose Fm 99.3 -",
         "url": "https://vistaradio.streamb.live/SB00102"
-      },
-      {
-        "name": "105.5 The Moose",
-        "url": "https://vistaradio.streamb.live/SB00116"
       }
     ]
   },
@@ -255070,10 +252670,6 @@
       {
         "name": "Gdradio - Gratef",
         "url": "http://108.163.245.230:8100/stream"
-      },
-      {
-        "name": "Jammin 107.7 - W",
-        "url": "https://crystalout.surfernetwork.com:8001/WWRX_MP3"
       },
       {
         "name": "Wdup 92.9Fm",
@@ -255282,10 +252878,6 @@
       {
         "name": "Rvr Amplepuis Fm",
         "url": "https://live.aurafm.org:7443/rvr-tarareplata"
-      },
-      {
-        "name": "Project Xy",
-        "url": "https://flux.saaslys.com:8000/radio.mp3"
       },
       {
         "name": "Activ Rad Fm 90.",
@@ -255638,10 +253230,6 @@
       {
         "name": "Rad Ascoli Fm 87",
         "url": "https://ice09.fluidstream.net/fluid0909.mp3"
-      },
-      {
-        "name": "Rad City Light F",
-        "url": "http://nr5.newradio.it:8651/stream"
       }
     ]
   },
@@ -255738,10 +253326,6 @@
       {
         "name": "Kxlx Am 700",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KXLXAMAAC.aac"
-      },
-      {
-        "name": "Ckqr Fm 99.3 The",
-        "url": "https://vistaradio.streamb.live/SB00085"
       },
       {
         "name": "Juice Fm 94.1",
@@ -256138,10 +253722,6 @@
       {
         "name": "Cisq - Mountain",
         "url": "https://rogers-hls.leanstream.co/rogers/squ1071.stream/icy"
-      },
-      {
-        "name": "Hellenic Media V",
-        "url": "http://us3.internet-radio.com:8090/live"
       },
       {
         "name": "Connect Fm 91.5",
@@ -257748,10 +255328,6 @@
         "url": "https://crystalout.surfernetwork.com:8001/WSKP-AM_MP3"
       },
       {
-        "name": "Jammin 107.7 - W",
-        "url": "https://crystalout.surfernetwork.com:8001/WWRX_MP3"
-      },
-      {
         "name": "Wdup 92.9Fm",
         "url": "https://s2.voscast.com:9761/stream"
       }
@@ -257810,10 +255386,6 @@
       {
         "name": "Gdradio - Gratef",
         "url": "http://108.163.245.230:8100/stream"
-      },
-      {
-        "name": "Jammin 107.7 - W",
-        "url": "https://crystalout.surfernetwork.com:8001/WWRX_MP3"
       }
     ]
   },
@@ -258224,10 +255796,6 @@
         "url": "http://centova71.instainternet.com:9100/stream"
       },
       {
-        "name": "Nrk P1 Sogn Og F",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_sogn_og_fjordane_aac_h"
-      },
-      {
         "name": "Rad102",
         "url": "https://stream.radio102.no/radio102_hq"
       },
@@ -258324,10 +255892,6 @@
         "url": "http://stream.teracomm.bg:8000/vega_b.mp3"
       },
       {
-        "name": "Life 106.3",
-        "url": "http://cast.streams.ovh:9130/live"
-      },
-      {
         "name": "Epiloges Fm 101",
         "url": "http://ice.streamcloud.mediacdn.com/epiloges1028"
       },
@@ -258390,14 +255954,6 @@
       {
         "name": "Rad Stryn",
         "url": "https://lyd.radiostryn.no/stryn_hq"
-      },
-      {
-        "name": "Nrk P1 Mre Og Ro",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_more_og_romsdal_mp3_h"
-      },
-      {
-        "name": "Nrk P1 Sogn Og F",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_sogn_og_fjordane_aac_h"
       },
       {
         "name": "Ksu 24/7",
@@ -259406,10 +256962,6 @@
       {
         "name": "Harvesters Fm",
         "url": "https://harvestersciog.radioca.st/CIOG"
-      },
-      {
-        "name": "Avr 97.7 Fm",
-        "url": "https://mbsradio.leanstream.co/CKENFM-MP3"
       }
     ]
   },
@@ -260001,10 +257553,6 @@
         "url": "https://stream.zeno.fm/brq1w7cu44zuv"
       },
       {
-        "name": "Hellenic Media V",
-        "url": "http://us3.internet-radio.com:8090/live"
-      },
-      {
         "name": "Cisq - Mountain",
         "url": "https://rogers-hls.leanstream.co/rogers/squ1071.stream/icy"
       }
@@ -260036,14 +257584,6 @@
       "e": -65.5109
     },
     "urls": [
-      {
-        "name": "Cjlu 93.9 Fm",
-        "url": "https://harvestersfm.radioca.st/NB"
-      },
-      {
-        "name": "Avr 97.7 Fm",
-        "url": "https://mbsradio.leanstream.co/CKENFM-MP3"
-      },
       {
         "name": "Oldies 96",
         "url": "https://us9.streamingpulse.com/ssl/oldies96"
@@ -260206,18 +257746,6 @@
       }
     ]
   },
-  "Suzhou,CN": {
-    "coords": {
-      "n": 31.6544,
-      "e": 120.7525
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
   "Svedalen,SE": {
     "coords": {
       "n": 57.718,
@@ -260332,10 +257860,6 @@
       {
         "name": "Narodni Rad Goga",
         "url": "http://cmr-hosting.com:8440/;"
-      },
-      {
-        "name": "Rad Max Fm 99.3",
-        "url": "https://azuracast.novi-net.net/radio/8010/radiomax.aac"
       },
       {
         "name": "Rad Banovina 96.",
@@ -261422,10 +258946,6 @@
     },
     "urls": [
       {
-        "name": "Banna-Tiran Inte",
-        "url": "https://stream.zeno.fm/ywptdatt40duv"
-      },
-      {
         "name": "Power Jz Ilocos",
         "url": "https://stream.zeno.fm/u26mf5z3f4duv"
       }
@@ -261958,10 +259478,6 @@
         "url": "http://radio.suprememastertv.com:9001/1/;"
       },
       {
-        "name": "I Like Rad",
-        "url": "https://stream.rcs.revma.com/aw9uqyxy2tzuv"
-      },
-      {
         "name": "Icrt Fm100",
         "url": "https://stream.rcs.revma.com/18pd8tztxp3vv"
       },
@@ -262066,10 +259582,6 @@
         "url": "http://radio.suprememastertv.com:9001/1/;"
       },
       {
-        "name": "I Like Rad",
-        "url": "https://stream.rcs.revma.com/aw9uqyxy2tzuv"
-      },
-      {
         "name": "Icrt Fm100",
         "url": "https://stream.rcs.revma.com/18pd8tztxp3vv"
       },
@@ -262154,10 +259666,6 @@
         "url": "http://radio.suprememastertv.com:9001/1/;"
       },
       {
-        "name": "I Like Rad",
-        "url": "https://stream.rcs.revma.com/aw9uqyxy2tzuv"
-      },
-      {
         "name": "Icrt Fm100",
         "url": "https://stream.rcs.revma.com/18pd8tztxp3vv"
       },
@@ -262216,10 +259724,6 @@
       {
         "name": "Supreme Master T",
         "url": "http://radio.suprememastertv.com:9001/1/;"
-      },
-      {
-        "name": "I Like Rad",
-        "url": "https://stream.rcs.revma.com/aw9uqyxy2tzuv"
       },
       {
         "name": "Icrt Fm100",
@@ -262648,10 +260152,6 @@
       {
         "name": "Klassikaraadio",
         "url": "https://icecast.err.ee/klassikaraadio.mp3"
-      },
-      {
-        "name": "Sooviraadio",
-        "url": "http://media.uunox.net:8888/;"
       },
       {
         "name": "Vikerraadio",
@@ -263535,10 +261035,6 @@
     },
     "urls": [
       {
-        "name": "Sensations Alpes",
-        "url": "https://sensationsalpes.ice.infomaniak.ch/sensationsalpes-128.mp3"
-      },
-      {
         "name": "Rad Krimi",
         "url": "http://radio13.pro-fhi.net:9240/stream"
       },
@@ -263705,10 +261201,6 @@
       {
         "name": "Supreme Master T",
         "url": "http://radio.suprememastertv.com:9001/1/;"
-      },
-      {
-        "name": "I Like Rad",
-        "url": "https://stream.rcs.revma.com/aw9uqyxy2tzuv"
       },
       {
         "name": "Icrt Fm100",
@@ -266209,10 +263701,6 @@
       {
         "name": "Thurston County,",
         "url": "https://audio1.broadcastify.com/614867495.mp3"
-      },
-      {
-        "name": "Oly Clsic Rk 100",
-        "url": "https://s9.reliastream.com/proxy/mike?mp=/stream"
       }
     ]
   },
@@ -267103,10 +264591,6 @@
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WMGIFMAAC_SC"
       },
       {
-        "name": "Hi 99",
-        "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WTHIFMAAC"
-      },
-      {
         "name": "Wreb 94.3 Fm",
         "url": "https://das-edge15-live365-dal02.cdnstream.com/a97741"
       },
@@ -267779,10 +265263,6 @@
         "url": "https://play.quebec-country.com/"
       },
       {
-        "name": "Choc 88.7",
-        "url": "https://stream2.statsradio.com:8110/stream"
-      },
-      {
         "name": "Ciax Fm 98.3",
         "url": "https://audio-edge-kef8b.ams.s.radiomast.io/84e54914-30b5-4bf8-aafe-d90ad3d50a3d"
       }
@@ -268277,10 +265757,6 @@
       {
         "name": "Rockenfolie",
         "url": "https://player.rockenfolie.com/;"
-      },
-      {
-        "name": "Sensations Alpes",
-        "url": "https://sensationsalpes.ice.infomaniak.ch/sensationsalpes-128.mp3"
       }
     ]
   },
@@ -268467,10 +265943,6 @@
     },
     "urls": [
       {
-        "name": "Zone Rad Ch",
-        "url": "https://stream.laut.fm/zone/;"
-      },
-      {
         "name": "Bear Metal Rad",
         "url": "https://cast5.asurahosting.com/proxy/bear?mp=/stream"
       },
@@ -268519,10 +265991,6 @@
         "url": "http://luradio-server.lakeheadu.ca:8000/stereo128/;"
       },
       {
-        "name": "Rockin' Eagle 98",
-        "url": "http://stream.up.net:8000/WGLI"
-      },
-      {
         "name": "Wmpl Am 920",
         "url": "http://wmpl.pasty.net:8000/"
       }
@@ -268546,10 +266014,6 @@
       "e": -77.4108
     },
     "urls": [
-      {
-        "name": "Cool Oldies 1450",
-        "url": "http://stream.wthuradio.com:9888/stream/1/"
-      },
       {
         "name": "Holy Fm Rad 24/7",
         "url": "http://s3.voscast.com:10100/;?icy=http"
@@ -269971,10 +267435,6 @@
         "url": "https://usa18.fastcast4u.com/proxy/loudcrymedia6?mp=/1"
       },
       {
-        "name": "Avr 97.7 Fm",
-        "url": "https://mbsradio.leanstream.co/CKENFM-MP3"
-      },
-      {
         "name": "Oldies 96",
         "url": "https://us9.streamingpulse.com/ssl/oldies96"
       },
@@ -270058,10 +267518,6 @@
       "e": -99.1907
     },
     "urls": [
-      {
-        "name": "El Rocanrosaurio",
-        "url": "https://rocanrosaurio-mayeutica.radioca.st/;"
-      },
       {
         "name": "Live Jz Rad",
         "url": "https://stream.freepi.io/8012/live"
@@ -270431,10 +267887,6 @@
     },
     "urls": [
       {
-        "name": "Tuff City Rad 90",
-        "url": "https://stream.aiir.com/zzrrqgywgaptv"
-      },
-      {
         "name": "Cjmp 90.1 Fm",
         "url": "https://usa2.fastcast4u.com/proxy/terjoyce?mp=/1&1584650169522"
       },
@@ -270618,10 +268070,6 @@
       {
         "name": "Cadena Ser Toled",
         "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SER_TOLEDOAAC.aac"
-      },
-      {
-        "name": "Cope Toledo",
-        "url": "https://wecast05-h-cloud.flumotion.com/copesedes/toledo.mp3"
       },
       {
         "name": "Intensa Fm",
@@ -271716,10 +269164,6 @@
         "url": "https://streaming.enacast.com/emunfmradioSD.mp3"
       },
       {
-        "name": "Rdio Juneda 107.",
-        "url": "https://stream.zeno.fm/tnnxu39g4p8uv"
-      },
-      {
         "name": "Rad Fraga Fm 107",
         "url": "https://streaming.enacast.com/radiofraga128.mp3"
       }
@@ -272344,10 +269788,6 @@
         "url": "https://betelgeuse.dribbcast.com/proxy/xassidaonline?mp=/stream"
       },
       {
-        "name": "Rad As Samadiyya",
-        "url": "https://betelgeuse.dribbcast.com/proxy/assamadyya?mp=/stream"
-      },
-      {
         "name": "Al Fayda Fm 90.1",
         "url": "https://usa5.fastcast4u.com/proxy/lyartech?mp=/1"
       },
@@ -272378,10 +269818,6 @@
       {
         "name": "Rad Maria France",
         "url": "https://dreamsiteradiocp6.com/proxy/rmfrance1?mp=/stream"
-      },
-      {
-        "name": "Antithse Rad",
-        "url": "https://listen.radioking.com/radio/11549/stream/63448"
       }
     ]
   },
@@ -272438,10 +269874,6 @@
       {
         "name": "Cfm Rad",
         "url": "https://cdnradio.streamakaci.com/cfmradio.mp3"
-      },
-      {
-        "name": "Rad Transparence",
-        "url": "http://37.187.77.45:9000/;"
       },
       {
         "name": "Rad De La Save F",
@@ -272730,10 +270162,6 @@
       {
         "name": "Flame Ccr",
         "url": "https://radio.canstream.co.uk:8120/live.aac"
-      },
-      {
-        "name": "Get Ready To Roc",
-        "url": "https://streamer.radio.co/s24ae1285c/listen"
       },
       {
         "name": "Capital Xtra",
@@ -274206,10 +271634,6 @@
       {
         "name": "Hitslove Rad",
         "url": "https://a7.asurahosting.com:7090/radio.mp3"
-      },
-      {
-        "name": "Choc 88.7",
-        "url": "https://stream2.statsradio.com:8110/stream"
       }
     ]
   },
@@ -274496,10 +271920,6 @@
     },
     "urls": [
       {
-        "name": "Latitude 95.8",
-        "url": "https://latitude.ice.infomaniak.ch/troyes.aac?ver=829176"
-      },
-      {
         "name": "Selectro Rad",
         "url": "https://radio7.pro-fhi.net/live/Selectro%20Radio"
       },
@@ -274518,10 +271938,6 @@
       {
         "name": "Rdio Trrega",
         "url": "https://streaming.enacast.com/radiotarrega128.mp3"
-      },
-      {
-        "name": "Rdio Juneda 107.",
-        "url": "https://stream.zeno.fm/tnnxu39g4p8uv"
       },
       {
         "name": "Rdio Morell Fm 9",
@@ -274988,10 +272404,6 @@
     },
     "urls": [
       {
-        "name": "Cjtb 93.1 Fm",
-        "url": "https://stream2.statsradio.com:8112/stream"
-      },
-      {
         "name": "Chev Exploits Co",
         "url": "http://janus.shoutca.st:8538/stream"
       },
@@ -275328,10 +272740,6 @@
     },
     "urls": [
       {
-        "name": "Banna-Tiran Inte",
-        "url": "https://stream.zeno.fm/ywptdatt40duv"
-      },
-      {
         "name": "Power Jz Ilocos",
         "url": "https://stream.zeno.fm/u26mf5z3f4duv"
       }
@@ -275370,10 +272778,6 @@
       {
         "name": "Mg Rad Misionera",
         "url": "https://sp5.servidorrprivado.com/6394/stream"
-      },
-      {
-        "name": "El Rocanrosaurio",
-        "url": "https://rocanrosaurio-mayeutica.radioca.st/;"
       },
       {
         "name": "Mexiquense Rad 1",
@@ -275688,10 +273092,6 @@
         "url": "https://sp5.servidorrprivado.com/6394/stream"
       },
       {
-        "name": "El Rocanrosaurio",
-        "url": "https://rocanrosaurio-mayeutica.radioca.st/;"
-      },
-      {
         "name": "Mexiquense Rad 8",
         "url": "https://streamingcwsradio30.com:7049/;"
       }
@@ -275841,18 +273241,6 @@
       }
     ]
   },
-  "Tumwater WA,US": {
-    "coords": {
-      "n": 47.0073,
-      "e": -122.9093
-    },
-    "urls": [
-      {
-        "name": "Oly Clsic Rk 100",
-        "url": "https://s9.reliastream.com/proxy/mike?mp=/stream"
-      }
-    ]
-  },
   "Tunceli,TR": {
     "coords": {
       "n": 39.1062,
@@ -275903,10 +273291,6 @@
       "e": 10.1815
     },
     "urls": [
-      {
-        "name": "Express Fm 103.6",
-        "url": "https://expressfm.ice.infomaniak.ch/expressfm-64.mp3"
-      },
       {
         "name": "Rad Tunisia Med",
         "url": "https://stream.zeno.fm/v7v98w9vhchvv"
@@ -276220,10 +273604,6 @@
         "url": "https://n25a-eu.rcs.revma.com/svdc83t5ad3vv?rj-ttl=5&rj-tok=AAABkNofxwAA4Y4LWSTHHLgebw"
       },
       {
-        "name": "Toradio",
-        "url": "https://nr5.newradio.it/proxy/fsrls?mp=/stream"
-      },
-      {
         "name": "Clsic Rad 70-80-",
         "url": "https://gianni.radioca.st/stream2"
       },
@@ -276338,10 +273718,6 @@
       {
         "name": "Klbs 1330 Am",
         "url": "http://war.str3am.com:7770/klbs"
-      },
-      {
-        "name": "La Mejor 106.3 K",
-        "url": "https://stream.zeno.fm/tli7ww6epazuv"
       },
       {
         "name": "Kcbp 95.5 Fm",
@@ -280340,10 +277716,6 @@
         "url": "https://us2.streamingpulse.com/ssl/kvakfm"
       },
       {
-        "name": "Magic 98.9 - Kym",
-        "url": "https://n15b-e2.revma.ihrhls.com/zc3018"
-      },
-      {
         "name": "Kcam Am 790",
         "url": "https://streams.radiomast.io/kcam"
       }
@@ -280730,10 +278102,6 @@
       {
         "name": "No Rad",
         "url": "http://8500.go2stream.fr:8000/stream"
-      },
-      {
-        "name": "Mrc Rad",
-        "url": "https://www.radioking.com/play/mrcradio"
       },
       {
         "name": "Rad Zinzine",
@@ -281244,10 +278612,6 @@
         "url": "https://play1.radioregional.pt/stream/4/;"
       },
       {
-        "name": "Rdio Montalegre",
-        "url": "http://centova.radios.pt:9566/;"
-      },
-      {
         "name": "Rdio Forum Botic",
         "url": "http://188.93.231.97:9300/;"
       },
@@ -281446,10 +278810,6 @@
       {
         "name": "Ckye Red Fm 93.1",
         "url": "https://ice10.securenetsystems.net/CKYE"
-      },
-      {
-        "name": "Hellenic Media V",
-        "url": "http://us3.internet-radio.com:8090/live"
       },
       {
         "name": "80'S New Wave Ra",
@@ -281712,24 +279072,12 @@
     },
     "urls": [
       {
-        "name": "Rad 1 Fm 105.6",
-        "url": "https://azuracast.novi-net.net/radio/8020/radio1.aac"
-      },
-      {
         "name": "Sjeverni Fm 92.8",
         "url": "https://live.sjeverni.fm/radio/8000/radio.mp3"
       },
       {
         "name": "Rad Ludbreg",
         "url": "https://a1.asurahosting.com/listen/radioludbreg/radio.mp3"
-      },
-      {
-        "name": "Rad Max Fm 99.3",
-        "url": "https://azuracast.novi-net.net/radio/8010/radiomax.aac"
-      },
-      {
-        "name": "Rad 105 Selnica",
-        "url": "https://azuracast.novi-net.net/radio/8050/radio105.aac"
       },
       {
         "name": "Rad Banovina 96.",
@@ -281978,10 +279326,6 @@
       {
         "name": "V2Beat Rad & Tv",
         "url": "https://de1se01.v2beat.live/icecast.audio"
-      },
-      {
-        "name": "Bnr Burgas",
-        "url": "http://stream.bnr.bg:8037/radio-burgas.aac"
       },
       {
         "name": "Rad Iubire",
@@ -282540,10 +279884,6 @@
         "url": "https://play8.tikast.com/proxy/nare?mp=/stream"
       },
       {
-        "name": "Impacto Estereo",
-        "url": "https://cloudstream2036.conectarhosting.com/8206/stream"
-      },
-      {
         "name": "Peon De Guatape",
         "url": "https://play8.tikast.com/proxy/guatape?mp=/stream"
       },
@@ -282770,10 +280110,6 @@
       {
         "name": "Rad 5 Fm 107.1",
         "url": "https://5fm.mk:8000/;stream.mp3"
-      },
-      {
-        "name": "Life 106.3",
-        "url": "http://cast.streams.ovh:9130/live"
       },
       {
         "name": "Rad Bum 104,2 Fm",
@@ -283060,10 +280396,6 @@
         "url": "https://radiobim-danidi01.radioca.st/stream"
       },
       {
-        "name": "Rad Studio 93",
-        "url": "https://onair15.xdevel.com/proxy/radiostudio93?mp=/;stream/;"
-      },
-      {
         "name": "Solo Rad",
         "url": "https://soloradio.sailweb.cloud/soloradio256.mp3"
       },
@@ -283154,10 +280486,6 @@
       {
         "name": "France Bleu Bour",
         "url": "https://icecast.radiofrance.fr/fbbourgogne-midfi.mp3"
-      },
-      {
-        "name": "Latitude 95.8",
-        "url": "https://latitude.ice.infomaniak.ch/troyes.aac?ver=829176"
       }
     ]
   },
@@ -283644,10 +280972,6 @@
         "url": "http://eco.onestreaming.com:8548/;"
       },
       {
-        "name": "Life 106.3",
-        "url": "http://cast.streams.ovh:9130/live"
-      },
-      {
         "name": "Party 97.1",
         "url": "http://s1.onweb.gr:8824/;"
       },
@@ -283850,10 +281174,6 @@
       {
         "name": "92.5 Fm Cfbx",
         "url": "http://198.162.21.84:8002/;?type=http&nocache=10%2Fstream.mp3&_=1"
-      },
-      {
-        "name": "Ckqr Fm 99.3 The",
-        "url": "https://vistaradio.streamb.live/SB00085"
       }
     ]
   },
@@ -284806,10 +282126,6 @@
       {
         "name": "Fidele Au Poste",
         "url": "https://radio.fideleauposte.com:8443/stream.ogg"
-      },
-      {
-        "name": "Choc 88.7",
-        "url": "https://stream2.statsradio.com:8110/stream"
       }
     ]
   },
@@ -284936,20 +282252,8 @@
         "url": "https://chopin.bizmusic.net/radio/8030/radio.mp3"
       },
       {
-        "name": "Rad 1 Fm 105.6",
-        "url": "https://azuracast.novi-net.net/radio/8020/radio1.aac"
-      },
-      {
         "name": "Sjeverni Fm 92.8",
         "url": "https://live.sjeverni.fm/radio/8000/radio.mp3"
-      },
-      {
-        "name": "Rad Max Fm 99.3",
-        "url": "https://azuracast.novi-net.net/radio/8010/radiomax.aac"
-      },
-      {
-        "name": "Rad 105 Selnica",
-        "url": "https://azuracast.novi-net.net/radio/8050/radio105.aac"
       },
       {
         "name": "Rad Banovina 96.",
@@ -285088,10 +282392,6 @@
         "url": "https://orf-live.ors-shoutcast.at/bgl-q1a"
       },
       {
-        "name": "Radioypsilon Fm",
-        "url": "http://mp3.radioypsilon.at:8000/mp3-160"
-      },
-      {
         "name": "Musikwelle Fm 10",
         "url": "https://stream.stadtradio.at:8000/live"
       },
@@ -285122,10 +282422,6 @@
       {
         "name": "Couleurs Fm 97.1",
         "url": "http://mixie.fr:8000/Couleursfm"
-      },
-      {
-        "name": "Project Xy",
-        "url": "https://flux.saaslys.com:8000/radio.mp3"
       },
       {
         "name": "Jz Rad Soul Food",
@@ -285234,10 +282530,6 @@
       {
         "name": "Starflame 107.5",
         "url": "https://stream.zeno.fm/621d85k10vduv"
-      },
-      {
-        "name": "Banna-Tiran Inte",
-        "url": "https://stream.zeno.fm/ywptdatt40duv"
       },
       {
         "name": "Power Jz Ilocos",
@@ -287416,10 +284708,6 @@
         "url": "http://direct.radioarmenie.com:9029/stream/;"
       },
       {
-        "name": "Project Xy",
-        "url": "https://flux.saaslys.com:8000/radio.mp3"
-      },
-      {
         "name": "Jz Rad Groov'Up",
         "url": "https://jazz-wr13.ice.infomaniak.ch/jazz-wr13-128.mp3"
       },
@@ -287590,10 +284878,6 @@
       {
         "name": "Couleurs Fm 97.1",
         "url": "http://mixie.fr:8000/Couleursfm"
-      },
-      {
-        "name": "Project Xy",
-        "url": "https://flux.saaslys.com:8000/radio.mp3"
       },
       {
         "name": "Jz Rad Groov'Up",
@@ -289016,16 +286300,8 @@
         "url": "http://radio.bygderadiovest.no:8000/radio"
       },
       {
-        "name": "Nrk P1 Mre Og Ro",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_more_og_romsdal_mp3_h"
-      },
-      {
         "name": "Thean Tamil Osai",
         "url": "http://centova71.instainternet.com:9100/stream"
-      },
-      {
-        "name": "Nrk P1 Sogn Og F",
-        "url": "https://lyd.nrk.no/nrk_radio_p1_sogn_og_fjordane_aac_h"
       },
       {
         "name": "Ksu 24/7",
@@ -290604,10 +287880,6 @@
         "url": "https://solid2.streamupsolutions.com/proxy/mqxncdsf?mp=/stream"
       },
       {
-        "name": "Al Mubarak Rad",
-        "url": "https://relay.emasjidlive.uk/almubarakradio"
-      },
-      {
         "name": "Audio Force Rad",
         "url": "https://global2.citrus3.com:2020/stream/audioforceradio"
       },
@@ -290714,10 +287986,6 @@
       {
         "name": "Beware! The Rad",
         "url": "https://bewaretheradio.out.airtime.pro/bewaretheradio_a"
-      },
-      {
-        "name": "Get Ready To Roc",
-        "url": "https://streamer.radio.co/s24ae1285c/listen"
       },
       {
         "name": "Capital Xtra",
@@ -291684,10 +288952,6 @@
     },
     "urls": [
       {
-        "name": "Magic 98.9 - Kym",
-        "url": "https://n15b-e2.revma.ihrhls.com/zc3018"
-      },
-      {
         "name": "Khcx 90.9 Fm",
         "url": "https://tektite.streamguys1.com:5285/live"
       },
@@ -291890,10 +289154,6 @@
       {
         "name": "Maverick 105.5 -",
         "url": "https://ice24.securenetsystems.net/KMOM"
-      },
-      {
-        "name": "Ksdj New Rk 90.7",
-        "url": "https://ksdj.stream.creek.fm/stream"
       },
       {
         "name": "Kscr 93.5 Fm",
@@ -292447,10 +289707,6 @@
       "e": -97.7973
     },
     "urls": [
-      {
-        "name": "Alans Golden Old",
-        "url": "http://psn3.prostreaming.net:8082/stream"
-      },
       {
         "name": "Pure Cntry 89.5",
         "url": "https://ice23.securenetsystems.net/QXFM"
@@ -293448,10 +290704,6 @@
         "url": "https://radio.canstream.co.uk:8120/live.aac"
       },
       {
-        "name": "Get Ready To Roc",
-        "url": "https://streamer.radio.co/s24ae1285c/listen"
-      },
-      {
         "name": "Rhyl Rad",
         "url": "https://a4.asurahosting.com:7120/radio.mp3"
       },
@@ -293848,10 +291100,6 @@
         "url": "https://crystalout.surfernetwork.com:8001/WSKP-AM_MP3"
       },
       {
-        "name": "Jammin 107.7 - W",
-        "url": "https://crystalout.surfernetwork.com:8001/WWRX_MP3"
-      },
-      {
         "name": "Wdup 92.9Fm",
         "url": "https://s2.voscast.com:9761/stream"
       }
@@ -294078,10 +291326,6 @@
       {
         "name": "Labr - Love A Br",
         "url": "https://solid2.streamupsolutions.com/proxy/mqxncdsf?mp=/stream"
-      },
-      {
-        "name": "Al Mubarak Rad",
-        "url": "https://relay.emasjidlive.uk/almubarakradio"
       },
       {
         "name": "Audio Force Rad",
@@ -294532,10 +291776,6 @@
     },
     "urls": [
       {
-        "name": "Wwer 88.1Fm",
-        "url": "https://listen.wwer.org/stream"
-      },
-      {
         "name": "Whov Smooth 88.1",
         "url": "https://n45b-e2.revma.ihrhls.com/zc5599"
       },
@@ -294966,10 +292206,6 @@
       {
         "name": "Orf Rad Burgenla",
         "url": "https://orf-live.ors-shoutcast.at/bgl-q1a"
-      },
-      {
-        "name": "Radioypsilon Fm",
-        "url": "http://mp3.radioypsilon.at:8000/mp3-160"
       },
       {
         "name": "Musikwelle Fm 10",
@@ -295472,10 +292708,6 @@
     },
     "urls": [
       {
-        "name": "Wcfm 91.9",
-        "url": "http://wcfm-streaming.williams.edu:8000/stream"
-      },
-      {
         "name": "Hoodz Rad",
         "url": "https://stream.radiojar.com/u3y9n1ykb"
       },
@@ -295530,10 +292762,6 @@
       {
         "name": "Gdradio - Gratef",
         "url": "http://108.163.245.230:8100/stream"
-      },
-      {
-        "name": "Jammin 107.7 - W",
-        "url": "https://crystalout.surfernetwork.com:8001/WWRX_MP3"
       }
     ]
   },
@@ -295770,10 +292998,6 @@
       {
         "name": "Jmi Live : Sound",
         "url": "https://stream.radio.co/s359769fee/listen"
-      },
-      {
-        "name": "Fbn Rad",
-        "url": "https://ice8.securenetsystems.net/WOTJ"
       },
       {
         "name": "Sunny 103.1 - Ws",
@@ -296171,10 +293395,6 @@
       "e": -81.3117
     },
     "urls": [
-      {
-        "name": "Clsic Rk 945 Cib",
-        "url": "https://live.leanstream.co/CIBUFM-MP3"
-      },
       {
         "name": "101.7 The One Ck",
         "url": "https://blackburn-ais.leanstream.co/CKNXFM"
@@ -297780,10 +295000,6 @@
         "url": "https://radio.canstream.co.uk:8120/live.aac"
       },
       {
-        "name": "Get Ready To Roc",
-        "url": "https://streamer.radio.co/s24ae1285c/listen"
-      },
-      {
         "name": "Capital Xtra",
         "url": "https://media-ice.musicradio.com/CapitalXTRANationalMP3?.mp3"
       }
@@ -297898,18 +295114,6 @@
       {
         "name": "Rad Konin 104.1",
         "url": "https://stream2.technologicznie.net/konin.fm"
-      }
-    ]
-  },
-  "Wuhan,CN": {
-    "coords": {
-      "n": 30.5929,
-      "e": 114.3055
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -298381,18 +295585,6 @@
       }
     ]
   },
-  "Xiangtan,CN": {
-    "coords": {
-      "n": 27.8298,
-      "e": 112.9441
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
   "Xicotepec,MX": {
     "coords": {
       "n": 20.2786,
@@ -298438,10 +295630,6 @@
       {
         "name": "Radiovoz A Limia",
         "url": "https://live.radiovoz.es/mp3/stream_orense.mp3"
-      },
-      {
-        "name": "Rdio Montalegre",
-        "url": "http://centova.radios.pt:9566/;"
       },
       {
         "name": "Rdio Forum Botic",
@@ -298530,10 +295718,6 @@
       {
         "name": "Cherry Fm 100.9",
         "url": "https://ice5.securenetsystems.net/KARY"
-      },
-      {
-        "name": "104.1 Kxdd - Kxd",
-        "url": "https://ice7.securenetsystems.net/KXDD"
       },
       {
         "name": "Kore-Lp",
@@ -298721,42 +295905,6 @@
       }
     ]
   },
-  "Yanbian Korea,CN": {
-    "coords": {
-      "n": 42.8913,
-      "e": 129.5089
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
-  "Yancheng,CN": {
-    "coords": {
-      "n": 33.2003,
-      "e": 120.5009
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
-  "Yangjiang,CN": {
-    "coords": {
-      "n": 21.858,
-      "e": 111.9822
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
   "Yangon,MM": {
     "coords": {
       "n": 16.8661,
@@ -298906,10 +296054,6 @@
       {
         "name": "Cerro Azul 107.4",
         "url": "http://radiolatina.info:9025/;"
-      },
-      {
-        "name": "Impacto Estereo",
-        "url": "https://cloudstream2036.conectarhosting.com/8206/stream"
       },
       {
         "name": "La Voz De San Pe",
@@ -299312,10 +296456,6 @@
     },
     "urls": [
       {
-        "name": "Fm 104.4",
-        "url": "https://stream.topradio.in.ua/topradio.mp3"
-      },
-      {
         "name": "Megapolis Fm 105",
         "url": "https://cast.megapolis.fm/listen/kryvyi_rih/radio.mp3"
       },
@@ -299334,18 +296474,6 @@
       {
         "name": "Rk It Rad",
         "url": "https://rock.it-radio.ru/stream/rock"
-      }
-    ]
-  },
-  "Yiyang,CN": {
-    "coords": {
-      "n": 28.5539,
-      "e": 112.3552
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -299422,10 +296550,6 @@
       {
         "name": "Nare Stereo",
         "url": "https://play8.tikast.com/proxy/nare?mp=/stream"
-      },
-      {
-        "name": "Impacto Estereo",
-        "url": "https://cloudstream2036.conectarhosting.com/8206/stream"
       },
       {
         "name": "Rad Fnix Am 1330",
@@ -299686,10 +296810,6 @@
       {
         "name": "Mountain Cntry 1",
         "url": "https://wppl.streamguys1.com/live"
-      },
-      {
-        "name": "Wngu 89.5 Fm",
-        "url": "https://gpb-geo.streamguys1.com/gpb/gpb-radio-wngu-mp3-radiogarden"
       }
     ]
   },
@@ -299977,18 +297097,6 @@
       }
     ]
   },
-  "Yueyang,CN": {
-    "coords": {
-      "n": 29.3573,
-      "e": 113.1292
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
   "Yuleba,AU": {
     "coords": {
       "n": -26.6154,
@@ -300050,18 +297158,6 @@
       {
         "name": "Click Latino",
         "url": "https://sonic.dattassd.com:8006/stream/;"
-      }
-    ]
-  },
-  "Yunfu,CN": {
-    "coords": {
-      "n": 22.9151,
-      "e": 112.0445
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -300608,20 +297704,12 @@
         "url": "https://egerszeg.str.42net.hu/stream"
       },
       {
-        "name": "Rad 1 Fm 105.6",
-        "url": "https://azuracast.novi-net.net/radio/8020/radio1.aac"
-      },
-      {
         "name": "Rad Drava Fm 92.",
         "url": "https://streaming.radio-drava.hr/live"
       },
       {
         "name": "Rad Ludbreg",
         "url": "https://a1.asurahosting.com/listen/radioludbreg/radio.mp3"
-      },
-      {
-        "name": "Rad 105 Selnica",
-        "url": "https://azuracast.novi-net.net/radio/8050/radio105.aac"
       },
       {
         "name": "Rad 1 Fm 89.5",
@@ -301014,10 +298102,6 @@
       {
         "name": "Zaragoza Stereo",
         "url": "https://radiostream.interven.ca/listen/zaragoza96.1fm/radio.mp3"
-      },
-      {
-        "name": "Impacto Estereo",
-        "url": "https://cloudstream2036.conectarhosting.com/8206/stream"
       },
       {
         "name": "Briceo Stereo Fm",
@@ -301509,18 +298593,6 @@
       }
     ]
   },
-  "Zhanjiang,CN": {
-    "coords": {
-      "n": 21.2707,
-      "e": 110.3594
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
   "Zheleznogorsk,RU": {
     "coords": {
       "n": 52.3333,
@@ -301534,42 +298606,6 @@
       {
         "name": "Nestandart",
         "url": "https://listen.radionestandart.ru:8200/nestandart-320.mp3"
-      }
-    ]
-  },
-  "Zhengzhou,CN": {
-    "coords": {
-      "n": 34.7473,
-      "e": 113.6249
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
-  "Zhongshan,CN": {
-    "coords": {
-      "n": 22.5176,
-      "e": 113.3928
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
-      }
-    ]
-  },
-  "Zhuhai,CN": {
-    "coords": {
-      "n": 22.271,
-      "e": 113.5767
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
@@ -302052,10 +299088,6 @@
     },
     "urls": [
       {
-        "name": "Radioypsilon Fm",
-        "url": "http://mp3.radioypsilon.at:8000/mp3-160"
-      },
-      {
         "name": "Musikwelle Fm 10",
         "url": "https://stream.stadtradio.at:8000/live"
       },
@@ -302374,10 +299406,6 @@
       {
         "name": "Jam On Rad",
         "url": "https://jam-on.ice.infomaniak.ch/jam-on-128.mp3"
-      },
-      {
-        "name": "Thaalam",
-        "url": "https://thaalam.out.airtime.pro/thaalam_b"
       },
       {
         "name": "Rad Eviva",
@@ -304298,18 +301326,6 @@
       {
         "name": "Rad Banovina 96.",
         "url": "https://audio.radio-banovina.hr:9998/stream"
-      }
-    ]
-  },
-  "Urumqi,CN": {
-    "coords": {
-      "n": 43.8256,
-      "e": 87.6169
-    },
-    "urls": [
-      {
-        "name": "Shirley & Spinoz",
-        "url": "https://s2.radio.co/sec5fa6199/listen"
       }
     ]
   },
