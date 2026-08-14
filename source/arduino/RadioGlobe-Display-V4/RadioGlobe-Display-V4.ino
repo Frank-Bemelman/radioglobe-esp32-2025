@@ -1,4 +1,4 @@
-// Using LVGL with Arduino requires some extra steps.......
+// Using LVGL with Arduino requires some extra steps...
 // Be sure to read the docs here: https://docs.lvgl.io/master/get-started/platforms/arduino.html  */
 // Place lv_conf.h (in arduino sketch folder) -> #define LV_MEM_SIZE (68U * 1024U)  /*[bytes]*/  // FB was 48U - remember to change to 68U
 // lvgl by kisvegaborn 8.3.11 , not a more recent version, SquareLine Studio only does 8.3.11
@@ -202,7 +202,7 @@ uint8_t BacklightValue = DEFAULT_BACKLIGHT;
 uint8_t PrevBacklightValue = 255;
 #define DEFAULT_HOLD_BACKLIGHT 60 // seconds
 uint8_t HoldBacklight = 0;
-#define DEFAULT_SHOW_VOLUME_TIMER 3 // seconds
+#define DEFAULT_SHOW_VOLUME_TIMER 2 // seconds
 uint16_t ShowVolumeTimer = 0;
 bool bInternalSpeakerStatusValid = false;
 
@@ -279,7 +279,7 @@ void Driver_Loop(void *parameter) // runs on core 0
         if(ShowVolumeTimer == 1)
         { if (xSemaphoreTake(lvgl_mutex, pdMS_TO_TICKS(20)) == pdTRUE)
           { if(DataFromDisplay.volumevalue) // at zero volume, power off icon is shown, let's keep it that way
-            { if(!bMusicMode) // jukebox
+            { if(!bMusicMode) // radio mode
               {
               lv_obj_add_state(ui_VolumeValue, LV_STATE_DISABLED); 
               lv_obj_add_flag(ui_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN); 
@@ -288,7 +288,7 @@ void Driver_Loop(void *parameter) // runs on core 0
               lv_obj_clear_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); 
               lv_obj_clear_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN); 
               }
-              else
+              else // music mode
               { lv_obj_add_state(ui_VolumeValue, LV_STATE_DISABLED); 
                 lv_obj_add_flag(ui_mainscreen_speakeroff, LV_OBJ_FLAG_HIDDEN); 
                 lv_obj_add_flag(ui_mainscreen_speakeron, LV_OBJ_FLAG_HIDDEN); 
@@ -504,7 +504,7 @@ void setup()
   //lv_label_set_text(ui_GlobeMac, content);
   lv_label_set_text(ui_PuckBuild, build_timestamp);
 
-  sprintf(content, "%d GB", DisplaySettings.globe_sd_gb);
+  sprintf(content, "%hu GB", DisplaySettings.globe_sd_gb);
   lv_label_set_text(ui_GlobeSDSizeText, content);
 
   ShowWeatherData(false);
@@ -579,9 +579,9 @@ void loop()
 { char content[256];
   char content64[64];
   int32_t value_int32t;
-  static int newvolumevalue;
-  static int newbassvalue;
-  static int newtreblevalue;
+  static uint16_t newvolumevalue;
+  static uint16_t newbassvalue;
+  static uint16_t newtreblevalue;
     
   static lv_obj_t * oldscreen;
   static time_t now;
@@ -841,16 +841,43 @@ void loop()
         case MESSAGE_NOP:
           break;
         case MESSAGE_STATION_NAME:
-          lv_label_set_text(ui_Station_Name, QueueMessage);
-          // rename in scroller if it makes sense
+          // rename on screen and in scroller if it makes sense..
           if(!bMusicMode)
-          { if(strlen(QueueMessage)>=3 && strlen(QueueMessage)<=32)
-            { if(Stations.requested<MAX_STATIONS)
-              { strcpy(Stations.StationNUG[Stations.requested].name, QueueMessage);
-                ReloadScroll();
-              }  
-            }
+          { // skip very short station/long station names, skip names with underscores, better stick to one from database
+            // otherwise accept and make a note to clean up database later, manually
+            if(strlen(QueueMessage)>=5 && strlen(QueueMessage)<=32 && strchr(QueueMessage, '_')==0)
+            { if(strlen(lv_label_get_text(ui_Station_Name)))
+              { if(strcmp(QueueMessage, lv_label_get_text(ui_Station_Name)) !=0)
+                { strcpy(logfile, "/ERR-database-stationname.log");
+                  AppendToLogFile(logfile, QueueMessage);
+                  sprintf(content, "Error in Database - stations150K.json stationname %s should be %s", Stations.StationNUG[Stations.requested].name, QueueMessage);
+                    AppendToLogFile(logfile, content);
+                    Serial.println(content);
+                    sprintf(content, "                  - gps_ns = %f gps_ew = %f", Stations.StationNUG[Stations.requested].gps_ns, Stations.StationNUG[Stations.requested].gps_ew);
+                    AppendToLogFile(logfile, content);
+                    Serial.println(content);
+                    sprintf(content, "                  - url = %s", Stations.StationNUG[Stations.requested].url);
+                    AppendToLogFile(logfile, content);
+                    Serial.println(content);
+                    sprintf(content, "                  - town = %s", Stations.StationNUG[Stations.requested].town);
+                    AppendToLogFile(logfile, content);
+                    Serial.println(content);
+                }
+              }    
+
+              if(strlen(QueueMessage)>=4 && strlen(QueueMessage)<=32)
+              { lv_label_set_text(ui_Station_Name, QueueMessage);
+                if(Stations.requested<MAX_STATIONS)
+                { strcpy(Stations.StationNUG[Stations.requested].name, QueueMessage);
+                  ScrollNeedsReload = 1;
+                  ReloadScroll();
+                }  
+              }
+            }  
           }  
+          else
+          { lv_label_set_text(ui_Station_Name, QueueMessage);
+          }
           break;
 
         // globe statt moving
@@ -860,10 +887,10 @@ void loop()
           lv_label_set_text(ui_Status_Line, "EXPLORING THE EARTH");
           lv_label_set_text(ui_Station_Title, "");
           lv_label_set_text(uic_Home_City, "EXPLORING");
-          //lv_label_set_text(uic_Home_Country, "GLOBETROTTER");      
-          lv_obj_add_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); // hide flag
+          //lv_obj_add_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); // hide flag
           lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide flag
           lv_obj_add_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN); // hide flag
+          lv_obj_add_flag(ui_ClockFlag, LV_OBJ_FLAG_HIDDEN); // hide flag
           
           //lv_img_set_src(ui_Jukebox, &ui_img_earth128x128_png);
           //lv_obj_clear_flag(ui_Jukebox, LV_OBJ_FLAG_HIDDEN);
@@ -981,8 +1008,11 @@ void loop()
           // station or file already killed by globe
           bMusicMode = false;
           lv_obj_add_flag(ui_Jukebox, LV_OBJ_FLAG_HIDDEN);
-          lv_obj_clear_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN);
-          lv_obj_clear_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN);
+          lv_obj_add_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN);
+          lv_obj_add_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN);
+          lv_obj_add_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN); 
+          lv_refr_now(NULL);
+
 
 
           if((screen != ui_CalibrationScreen) && (screen != ui_CalibrationScreenAdvanced))
@@ -1003,13 +1033,13 @@ void loop()
                 //lv_label_set_text(ui_Station_Name, ""); // already done by globe signalling globe movement
                 lv_label_set_text(ui_Status_Line, "");
                 //lv_label_set_text(ui_Station_Title, ""); // already done by globe signalling globe movement
-                Lvgl_Loop();  
+                lv_refr_now(NULL);  
                 lv_scr_load(ui_Home);
-                Lvgl_Loop();  
                 FindNewStation();
                 ReloadScroll();
               }
-            }  
+            } 
+
           }
           break;
 
@@ -1034,7 +1064,7 @@ void loop()
           DataFromDisplay.D_QueueStationIndex = -1;
           Stations.playing = -1;
           if(DataFromGlobe.D_QueueMessageCount<10) // don't waste time logging when behind schedule
-          { // response is like "error  -> url"
+          { // response format is like "error -> url"
             // reported error message will be used as filename
             char filename[QUEUEMESSAGELENGTH];
             strcpy(filename, QueueMessage);
@@ -1214,7 +1244,7 @@ void loop()
                 { if(strcmp(Stations.StationNUG[Stations.requested].countrycode, countrycode)!=NULL) // country different from expected
                   { // must write to file for later examination
                     Serial.printf("Problem with Stations.requested = %d\n", Stations.requested);
-                    strcpy(logfile, "/database-error.log");
+                    strcpy(logfile, "/ERR-database-country.log");
                     AppendToLogFile(logfile, QueueMessage);
                     sprintf(content, "Error in Database - stations150K.json countrycode %s should be %s", Stations.StationNUG[Stations.requested].countrycode, countrycode);
                     AppendToLogFile(logfile, content);
@@ -1235,7 +1265,7 @@ void loop()
                   if(strncmp(Stations.StationNUG[Stations.requested].town, town, strcmplen)!=NULL) // town different from expected, but "Canton" for "Canton OH" is ok
                   { // must write to file for later examination
                     Serial.printf("Problem with Stations.requested = %d\n", Stations.requested);
-                    strcpy(logfile, "/database-error.log");
+                    strcpy(logfile, "/ERR-database-town.log");
                     AppendToLogFile(logfile, QueueMessage);
                     sprintf(content, "Error in Database - stations150K.json town name <%s> should be <%s>", Stations.StationNUG[Stations.requested].town, town);
                     AppendToLogFile(logfile, content);
@@ -1268,6 +1298,8 @@ void loop()
             if(FindCountryNameByCode(FoundCountryName, countrycode))
             { Serial.printf("Called from radioglobe-display.ino line ~1228\n");
               SetFlag(countrycode); // just do it - flag isn't always early loaded, for instance if no stations were found, or XX result
+              lv_label_set_text(ui_Home_City, town);
+              
               if(bClockHomeTime)
               { strcpy(Home.CountryCode, countrycode); // later used for clock face
                 // do not copy countryname, keep the HOME SWEET HOME text
@@ -1276,14 +1308,20 @@ void loop()
               else
               { strcpy(World.CountryCode, countrycode); // later used for clock face
                 strcpy(World.CountryName, FoundCountryName); // later used for clock face
+                lv_label_set_text_uppercase(ui_Clock_Country, World.CountryName);
               }
+
               if(!bMusicMode)
-              { lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // show flag, perhaps was hidden by a new search start
-                lv_obj_clear_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start 
-                lv_obj_clear_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start 
-                lv_obj_clear_flag(ui_ClockFlag, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
+              { if(DataFromDisplay.volumevalue) // not with volume at 0 (power switch logo shown)
+                { lv_obj_clear_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start 
+                  lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // show flag, perhaps was hidden by a new search start
+                  lv_obj_clear_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start 
+                }  
               }
-              
+              lv_obj_clear_flag(ui_ClockFlag, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
+              lv_obj_clear_flag(ui_Clock_Country, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
+              lv_refr_now(NULL); // show immediately
+
               if(Stations.requested>=0 && Stations.requested<MAX_STATIONS+MAX_FAVORITES) 
               { sprintf(content, "%s  -  %s", Stations.StationNUG[Stations.requested].town, GetAllUpperCase(content64, Stations.StationNUG[Stations.requested].countryname));
                 lv_label_set_text(ui_StationRollerPlace, content);
@@ -1294,7 +1332,6 @@ void loop()
               // on setup screen (as the place where you are on the globe)
               lv_label_set_text(ui_GlobeCurrentCountry, GetAllUpperCase(content64, Stations.StationNUG[Stations.requested].countryname));
               
-              lv_label_set_text(ui_Home_City, town);
                 // on map
               sprintf(content,"Greetings From %s", GetAllUpperCase(content64, FoundCountryName));
               lv_label_set_text(ui_Database_Town_Name, content);
@@ -1363,6 +1400,7 @@ void loop()
           lv_label_set_text(ui_GlobeBuild, QueueMessage);
           break;
 
+        // not used or implented on globe
         case MESSAGE_RADIO_PRESET:
           sscanf(QueueMessage, "%d", &value_int32t);
           playpreset(value_int32t-1);
@@ -1450,7 +1488,7 @@ void loop()
           break;
 
         case MESSAGE_SET_PUCK_WIFI_CHANNEL:
-          sscanf(QueueMessage, "%d", &new_channel);
+          sscanf(QueueMessage, "%hu", &new_channel);
           if(DisplaySettings.wifichannel != new_channel)
           { DisplaySettings.wifichannel = new_channel;
             SaveDisplaySettings();
@@ -1462,7 +1500,7 @@ void loop()
 
         case MESSAGE_GLOBE_SD_GB:
           
-          sscanf(QueueMessage, "%d", &DisplaySettings.globe_sd_gb);
+          sscanf(QueueMessage, "%hu", &DisplaySettings.globe_sd_gb);
           if(OldDisplaySettings.globe_sd_gb != DisplaySettings.globe_sd_gb)SaveDisplaySettings();
         
           if(DisplaySettings.globe_sd_gb==0)
@@ -1481,10 +1519,6 @@ void loop()
           if(QueueMessage[0]=='1')bMusicMode = true;
           else bMusicMode = false;
 
-          SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
-          lv_obj_add_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN); 
-
-           
           if(bMusicMode == true)
           { // empty roller
             Stations.count = 0;
@@ -1494,6 +1528,8 @@ void loop()
             lv_obj_clear_flag(ui_Jukebox, LV_OBJ_FLAG_HIDDEN);
             lv_obj_add_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN);
             lv_obj_add_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN);
+            SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
+            lv_obj_add_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN); 
           }
           else
           { lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN);
@@ -1506,19 +1542,20 @@ void loop()
         case MESSAGE_PLAYLIST_SONG_ARTIST:
           // add song and artist to roller
           AddToScroll(QueueMessage);
-          Serial.printf("Added\n");
+          Serial.printf("Added song to playlist\n");
           break;
 
         case MESSAGE_SET_ROLLER_INDEX:
           // received from globe when (next) song from SD is started
-          sscanf(QueueMessage, "%d", &Stations.requested);
+          sscanf(QueueMessage, "%hd", &Stations.requested);
           lv_roller_set_selected(ui_StationRoller, Stations.requested, LV_ANIM_ON);
-          sprintf(content, "%d-%d", Stations.requested+1, Stations.count); // top label 1-150 in stations roller
+          sprintf(content, "%hd-%hu", Stations.requested+1, Stations.count); // top label 1-150 in stations roller
           lv_label_set_text(ui_StationRollerSelected, content);
           break;
 
         case MESSAGE_UPDATE_PUCK:
           // in puck setup menu, long press serialnumber to trigger, globe updates first, then puck update
+          delay(1000); 
           if(UpdateState==0)UpdateState = 1; // triggers the update procedure, if procedure does not run yet
           break;
 
@@ -1580,7 +1617,7 @@ void loop()
     }
 
 
-    sscanf(lv_label_get_text(ui_VolumeValue), "%d", &newvolumevalue);
+    sscanf(lv_label_get_text(ui_VolumeValue), "%hu", &newvolumevalue);
     if(DataFromDisplay.volumevalue != newvolumevalue)
     { DataFromDisplay.volumevalue = newvolumevalue; // globe will pick that up
       BacklightValue = DEFAULT_BACKLIGHT;
@@ -1611,13 +1648,13 @@ void loop()
       }
     }
 
-    sscanf(lv_label_get_text(ui_BassValue), "%d", &newbassvalue);
+    sscanf(lv_label_get_text(ui_BassValue), "%hu", &newbassvalue);
     if(DataFromDisplay.bassvalue != newbassvalue)
     { DataFromDisplay.bassvalue = newbassvalue;
       BacklightValue = DEFAULT_BACKLIGHT;
     }
 
-    sscanf(lv_label_get_text(ui_TrebleValue), "%d", &newtreblevalue);
+    sscanf(lv_label_get_text(ui_TrebleValue), "%hu", &newtreblevalue);
     if(DataFromDisplay.treblevalue != newtreblevalue)
     { DataFromDisplay.treblevalue = newtreblevalue;
       BacklightValue = DEFAULT_BACKLIGHT;
@@ -1722,14 +1759,14 @@ void loop()
       { AutoSleepTimer--;
         if(AutoSleepTimer<DataFromDisplay.volumevalue)
         { // lower the volume slowly when approaching power down 
-          sscanf(lv_label_get_text(ui_VolumeValue), "%d", &newvolumevalue);
+          sscanf(lv_label_get_text(ui_VolumeValue), "%hu", &newvolumevalue);
           if(newvolumevalue>1)
           { newvolumevalue--;
-            sprintf(content, "%ld", newvolumevalue);
+            sprintf(content, "%hu", newvolumevalue);
             lv_label_set_text(ui_VolumeValue, content);
             lv_arc_set_value(ui_VolumeArc, newvolumevalue);
             DataFromDisplay.volumevalue = newvolumevalue;
-            Serial.printf("Powerdown volume -> %d\n", DataFromDisplay.volumevalue);
+            Serial.printf("Powerdown volume -> %hu\n", DataFromDisplay.volumevalue);
           }
         }
         else if(DataFromDisplay.volumevalue <2)

@@ -87,6 +87,8 @@ void station1234(lv_event_t * e, uint16_t station)
   { if(longpressed==0)
     { if(strlen(Stations.StationNUG[station+MAX_STATIONS].url)>0) // only respond to loaded buttons
       { beep(e);
+
+
         AddStationToQueueForGlobe(station+MAX_STATIONS); // presets come just after the regular list of stations
         if(bMusicMode)Stations.count = 0; // forces a station search FindNewStation(); and ReloadScroll(); if RADIO GLOBE is tapped
         Serial.printf("Favorites Select station %s under Preset %d\n", Stations.StationNUG[station+MAX_STATIONS].name, station);
@@ -101,8 +103,8 @@ void station1234(lv_event_t * e, uint16_t station)
         int16_t yc = (station * 70) - 104;
         //Serial.printf("station=%d yc = %d\n", station, yc);
         lv_obj_set_y(ui_PresetFlag, yc);  // -104 -34 34 104 
-        lv_obj_clear_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start
-        lv_event_send(ui_PresetFlag, LV_EVENT_REFRESH, NULL);
+        //lv_obj_clear_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start
+        //lv_event_send(ui_PresetFlag, LV_EVENT_REFRESH, NULL);
       }  
     }
     longpressed = 0;

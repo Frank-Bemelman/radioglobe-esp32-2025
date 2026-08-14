@@ -277,7 +277,7 @@ void loop_esp_now() {
         delay(5);
       }
     }
-    else // keep sending last one, if changed with perhaps volume setting
+    else // keep sending if changed with perhaps volume setting
     { if(memcmp(&PrevDataFromDisplay, &DataFromDisplay,sizeof(PrevDataFromDisplay)) != 0)
       { DataFromDisplay.D_QueueMessageType = MESSAGE_NOP; // don't want this to be picked up by globe as message with real job to do
         esp_err_t result = esp_now_send(DisplaySettings.globemac, (uint8_t *) &DataFromDisplay, sizeof(DataFromDisplay)); 

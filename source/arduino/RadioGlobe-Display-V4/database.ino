@@ -83,15 +83,13 @@ void BuildDatabaseNow(void)
 
   if(Puck_SD_GB == 0)
   { lv_label_set_text(ui_Database_Dir_Path, "No SD Card Found!");
-    //Lvgl_Loop();
-    lv_refr_now(NULL); // seems a better choice
+    lv_refr_now(NULL); 
     delay(1000);
     while(timeout)
     {  delay(1000);
        sprintf(content, "leaving in %d seconds", timeout);
        lv_label_set_text(ui_Database_Dir_Path, content);
-       //Lvgl_Loop();
-       lv_refr_now(NULL); // seems a better choice
+       lv_refr_now(NULL); 
        timeout --;
     }
     delay(1000);
@@ -100,14 +98,8 @@ void BuildDatabaseNow(void)
   }
   else
   { lv_label_set_text(ui_Database_Dir_Path, "SD Card Found!");
-    //Lvgl_Loop();
-    lv_refr_now(NULL); // seems a better choice
-  
-    //strcpy(filename, "/stations.json"); // don't fortget the forward slash
-    //strcpy(filename, "/stations1K.json"); // don't fortget the forward slash
-    //strcpy(filename, "/stations20K.json"); // don't fortget the forward slash
+    lv_refr_now(NULL); 
     strcpy(filename, "/stations150K.json"); // don't fortget the forward slash
-
     ReadDatabase(SD_MMC, filename); // don't fortget the forward slash
     WriteStationsBitmapFile(SD_MMC, "/stationsmap.bmp");
     Serial.println("Database rebuild done");
@@ -142,16 +134,16 @@ void ReadDatabase(fs::FS &fs, char *filename)
     if (!root) 
     { sprintf(sometext, "Failed To Open %s", filename);
       lv_label_set_text(ui_Database_Dir_Path, sometext);
-      //Lvgl_Loop();
-      lv_refr_now(NULL); // seems a better choice
+      lv_refr_now(NULL);
       Serial.println(sometext);
       delay(2000); 
+      lv_obj_clear_state(uic_RebuildDatabase, LV_STATE_DISABLED);
+      lv_obj_clear_flag(uic_HomeButton3, LV_OBJ_FLAG_HIDDEN);
       return;
     }
     sprintf(sometext, "Succes opening %s", filename);
     lv_label_set_text(ui_Database_Dir_Path, sometext);
-    //Lvgl_Loop();
-    lv_refr_now(NULL); // seems a better choice
+    lv_refr_now(NULL); 
     delay(2000); 
   
     filesize = root.size(); // used for progress percentage calculation
@@ -175,8 +167,7 @@ void ReadDatabase(fs::FS &fs, char *filename)
         percentagedone = fileposition * 100 / filesize;
         sprintf(sometext, "Done %d%% urls=%ld", percentagedone, urlcount);
         lv_label_set_text(ui_Database_Progress, sometext);
-        //Lvgl_Loop();
-        lv_refr_now(NULL); // seems a better choice
+        lv_refr_now(NULL); 
       }
 
       bytesread = root.readBytesUntil(0x0a, oneline, sizeof(oneline)-1);
@@ -279,8 +270,7 @@ void ReadDatabase(fs::FS &fs, char *filename)
     lv_label_set_text(ui_Database_Progress, sometext);
     sprintf(sometext, "%d Locations Created", filecount);
     lv_label_set_text(ui_Database_Dir_Path, sometext);
-    //Lvgl_Loop();
-    lv_refr_now(NULL); // seems a better choice
+    lv_refr_now(NULL); 
 
   }
 
@@ -450,7 +440,7 @@ void FindNewStation(void)
 
   Stations.count = 0;
   Stations.requested -1;
-  char firstcountrycode[3] = ""; // near borders, different countries can be in the directory, decided to stick with the first found
+  char firstcountrycode[3] = ""; // near borders, different countries can be in the directory, decided to stick with the country first found, to avoid a mixed list
 
   lv_label_set_text(ui_Station_Name, "SEARCHING");
   lv_label_set_text(ui_Home_City, "");
@@ -459,6 +449,7 @@ void FindNewStation(void)
   // also on clock, in case we play the globe while clock is shown
   lv_obj_add_flag(ui_ClockFlag, LV_OBJ_FLAG_HIDDEN); 
   lv_label_set_text(ui_Clock_Country, "");
+  lv_refr_now(NULL); // show immediately
   
 
   search_mS = millis();
@@ -479,16 +470,9 @@ void FindNewStation(void)
   
   Serial.printf("End search -> %ld\n", millis() - search_mS);
   
-  // turn of preset leds
-  SetLed(1, 0);
-  SetLed(2, 0);
-  SetLed(3, 0);
-  SetLed(4, 0);
-  lv_obj_add_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN); 
-
   if(Stations.count)
-  { sprintf(content, "%d Stations Found", Stations.count);
-    lv_label_set_text(ui_Station_Name, content);
+  { //sprintf(content, "%d Stations Found", Stations.count);
+    //lv_label_set_text(ui_Station_Name, content);
     
     AddToQueueForGlobe("Reset Your DataFromGlobe.D_QueueStationIndex to -1", MESSAGE_NEW_LIST_LOADED);
     
@@ -539,8 +523,7 @@ void CollectStationsAtGps(int16_t mapfind_ns, int16_t mapfind_ew, char *firstcou
     sprintf(dirpath, "/%c/%d/%d/%c/%d/%d", (dir_ns<0)?'S':'N', abs(dir_ns)/10, abs(dir_ns)%10, (dir_ew<0)?'W':'E', abs(dir_ew)/10, abs(dir_ew)%10);
     Serial.println(dirpath);
     //lv_label_set_text(ui_Station_Title, dirpath);
-    //Lvgl_Loop();
-    //lv_refr_now(NULL); // seems a better choice
+    //lv_refr_now(NULL); 
 
     root = SD_MMC.open(dirpath);
     if (!root) 
@@ -568,10 +551,10 @@ void CollectStationsAtGps(int16_t mapfind_ns, int16_t mapfind_ew, char *firstcou
           break; // done, get out og here
         }
         
-        lv_label_set_text(ui_Station_Title, file.name());
-        //Lvgl_Loop();  //  maybe not - crshes on tapping world map 
-        lv_refr_now(NULL); // seems a better choice
-        delay(1); // give OS some time, just a gut feeling
+        if(Stations.count==0)
+        { lv_label_set_text(ui_Station_Title, file.name());
+          lv_refr_now(NULL); 
+        }  
         
         strcpy(town, file.name());
         // filenames are constructed from name of town, underscore, and 2 letter country code, like -> Amsterdam_NL.txt
@@ -623,9 +606,7 @@ void CollectStationsAtGps(int16_t mapfind_ns, int16_t mapfind_ew, char *firstcou
               if(Stations.count==0)
               { ForceGlobeStationGPSupdate = true; 
                 AddStationToQueueForGlobe(Stations.count);
-                loop_esp_now(); // send it out immediately 
-                loop_esp_now(); // send it out immediately, check for more
-                loop_esp_now(); // send it out immediately, check for more
+                while(ToGlobe.QueueCnt)loop_esp_now(); // send everything out immediately 
               }  
 
               // in all honesty, ignore if country not the same as first one found and also ignore this url if already in list
@@ -638,10 +619,7 @@ void CollectStationsAtGps(int16_t mapfind_ns, int16_t mapfind_ew, char *firstcou
               }
               else
               { Serial.printf("%s differs from %s\n", firstcountrycode, countrycode);
-                //if(CheckIfUniqueUrl())Stations.count++;
               }
-
-
             }
           } 
         }
@@ -742,8 +720,7 @@ void RadioGlobeClick(lv_event_t * e)
 
         //lv_label_set_text(ui_Station_Name, "Searching..."); // pointless, searching goes so fast you won't see this
         lv_label_set_text(ui_Station_Title, "");
-        // Lvgl_Loop();  // maybe not good
-        lv_refr_now(NULL); // seems a better choice
+        lv_refr_now(NULL); 
         FindNewStation();
         ReloadScroll();
       }
@@ -1027,7 +1004,7 @@ void AddStationToQueueForGlobe(int16_t station)
     AddToQueueForGlobe(content, MESSAGE_TIMEZONE_NAME); // will use DataFromDisplay.ns_cal, DataFromDisplay.ew_cal as coordinates
     AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION); // will use DataFromDisplay.ns_cal, DataFromDisplay.ew_cal as coordinates
     loop_esp_now(); // send it now, before it gets old
-    lv_obj_add_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide flag
+    lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // hide flag
     lv_obj_add_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN);
     SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
 
@@ -1039,6 +1016,13 @@ void AddStationToQueueForGlobe(int16_t station)
   { bMusicMode = false;
     DataFromDisplay.D_QueueStationIndex = station;
     Stations.playing = -1;
+
+    if(bPowerStatus == true)
+    { sprintf(message, "%s-%s", Stations.StationNUG[station].countrycode, Stations.StationNUG[station].url);
+      // send countrycode and station url to globe
+      AddToQueueForGlobe(message, MESSAGE_START_THIS_STATION);
+    }
+
 
     lv_label_set_text(ui_Station_Name, Stations.StationNUG[station].name);
     lv_label_set_text(ui_Status_Line, "CONNECTING");
@@ -1067,11 +1051,14 @@ void AddStationToQueueForGlobe(int16_t station)
     }
 
     // check if gps position is a new one
+    sprintf(content, "%f %f", Stations.StationNUG[station].gps_ns, Stations.StationNUG[station].gps_ew);
     if(strcmp(lastgpsrequest, content) != NULL || (ForceGlobeStationGPSupdate == true))
     { strcpy(lastgpsrequest, content);
       ForceGlobeStationGPSupdate = false;
+
+      // add station and incrementing PuckApiRequest number
       PuckApiRequest++; // value to check if arriving result can be discarded, as it could perhaps belongs to previous request
-      sprintf(content, "%d %f %f %d", station, DataFromDisplay.D_StationGpsNS, DataFromDisplay.D_StationGpsEW, PuckApiRequest);
+      sprintf(content, "%d %s %d", station, lastgpsrequest, PuckApiRequest);
       if(bClockHomeTime)AddToQueueForGlobe(content, MESSAGE_HOME_TIMEZONE_NAME);
       else AddToQueueForGlobe(content, MESSAGE_GET_TIMEZONE_BY_GPS);
       AddToQueueForGlobe(content, MESSAGE_GET_GEOLOCATION_BY_GPS);
@@ -1090,27 +1077,27 @@ void AddStationToQueueForGlobe(int16_t station)
     }
     else
     { strcpy(World.CountryCode, Stations.StationNUG[station].countrycode); // later used for clock face
-      strcpy(World.CountryName, Stations.StationNUG[Stations.requested].countryname); // later used for clock face
+      strcpy(World.CountryName, Stations.StationNUG[station].countryname); // later used for clock face
     }
 
-    lv_obj_clear_flag(uic_Home_Flag, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start
-    lv_obj_clear_flag(ui_ClockFlag, LV_OBJ_FLAG_HIDDEN); 
-      
+    lv_obj_clear_flag(ui_ClockFlag, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start
+    lv_obj_clear_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start
+
     Serial.printf("Town = %s\n", Stations.StationNUG[station].town);
     lv_label_set_text(uic_Home_City, Stations.StationNUG[station].town);
-    lv_obj_clear_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
 
     Serial.printf("Country = %s\n", Stations.StationNUG[station].countryname);
-    strcpy(content, Stations.StationNUG[station].countryname);
-    lv_label_set_text(uic_Home_Country, content);
-    
-    // when station is from home country, print the "HOME SWEET HOME" text
-//    if(bClockHomeTime)
-//    { lv_label_set_text_uppercase(ui_Clock_Country, Home.CountryName);
-//    }
-//    else lv_label_set_text_uppercase(uic_Clock_Country, content);
+    lv_label_set_text(uic_Home_Country, Stations.StationNUG[station].countryname);
+    lv_label_set_text(uic_Clock_Country, Stations.StationNUG[station].countryname);
 
-    lv_obj_clear_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
+
+    // show if volume not a zero
+    if(DataFromDisplay.volumevalue)
+    { lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start
+      lv_obj_clear_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
+      lv_obj_clear_flag(uic_Home_Country, LV_OBJ_FLAG_HIDDEN); // it was hidden by a new search start
+    }
+
     lv_obj_clear_flag(uic_Clock_Country, LV_OBJ_FLAG_HIDDEN); // unhide country name 
 
     // also update the world map screen
@@ -1123,12 +1110,12 @@ void AddStationToQueueForGlobe(int16_t station)
     sprintf(content,"You Are In  %s", Stations.StationNUG[station].town);
     lv_label_set_text(ui_Database_Output_File, content);
 
-    if(bPowerStatus == true)
-    { sprintf(message, "%s-%s", Stations.StationNUG[station].countrycode, Stations.StationNUG[station].url);
-      // send countrycode and station url to globe
-      AddToQueueForGlobe(message, MESSAGE_START_THIS_STATION);
-    }
-
+//    if(bPowerStatus == true)
+//    { sprintf(message, "%s-%s", Stations.StationNUG[station].countrycode, Stations.StationNUG[station].url);
+//      // send countrycode and station url to globe
+//      AddToQueueForGlobe(message, MESSAGE_START_THIS_STATION);
+//    }
+    lv_refr_now(NULL);   
   }
 }
 
@@ -1217,11 +1204,11 @@ void ReadStationsBitmapFile(fs::FS &fs, char* filename)
 void AppendToLogFile(char *filename, char *url)
 { char logtext[256];
   char active_posix_tz[32];
-  if(FtpBootState)return; // don't mess around while FTP active
+  if(FtpBootState)return; // don't mess around while FTP active..
 
   if(strcmp(filename, "/Sleeptimer.log") == 0)return; // turn those off for now
 
-  snprintf(logtext, 256, "%d-%s-%d %02d:%02d ->%s",    (int)datetime.day, monthnames[datetime.month],  (int)datetime.year%100, datetime.hour, (int)datetime.minute, url);
+  snprintf(logtext, 256, "%d-%s-%d %02d:%02d:%02d ->%s",    (int)datetime.day, monthnames[datetime.month],  (int)datetime.year%100, datetime.hour, (int)datetime.minute, (int)datetime.second, url);
 
   // file creation dates seem to reflect a double TZ correction
   // use UTC to make it a bit more predictable
@@ -1388,4 +1375,43 @@ char * GetAllUpperCase(char *t, char *s)
   return t;
 }
 
+// Full rebuild, step by step
+uint16_t DatabaseFullRebuild(uint16_t state)
+{ delay(1000);
 
+  switch(state)
+  { case 1:
+      state++;
+      return state;
+      break;
+    
+    case 10:
+      state = 0;
+      return state;
+      break;
+
+    default:
+      state++;
+      return state;
+      break;
+
+  }
+
+  return 0;
+
+}
+
+/*
+rebuild states
+
+1: open rebuildstate.log, read state number and json filesize. if >2 take that state
+2: create file, write 3 and size 1000
+3: check presence of stationsok.json on sd, increment state to 10
+4; if no stationsok.json, download from github stations.json
+5: delete stations.json, download stations.json and rename to stationsok.json when done
+
+10 we have a ok json file now. check if size is new/different, 
+
+
+
+*/

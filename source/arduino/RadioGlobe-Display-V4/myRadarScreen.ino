@@ -152,7 +152,7 @@ void message_get_flight_date_handler(char *incomingMessage)
         { lv_label_set_text_fmt(ui_PlaneCounter, "%d PLANES", flightdata.num_flights);
         }
         else 
-        { lv_label_set_text(ui_PlaneCounter, "SCANNING");
+        { lv_label_set_text_fmt(ui_PlaneCounter, "%c%d.%d - %c%d.%d", (DataFromDisplay.ns_cal<0)?'S':'N', abs(DataFromDisplay.ns_cal)/10, abs(DataFromDisplay.ns_cal)%10, (DataFromDisplay.ew_cal<0)?'W':'E', abs(DataFromDisplay.ew_cal)/10, abs(DataFromDisplay.ew_cal)%10);
         }
         Serial.printf("Puck: %d live vliegtuigen op de radar getekend!\n", flightdata.num_flights);
       } // if (lv_scr_act() == ui_RadarScreen)
@@ -166,8 +166,12 @@ void message_get_flight_date_handler(char *incomingMessage)
 static lv_timer_t * radar_refresh_timer = NULL;
 // timer-callback for requesting flight data
 static void radar_refresh_timer_cb(lv_timer_t * timer) 
-{ RadarDownTimer--;
-  if(RadarDownTimer>1)AddToQueueForGlobe("", MESSAGE_GET_FLIGHT_DATA); 
+{ char content[32];
+  RadarDownTimer--;
+  if(RadarDownTimer>1)
+  { sprintf(content, "%d %f %f", 0, (float)DataFromDisplay.ns_cal/10, (float)DataFromDisplay.ew_cal/10);
+    AddToQueueForGlobe(content, MESSAGE_GET_FLIGHT_DATA); 
+  }
   else 
   { lv_scr_load(uic_Home); 
     Serial.println("Radarscreen clicked for exit");
@@ -175,7 +179,8 @@ static void radar_refresh_timer_cb(lv_timer_t * timer)
 }
 
 static void radar_screen_event_cb(lv_event_t * e) 
-{   lv_event_code_t code = lv_event_get_code(e);
+{   char content[32];
+    lv_event_code_t code = lv_event_get_code(e);
     
     if(code == LV_EVENT_SCREEN_LOAD_START) 
     { Serial.println("Radar screen event: LV_EVENT_SCREEN_LOAD_START");
@@ -194,8 +199,9 @@ static void radar_screen_event_cb(lv_event_t * e)
       if(radar_refresh_timer == NULL) 
       { radar_refresh_timer = lv_timer_create(radar_refresh_timer_cb, 1000, NULL);
       }
- 
-      AddToQueueForGlobe("", MESSAGE_GET_FLIGHT_DATA); 
+      
+      sprintf(content, "%d %f %f", 0, (float)DataFromDisplay.ns_cal/10, (float)DataFromDisplay.ew_cal/10);
+      AddToQueueForGlobe(content, MESSAGE_GET_FLIGHT_DATA); 
       return;
    }
 

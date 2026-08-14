@@ -388,7 +388,10 @@ void SaveVolTone(lv_event_t * e)
   { // tell globe to save settings
     AddToQueueForGlobe("SAVE VOLUME AND TONE CONTROLS", MESSAGE_STORE_VOLUME_AND_TONE);
     SaveDisplaySettings();
+    lv_label_set_text(ui_ToneControlInstruction, "Audio Preferences Saved");
+    lv_refr_now(NULL);
     beepforMs(1000);
+    lv_label_set_text(ui_ToneControlInstruction, "Long Press Button To Save");
   }
 }
 
@@ -679,14 +682,14 @@ uint8_t my_global_weather_img_data[70*60*3]; // 12600 bytes
 void SetWeatherData(char *settings)
 { char path[32];
   float temperature;
-  int humidity;
+  uint16_t humidity;
   char icon[8];
-  char content[32];
   uint16_t apirequest;
+  char content[32];
   
   // example, setting = "Temp 25.3 Rh 8 Icon 01d"
 
-  sscanf(settings, "Temp %f Rh %d Icon %3s %d", &temperature, &humidity, &icon[0], apirequest);
+  sscanf(settings, "Temp %f Rh %hu Icon %3s %hu", &temperature, &humidity, &icon[0], apirequest);
 
   int temperaturerounded = (int)round(temperature);
   sprintf(content, "%d °C", temperaturerounded); 
@@ -697,18 +700,20 @@ void SetWeatherData(char *settings)
 
   sprintf(path, "/weather-bin/%s-70x60.bin", icon);
 
-  my_global_weather_img.header.always_zero = 0;
-  my_global_weather_img.header.w = 70;
-  my_global_weather_img.header.h = 60;
-  my_global_weather_img.header.cf = LV_IMG_CF_TRUE_COLOR_ALPHA;
-  my_global_weather_img.data = my_global_weather_img_data;
-
   if(Puck_SD_GB)
   { File fp = SD_MMC.open(path, FILE_READ);
-    fp.read((uint8_t *)my_global_weather_img_data, 4); // header, basically skipping it, header is already filled above
-    fp.read((uint8_t *)my_global_weather_img_data, sizeof(my_global_weather_img_data)); // data
-    fp.close();
-    lv_img_set_src(uic_Weather_Icon, &my_global_weather_img);
+    if(fp)
+    { my_global_weather_img.header.always_zero = 0;
+      my_global_weather_img.header.w = 70;
+      my_global_weather_img.header.h = 60;
+      my_global_weather_img.header.cf = LV_IMG_CF_TRUE_COLOR_ALPHA;
+      my_global_weather_img.data = my_global_weather_img_data;
+      
+      fp.read((uint8_t *)my_global_weather_img_data, 4); // header, basically skipping it, header is already filled above
+      fp.read((uint8_t *)my_global_weather_img_data, sizeof(my_global_weather_img_data)); // data
+      fp.close();
+      lv_img_set_src(uic_Weather_Icon, &my_global_weather_img);
+    }
   }  
 }
 

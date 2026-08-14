@@ -1,13 +1,9 @@
 // update of firmware
 // new files are located at: github
 // steps to take
-// - check most recent version
-// - download to SD if newwer
-// - install from SD
-// 
-//#include <HttpsOTAUpdate.h>
-//#include <Update.h>
-//#include <Updater_Signing.h>
+// install in arduino IDE, Arduino_ESP32_OTA by Arduino, V 0.3.1
+// check for most recent version
+// install if newer
 
 
 #include <HTTPClient.h>

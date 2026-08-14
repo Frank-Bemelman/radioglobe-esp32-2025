@@ -41,7 +41,6 @@ extern lv_obj_t * ui_SetFuzzinessButtonTextR;
 extern lv_obj_t * ui_SetFuzzinessValue;
 extern lv_obj_t * ui_mainscreen_speakeron;
 extern lv_obj_t * ui_mainscreen_speakeroff;
-//extern lv_obj_t * ui_MusicLibraryButton;
 extern lv_obj_t * ui_PresetFlag;
 extern void ui_event_PresetFlag(lv_event_t * e);
 
