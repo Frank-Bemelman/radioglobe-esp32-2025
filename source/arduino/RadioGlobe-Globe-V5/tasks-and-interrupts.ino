@@ -6,7 +6,7 @@ void setup_tasks(void)
                     "Queued_Api_Calls",  /* name of task. */
                     10000,       /* Stack size of task */
                     NULL,        /* parameter of the task */
-                    3,           /* priority of the task */
+                    0,           /* priority of the task */
                     NULL,      /* Task handle to keep track of created task */
                     0);          /* pin task to core 0 */      
   xTaskCreatePinnedToCore(
@@ -40,6 +40,9 @@ void ReadAS5600Encoders(void * pvParameters)
   static bool EncoderReliable = false;  
   static uint8_t LedAnimationBrightness = 0;
   static uint32_t EncoderTicker100mS = 0; 
+
+  extern uint16_t UpdateState;
+
   
   while(1)
   { EncoderTicker100mS = GlobalTicker100mS;
@@ -91,7 +94,7 @@ void ReadAS5600Encoders(void * pvParameters)
     if((abs(NSFilteredRAW - AverageNS[(AverageIdx-1)%4])<8) && (abs(EWFilteredRAW - AverageEW[(AverageIdx-1)%4])<8))
     { // pretty stable
       if(stable100ms<10000)stable100ms++;
-      if(EncoderReliable && (stable100ms>9)) // if stable for 1 second
+      if(EncoderReliable && (stable100ms>4)) // if stable for 1 second
       { stable = true;
         if(LedAnimationBrightness)LedAnimationBrightness-=5; // brigthness dims down in roughly 2.5 seconds
       }
@@ -102,7 +105,7 @@ void ReadAS5600Encoders(void * pvParameters)
       PixelUpdate(0, 0xFFFFFF, 0x000000, 2000); // solid white to light up globe                    
       LedAnimationBrightness=255;
 
-      if(bPowerStatus && !stable && !bEncoderKillStation && bSetupCompleted && !Tuning)
+      if(bPowerStatus && !stable && !bEncoderKillStation && bSetupCompleted && !Tuning && UpdateState==0)
       {  PlayWhile((uint8_t *)mp3_radio_tuning, sizeof(mp3_radio_tuning), true); // play one snippet and loop around if need be
       }
     }
@@ -131,7 +134,7 @@ void ReadAS5600Encoders(void * pvParameters)
       }
     }
 
-    if(EncoderReliable && (stable_changed != stable))
+    if(EncoderReliable && (stable_changed != stable) && UpdateState==0)
     { stable_changed = stable;
       stream.forceVolume(0); // whatever is playing - mute it
 
@@ -220,7 +223,7 @@ void TaskTouch(void * pvParameters)
     else
     { 
       
-      if(value > (average + (average/5))) // started with 16, try more sensitive with 20, 21JUL26 less sensitive with 3
+      if(value > (average + (average/10))) // started with 16, try more sensitive with 20, 21JUL26 less sensitive with 3 then 5, didnt work with knob, settled for 5
       { if(touch_status == false)
         { touch_started_at_mS = millis();
           if(recent_short_touches==1)long_press_up = true;

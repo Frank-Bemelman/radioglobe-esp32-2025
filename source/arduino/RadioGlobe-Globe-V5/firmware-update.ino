@@ -7,9 +7,20 @@
 // - update build date in eeprom
 
 
-#include <WiFi.h>
+//#include <WiFi.h>
+//#include <HTTPClient.h>
+//#include <NetworkClientSecure.h>
+
 #include <HTTPClient.h>
-#include <NetworkClientSecure.h>
+#include <WiFi.h>
+#include <NetworkClient.h>
+#include <ESP_SSLClient.h>
+#include <Update.h>
+
+NetworkClient base_client;
+ESP_SSLClient ssl_client;
+
+
 
 uint16_t UpdateState = 0;
 
@@ -17,6 +28,8 @@ const char firmware_file[] = "/firmware.bin";
 
 // Target file in Github release
 char file_url[] = "https://github.com/Frank-Bemelman/radioglobe-esp32-2025/releases/download/RadioGlobe-Firmware/RadioGlobe-Globe.bin";
+char path_url[] = "/Frank-Bemelman/radioglobe-esp32-2025/releases/download/RadioGlobe-Firmware/RadioGlobe-Globe.bin";
+
 
 // worthless
 void PlayComplete(char* soundfile)
@@ -48,6 +61,8 @@ uint8_t UpdateFirmware(uint8_t state)
 { static char GithubTimeStamp[32];
   File file;
 
+  delay(1000); // make it a timer in loop()
+
   while(true)
   { Serial.printf("UpdateFirmware process state %d\n", state);
     switch(state)
@@ -56,92 +71,66 @@ uint8_t UpdateFirmware(uint8_t state)
        break;
 
      case 1:
-       //GetTimeStampGitHubReleaseV2(file_url, GithubTimeStamp)
+       stream.stopSong();
+       PixelUpdate(0, 0xFF0000, 0x000000, 10000); // solid red     
        AddToQueueForDisplay("Updating Globe", MESSAGE_STATION_NAME);
        AddToQueueForDisplay("MAY TAKE A MINUTE", MESSAGE_STATUS_LINE);
-       AddToQueueForDisplay("Checking For New Firmware", MESSAGE_SONG_TITLE);
+       AddToQueueForDisplay("Checking Github For New Firmware", MESSAGE_SONG_TITLE);
        AddToQueueForDisplay(GlobeSettings.ssid , MESSAGE_SSID_FOR_GLOBE);
        AddToQueueForDisplay(GlobeSettings.password, MESSAGE_PASSWORD_FOR_GLOBE);
-       //PlayComplete("/GLOBEMUSIC/SOUNDS/checking_new_firmware.mp3"); // sound effect
-       //PlayComplete("/GLOBEMUSIC/SOUNDS/Download Blues.mp3"); // sound effect
-       
-       delay(1000);
+       state++;
+       return state;
+       break;
 
+       case 2:
+       PixelUpdate(0, 0xFF0000, 0x000000, 10000); // solid red     
        if(!GetTimeStampGitHubReleaseV2(file_url, GithubTimeStamp))
-       { AddToQueueForDisplay("No Globe Update Available", MESSAGE_SONG_TITLE);
-         delay(1000);
+       { // could not find a bin file with datestamp
+         AddToQueueForDisplay("Continue With Puck", MESSAGE_STATION_NAME);
+         AddToQueueForDisplay("No Globe Firmware On Github", MESSAGE_SONG_TITLE);
          AddToQueueForDisplay("", MESSAGE_UPDATE_PUCK);
+         PixelUpdate(0, 0x000000, 0x000000, 10000); // all off
          return 0;
        } 
        state++;
+       return state;
        break;
 
-     case 2:
+     case 3:
        // sooner or later
        // check if github has a newer version than currently running
+       PixelUpdate(0, 0xFF0000, 0x000000, 10000); // solid red     
        if(!CheckIfNewer(GithubTimeStamp, build_timestamp_only))
        { Serial.printf("Updater: Github %s is older than running version %s - quit update!\n", GithubTimeStamp, build_timestamp_only);
-         AddToQueueForDisplay("Globe Firmware Is The Latest", MESSAGE_SONG_TITLE);
-         delay(1000);
          AddToQueueForDisplay("", MESSAGE_STATUS_LINE);
-         AddToQueueForDisplay("", MESSAGE_UPDATE_PUCK);
-         return 0;
+         AddToQueueForDisplay("Globe Firmware Is The Latest", MESSAGE_SONG_TITLE);
+         state  = 11; // continue with puck check
+         PixelUpdate(0, 0x000000, 0x000000, 10000); // all off
+         return state;
        }
        Serial.printf("Updater: Github %s is NEWER than running version %s - continue update!\n", GithubTimeStamp, build_timestamp_only);
        state++;
+       return state;
        break;
-     case 3:
-       // github is more recent
-       // delete existing bin firmawere file first
-       if(SD.remove(firmware_file))
-       { Serial.printf("Updater -> old file: %s succesfully deleted!\n", firmware_file);
-       }
-       else
-       { Serial.printf("Updater: no %s present on SD card!\n", firmware_file);
-       }
-       state++;
-       break;
+
+     // last step in actual globe update, and puck is triggered
      case 4:
+       PixelUpdate(4, 0xFF0000, 0x000000, 60000); // red rotating
        AddToQueueForDisplay("New Globe Firmware Downloading", MESSAGE_SONG_TITLE);
-       delay(1000);
-       if(!DownloadGithubFile(file_url))
+       AddToQueueForDisplay("", MESSAGE_UPDATE_PUCK);
+       //if(!DownloadGithubFileToSD(file_url))
+       if(!startVolledigeOtaDownload("github.com", path_url)) // reboots on succes
        { AddToQueueForDisplay("Globe Firmware Download Failed", MESSAGE_SONG_TITLE);
-         delay(1000);
-         AddToQueueForDisplay("", MESSAGE_STATUS_LINE);
-         AddToQueueForDisplay("", MESSAGE_UPDATE_PUCK);
-         return 0;
+         return 0; 
        }        
-       Serial.printf("Updater: new firmware downloaded to SD card!\n");
+       break;
+    
 
-       state++;
-       break;
-
-     case 5:
-       DataFromGlobe.D_QueueStationIndex = -1; 
-       stream.stopSong(); // stop whatever stream or file was playing
-       Speakers(SPEAKERS_ON);
-       SetVolumeMapped(DataFromDisplay.volumevalue); 
-       stream.connectToFile(SD, "/GLOBEMUSIC/SOUNDS/Download Blues.mp3"); // play it 
-       //  stream.connectToFile(SD, "/GLOBEMUSIC/JUKEBOX/D04-Gloria Estefan-Higher.mp3"); // play it 
-       state++;
-       break;
- 
-     case 6:
-       AddToQueueForDisplay("Update Globe ESP32 Processor", MESSAGE_SONG_TITLE);
-       delay(1000);
-       if(!UpdateFromSD(file_url))
-       { AddToQueueForDisplay("Update Globe ESP32 Failed", MESSAGE_SONG_TITLE);
-         delay(1000);
-         AddToQueueForDisplay("", MESSAGE_STATUS_LINE);
-         AddToQueueForDisplay("", MESSAGE_UPDATE_PUCK);
-         return 0;
-       }        
-       state++;
-       break;
-     
-     case 10:
-       return 0;
-       break;
+     // continue with puck only
+     case 11: 
+       AddToQueueForDisplay("", MESSAGE_UPDATE_PUCK);
+       return 0; 
+       
      default:
        state++;
        break;
@@ -150,12 +139,12 @@ uint8_t UpdateFirmware(uint8_t state)
 }
 
 
-bool UpdateFromSD(char *file_url)
-{ File firmware = SD.open("/firmware.bin");
+bool UpdateFromSD(const char *firmware_file)
+{ File firmware = SD.open(firmware_file);
   
   Serial.printf("Updater: start flashing new firmware from SD card!\n");
   if (!firmware) 
-  { Serial.println("Failed to open firmware.bin");
+  { Serial.printf("Failed to open %s\n", firmware_file);
     return false;
   }
 
@@ -259,7 +248,7 @@ bool CheckIfNewer(const char *gstamp, const char* bstamp)
 }
 
 
-bool DownloadGithubFile(char *url)
+bool DownloadGithubFileToSD(char *url)
 { File sdfile;
   NetworkClientSecure client;
   HTTPClient http;
@@ -280,32 +269,34 @@ bool DownloadGithubFile(char *url)
 
       sdfile = SD.open(firmware_file, FILE_WRITE);
 
-      // Read data from stream to save ESP32 heap memory
-      NetworkClient* stream = http.getStreamPtr();
+      if(sdfile)
+      { // Read data from stream to save ESP32 heap memory
+        NetworkClient* stream = http.getStreamPtr();
+ 
+        // read all data from server
+        while (http.connected() && (contentLength > 0 || contentLength == -1)) 
+        { // get available data size
+          size_t size = stream->available();
 
-      // read all data from server
-      while (http.connected() && (contentLength > 0 || contentLength == -1)) 
-      { // get available data size
-        size_t size = stream->available();
-
-        if (size) 
-        { // read up to 128 byte
-          int c = stream->readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
-          if(contentLength > 0) 
-          { contentLength -= c;
-            if(contentLength == 0)fulldownload = true;
+          if (size) 
+          { // read up to 128 byte
+            int c = stream->readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
+            if(contentLength > 0) 
+            { contentLength -= c;
+              if(contentLength == 0)fulldownload = true;
+            }
+            count+=c;
+            Serial.printf("Github Firmware downloaded sofar: %d bytes\n", count);
+            // write it to Serial
+            // Serial.write(buff, c);
+            // write to SD card
+            sdfile.write(buff,c);
           }
-          count+=c;
-          Serial.printf("Github Firmware downloaded sofar: %d bytes\n", count);
-          // write it to Serial
-          // Serial.write(buff, c);
-          // write to SD card
-          sdfile.write(buff,c);
-        }
-        delay(1);
-      }  
-      sdfile.close();
-    } 
+          delay(1);
+        }  
+        sdfile.close();
+      }
+    }   
     http.end(); 
   }
  
@@ -330,7 +321,7 @@ bool GetTimeStampGitHubReleaseV2(char *url, char *timestamp)
   client.setInsecure(); 
   
   http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
-  Serial.println("GitHub connect for download...");
+  Serial.printf("GitHub connect to url: %s for download...", url);
 
   if(http.begin(client, url)) 
   { int httpCode = http.GET();
@@ -402,10 +393,130 @@ bool GetTimeStampGitHubReleaseV2(char *url, char *timestamp)
     } 
     http.end(); 
   }
+  else
+  { Serial.printf("Could not open Github url: %s\n", url); 
+  }
  
   Serial.printf("Github Label checked with downloaded: %d bytes\n", count);
   return build_label_complete;
 }
 
 
+// =======================================================================
+// FASE 2: DE ECHTE UPDATE (Volledig downloaden vanaf byte 0 naar Flash)
+// =======================================================================
+bool startVolledigeOtaDownload(String host, String path) {
+    ssl_client.setClient(&base_client);
+    ssl_client.setInsecure();
+    heap_caps_malloc_extmem_enable(1024); 
+    ssl_client.setBufferSizes(16384, 2048); 
+
+    Serial.printf("[OTA] Verbinding maken voor complete download: %s...\n", host.c_str());
+    if (!ssl_client.connect(host.c_str(), 443)) {
+        Serial.println("[OTA] Verbinding mislukt.");
+        return false;
+    }
+
+    ssl_client.print("GET " + path + " HTTP/1.1\r\n");
+    ssl_client.print("Host: " + host + "\r\n");
+    ssl_client.print("Connection: close\r\n\r\n");
+
+    unsigned long timeout = millis();
+    while (ssl_client.available() == 0) {
+        if (millis() - timeout > 10000) { ssl_client.stop(); return false; }
+    }
+
+    // Volg redirect ook in fase 2
+    String firstLine = ssl_client.readStringUntil('\n');
+    if (firstLine.indexOf("302") != -1 || firstLine.indexOf("301") != -1) {
+        String newHost = "", newPath = "";
+        while (ssl_client.available()) {
+            String line = ssl_client.readStringUntil('\n');
+            if (line.startsWith("Location: ") || line.startsWith("location: ")) {
+                String fullUrl = line.substring(10); fullUrl.trim();
+                if (fullUrl.startsWith("https://")) {
+                    String urlWithoutProtocol = fullUrl.substring(8);
+                    int firstSlash = urlWithoutProtocol.indexOf('/');
+                    newHost = urlWithoutProtocol.substring(0, firstSlash);
+                    newPath = urlWithoutProtocol.substring(firstSlash);
+                }
+                break;
+            }
+        }
+        ssl_client.stop();
+        if (newHost != "") {
+            return startVolledigeOtaDownload(newHost, newPath);
+        }
+    }
+
+    size_t bestandGrootte = 0;
+    bool endOfHeaders = false;
+    while (ssl_client.available() && !endOfHeaders) {
+        String line = ssl_client.readStringUntil('\n');
+        // Maak eerst een kopie in kleine letters
+        String lowerLine = line;
+        lowerLine.toLowerCase();
+        
+        // Controleer nu de gekopieerde regel
+        if (lowerLine.startsWith("content-length:")) {
+            bestandGrootte = line.substring(15).toInt();
+        }
+        line.trim();
+        if (line.length() == 0) endOfHeaders = true;
+    }
+
+    if (bestandGrootte == 0) {
+        Serial.println("[OTA] Fout: Geen Content-Length bekend.");
+        ssl_client.stop();
+        return false;
+    }
+
+    // Start nu pas de officiële Arduino Update-engine
+    if (!Update.begin(bestandGrootte, U_FLASH)) {
+        Serial.printf("[OTA] Fout bij starten engine: %s\n", Update.errorString());
+        ssl_client.stop();
+        return false;
+    }
+
+    Serial.println("[OTA] Schrijven naar flash-partitie gestart...");
+
+    uint8_t* downloadBuffer = (uint8_t*) malloc(2048);
+    size_t totaalBinnen = 0;
+    unsigned long lastDataTime = millis();
+
+    while (totaalBinnen < bestandGrootte) {
+        while (ssl_client.available() == 0) {
+            if (millis() - lastDataTime > 15000) {
+                Serial.println("\n[OTA] Fout: Verbinding stilgevallen.");
+                free(downloadBuffer); Update.end(); ssl_client.stop(); return false;
+            }
+            delay(1);
+        }
+        lastDataTime = millis();
+
+        int teLezenBytes = min((size_t)2048, bestandGrootte - totaalBinnen);
+        int bytesGelezen = ssl_client.read(downloadBuffer, teLezenBytes); 
+        
+        if (bytesGelezen > 0) {
+            Update.write(downloadBuffer, bytesGelezen);
+            totaalBinnen += bytesGelezen;
+            
+            if (totaalBinnen % 102400 == 0 || totaalBinnen == bestandGrootte) { 
+                Serial.printf("[OTA] Voortgang: %d / %d bytes (%.1f%%)\n", totaalBinnen, bestandGrootte, (float)totaalBinnen / bestandGrootte * 100.0);
+            }
+        }
+    }
+
+    free(downloadBuffer);
+    ssl_client.stop();
+
+    if (Update.end(true)) {
+        Serial.println("\n[OTA SUCCESS] Systeem succesvol bijgewerkt! Rebooten...");
+        delay(1000);
+        ESP.restart();
+    } else {
+        Serial.printf("[OTA FOUT] Validatie mislukt: %s\n", Update.errorString());
+    }
+    return false;
+}
 

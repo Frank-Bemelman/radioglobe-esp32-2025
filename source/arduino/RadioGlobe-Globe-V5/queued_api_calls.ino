@@ -4,11 +4,24 @@
 #include "time.h" 
 
 /*
-https://maps.googleapis.com/maps/api/timezone/json?location=52.21810%2C4.54510&timestamp=1747924919&key=YOUR-API-KEY-FROM-GOOGLE
-https://maps.googleapis.com/maps/api/geocode/json?latlng=53,5&key=YOUR-API-KEY-FROM-GOOGLE
-https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}
 
-https://timeapi.io/api/v1/time/current/coordinate?latitude=38.9&longitude=-77.03
+// API for timezone, google, api key needed
+// https://maps.googleapis.com/maps/api/timezone/json?location=52.21810%2C4.54510&timestamp=1747924919&key=YOUR-API-KEY-FROM-GOOGLE
+
+// API for geo decoding, google, api key needed
+// https://maps.googleapis.com/maps/api/geocode/json?latlng=53,5&key=YOUR-API-KEY-FROM-GOOGLE
+
+// API for weather condition, api key needed
+//https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}
+
+// API for exchange rates 
+// https://open.er-api.com/v6/latest/EUR
+
+// API for flightradar data, free, no api key needed
+// https://opendata.adsb.fi/api/v3/lat/53.0000/lon/11.0000/dist/25
+
+// API for timezone, not google, not tested
+// https://timeapi.io/api/v1/time/current/coordinate?latitude=38.9&longitude=-77.03
 */
 
 
@@ -34,24 +47,27 @@ void Queued_Api_Calls(void * pvParameters)
     }
 
     // process messages arrived in ApiQueue
-    while(ApiCallsToDo.ApiQueueIndexIn != ApiCallsToDo.ApiQueueIndexOut) // we have to catch up with new messages
+    if(ApiCallsToDo.ApiQueueIndexIn != ApiCallsToDo.ApiQueueIndexOut && FromDisplay.QueueCnt==0) // we have to catch up with new messages, one at the time
     { // process ApiCallsToDo.ApiQueueMessageType[ApiCallsToDo.ApiQueueIndexOut];
-      uint16_t ApiType = ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexOut]; // atomic 
+      uint16_t ApiType = ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexOut]; // atomic local copy
+
+      Serial.printf("ASYNC PROCESS: PUCK-SERIAL %d %s %d\n", ApiCallsToDo.ApiQueueMessageSerialNumber[ApiCallsToDo.ApiQueueIndexOut], messagetexts[ApiType], ApiType);
+
       switch(ApiType)
       { case MESSAGE_GET_TIMEZONE_BY_GPS:
         case MESSAGE_TIMEZONE_NAME:
         case MESSAGE_HOME_TIMEZONE_NAME:
-          GetTimeZone(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexOut]);
-          GetOpenWeatherData(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut]);
+          GetTimeZone(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiPuckRequest[ApiCallsToDo.ApiQueueIndexOut]);
+          GetOpenWeatherData(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiPuckRequest[ApiCallsToDo.ApiQueueIndexOut]);
           break;
 
 
         case MESSAGE_GET_GEOLOCATION_BY_GPS:
-          GetGeolocationData(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexOut]);
+          GetGeolocationData(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiPuckRequest[ApiCallsToDo.ApiQueueIndexOut]);
           break;
 
         case MESSAGE_GET_GEOLOCATION:
-          GetGeolocationData(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexOut]);
+          GetGeolocationData(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiPuckRequest[ApiCallsToDo.ApiQueueIndexOut]);
           break;
 
         case MESSAGE_GET_FLIGHT_DATA:
@@ -66,19 +82,19 @@ void Queued_Api_Calls(void * pvParameters)
       ApiCallsToDo.ApiQueueIndexOut %= APIQUEUESIZE;
       ApiCallsToDo.ApiQueueCnt--;
     }
-    vTaskDelay(25 / portTICK_PERIOD_MS); // lowered to 100, was 200
+    vTaskDelay(250 / portTICK_PERIOD_MS); // lowered to 100, was 200
   }  
 }
 
 void CancelApiType(uint16_t ApiType)
 { for(uint16_t n = 0; n<APIQUEUESIZE; n++)
   { if(ApiCallsToDo.ApiType[n]==ApiType)
-    { ApiCallsToDo.ApiType[n]=0;
+    { ApiCallsToDo.ApiType[n]=MESSAGE_CANCELLED_APITYPE;
     }
  }
 }
 
-void GetTimeZone(float StationGpsNS, float StationGpsEW, uint16_t ApiType)
+void GetTimeZone(float StationGpsNS, float StationGpsEW, uint16_t ApiType, uint16_t PuckRequest)
 { WiFiClientSecure client;
   time_t now;
   char   payload[256]; 
@@ -178,10 +194,11 @@ void GetTimeZone(float StationGpsNS, float StationGpsEW, uint16_t ApiType)
       AddToQueueForDisplay("TZ - Nautical", MESSAGE_TIMEZONE_NAME);
       
 
-      CancelApiType(MESSAGE_GET_GEOLOCATION); // does not make sense anymore
+      CancelApiType(MESSAGE_GET_GEOLOCATION); // does not make sense anymore, TZ nautical means we are at sea
       strcpy(CountryCodeSelectorSD, "XX");
       DataFromGlobe.D_ApisFetchedForStation = -1;
-      AddToQueueForDisplay("XX,???", MESSAGE_GET_GEOLOCATION);
+      sprintf(content, "XX,???,%d", PuckRequest); 
+      AddToQueueForDisplay(content, MESSAGE_GET_GEOLOCATION);
 
       //printLocalTime();
     }
@@ -194,7 +211,7 @@ void GetTimeZone(float StationGpsNS, float StationGpsEW, uint16_t ApiType)
 }
 
 // fetch country and town
-void GetGeolocationData(float StationGpsNS, float StationGpsEW, int16_t AskingForStation)
+void GetGeolocationData(float StationGpsNS, float StationGpsEW, int16_t AskingForStation, uint16_t PuckRequest)
 { WiFiClientSecure client;
   char   payload[512]; // 256->512
   char   shortname[128]; // 64->128
@@ -211,8 +228,7 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW, int16_t AskingFo
   //Serial.println("MFree Heap at Start  GetTimeZone()" + String(ESP.getFreeHeap()));   
   print = 0;
   
-  //if(print)
-  Serial.printf("GetGeoLocationData Requested By Display -> Position NS = %f, EW = %f\n", StationGpsNS, StationGpsEW);
+  if(print)Serial.printf("GetGeoLocationData Requested By Display -> Position NS = %f, EW = %f\n", StationGpsNS, StationGpsEW);
 
   // examples
   // https://maps.googleapis.com/maps/api/geocode/json?latlng=42.464699,21.466900&key=YOUR-API-KEY-FROM-GOOGLE
@@ -229,7 +245,10 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW, int16_t AskingFo
   //  api.geonames.org/oceanJSON?lat=40.78343&lng=-43.96625&username=demo
   //  as seen here https://www.geonames.org/export/web-services.html#ocean
   
-  if(print)Serial.println(api_url);
+  if(print)
+  { Serial.println("START MET:");
+    Serial.println(api_url);
+  }
 
   startMs = millis();
   client.setInsecure();
@@ -247,6 +266,13 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW, int16_t AskingFo
     { uint16_t cnt = client.readBytesUntil('\n', payload, sizeof(payload)); // or until client.setTimeout(100)
       payload[cnt]=0;
       if(print)Serial.printf("cnt=%d ->%s\n", cnt, payload);
+      if((p = strstr(payload, "API key is invalid")) != NULL)
+      { strcpy(GlobeSettings.google_api_key, google_api_key);
+        EEPROM.put(0x0, GlobeSettings);
+        EEPROM.commit();
+        Serial.printf("Google Api resetted to one stored in firmware -> %s\n", GlobeSettings.google_api_key);
+      }
+
       if((p = strrchr(payload, '\"')) != NULL)*p=0; // get rid of the last ",
       if((p = strstr(payload, "\"short_name\" : \"")) != NULL)
       { p+=16;
@@ -272,14 +298,18 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW, int16_t AskingFo
         countryfound = true;
       }
       if(townfound && countryfound)found=true;
+
     }
-    sprintf(payload, "%s,%s", countrycode, town);
+    sprintf(payload, "%s,%s,%d", countrycode, town, PuckRequest);
     //sprintf(payload, "%s,%s,%d", countrycode, town, D_RequestedStation); // don't like it yet
     DataFromGlobe.D_ApisFetchedForStation = AskingForStation; 
     Serial.printf("GetGeolocationData() result -> >%s<\n", payload);
+
+
+
   }  
   else 
-  { sprintf(payload, "%s,%s", countrycode, town);
+  { sprintf(payload, "%s,%s,%d", countrycode, town, PuckRequest);
     //sprintf(payload, "%s,%s,%d", countrycode, town, D_RequestedStation); // don't like it yet
     DataFromGlobe.D_ApisFetchedForStation = AskingForStation; 
     Serial.printf("GetGeolocationData() -> Error code: %d\n", httpResponseCode);
@@ -298,7 +328,7 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW, int16_t AskingFo
 
 }
 
-void GetOpenWeatherData(float StationGpsNS, float StationGpsEW)
+void GetOpenWeatherData(float StationGpsNS, float StationGpsEW, uint16_t PuckRequest)
 { WiFiClientSecure client;
   char   payload[1024]; 
   char   countrycode[3]=""; 
@@ -401,11 +431,13 @@ void FetchJsonExchangeRates(void)
 
   if((country_index=IsCountryCodeValid(GlobeSettings.HomeCountryCode))<0)
   { Serial.printf("Can't get exchange rates for unknown home country %s\n", GlobeSettings.HomeCountryCode);
+    RefreshRatesCountDownTimer = 3600; // do it again after 1 hours
     return;
   }
 
   if(strlen(CountryList[country_index].valutacode)<3)
   { Serial.printf("Can't get exchange rates for valuta -> %s\n", CountryList[country_index].valutacode);
+    RefreshRatesCountDownTimer = 3600; // do it again after 1 hours
     return;
   }
 
@@ -426,17 +458,15 @@ void FetchJsonExchangeRates(void)
   int httpResponseCode = https.GET();
   if (httpResponseCode>0) 
   { if(print)Serial.printf("HTTP Response code: %d\n", httpResponseCode);
-//    strcpy(exchangepayload, https.getString().c_str());
-//    if(print)Serial.println(exchangepayload);
-//    if(print)Serial.printf("length exchangepayload = %d\n", strlen(exchangepayload));
-  }  
+    // strcpy(exchangepayload, https.getString().c_str());
+    //    if(print)Serial.println(exchangepayload);
+    //    if(print)Serial.printf("length exchangepayload = %d\n", strlen(exchangepayload));
     payload = https.getString();
     if(print)Serial.println(payload);
     if(print)Serial.printf("length exchange payload = %d\n", strlen(payload.c_str()) );
-
+  }
   else 
-  { //exchangepayload[0]=0;
-    payload = "";
+  { payload = "";
     if(print)Serial.printf("Error code: %d\n", httpResponseCode);
   }
   https.end();
@@ -515,148 +545,132 @@ struct RadarDataPacket {
 void GetAdsbFiFlightData(float lat, float lon)
 { WiFiClientSecure client;  
           
-    
-    
-    client.setInsecure();
-    // We zoeken in een straal van 25 Nautische Mijlen (~46 km) rondom de bol
-    String url = "https://opendata.adsb.fi/api/v3/lat/" + String(lat, 4) + "/lon/" + String(lon, 4) + "/dist/25";
+  client.setInsecure();
 
-    Serial.println(url);
+  // search in a radius of 25 nautic miles (~46 km) at given gps location
+  String url = "https://opendata.adsb.fi/api/v3/lat/" + String(lat, 4) + "/lon/" + String(lon, 4) + "/dist/25";
+  // example https://opendata.adsb.fi/api/v3/lat/44.0000/lon/10.0000/dist/25
+  // Serial.println(url);
 
-    HTTPClient http;
-
+  HTTPClient http;
+  http.begin(url);
     
-    http.begin(url);
-    
-    int httpCode = http.GET();
-    if (httpCode == HTTP_CODE_OK) {
-        String payload = http.getString();
-        Serial.println(payload);
+  int httpCode = http.GET();
+  if (httpCode == HTTP_CODE_OK) 
+  { String payload = http.getString();
+    // Serial.println(payload);
+    // adsb.fi can give large JSON results. make enough room for that!
+    DynamicJsonDocument doc(16384); 
+    DeserializationError error = deserializeJson(doc, payload);
         
-//23:17:42.335 -> https://opendata.adsb.fi/api/v3/lat/53.0000/lon/11.0000/dist/25
+    if (!error) 
+    { JsonArray aircrafts = doc["ac"];
+      RadarDataPacket responsePacket;
+      responsePacket.packet_type = 0xAA; 
+      responsePacket.num_flights = 0;
 
-//https://opendata.adsb.fi/api/v3/lat/44.0000/lon/10.0000/dist/25
+      for (JsonObject ac : aircrafts) 
+      { if (responsePacket.num_flights >= 5) break; // max 5 on radar
+        if (!ac.containsKey("lat") || !ac.containsKey("lon")) continue;
 
-        // adsb.fi kan flinke JSON's geven. Genoeg heap op Core 0 reserveren!
-        DynamicJsonDocument doc(16384); 
-        DeserializationError error = deserializeJson(doc, payload);
-        
-        if (!error) 
-        {
-            JsonArray aircrafts = doc["ac"];
-            RadarDataPacket responsePacket;
-            responsePacket.packet_type = 0xAA; 
-            responsePacket.num_flights = 0;
-
-            for (JsonObject ac : aircrafts) 
-            {
-                if (responsePacket.num_flights >= 5) break; // Max 5 op je radarscherm
-
-                if (!ac.containsKey("lat") || !ac.containsKey("lon")) continue;
-
-                float f_lat = ac["lat"].as<float>();
-                float f_lon = ac["lon"].as<float>();
-                float f_track = ac["track"].as<float>();
+        float f_lat = ac["lat"].as<float>();
+        float f_lon = ac["lon"].as<float>();
+        float f_track = ac["track"].as<float>();
                 
-                String cleanFlight = ac["flight"].as<String>();
-                cleanFlight.trim(); // Haal eventuele spaties weg
-                if (cleanFlight.length() == 0) cleanFlight = "UNK";
-
-                String cleanType = ac["t"].as<String>();
-                cleanType.trim();
-                if (cleanType.length() == 0) cleanType = "AIRC";
-                
-                int alt_baro = 0;
-                if (ac["alt_baro"].is<int>()) {
-                    alt_baro = ac["alt_baro"].as<int>();
-                }
-
-
-                float afstand_tot_bol = BerekenAfstandKm(lat, lon, f_lat, f_lon);
-
-                const float R = 6371.0; // radius earth in km
-                //const float DEG_TO_RAD = M_PI / 180.0;
-                float mid_lat_rad = ((lat + f_lat) / 2.0) * DEG_TO_RAD;
-                float afstand_x_km = (f_lon - lon) * DEG_TO_RAD * cos(mid_lat_rad) * R;
-                float afstand_y_km = (f_lat - lat) * DEG_TO_RAD * R;
-
-                // 4. Schaal de kilometers om naar de 200-pixel radarstraal
-                // 200 pixels / 46.3 km = 4.31966
-                int16_t calc_x = (int16_t)(afstand_x_km * 4.31966);
-                int16_t calc_y = (int16_t)(afstand_y_km * 4.31966);
-
-                int32_t kwadratische_afstand = ((int32_t)calc_x * calc_x) + ((int32_t)calc_y * calc_y);
-                // Drempel: binnen 400x400 cirkel blijven -> Straal = 200 -> Kwadraat = 40000
-                Serial.printf("x=%d y=%d px^2-afstand=%d afstand-float=%f kM callsign <%s>\n", calc_x, calc_y, kwadratische_afstand, afstand_tot_bol, responsePacket.flights[responsePacket.num_flights].callsign);
-               
-                if (kwadratische_afstand > 40000) 
-                {  Serial.printf("ERUIT   x=%d y=%d px^2-afstand=%d afstand-float=%f kM callsign <%s>\n", calc_x, calc_y, kwadratische_afstand, afstand_tot_bol, responsePacket.flights[responsePacket.num_flights].callsign);
-               
-                    // Vliegtuig valt buiten de ronde radar-cirkel. Direct skippen!
-                    continue; 
-                }
-
-                responsePacket.flights[responsePacket.num_flights].rel_x = calc_x;
-                responsePacket.flights[responsePacket.num_flights].rel_y = calc_y;
-
-                // test to see if this renders the airplane at the center of the puck display - yes it did
-                // if(responsePacket.num_flights == 0)
-                // { responsePacket.flights[responsePacket.num_flights].rel_x = 0;
-                //   responsePacket.flights[responsePacket.num_flights].rel_y = 0;
-                // }
-
-                responsePacket.flights[responsePacket.num_flights].heading = (uint16_t)f_track;
-
-
-                memset(responsePacket.flights[responsePacket.num_flights].callsign, 0, 8);
-                strncpy(responsePacket.flights[responsePacket.num_flights].callsign, cleanFlight.c_str(), 7);
-
-                memset(responsePacket.flights[responsePacket.num_flights].type, 0, 5);
-                strncpy(responsePacket.flights[responsePacket.num_flights].type, cleanType.c_str(), 4);
-
-                Serial.printf("callsign <%s> type <%s>\n", responsePacket.flights[responsePacket.num_flights].callsign, responsePacket.flights[responsePacket.num_flights].type);
-
-                // 4. Zet hoogte direct om naar Flight Level getal
-                responsePacket.flights[responsePacket.num_flights].altitude_ft = (uint16_t)(alt_baro);
-
-                responsePacket.num_flights++;
-            }
-
-            // Stuur de schone, compacte struct terug via je bestaande ESP-NOW zend-systeem
-           
-            AddToQueueForDisplay((char *)&responsePacket, MESSAGE_GET_FLIGHT_DATA);
-           
-            for(int n=0; n<responsePacket.num_flights; n++)
-            { Serial.printf("callsign <%s> type <%s>\n", responsePacket.flights[n].callsign, responsePacket.flights[n].type);
-            }
-           
-            Serial.printf("Radar: %d vluchten naar Puck gestuurd.\n", responsePacket.num_flights);
+        String cleanFlight = ac["flight"].as<String>();
+        cleanFlight.trim(); // remove spaces
+        if (cleanFlight.length() == 0) cleanFlight = "UNK";
+        String cleanType = ac["t"].as<String>();
+        cleanType.trim();
+        if (cleanType.length() == 0) cleanType = "AIRC";
+       
+        int alt_baro = 0;
+        if (ac["alt_baro"].is<int>()) 
+        { alt_baro = ac["alt_baro"].as<int>();
         }
-    } 
-    else 
-    {  Serial.printf("Radar API Error: HTTP code %d\n", httpCode);
+
+
+        float distance_from_center = CalculateDistanceInKm(lat, lon, f_lat, f_lon);
+
+        const float R = 6371.0; 
+        float mid_lat_rad = ((lat + f_lat) / 2.0) * DEG_TO_RAD;
+        float distance_x_km = (f_lon - lon) * DEG_TO_RAD * cos(mid_lat_rad) * R;
+        float distance_y_km = (f_lat - lat) * DEG_TO_RAD * R;
+
+        // scale km to 200-pixel radar radius
+        // 200 pixels / 46.3 km = 4.31966
+        int16_t calc_x = (int16_t)(distance_x_km * 4.31966);
+        int16_t calc_y = (int16_t)(distance_y_km * 4.31966);
+
+        int32_t squared_distance = ((int32_t)calc_x * calc_x) + ((int32_t)calc_y * calc_y);
+        // treshold: stay within 400x400 cirle -> radius = 200px -> squared = 40000
+        // Serial.printf("x=%d y=%d px^2-distance=%d distance-float=%f kM callsign <%s>\n", calc_x, calc_y, squared_distance, distance_from_center, responsePacket.flights[responsePacket.num_flights].callsign);
+               
+        if(squared_distance > 40000) 
+        {  // Serial.printf("Off Radar   x=%d y=%d px^2-distance=%d distance-float=%f kM callsign <%s>\n", calc_x, calc_y, squared_distance, distance_from_center, responsePacket.flights[responsePacket.num_flights].callsign);
+           // aircarft is off the radar, skip it!
+           continue; 
+        }
+
+        responsePacket.flights[responsePacket.num_flights].rel_x = calc_x;
+        responsePacket.flights[responsePacket.num_flights].rel_y = calc_y;
+
+        // test to see if this renders the airplane at the center of the puck display - yes it does
+        // if(responsePacket.num_flights == 0)
+        // { responsePacket.flights[responsePacket.num_flights].rel_x = 0;
+        //   responsePacket.flights[responsePacket.num_flights].rel_y = 0;
+        // }
+
+        responsePacket.flights[responsePacket.num_flights].heading = (uint16_t)f_track;
+
+
+        memset(responsePacket.flights[responsePacket.num_flights].callsign, 0, 8);
+        strncpy(responsePacket.flights[responsePacket.num_flights].callsign, cleanFlight.c_str(), 7);
+
+        memset(responsePacket.flights[responsePacket.num_flights].type, 0, 5);
+        strncpy(responsePacket.flights[responsePacket.num_flights].type, cleanType.c_str(), 4);
+
+        //Serial.printf("callsign <%s> type <%s>\n", responsePacket.flights[responsePacket.num_flights].callsign, responsePacket.flights[responsePacket.num_flights].type);
+
+        // set height
+        responsePacket.flights[responsePacket.num_flights].altitude_ft = (uint16_t)(alt_baro);
+
+        responsePacket.num_flights++;
+      } // end for
+
+      // send struct back to puck
+           
+      // for(int n=0; n<responsePacket.num_flights; n++)
+      // { Serial.printf("callsign <%s> type <%s>\n", responsePacket.flights[n].callsign, responsePacket.flights[n].type);
+      // }
+      Serial.printf("Radar: %d flights send to puck\n", responsePacket.num_flights);
+      AddToQueueForDisplay((char *)&responsePacket, MESSAGE_GET_FLIGHT_DATA);
     }
-    http.end();
+  } 
+  else 
+  {  Serial.printf("Radar API Error: HTTP code %d\n", httpCode);
+  }
+  http.end();
 }
 
-float BerekenAfstandKm(float lat1, float lon1, float lat2, float lon2) {
-    // 1. Straal van de aarde in kilometers
+float CalculateDistanceInKm(float lat1, float lon1, float lat2, float lon2) {
+    // radius earth in km
     const float R = 6371.0; 
 
-    // 2. Reken alle graden om naar radialen (graden * pi / 180)
+    // convert degrees to radians (degrees * pi / 180)
     float lat1_rad = lat1 * M_PI / 180.0;
     float lat2_rad = lat2 * M_PI / 180.0;
     float delta_lat_rad = (lat2 - lat1) * M_PI / 180.0;
     float delta_lon_rad = (lon2 - lon1) * M_PI / 180.0;
 
-    // 3. De Haversine wiskunde
+    // haversine formula
     float a = sin(delta_lat_rad / 2.0) * sin(delta_lat_rad / 2.0) +
               cos(lat1_rad) * cos(lat2_rad) *
               sin(delta_lon_rad / 2.0) * sin(delta_lon_rad / 2.0);
               
     float c = 2.0 * atan2(sqrt(a), sqrt(1.0 - a));
 
-    // 4. Totale afstand in kilometers
+    // total distance in km
     return R * c; 
 }
 

@@ -9,20 +9,22 @@ typedef struct {
   char     QueueMessage[QUEUESIZE][QUEUEMESSAGELENGTH];  // 50 strings of 128 each (6400 bytes) 
   uint16_t QueueMessageType[QUEUESIZE];
   uint16_t QueueMessageSerialNumber[QUEUESIZE];
-  uint16_t QueueIndexIn;
-  uint16_t QueueIndexOut;
-  uint16_t QueueCnt;
+  volatile uint16_t QueueIndexIn;
+  volatile uint16_t QueueIndexOut;
+  volatile uint16_t QueueCnt;
 } Queue;
 
 #define APIQUEUESIZE 25
 typedef struct {               
   uint16_t ApiType[APIQUEUESIZE];
+  uint16_t ApiQueueMessageSerialNumber[QUEUESIZE]; // message serial number as send by puck
   float ApiParameterNS[APIQUEUESIZE];
   float ApiParameterEW[APIQUEUESIZE];
   uint16_t ApiRequestedStation[APIQUEUESIZE];
-  uint16_t ApiQueueIndexIn;
-  uint16_t ApiQueueIndexOut;
-  uint16_t ApiQueueCnt;
+  uint16_t ApiPuckRequest[APIQUEUESIZE];
+  volatile uint16_t ApiQueueIndexIn;
+  volatile uint16_t ApiQueueIndexOut;
+  volatile uint16_t ApiQueueCnt;
 } ApiQueue;
 
 ApiQueue ApiCallsToDo; // queue with apis to call
@@ -100,7 +102,8 @@ const char * messagetexts[] = {
    { "GET_HOME_TIMEZONE 69"},
    { "HOME_TIMEZONE_POSIX 70"},
    { "TEST_URL 71"},
-   { "MESSAGE_MAX 72"}
+   { "CANCELLED API TYPE 72"},
+   { "MESSAGE_MAX 73"}
  };
 
 
@@ -178,6 +181,7 @@ const char * messagetexts[] = {
 #define MESSAGE_HOME_TIMEZONE_NAME 69
 #define MESSAGE_HOME_TIMEZONE_POSIX 70
 #define MESSAGE_TEST_URL 71
+#define MESSAGE_CANCELLED_APITYPE 71
 #define MESSAGE_MAX 72
 
 #define MESSAGE_URL_HTTP_400_BAD_REQUEST 400

@@ -1,15 +1,24 @@
-// in arduino library manager......
+// in arduino library manager........
 // install libs as shown here https://randomnerdtutorials.com/esp32-wi-fi-manager-asyncwebserver/
 // this is for the wifi manager portal
 
+// libraries needed in Arduino ide
+// Arduinojson by Benoit - v7.4.3
+// https://github.com/baldram/ESP_VS1053_Library download zip file and install
+// AS5600 by Rob Tilaart - v0.6.7
+// Adafruit Neopixel 1.15.5
+// WiFiManager by tzapu V2.0.17
+// Async TCP by ESP32Async V3.50
+// ESPAsyncWebServer by ESP32Async V3.12.0 
+// ESP_SSLClient by Mobitz V 3.1.3
+// home-assistant-integration Version  by Dawid 2.1.0
+
 // arduino ide settings 
-// esp32 3.1.2 board library
+// esp32 3.1.11 board library
 // esp32s3 dev module
 // tools -> flash size 16MB
 // tools -> partition 16MB 3MB APP 9.9MB FATFS
 // tools -> PSRAM OPI PSRAM 
-
-// TODO - turns off BT module when power off - or better not - perhaps better not - yes, better not
 
 // 30 JUN 26 - auto update refinements
 // 27 JUN 26 - added auto update from github
@@ -32,8 +41,8 @@
 // make this -> Globe Build Jun 23 2026 - 21:08:50
 #define BUILD_TIMESTAMP  BUILD_LABEL " " __DATE__ " - " __TIME__
 #define BUILD_TIMESTAMP_ONLY __DATE__ " - " __TIME__
-const char build_label[] =  BUILD_LABEL;
-const char build_timestamp[] =  BUILD_TIMESTAMP;
+const char build_label[] PROGMEM =  BUILD_LABEL;
+const char build_timestamp[] PROGMEM =  BUILD_TIMESTAMP;
 const char build_timestamp_only[] =  BUILD_TIMESTAMP_ONLY;
 extern uint8_t UpdateFirmware(uint8_t state); // start with 1 for a full date/time check and update
 extern bool CheckForNewGlobeUpdate(void);
@@ -139,6 +148,8 @@ static uint32_t startMillis;
 static uint32_t lapMillis;
 static uint32_t currentMillis;
 static uint32_t ConnectedInMillis;
+static uint32_t StationConnectedAtMillis;
+
 
 int16_t PrevTick = 0;
 bool bPowerStatus = true;
@@ -225,21 +236,23 @@ const char* VS1053_connectResult;
 extern void setupwebserver(void);
 
 
-volatile uint32_t GlobalTicker100mS = 0;
-volatile bool Flag100mS = false; // will always reset to true within 100mS by timer interrupt
-
 char PrevStreamType[64]="";
 char StreamType[64]="";
 char StreamCodec[16]="";
 char StreamBitrate[16]="";
+char StreamLastError[64];
 
+
+
+volatile uint32_t GlobalTicker100mS = 0;
+volatile bool bFlag100mS = false; // will always reset to true within 100mS by timer interrupt
 
 void IRAM_ATTR onGlobalTimer100ms(void* arg) {
     GlobalTicker100mS++;
-    Flag100mS = true; 
+    bFlag100mS = true; 
 }
 
-void SetupGlobalTimer(void) {
+void SetupGlobalTimer100mS(void) {
     const esp_timer_create_args_t timer_args = {
         .callback = &onGlobalTimer100ms,
         .name = "global_100ms_ticker"
@@ -266,10 +279,33 @@ void readMacAddress()
 
 bool bPortalOpened = false; // to freeze loop_esp_now(); during portal, so wifi channel is more quiet
 
+// stacksize is standard 8K
+// as experiment, tried to increase it to see if it made any differences regarding instabilities I had at a certain moment. 
+// can't say it made much difference
+// so I took it out again
+SET_LOOP_TASK_STACK_SIZE(16*1024);
+
+VS1053 *franks_vs1053;
+
 void setup()
 { char message[64];
+  startMillis = millis();
+// 6AUG26  globe freezes wehen running a heavy testurl job,  after 2-12 hours of testing 1 station every 1-3 seconds
+  // so I direct malloc to PSRAM for larger>1024, rather than ram. Also increase stacksize from 8K to 16K, see SET_LOOP_TASK_STACK_SIZE macro above
+  heap_caps_malloc_extmem_enable(1024); 
 
-  SetupGlobalTimer();
+  extern size_t getArduinoLoopTaskStackSize(void);
+  Serial.printf("Stack size = %d\n", getArduinoLoopTaskStackSize());
+  TaskHandle_t CurrentTask = xTaskGetCurrentTaskHandle();
+  TaskStatus_t TaskStatus;
+  vTaskGetInfo(CurrentTask, &TaskStatus, pdTRUE, eInvalid);
+  Serial.printf("Taskname: %s\n", TaskStatus.pcTaskName);
+  Serial.printf("Free Stack Size: %d bytes\n", uxTaskGetStackHighWaterMark(NULL));
+  // 6AUG26  een kijken of de globe minder vastloopt (bij url test na 12 uur soms)
+
+  Serial.begin(115200);
+
+  SetupGlobalTimer100mS(); // give us a steady uint32_t GlobalTicker100mS upcounter and bFlag100mS going true always every 100mS
 
   // replace !!!! characters in fetched api key (from secrets.h, where it is stored slighly corrupted)
   // basically to disguise apikey in final firmware
@@ -277,6 +313,9 @@ void setup()
   google_api_key[1]='I';
   google_api_key[2]='z';
   google_api_key[3]='a';
+
+
+  
 
   EEPROM.begin(EEPROM_SIZE);
   EEPROM.get(0x0, GlobeSettings);
@@ -286,7 +325,6 @@ void setup()
   if(CheckIfBTSwitchable())GlobeSettings.btmodule_switchable = 1;
   else GlobeSettings.btmodule_switchable = 0;
   
-  startMillis = millis();
 
   xTaskCreatePinnedToCore(
                     TaskTouch,   /* Task function. */
@@ -305,34 +343,49 @@ void setup()
   else digitalWrite(BT_POWER_PIN, LOW);  // turn off
   
   pinMode(MUTE_AMPLIFIERS, OUTPUT);
-  Speakers(SPEAKERS_ON);
+  Speakers(SPEAKERS_OFF);
 
   pinMode(SPEAKER_TOGGLE_PIN, INPUT_PULLUP);
   pinMode(PORTALSWITCH_PIN, INPUT_PULLUP); // input to button for opening portal
 
-  Serial.begin(115200);
   //while (!Serial) 
   //{ delay(10); // essentail for ESP32-S3
   //}
 
   Serial.printf("GlobeSettings size = %d bytes\n", sizeof(GlobeSettings));
 
-  //Start SPI bus
-  SPI.setHwCs(true);
-  SPI.begin(SPI_CLK_PIN, SPI_MISO_PIN, SPI_MOSI_PIN);
-  Serial.println("vspi bus started.");
+  Serial.printf("Sofar %dmS spend\n", (millis()-startMillis));
 
+
+//  pinMode(VS1053_CS, OUTPUT);
+//  pinMode(VS1053_DCS, OUTPUT);
   pinMode(VS1053_RESET, OUTPUT);
-  digitalWrite(VS1053_RESET, LOW);  
-  delay(50);   
-  digitalWrite(VS1053_RESET, HIGH); 
-  delay(50);          
 
-  // Initialize the VS1053 decoder
+//  digitalWrite(VS1053_CS, HIGH); 
+//  digitalWrite(VS1053_DCS, HIGH); 
+  digitalWrite(VS1053_RESET, LOW); 
+
+  delay(51);   
+  //pinMode(SPI_CLK_PIN, OUTPUT);
+  //pinMode(SPI_MOSI_PIN, OUTPUT);
+  //digitalWrite(SPI_CLK_PIN, LOW);
+  //digitalWrite(SPI_MOSI_PIN, LOW);
+  //delay(100);
+
+  digitalWrite(VS1053_RESET, HIGH); 
+  delay(20);          
+
+  // Start SPI bus, takes less than a mS
+  //SPI.setHwCs(true);
+  SPI.begin(SPI_CLK_PIN, SPI_MISO_PIN, SPI_MOSI_PIN);
+  
+
+  // Initialize the VS1053 decoder, takes quite long, 3762mS
+  startMillis = millis();
   if (!stream.startDecoder(VS1053_CS, VS1053_DCS, VS1053_DREQ) || !stream.isChipConnected()) 
   { Serial.println("Decoder not running - this is bad");
   }
-  else Serial.println("VS1053 up & running");
+  else Serial.printf("VS1053 up & running after %dmS\n", (millis()-startMillis));
   // Set the codec callback
   stream.setCodecCB(codecCallback);
   // Set the bitrate callback
@@ -345,10 +398,20 @@ void setup()
   stream.setEofCB(audio_eof_stream);    
   // Set the error callback
   stream.setErrorCB(VS1053error);    
-    
-  delay(500);
 
-  stream.stopSong(); 
+  //stream.stopSong(); // had a _vs1053->switchToMp3Mode(); inside that, otherwise my VS1053 diesn't always boot well
+  franks_vs1053 = stream.getVS1053pointer();
+  franks_vs1053->switchToMp3Mode();
+
+  // maybe if we want to poll vu meter sound level
+  //if (franks_vs1053->getChipVersion() == 4)
+  //  {
+  //      log_d("Patching vs1053 firmware");
+        //_vs1053->loadDefaultVs1053Patches(); 
+  //      _vs1053->loadUserCode(PATCHES_FLAC, PATCHES_FLAC_SIZE);
+  //  }
+
+  //stream.stopSong(); 
   PlaySoundBite((uint8_t *)mp3_happy_ping, sizeof(mp3_happy_ping), 0); 
 
   // start SD card
@@ -545,9 +608,11 @@ void setup()
     AddToQueueForDisplay("0 GB", MESSAGE_GLOBE_SD_GB);
   }
   
-  setupwebserver(); // that's all
-  sprintf(message, "%s.local", WiFi.getHostname());
-  AddToQueueForDisplay(message, MESSAGE_GLOBE_HOSTNAME);
+  if(GlobeSettings.globe_sd_gb !=0)
+  { setupwebserver(); // that's all
+    sprintf(message, "%s.local", WiFi.getHostname());
+    AddToQueueForDisplay(message, MESSAGE_GLOBE_HOSTNAME);
+  }  
 }
 
 
@@ -571,37 +636,59 @@ void loop()
   static bool bFirst = true;
   static uint32_t LoopTicker100mS = 0;
   
+  static uint32_t nowmillis;
+  static uint32_t prevmillis;
+  static uint32_t lapmillis;
+
   if(GlobeSettings.globe_sd_gb != 0)ftp.handleFTP();
    
   loop2(); // checks portal button in advanced.ino
   
-  stream.loop(); // keeps the VS1053 going
+  nowmillis = millis();
+  lapmillis = nowmillis - prevmillis;
+  if(lapmillis>2)Serial.printf("main loop(); took = %dmS\n", lapmillis);
+  prevmillis = nowmillis;
+
+  stream.loop(); // keeps the VS1053 going..
   
+  nowmillis = millis();
+  lapmillis = nowmillis - prevmillis;
+  //if(lapmillis>1)Serial.printf("stream.loop(); took = %dmS\n", lapmillis);
+  prevmillis = nowmillis;
+
+
+
   if(bMqttActivated==1234)loopMQTT();
   
   if(UpdateState) // update check in one step at the time
   { UpdateState = UpdateFirmware(UpdateState);
   } 
 
-  if(Flag100mS)
-  { Flag100mS = false; 
+  if(bFlag100mS)
+  { bFlag100mS = false; 
     LoopTicker100mS = GlobalTicker100mS;
   }  
 
   if((LoopTicker100mS % 50)==0) // every 5 seconds or so
   { if(WiFi.status() != WL_CONNECTED) 
-    { Serial.println("Reconnecting to WiFi...");
-      WiFi.disconnect();
-      WiFi.reconnect();
-      connection_lost_counter++;
-      if(connection_lost_counter>500)
-      { Serial.println("WiFi connection lost for 2500 seconds...");
+    { if(connection_lost_counter++>500)
+      { Serial.println("Unable to recover Wifi after 2500 seconds...");
         delay(100);
         ESP.restart(); 
       }
+      Serial.printf("Reconnecting to Wifi attempt %hu...\n", connection_lost_counter);
+      WiFi.disconnect();
+      WiFi.mode(WIFI_OFF);
+      delay(100); 
+      WiFi.mode(WIFI_STA);
+      WiFi.setSleep(false); 
+      WiFi.begin(GlobeSettings.ssid, GlobeSettings.password);
     }
     else
-    { connection_lost_counter = 0;
+    { if (connection_lost_counter > 0)
+      { AddToQueueForDisplay("WIFI -> Reconnected After Connection Lost", MESSAGE_CONNECTTOHOST_FAILURE);
+      }
+      connection_lost_counter = 0;
     }
   }
 
@@ -684,7 +771,7 @@ void loop()
      QueueMessage[sizeof(QueueMessage) - 1] = '\0'; // make sure it's 0 terminated
 
      if((QueueMessageType>=0) && (QueueMessageType<=MESSAGE_MAX)) 
-     { Serial.printf("PROCESS:%d %s >%s<\n", FromDisplay.QueueMessageSerialNumber[FromDisplay.QueueIndexOut], messagetexts[QueueMessageType], QueueMessage); 
+     { Serial.printf("PROCESS: PUCK-SERIAL %d %s >%s<\n", FromDisplay.QueueMessageSerialNumber[FromDisplay.QueueIndexOut], messagetexts[QueueMessageType], QueueMessage); 
      }
 
      // and now take care of it
@@ -699,6 +786,7 @@ void loop()
          }
          break;
       
+       // puck sends google api key at booting up, could be different from hard coded key, it set in api key file in puck
        case MESSAGE_GOOGLE_API_KEY:
          Serial.println(QueueMessage);
          if(strcmp(GlobeSettings.google_api_key, QueueMessage)!=0)
@@ -799,7 +887,7 @@ void loop()
          // quick & dirty, but maybe too dirty, as not all (but most do) https urls are http approacheable (Http create error)
          // but we also catch the 400 and do a retry on https in that case 
          // so, always try http first, remove the 's' from https
-         if(TargetUrl[4]=='s')strcpy(&TargetUrl[4], &TargetUrl[5]);  
+//         if(TargetUrl[4]=='s')strcpy(&TargetUrl[4], &TargetUrl[5]);  
         
          Tuning = true;
          if(StartNewStation()==1) // succes
@@ -831,6 +919,10 @@ void loop()
                 }
                 TargetUrl[4]='s';
               }
+              else
+              { if(TargetUrl[4]=='s')strcpy(&TargetUrl[4], &TargetUrl[5]);  
+              }
+
               if(StartNewStation()==1) // succes
               { DataFromGlobe.D_QueueStationIndex = DataFromDisplay.D_QueueStationIndex;
                 Serial.printf("SUCCES: stream.connecttohost\n"); 
@@ -883,6 +975,7 @@ void loop()
       case MESSAGE_STORE_VOLUME_AND_TONE:
         if(GlobeSettings.ee_volume < 10)GlobeSettings.ee_volume = 10;
         if(GlobeSettings.ee_volume > 70)GlobeSettings.ee_volume = 70;
+        Serial.printf("GlobeSettings.ee_volume = %d\n", GlobeSettings.ee_volume);
         EEPROM.put(0x0, GlobeSettings);
         EEPROM.commit();
         Serial.println("Eeprom saved..");
@@ -959,13 +1052,13 @@ void loop()
 
   }
 
-  if(bEncoderNewPosition)
+  if(bEncoderNewPosition && UpdateState==0)
   { bEncoderNewPosition = false;
     DataFromGlobe.D_QueueStationIndex = -1; // not meaningfull anymore, current list will be replaced
     AddToQueueForDisplay("?", MESSAGE_FINDNEWSTATION);
   }
   
-  if(bEncoderKillStation)
+  if(bEncoderKillStation && UpdateState==0)
   { bEncoderKillStation = false;
     stream.stopSong();
     Speakers(SPEAKERS_DELAYED_OFF);
@@ -1080,7 +1173,7 @@ bool StartNewStation(void)
 
   Serial.printf("StartNewStation with %s\n", TargetUrl);
   SetVolumeMapped(0);
-  if(stream.isRunning())
+  //if(stream.isRunning())
   { Serial.printf("First stop this one: %s\n", ActiveUrl);
     stream.stopSong();
   }
@@ -1139,11 +1232,13 @@ bool StartNewStation(void)
   //  stream.connecttofile(SD, "/GLOBEMUSIC/JUKEBOX//G03 Master KG-Jerusalema.mp3"); // works also 
 
   if(stream.isRunning()) 
-  { currentMillis = millis();
+  { StationConnectedAtMillis = millis();
+    currentMillis = millis();
     ConnectedInMillis = currentMillis - lapMillis;
     Serial.printf("Succesfully connected: %s -> time elapsed = %ld\n", TargetUrl, ConnectedInMillis);
     return_result = 1;
-    strcpy(ActiveUrl, TargetUrl);
+    strncpy(ActiveUrl, TargetUrl, sizeof(ActiveUrl));
+    ActiveUrl[QUEUEMESSAGELENGTH-1]=0;
     PixelUpdate(0, 0x000000, 0x000000, 5000); // all off
   }
   else
@@ -1200,7 +1295,7 @@ void audio_showstation(const char* info)
   char *p;
   int cnt;
 
-  if(!bPowerStatus)return;
+  if(!bPowerStatus && UpdateState == 0)return;
 
   // info parameter can be extremely long
   if(strncmp(currentinfo, info, (sizeof(currentinfo)-1)) ==0)return; // once, not twice the same
@@ -1250,7 +1345,7 @@ void audio_showstreamtitle(const char* info)
   int cnt;
   char *p;
 
-  if(!bPowerStatus)return;
+  if(!bPowerStatus && UpdateState == 0)return;
   
   // info parameter can be extremely long
   if(strncmp(currentinfo, info, (sizeof(currentinfo)-1)) ==0)return; // once, not twice the same
@@ -1290,7 +1385,10 @@ void audio_showstreamtitle(const char* info)
 
 // called from VS1053 driver
 void audio_eof_stream(const char* info) 
-{ char message[QUEUEMESSAGELENGTH];
+{ char message[1024];
+  uint32_t StationConnectedForMillis;
+
+  StationConnectedForMillis = millis() - StationConnectedAtMillis;
 
   Speakers(SPEAKERS_DELAYED_OFF);
   //Serial.printf("End of stream  -> %s\n", info); // seems to corrupt things when info is extremely long  
@@ -1306,7 +1404,11 @@ void audio_eof_stream(const char* info)
   // only next station or file if power is on
   if(bPowerStatus == true)
   { if(!bMusicMode)
-    {   
+    { // VS1053_connectResult is a const char * to reason of failure? 
+
+      sprintf(message, "EOF -> (%s) url=%s stopped after %ldmS", StreamLastError, ActiveUrl, StationConnectedForMillis);
+      strcpy(StreamLastError, "No recent error");
+      AddToQueueForDisplay(message, MESSAGE_CONNECTTOHOST_FAILURE); // let display store this number for log report
       AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);
       strcpy(ActiveUrl, "");
     }
@@ -1528,6 +1630,8 @@ void GlobePowerDown(uint16_t silentmode)
   Serial.printf("POWERDOWN - volume -> %d \n", GlobeSettings.ee_volume);
   SetVolumeMapped(GlobeSettings.ee_volume); 
   stream.stopSong();
+  franks_vs1053->switchToMp3Mode(); // prevent last snippet of station playing when power-down tune start playing
+
   strcpy(ActiveStationTitle, "");
   strcpy(ActiveSongTitle, "");
   AddToQueueForDisplay(ActiveStationTitle, MESSAGE_STATION_NAME);
@@ -1545,7 +1649,7 @@ void GlobePowerDown(uint16_t silentmode)
   SetVolumeMapped(0);
   digitalWrite(BT_POWER_PIN, LOW); // turn off BT module
 
-  // tell puck that a globe update is available
+  // tell puck that a globe update is availableor not
   UpdateAvailable = CheckForNewGlobeUpdate();
   if(UpdateAvailable)AddToQueueForDisplay("1", MESSAGE_GLOBE_UPDATE_AVAILABLE);
   else AddToQueueForDisplay("0", MESSAGE_GLOBE_UPDATE_AVAILABLE);
@@ -1711,7 +1815,7 @@ void Speakers(uint8_t mode)
 void codecCallback(const char *codec)
 { Serial.printf("codec: %s\n", codec);
   // during url test, ignore this
-  if(bPowerStatus)
+  if(bPowerStatus  && UpdateState == 0)
   { SetVolumeMapped(DataFromDisplay.volumevalue); // will also enable amplifiers
     strcpy(StreamCodec, codec);
     sprintf(StreamType, "Streaming %s - %s", StreamCodec, StreamBitrate);
@@ -1726,8 +1830,8 @@ void codecCallback(const char *codec)
 // Called when bitrate is detected (cbr) and changes (vbr)
 void bitrateCallback(uint32_t bitrate)
 {   // during url test, ignore this
-  if(bPowerStatus)
-  { Serial.printf("bitrate: %lu kbps\n", bitrate);
+  if(bPowerStatus  && UpdateState == 0) 
+  { //Serial.printf("bitrate: %lu kbps\n", bitrate);
     sprintf(StreamBitrate, "%lu kbps", bitrate);
     sprintf(StreamType, "Streaming %s - %s", StreamCodec, StreamBitrate);
     if(strcmp(PrevStreamType, StreamType)!=0)
@@ -1746,6 +1850,7 @@ void audio_fail(void)
 void VS1053error(const char *error) 
 { Serial.printf("Error from VS1053 -> %s\n", error);
   VS1053_connectResult = error;
+  strcpy(StreamLastError, error);
 }
 
 #include <stdio.h>

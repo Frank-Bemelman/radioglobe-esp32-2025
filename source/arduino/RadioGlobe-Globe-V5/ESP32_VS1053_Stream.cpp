@@ -151,6 +151,9 @@ bool ESP32_VS1053_Stream::startDecoder(const uint8_t CS, const uint8_t DCS, cons
     _vs1053 = new VS1053(CS, DCS, DREQ);
     if (!_vs1053)
         return false;
+
+    //franks_vs1053 = _vs1053;
+
     _vs1053->begin();
     _vs1053->switchToMp3Mode();
     if (_vs1053->getChipVersion() == 4)
@@ -161,6 +164,10 @@ bool ESP32_VS1053_Stream::startDecoder(const uint8_t CS, const uint8_t DCS, cons
     }
     _allocateRingbuffer();
     return true;
+}
+
+VS1053 * ESP32_VS1053_Stream:: getVS1053pointer()
+{ return _vs1053;
 }
 
 bool ESP32_VS1053_Stream::_escapeUrl(const char *url, const size_t len)
@@ -259,6 +266,7 @@ bool ESP32_VS1053_Stream::isChipConnected()
     return _vs1053 ? _vs1053->isChipConnected() : false;
 }
 
+
 void ESP32_VS1053_Stream::_resolveRedirect(const char *location, const char *base, char *result)
 {
     // Absolute URL
@@ -314,6 +322,7 @@ void ESP32_VS1053_Stream::_resolveRedirect(const char *location, const char *bas
 
     snprintf(result, sizeof(_url), "%.*s/%s", int(lastSlash - base), base, location);
 }
+
 
 bool ESP32_VS1053_Stream::connectToHost(const char *url)
 {
@@ -472,6 +481,9 @@ bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
         log_d("%s stream", _chunkedResponse ? "chunked" : "http");
         _offset = (_remainingBytes == -1) ? 0 : offset;
         _metaDataStart = _http->header(ICY_METAINT).toInt();
+
+        //Serial.printf("FRANK SAYS _metaDataStart = %d\n", _metaDataStart);
+
         _musicDataPosition = _metaDataStart ? 0 : -1;
         if (strcmp(_url, url))
             snprintf(_url, sizeof(_url), "%s", url);
@@ -508,28 +520,15 @@ bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
 
         char *location = reinterpret_cast<char *>(_localbuffer);
 
-        //char *p;
-        // get host from url, unless url is bare host already like https://random.sp.radio.fm
-        //if((p=strchr(url+8, '/'))!=0)
-        //{ strncpy(location, url, p-url);
-       // }
-
-        //if(_http->header(LOCATION).c_str()[0]=='/')
-        //{ strcpy(location + (p-url), _http->header(LOCATION).c_str());
-        //}
-        //else  
-        snprintf(location, sizeof(_localbuffer), "%s", _http->header(LOCATION).c_str());
-
-        //Serial.println(location);
-        //Serial.printf("DoubleCHECK %i redirection to: %s\n", HTTPresult, location);
-
-        _resolveRedirect(location, url, _url);
+        _resolveRedirect(_http->header(LOCATION).c_str(), url, location);
 
         stopSong();
         log_i("%i redirection to: %s", HTTPresult, _url);
-        Serial.printf("%i redirection to: %s\n", HTTPresult, _url);
+        //Serial.printf("FRANK at 543 SAYS %i redirection to: %s\n", HTTPresult, location);
 
-        return connectToHost(_url, username, pwd, 0);
+        
+
+        return connectToHost(location, username, pwd, 0);
     }
 
 //    https://lyd.nrk.no/nrk_radio_p1_ostfold_mp3_m     /icecast/mp3/high/s0w7hwn47m/p1_dk15/icecast/mp3/high/s0w7hwn47m/p1_dk15
@@ -580,7 +579,7 @@ void ESP32_VS1053_Stream::_playFromRingBuffer()
     {
         size_t size = 0;
         const size_t avail = min(VS1053_PLAYBUFFER_SIZE, (size_t)_remainingBytes);
-        uint8_t *data = (uint8_t *)xRingbufferReceiveUpTo(_ringbuffer_handle, &size, pdMS_TO_TICKS(0), avail);
+        uint8_t *data = (uint8_t *)xRingbufferReceiveUpTo(_ringbuffer_handle, &size, pdMS_TO_TICKS(0), avail); //////// testen met 10 ticks ?????????????????
         if (!data)
         {
             if (_bufferStallStartMS && (millis() - _bufferStallStartMS) > VS1053_PSRAM_BUFFER_TIMEOUT_MS)
@@ -689,7 +688,7 @@ void ESP32_VS1053_Stream::_handleStream(WiFiClient *stream)
     }
 
     if (_metaDataStart && _musicDataPosition == _metaDataStart && stream->available())
-    {
+    {  
         const auto required = stream->peek() * 16 + 1;
         if (stream->available() < required)
         {
@@ -718,9 +717,8 @@ void ESP32_VS1053_Stream::_chunkedStreamToRingBuffer(WiFiClient *stream)
 
     const size_t MAX_MOVE = size() ? 2048 : 512; // everything without a size is radio so low bitrate
 
-    if (_bytesLeftInChunk && _musicDataPosition < _metaDataStart &&
-        xRingbufferGetCurFreeSize(_ringbuffer_handle) && stream->available())
-    {
+    if (_bytesLeftInChunk && _musicDataPosition < _metaDataStart  && xRingbufferGetCurFreeSize(_ringbuffer_handle) && stream->available())
+    { 
         const size_t inStream = _metaDataStart ? _metaDataStart - _musicDataPosition : stream->available();
         const size_t inChunk = min(_bytesLeftInChunk, inStream);
         const size_t toMove = min(inChunk, MAX_MOVE);
@@ -758,7 +756,7 @@ void ESP32_VS1053_Stream::_handleChunkedStream(WiFiClient *stream)
     }
 
     if (_ringbuffer_handle)
-    {
+    { //Serial.print("+");
         _chunkedStreamToRingBuffer(stream);
         _playFromRingBuffer();
     }
@@ -787,17 +785,24 @@ void ESP32_VS1053_Stream::_handleChunkedStream(WiFiClient *stream)
     }
 
     if (_metaDataStart && _musicDataPosition == _metaDataStart && _bytesLeftInChunk && stream->available())
-    {
+    {   //Serial.printf("803 FRANK SAYS stream->available() = %d\n", stream->available());
+        //Serial.printf("804 FRANK SAYS stream->peek() = %d\n", stream->peek());
         const auto required = stream->peek() * 16 + 20; /* extra margin for chunk end */
-        if (stream->available() < required)
-        {
-            if (_ringbuffer_handle && _remainingBytes)
-                _playFromRingBuffer();
-            return;
-        }
+
+//        if (stream->available() < required)
+//        {
+//            if (_ringbuffer_handle && _remainingBytes)
+//                _playFromRingBuffer();
+//            Serial.printf("804 FRANK SAYS _remainingBytes = %d\n", _remainingBytes);
+//            return;
+//        }
+
+//        Serial.printf("804 FRANK SAYS _bytesLeftInChunk = %d\n", _bytesLeftInChunk);
 
         const auto metaLen = stream->read() * 16;
         _bytesLeftInChunk--;
+
+//        Serial.printf("804 FRANK SAYS metaLen = %d\n", metaLen);
 
         if (metaLen)
         {
@@ -832,7 +837,7 @@ void ESP32_VS1053_Stream::_handleChunkedStream(WiFiClient *stream)
         _musicDataPosition = 0;
     }
 
-    if (!_bytesLeftInChunk && !_checkSync(stream))
+    if (!_bytesLeftInChunk && !_checkSync(stream)) // original
     {
         _remainingBytes = 0;
         return;
@@ -842,10 +847,13 @@ void ESP32_VS1053_Stream::_handleChunkedStream(WiFiClient *stream)
 void ESP32_VS1053_Stream::_feedDecoder(WiFiClient *stream)
 {
     if (_chunkedResponse)
-        _handleChunkedStream(stream);
+    { //Serial.print("x");
+        _handleChunkedStream(stream); 
+    }    
     else
+    { //Serial.print(".");
         _handleStream(stream);
-
+    }
     if (!_remainingBytes)
         _eofStream();
 }
@@ -909,7 +917,11 @@ void ESP32_VS1053_Stream::loop()
         _streamStallStartMS = 0;
     }
 
-    _feedDecoder(stream);
+    if(data) _feedDecoder(stream);
+
+    if (!data && _ringbuffer_handle)
+        _playFromRingBuffer();
+
 }
 
 bool ESP32_VS1053_Stream::isRunning()
@@ -920,7 +932,7 @@ bool ESP32_VS1053_Stream::isRunning()
 void ESP32_VS1053_Stream::stopSong()
 {
     if (!_http && !_playingFile)
-    { //_vs1053->switchToMp3Mode();
+    {   //_vs1053->switchToMp3Mode(); // keep it!!! otherwise VS1053 does not seem to boot well always... (moved to own code now)
         return;
     }    
 

@@ -21,6 +21,10 @@ void OnDataSent(const esp_now_send_info_t *tx_info, esp_now_send_status_t status
 { //Serial.print("\r\nLast Packet Send Status:\t");
   //Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
   bWasTransmitted = (status == ESP_NOW_SEND_SUCCESS);
+  if(!bWasTransmitted)
+  { Serial.print("\r\nLast Packet Send Status:\t");
+    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+  }
 }
 
 
@@ -39,72 +43,60 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
   // make sure message string is 0 terminated, just in case it is corrupt data, bitten once, never twice
   DataFromDisplay.D_QueueMessage[QUEUEMESSAGELENGTH - 1] = 0; 
   
-  // quickly store gps location for timezone request before they become altered
-//  if(PrevDataFromDisplay.D_QueueMessageType != DataFromDisplay.D_QueueMessageType && ((DataFromDisplay.D_QueueMessageType != MESSAGE_NOP) ))
-  //if(PrevDataFromDisplay.D_QueueMessageType != DataFromDisplay.D_QueueMessageType && ((DataFromDisplay.D_QueueMessageType != MESSAGE_NOP) ))
+  // first deal with messages related to api calls to maken, fall through if not api call related
   if((DataFromDisplay.D_QueueMessageType != MESSAGE_NOP) && (MessageSerialNumberApi != DataFromDisplay.D_QueueSerialNumberSend))
   { MessageSerialNumberApi = DataFromDisplay.D_QueueSerialNumberSend; // treat once, never twice
     DataFromGlobe.D_QueueSerialNumberReceived = MessageSerialNumberApi; // echo back
-    if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_TIMEZONE_BY_GPS || DataFromDisplay.D_QueueMessageType == MESSAGE_HOME_TIMEZONE_NAME)
-    { Serial.printf("PUCK SAYS -> MESSAGE_GET_TIMEZONE_BY_GPS <%s>\n", DataFromDisplay.D_QueueMessage);
+    ApiCallsToDo.ApiQueueMessageSerialNumber[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_QueueSerialNumberSend;
+    //example message "<25 52.813301 6.090900>"
+    Serial.printf("PUCK SAYS: PUCK-SERIAL %d %s <%s>\n", ApiCallsToDo.ApiQueueMessageSerialNumber[ApiCallsToDo.ApiQueueIndexOut], messagetexts[DataFromDisplay.D_QueueMessageType], DataFromDisplay.D_QueueMessage);
+
+    if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_TIMEZONE_BY_GPS || 
+       DataFromDisplay.D_QueueMessageType == MESSAGE_HOME_TIMEZONE_NAME || 
+       DataFromDisplay.D_QueueMessageType == MESSAGE_TIMEZONE_NAME)
+    { //Serial.printf("PUCK SAYS -> MESSAGE_GET_TIMEZONE_BY_GPS <%s>\n", DataFromDisplay.D_QueueMessage);
       //PUCK SAYS -> MESSAGE_GET_TIMEZONE_BY_GPS <25 52.813301 6.090900>
+
       int16_t station;
       float nsGps;
       float ewGps;
-      sscanf(DataFromDisplay.D_QueueMessage, "%d %f %f", &station, &nsGps, &ewGps);
-      Serial.printf("  SSCANF-ED AS %d %f %f\n", station, nsGps, ewGps);
+      uint16_t PuckRequest; // to be echoed back
+      sscanf(DataFromDisplay.D_QueueMessage, "%hd %f %f %hu", &station, &nsGps, &ewGps, &PuckRequest);
+      // Serial.printf("  SSCANF-ED AS %d %f %f\n", station, nsGps, ewGps);
 
       CancelApiType(MESSAGE_GET_TIMEZONE_BY_GPS); // cancel previous ones
       CancelApiType(MESSAGE_HOME_TIMEZONE_NAME); // cancel previous ones
+      CancelApiType(MESSAGE_TIMEZONE_NAME);
 
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
-      
-      //ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsNS;
-      //ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsEW;
-      //ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_RequestedStation;
       
       ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = station;
       ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = nsGps;
       ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = ewGps;
-
+      ApiCallsToDo.ApiPuckRequest[ApiCallsToDo.ApiQueueIndexIn] = PuckRequest;
       
-      ApiCallsToDo.ApiQueueIndexIn++;
-      ApiCallsToDo.ApiQueueIndexIn %= APIQUEUESIZE;
-      ApiCallsToDo.ApiQueueCnt++;
-      return; // don't add to queue
-    }  
-    else if((DataFromDisplay.D_QueueMessageType == MESSAGE_TIMEZONE_NAME))
-    { Serial.printf("PUCK SAYS -> MESSAGE_GET_TIMEZONE <%s>\n", DataFromDisplay.D_QueueMessage);
-      CancelApiType(MESSAGE_TIMEZONE_NAME);
-      ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
-
-      ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ns_cal/10.0;
-      ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ew_cal/10.0;
-      ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_RequestedStation;
-
+      
       ApiCallsToDo.ApiQueueIndexIn++;
       ApiCallsToDo.ApiQueueIndexIn %= APIQUEUESIZE;
       ApiCallsToDo.ApiQueueCnt++;
       return; // don't add to queue
     }  
     else if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_GEOLOCATION_BY_GPS)
-    { Serial.printf("PUCK SAYS -> MESSAGE_GET_GEOLOCATION_BY_GPS <%s>\n", DataFromDisplay.D_QueueMessage);
+    { //Serial.printf("PUCK SAYS -> MESSAGE_GET_GEOLOCATION_BY_GPS <%s>\n", DataFromDisplay.D_QueueMessage);
       //PUCK SAYS -> MESSAGE_GET_GEOLOCATION_BY_GPS <25 52.813301 6.090900>
       int16_t station;
       float nsGps;
       float ewGps;
-      sscanf(DataFromDisplay.D_QueueMessage, "%d %f %f", &station, &nsGps, &ewGps);
-      Serial.printf("  SSCANF-ED AS %d %f %f\n", station, nsGps, ewGps);
+      uint16_t PuckRequest; // to be echoed back
+      sscanf(DataFromDisplay.D_QueueMessage, "%hd %f %f %hu", &station, &nsGps, &ewGps, &PuckRequest);
+      // Serial.printf("  SSCANF-ED AS %d %f %f\n", station, nsGps, ewGps);
       CancelApiType(MESSAGE_GET_GEOLOCATION_BY_GPS); 
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
-      
-      //ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsNS;
-      //ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_StationGpsEW;
-      //ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_RequestedStation;
       
       ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = station;
       ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = nsGps;
       ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = ewGps;
+      ApiCallsToDo.ApiPuckRequest[ApiCallsToDo.ApiQueueIndexIn] = PuckRequest;
       
       ApiCallsToDo.ApiQueueIndexIn++;
       ApiCallsToDo.ApiQueueIndexIn %= APIQUEUESIZE;
@@ -114,27 +106,47 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
     else if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_GEOLOCATION)
     { Serial.printf("PUCK SAYS -> MESSAGE_GET_GEOLOCATION <%s> (station %d )\n",  DataFromDisplay.D_QueueMessage, DataFromDisplay.D_RequestedStation);
       // PUCK SAYS -> MESSAGE_GET_GEOLOCATION <-1 33.900002 -38.299999> (station -1 )
+      int16_t station;
+      float nsGps;
+      float ewGps;
+      uint16_t PuckRequest; // to be echoed back
+      sscanf(DataFromDisplay.D_QueueMessage, "%hd %f %f %hu", &station, &nsGps, &ewGps, &PuckRequest);
+
       CancelApiType(MESSAGE_GET_GEOLOCATION);
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
-      ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ns_cal/10.0;
-      ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ew_cal/10.0;
-      ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.D_RequestedStation;
+
+      ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = station;
+      ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = nsGps;
+      ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = ewGps;
+      ApiCallsToDo.ApiPuckRequest[ApiCallsToDo.ApiQueueIndexIn] = PuckRequest;
+      
       ApiCallsToDo.ApiQueueIndexIn++;
       ApiCallsToDo.ApiQueueIndexIn %= APIQUEUESIZE;
       ApiCallsToDo.ApiQueueCnt++;
       return; // don't add to queue
     }  
     else if(DataFromDisplay.D_QueueMessageType == MESSAGE_GET_FLIGHT_DATA)
-    { Serial.printf("PUCK SAYS -> MESSAGE_GET_FLIGHT_DATA <%s>\n", DataFromDisplay.D_QueueMessage);
+    { int16_t station; // not used, always 0 -> maybe future use for nautic miles radius
+      float nsGps;
+      float ewGps;
+      uint16_t PuckRequest; // to be echoed back
+      sscanf(DataFromDisplay.D_QueueMessage, "%hd %f %f %hu", &station, &nsGps, &ewGps, &PuckRequest);
+      //Serial.printf("  SSCANF-ED AS %d %f %f\n", station, nsGps, ewGps);
+      CancelApiType(MESSAGE_GET_FLIGHT_DATA); 
       ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexIn] =  DataFromDisplay.D_QueueMessageType;
-      ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ns_cal/10.0;
-      ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = DataFromDisplay.ew_cal/10.0;
+      
+      ApiCallsToDo.ApiRequestedStation[ApiCallsToDo.ApiQueueIndexIn] = station;
+      ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexIn] = nsGps;
+      ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexIn] = ewGps;
+      ApiCallsToDo.ApiPuckRequest[ApiCallsToDo.ApiQueueIndexIn] = PuckRequest;
+
+
       ApiCallsToDo.ApiQueueIndexIn++;
       ApiCallsToDo.ApiQueueIndexIn %= APIQUEUESIZE;
       ApiCallsToDo.ApiQueueCnt++;
       return; // don't add to queue
     }
-    // not a special for api queue, continue..
+    // not a special for api queue, continue below..
   }  
 
   // put in receiving queue
@@ -219,8 +231,9 @@ void setup_esp_now()
 bool Q_filling = 0;
 bool Q_sending = 0;
 
-void loop_esp_now() 
+void loop_esp_now() // called from encoder task every 100mS
 { static uint16_t wait = 10;
+  static esp_err_t result; 
             
   // we get called here from the encoder loop, every 100mS
   
@@ -229,8 +242,8 @@ void loop_esp_now()
   // check and send all queued messages via ESP-NOW
   if(1) //bUpAndRunning)
   { if(ToDisplay.QueueCnt>0)
-    { int max_to_send_attempts = 10; 
-      while(ToDisplay.QueueCnt && max_to_send_attempts--) // don't let us hang in here forever, best effort here
+    { int max_to_send_attempts = 0; 
+      while(ToDisplay.QueueCnt && (max_to_send_attempts++ < 11)) // don't let us hang in here forever, best effort here
       { if(ToDisplay.QueueIndexOut != ToDisplay.QueueIndexIn)
         { //DataFromGlobe.G_QueueSerialNumberSend++;
           //Serial.printf("ESPNOW esp_now_send() ToDisplay.QueueCnt %d -> ToDisplay.QueueIndexOut %d != ToDisplay.QueueIndexIn %d\n", ToDisplay.QueueCnt, ToDisplay.QueueIndexOut, ToDisplay.QueueIndexIn);
@@ -241,40 +254,48 @@ void loop_esp_now()
 
           DataFromGlobe.G_QueueMessageType = ToDisplay.QueueMessageType[ToDisplay.QueueIndexOut];
           
-          bWasTransmitted = false;
-          esp_err_t result = esp_now_send(PuckMac, (uint8_t *) &DataFromGlobe, sizeof(DataFromGlobe));
-          Serial.printf("ESPNOW esp_now_send() SERIALNR %d -> %s sent to display = >%s<\n", DataFromGlobe.G_QueueSerialNumberSend, messagetexts[DataFromGlobe.G_QueueMessageType]  , DataFromGlobe.G_QueueMessage);
+          // if(!bWasTransmitted)delay(50); // give it some more time - will activate this if the increasing delay doesn't bring peace
+
+          // first attempt, send out only once, never twice
+          if(max_to_send_attempts==1)
+          { bWasTransmitted = false;
+            result = esp_now_send(PuckMac, (uint8_t *) &DataFromGlobe, sizeof(DataFromGlobe));
+            //Serial.printf("ESPNOW esp_now_send() SERIALNR %d -> %s sent to display = >%s<\n", DataFromGlobe.G_QueueSerialNumberSend, messagetexts[DataFromGlobe.G_QueueMessageType]  , DataFromGlobe.G_QueueMessage);
+          }  
           
           if(result==0) // && !bWasTransmitted) // all went ok
           { //Serial.printf("ESPNOW esp_now_send() succesfully queued\n");
             delay(2); // bWasTransmitted very likely true after this wait
-            int wait = 25;
+            int wait = 15;
             while(wait-- && !bWasTransmitted ) // usually never happens, bWasTransitted already true;
-            { Serial.printf("ESPNOW esp_now_send() wait for message actually send out\n");
+            { //Serial.printf("ESPNOW esp_now_send() wait for message actually send out\n");
               delay(1);
             }
             if(bWasTransmitted)
             { //Serial.printf("ESPNOW esp_now_send() package DataFromGlobe.G_QueueSerialNumber = %d -> delivered at puck\n", DataFromGlobe.G_QueueSerialNumberSend);
-              Serial.printf("ESPNOW esp_now_send() DISPLAY CONFIRMED  %s -> delivered at puck\n", messagetexts[ToDisplay.QueueMessageType[ToDisplay.QueueIndexOut]]);
+              //Serial.printf("ESPNOW esp_now_send() DISPLAY CONFIRMED  %s -> delivered at puck\n", messagetexts[ToDisplay.QueueMessageType[ToDisplay.QueueIndexOut]]);
               ToDisplay.QueueIndexOut++;
               ToDisplay.QueueIndexOut %= QUEUESIZE;
               ToDisplay.QueueCnt--;
               DataFromGlobe.G_QueueSerialNumberSend++;
+              max_to_send_attempts = 0;
+              bWasTransmitted = false;
             }
             else
             { Serial.printf("ESPNOW Failed after 25mS waiting, try again..\n");
             }  
           } 
-          else
-          { Serial.printf("ESPNOW esp_now_send() could not queue (result=%d) message, will try again after 10 mS\n", result);
-            delay(10);
+          else // still waiting
+          { // seen ESP_ERR_ESPNOW_NO_MEM (12391 or (0x3067) increased stacksize from 8K to 16K to see if this stays away - also an increasing delay if it still struggles
+            Serial.printf("ESPNOW esp_now_send() could not queue (result=%d) message, will try again after %d mS\n", result, (max_to_send_attempts*10) );
+            delay(max_to_send_attempts*10); // wait increasingly longer as it keeps failing
           }
-          delay(5);
+          //delay(5);
         }
         // keep last one send
         memcpy(&PrevDataFromGlobe, &DataFromGlobe, sizeof(PrevDataFromGlobe));
-        delay(5); // since we are in a wile loop, this seems to fix the odd lost packet of data
-      }
+        //delay(5); // since we are in a wile loop, this seems to fix the odd lost packet of data
+      } // end while
     }
     else // keep sending last one, if changed with perhaps updated coordinates, rssi strength, whatever
     { if(memcmp(&PrevDataFromGlobe, &DataFromGlobe,sizeof(PrevDataFromGlobe)) != 0)
@@ -285,6 +306,7 @@ void loop_esp_now()
     }
   }
   Q_sending = false;
+  
 }
 
 //typedef struct {               
@@ -304,7 +326,9 @@ void AddToQueueForDisplay(const char* message, uint16_t queuemessagetype)
     return;
   }
 
-  if(ToDisplay.QueueCnt < (QUEUESIZE-1)) // at least one empty slot needed
+  //Serial.printf("ADD-TO-QUEUE-FOR-DISPLAY: ToDisplay.QueueCnt=%d (QueueIndexIn %d): %s -> %s\n", ToDisplay.QueueCnt, ToDisplay.QueueIndexIn, messagetexts[queuemessagetype], message);
+
+  if(ToDisplay.QueueCnt < (QUEUESIZE-2)) // at least one empty slot needed
   { ToDisplay.QueueIndexIn %= QUEUESIZE; // just to be sure
     //strncpy(ToDisplay.QueueMessage[ToDisplay.QueueIndexIn], message, QUEUEMESSAGELENGTH);
     memcpy(ToDisplay.QueueMessage[ToDisplay.QueueIndexIn], message, QUEUEMESSAGELENGTH);
@@ -312,13 +336,13 @@ void AddToQueueForDisplay(const char* message, uint16_t queuemessagetype)
     ToDisplay.QueueMessage[ToDisplay.QueueIndexIn][QUEUEMESSAGELENGTH-1] = 0; // terminate just in case of idiotic long message that could upset the puck decoding this
     ToDisplay.QueueMessageType[ToDisplay.QueueIndexIn] = queuemessagetype;
     
-    Serial.printf("TELL DISPLAY (QueueIndexIn %d): %s -> %s\n", ToDisplay.QueueIndexIn, messagetexts[ToDisplay.QueueMessageType[ToDisplay.QueueIndexIn]], ToDisplay.QueueMessage[ToDisplay.QueueIndexIn]);
+    Serial.printf("TELL PUCK: ToDisplay.QueueCnt=%hu (QueueIndexIn %hu): %s -> %s\n", ToDisplay.QueueCnt, ToDisplay.QueueIndexIn, messagetexts[ToDisplay.QueueMessageType[ToDisplay.QueueIndexIn]], ToDisplay.QueueMessage[ToDisplay.QueueIndexIn]);
 
     ToDisplay.QueueIndexIn++;
     ToDisplay.QueueIndexIn %= QUEUESIZE;
     ToDisplay.QueueCnt++;
   }
-  else Serial.println("Queue to display is full!!!");
+  else Serial.printf("Queue to display is full!!! ()%hu", ToDisplay.QueueCnt);
   Q_filling = false;
 }
 
