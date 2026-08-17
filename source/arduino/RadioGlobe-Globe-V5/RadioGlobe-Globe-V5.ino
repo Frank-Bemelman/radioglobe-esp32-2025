@@ -549,9 +549,9 @@ void setup()
   }
 
   readMacAddress();
-  sprintf(message, "%02X:%02X:%02X:%02X:%02X:%02X", GlobeMac[0], GlobeMac[1], GlobeMac[2], GlobeMac[3], GlobeMac[4], GlobeMac[5]);
+  snprintf(message, sizeof(message), "%02X:%02X:%02X:%02X:%02X:%02X", GlobeMac[0], GlobeMac[1], GlobeMac[2], GlobeMac[3], GlobeMac[4], GlobeMac[5]);
   AddToQueueForDisplay(message, MESSAGE_GLOBE_MAC);
-  sprintf(message, "%d", WiFi.channel());
+  snprintf(message, sizeof(message), "%d", (uint32_t) WiFi.channel());
   AddToQueueForDisplay(message, MESSAGE_SET_PUCK_WIFI_CHANNEL);
   
 
@@ -887,7 +887,7 @@ void loop()
          // quick & dirty, but maybe too dirty, as not all (but most do) https urls are http approacheable (Http create error)
          // but we also catch the 400 and do a retry on https in that case 
          // so, always try http first, remove the 's' from https
-//         if(TargetUrl[4]=='s')strcpy(&TargetUrl[4], &TargetUrl[5]);  
+         // if(TargetUrl[4]=='s')strcpy(&TargetUrl[4], &TargetUrl[5]);  
         
          Tuning = true;
          if(StartNewStation()==1) // succes
@@ -896,7 +896,7 @@ void loop()
            Serial.printf("SUCCES: stream.connecttohost\n"); 
            
            AddToQueueForDisplay(QueueMessage, MESSAGE_STATION_CONNECTED); 
-           sprintf(message, "%ld,\"%s\"", ConnectedInMillis, QueueMessage); 
+           snprintf(message,  sizeof(message), "%d,\"%s\"", ConnectedInMillis, QueueMessage); 
            AddToQueueForDisplay(message, MESSAGE_STATION_CONNECTED_IN_MS); 
          }
          else
@@ -904,12 +904,12 @@ void loop()
             //Serial.printf("FAILED: stream.connecttohost HTTP code %d\n", stream.connectResult()); 
             Serial.printf("FAILED: stream.connecttohost ERROR code %s\n", VS1053_connectResult); 
 
-            if(strcmp(VS1053_connectResult, "Http create error")==0) // DNS fail??
-            { sprintf(message, "%s -> %s", VS1053_connectResult, QueueMessage); 
+            // if(strcmp(VS1053_connectResult, "Http create error")==0) // DNS fail??
+            { snprintf(message, sizeof(message), "%s -> %s", VS1053_connectResult, QueueMessage); 
               AddToQueueForDisplay(message, MESSAGE_CONNECTTOHOST_FAILURE); // let display store this number for log report
               AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);
             }
-            else
+            /* else
             { // try again, toggle https<>http, insert 's' to url
               if(TargetUrl[4]==':') // try again, with https, insert 's' to url
               { int16_t len = strlen(TargetUrl);
@@ -927,17 +927,17 @@ void loop()
               { DataFromGlobe.D_QueueStationIndex = DataFromDisplay.D_QueueStationIndex;
                 Serial.printf("SUCCES: stream.connecttohost\n"); 
                 AddToQueueForDisplay(QueueMessage, MESSAGE_STATION_CONNECTED); 
-                sprintf(message, "%ld,\"%s\"", ConnectedInMillis, QueueMessage); 
+                snprintf(message, sizeof(message), "%d,\"%s\"", ConnectedInMillis, QueueMessage); 
                 AddToQueueForDisplay(message, MESSAGE_STATION_CONNECTED_IN_MS); 
               }
               else
               { Serial.printf("FAILED: stream.connecttohost ERROR code %s\n", VS1053_connectResult); 
-
-                sprintf(message, "%s -> %s", VS1053_connectResult, QueueMessage); 
+                snprintf(message, sizeof(message), "%s -> %s", VS1053_connectResult, QueueMessage); 
                 AddToQueueForDisplay(message, MESSAGE_CONNECTTOHOST_FAILURE); // let display store this number for log report
                 AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);        //    audio_eof_stream("Retry from main message loop for HTTP errors < 0", 0);
               }
             }  
+            */
          }
          Tuning = false;
 
@@ -1248,43 +1248,38 @@ bool StartNewStation(void)
   return return_result;
 }
 
-
-
 void SetVolumeMapped(uint16_t volume)
 { static uint16_t prevvol;
-  static uint8_t Actual_vs1053vol=0;
   static uint8_t New_vs1053vol;
 
   // first some led animation
   if(bSetupCompleted)
   { if(volume>prevvol)
-    { PixelUpdate(4, 0xFFFF00, 0x000000, 1000); // right turn yellow
+    { PixelUpdate(4, 0x6060FF, 0x000000, 1000); // right turn purple
     }  
     if(volume<prevvol)
-    { PixelUpdate(3, 0xFFFF00, 0x000000, 1000); // left turn yellow
+    { PixelUpdate(3, 0x6060FF, 0x000000, 1000); // left turn purple
     }
   }  
   prevvol = volume;
 
-  if(volume)New_vs1053vol = map(volume, 0, 100, 60, 100); // range is 128db - more practical useable volume range of VS1053 is 68-100, 100-> 0dB and 68 being very quiet -40db
+  // VS1053 volume range is -128dB to 0dB which is way too large for practical human use
+  // a more practical useable volume range is 60-100, input 100 gives max volume -0dB and 60 being very quiet at -51.2db
+  // such ranges suites better with daily usages, so we remap the 0-100 to this range
+  if(volume)New_vs1053vol = map(volume, 0, 100, 60, 100); 
   else New_vs1053vol = 0;
- 
-  Serial.printf("SetVolumeMapped() with -> %d New_vs1053vol (mapped parameter) -> %d Actual_vs1053vol -> %d\n", volume, New_vs1053vol, Actual_vs1053vol);
 
   if(volume==0)Speakers(SPEAKERS_DELAYED_OFF);
   else // we have a volume
   { if(GlobeSettings.ee_internal_speakers == 1)
-    { if(stream.isRunning())Speakers(SPEAKERS_ON); 
+    { Speakers(SPEAKERS_ON); 
     }
     else Speakers(SPEAKERS_DELAYED_OFF); // no sound from speakers wanted
   } 
 
-  //if(Actual_vs1053vol!=New_vs1053vol)
-  { Serial.printf("New Volume adjusted to %d\n", New_vs1053vol);
-    stream.forceVolume(New_vs1053vol);
-    Actual_vs1053vol=New_vs1053vol;
-    Serial.printf("stream.setVolume -> Actual_vs1053vol is now -> %d SpeakerOffAfter25ms -> %d MUTE_AMPLIFIERS Output -> %d\n", Actual_vs1053vol, SpeakerOffAfter25mS, digitalRead(MUTE_AMPLIFIERS));
-  }  
+  Serial.printf("New Volume adjusted to %d\n", New_vs1053vol);
+  stream.forceVolume(New_vs1053vol);
+    
 }
 
 

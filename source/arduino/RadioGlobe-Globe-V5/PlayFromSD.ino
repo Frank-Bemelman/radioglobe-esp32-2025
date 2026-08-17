@@ -47,7 +47,7 @@ bool CheckSD(void)
   }
 }
 
-
+// todo - make it fail safe when directory can't be opened, no tracks can be collected etc...
 // called by puck message (and subsequent when filehas ended)
 void StartPlayFromSD(void)
 { static char PrevCountryCodeSelectorSD[3] = "";

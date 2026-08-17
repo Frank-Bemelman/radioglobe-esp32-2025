@@ -24,7 +24,7 @@
 
 constexpr size_t VS1053_LOCALBUFFER_SIZE = 4096; // need at least 4kB to safely receive ICY metadata
 constexpr uint8_t VS1053_MAXVOLUME = 100;
-constexpr size_t VS1053_PLAYBUFFER_SIZE = 1024; // SD-playback At 32 it stutters, at 48 it is almost stutter free, and at 64 the wavs (44.1Khz stereo) play perfect. 9JUL26 -> 64 stutter -> 128 - mad test 1024
+constexpr size_t VS1053_PLAYBUFFER_SIZE = 128; // SD-playback At 32 it stutters, at 48 it is almost stutter free, and at 64 the wavs (44.1Khz stereo) play perfect. 9JUL26 -> 64 stutter -> 128 - mad test 1024
 
 static_assert(VS1053_LOCALBUFFER_SIZE >= 4096,
               "VS1053_LOCALBUFFER_SIZE must be equal or greater than 4096");
@@ -57,7 +57,7 @@ public:
     bool connectToFile(fs::FS &fs, const char *filename);
     bool connectToFile(fs::FS &fs, const char *filename, const size_t offset);
     
-    void playChunk(uint8_t *buffer, size_t bytes_to_play);
+    bool playChunk(uint8_t *buffer, size_t bytes_to_play);
     
     void setCodecCB(codec_callback_t cb);
     void clearCodecCB();
@@ -144,6 +144,7 @@ private:
     void _playFromRingBuffer();
     void _streamToRingBuffer(WiFiClient *stream);
     void _chunkedStreamToRingBuffer(WiFiClient *stream);
+    void _waitForEnd();
 
     codec_callback_t _codecCallback = nullptr;
     bitrate_callback_t _bitrateCallback = nullptr;

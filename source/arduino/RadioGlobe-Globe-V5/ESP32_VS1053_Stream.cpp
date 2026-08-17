@@ -575,6 +575,8 @@ void ESP32_VS1053_Stream::_playFromRingBuffer()
 
     const size_t MAX_MOVE = size() ? 2048 : 512; // everything without a size is radio so low bitrate
 
+    //Serial.printf("578 FRANK SAYS MAX_MOVE=%d\n", MAX_MOVE); 
+
     while (_remainingBytes && bytesToDecoder < MAX_MOVE && _vs1053->data_request())
     {
         size_t size = 0;
@@ -715,7 +717,8 @@ void ESP32_VS1053_Stream::_chunkedStreamToRingBuffer(WiFiClient *stream)
     [[maybe_unused]] const auto startTimeMS = millis();
     size_t bytesToRingBuffer = 0;
 
-    const size_t MAX_MOVE = size() ? 2048 : 512; // everything without a size is radio so low bitrate
+ //   const size_t MAX_MOVE = size() ? 2048 : 512; // everything without a size is radio so low bitrate
+    const size_t MAX_MOVE = 4096; // note from frank, tried this for 105 5 Rox =FM test (https://stream.zeno.fm/0psw13g10a0uv) and did fix the stutter, but fails after a minute with Ringbuffer empty
 
     if (_bytesLeftInChunk && _musicDataPosition < _metaDataStart  && xRingbufferGetCurFreeSize(_ringbuffer_handle) && stream->available())
     { 
@@ -767,7 +770,9 @@ void ESP32_VS1053_Stream::_handleChunkedStream(WiFiClient *stream)
         [[maybe_unused]] const auto startTimeMS = millis();
         size_t bytesToDecoder = 0;
 
-        const size_t MAX_MOVE = size() ? 2048 : 512; // everything without a size is radio so low bitrate
+//        const size_t MAX_MOVE = size() ? 2048 : 512; // everything without a size is radio so low bitrate
+        const size_t MAX_MOVE = 4096; // note from frank, tried this for 105 5 Rox =FM test (https://stream.zeno.fm/0psw13g10a0uv) and did fix the stutter, but fails after a minute with Ringbuffer empty
+
 
         while (_bytesLeftInChunk && _musicDataPosition < _metaDataStart && bytesToDecoder < MAX_MOVE &&
                stream->available() && _vs1053->data_request())
@@ -788,7 +793,7 @@ void ESP32_VS1053_Stream::_handleChunkedStream(WiFiClient *stream)
     {   //Serial.printf("803 FRANK SAYS stream->available() = %d\n", stream->available());
         //Serial.printf("804 FRANK SAYS stream->peek() = %d\n", stream->peek());
         const auto required = stream->peek() * 16 + 20; /* extra margin for chunk end */
-
+       
 //        if (stream->available() < required)
 //        {
 //            if (_ringbuffer_handle && _remainingBytes)
@@ -954,10 +959,15 @@ void ESP32_VS1053_Stream::stopSong()
         _bufferStallStartMS = 0;
     }
 
-    while (!_vs1053->data_request())
-        yield();
 
-    _vs1053->startSong();
+//    _waitForEnd(); // code below was taken out by cellie - didnt
+
+_vs1053->stopSong();
+
+//    while (!_vs1053->data_request())
+//        yield();
+
+//    _vs1053->startSong();
 
     if (_playingFile)
     {
@@ -1110,11 +1120,6 @@ bool ESP32_VS1053_Stream::connectToFile(fs::FS &fs, const char *filename, const 
 
 
 
-void ESP32_VS1053_Stream::playChunk(uint8_t *buffer, size_t bytes_to_play)
-{  _vs1053->setVolume(_volume);
-   _vs1053->playChunk(buffer, bytes_to_play);
-   //_vs1053->setVolume(0); // mutes too early, don't do it
-}
 
 size_t ESP32_VS1053_Stream::_fileLastWAVByte()
 {
@@ -1472,3 +1477,31 @@ void ESP32_VS1053_Stream::clearErrorCB()
 {
     _errorCallback = nullptr;
 }
+
+void ESP32_VS1053_Stream::_waitForEnd()
+{
+    uint16_t hdat1 = 0xFFFF;
+    while (hdat1)
+    {
+        hdat1 = _vs1053->readRegister(SCI_HDAT1);
+        yield();
+    }
+}
+
+bool ESP32_VS1053_Stream::playChunk(uint8_t *buffer, size_t bytes_to_play)
+{  if (!_vs1053)
+        return false;
+
+   //if (isRunning())
+   // {
+   //     log_e("need to stop playback first");
+   //     return false;
+   // }        
+    
+    _vs1053->setVolume(_volume);
+   _vs1053->playChunk(buffer, bytes_to_play);
+//    _waitForEnd();
+//_vs1053->stopSong();
+//   _vs1053->setVolume(0); // mutes too early, don't do it
+}
+
