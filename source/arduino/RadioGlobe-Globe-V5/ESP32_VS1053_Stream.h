@@ -57,8 +57,9 @@ public:
     bool connectToFile(fs::FS &fs, const char *filename);
     bool connectToFile(fs::FS &fs, const char *filename, const size_t offset);
     
-    bool playChunk(uint8_t *buffer, size_t bytes_to_play);
     
+    
+
     void setCodecCB(codec_callback_t cb);
     void clearCodecCB();
 
@@ -110,6 +111,10 @@ public:
         e.g. uint8_t rtone[4]  = {12, 15, 15, 15}; // initialize bass & treble
         See https://www.vlsi.fi/fileadmin/datasheets/vs1053.pdf section 9.6.3 */
 
+    bool playChunk(uint8_t *data, size_t len, bool stopSong = true);    
+    bool playChunkNonBlocking(uint8_t *buffer, size_t bytes_to_play, bool looparound);
+
+
 private:
     VS1053 *_vs1053;
     HTTPClient *_http;
@@ -120,6 +125,8 @@ private:
     RingbufHandle_t _ringbuffer_handle;
     StaticRingbuffer_t *_buffer_struct;
     uint8_t *_buffer_storage;
+
+   
 
     File _file;
     bool _playingFile = false;
@@ -145,6 +152,8 @@ private:
     void _streamToRingBuffer(WiFiClient *stream);
     void _chunkedStreamToRingBuffer(WiFiClient *stream);
     void _waitForEnd();
+
+    bool _handlePlayChunk();
 
     codec_callback_t _codecCallback = nullptr;
     bitrate_callback_t _bitrateCallback = nullptr;
@@ -200,6 +209,13 @@ private:
     unsigned long _bufferStallStartMS = 0;
     uint8_t _redirectCount = 0;
     bool _isHLS = false;
+
+    uint8_t *_chunkbufferstart;
+    bool _playingChunk = false; // frank, for non blocking chunkplayer
+    size_t _bytesinchunk = 0;
+    size_t _byteslefttoplay = 0;
+    bool _looparound = false;
+
 
     const char *CONTENT_TYPE = "Content-Type";
     const char *ICY_NAME = "icy-name";

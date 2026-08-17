@@ -348,10 +348,6 @@ void setup()
   pinMode(SPEAKER_TOGGLE_PIN, INPUT_PULLUP);
   pinMode(PORTALSWITCH_PIN, INPUT_PULLUP); // input to button for opening portal
 
-  //while (!Serial) 
-  //{ delay(10); // essentail for ESP32-S3
-  //}
-
   Serial.printf("GlobeSettings size = %d bytes\n", sizeof(GlobeSettings));
 
   Serial.printf("Sofar %dmS spend\n", (millis()-startMillis));
@@ -365,7 +361,7 @@ void setup()
 //  digitalWrite(VS1053_DCS, HIGH); 
   digitalWrite(VS1053_RESET, LOW); 
 
-  delay(51);   
+  delay(50);   
   //pinMode(SPI_CLK_PIN, OUTPUT);
   //pinMode(SPI_MOSI_PIN, OUTPUT);
   //digitalWrite(SPI_CLK_PIN, LOW);
@@ -399,7 +395,7 @@ void setup()
   // Set the error callback
   stream.setErrorCB(VS1053error);    
 
-  //stream.stopSong(); // had a _vs1053->switchToMp3Mode(); inside that, otherwise my VS1053 diesn't always boot well
+  //stream.stopSong(); // had a _vs1053->switchToMp3Mode(); inside that, otherwise my VS1053 doesn't always boot well
   franks_vs1053 = stream.getVS1053pointer();
   franks_vs1053->switchToMp3Mode();
 
@@ -411,7 +407,14 @@ void setup()
   //      _vs1053->loadUserCode(PATCHES_FLAC, PATCHES_FLAC_SIZE);
   //  }
 
-  //stream.stopSong(); 
+  //Speakers(SPEAKERS_ON); 
+  //stream.forceVolume(75);
+  //stream.playChunkNonBlocking((uint8_t *)mp3_happy_ping, sizeof(mp3_happy_ping), false);
+  //stream.playChunkNonBlocking((uint8_t *)mp3_radio_tuning, sizeof(mp3_radio_tuning), true);
+  //while(stream.isRunning()) stream.loop();
+
+
+
   PlaySoundBite((uint8_t *)mp3_happy_ping, sizeof(mp3_happy_ping), 0); 
 
   // start SD card
@@ -463,22 +466,17 @@ void setup()
   //  Serial.printf("Nibble2 %04x\n", (uint16_t) rtone[0] );                           
   stream.setTone(rtone); 
 
-// A0:85:E3:E1:50:4C
-//GlobeSettings.ee_puckmac[0] = 0xA0; 
-//GlobeSettings.ee_puckmac[1] = 0x85; 
-//GlobeSettings.ee_puckmac[2] = 0xE3;
-//GlobeSettings.ee_puckmac[3] = 0xE1;
-//GlobeSettings.ee_puckmac[4] = 0x50; 
-//GlobeSettings.ee_puckmac[5] = 0x4C;
+  // A0:85:E3:E1:50:4C
+  //GlobeSettings.ee_puckmac[0] = 0xA0; 
+  //GlobeSettings.ee_puckmac[1] = 0x85; 
+  //GlobeSettings.ee_puckmac[2] = 0xE3;
+  //GlobeSettings.ee_puckmac[3] = 0xE1;
+  //GlobeSettings.ee_puckmac[4] = 0x50; 
+  //GlobeSettings.ee_puckmac[5] = 0x4C;
 
   Serial.printf("Puck Mac %02X:%02X:%02X:%02X:%02X:%02X as stored in eeprom\n", GlobeSettings.ee_puckmac[0], GlobeSettings.ee_puckmac[1], GlobeSettings.ee_puckmac[2], GlobeSettings.ee_puckmac[3], GlobeSettings.ee_puckmac[4], GlobeSettings.ee_puckmac[5]);
   
-  
-  
-  
   memcpy(PuckMac, GlobeSettings.ee_puckmac, 6);
-
-  
 
   DataFromGlobe.D_QueueStationIndex = -1;
 
@@ -1255,10 +1253,11 @@ void SetVolumeMapped(uint16_t volume)
   // first some led animation
   if(bSetupCompleted)
   { if(volume>prevvol)
-    { PixelUpdate(4, 0x6060FF, 0x000000, 1000); // right turn purple
+    { //PixelUpdate(4, 0x6060FF, 0x000000, 1000); // right turn purple
+      PixelUpdate(4, 0x5050E0, 0x000000, 1000); // right turn purple
     }  
     if(volume<prevvol)
-    { PixelUpdate(3, 0x6060FF, 0x000000, 1000); // left turn purple
+    { PixelUpdate(3, 0x5050EF, 0x000000, 1000); // left turn purple
     }
   }  
   prevvol = volume;
@@ -1594,7 +1593,7 @@ void checkSpeakerToggleButton(void)
 }     
 
 // needs attention - lot of fuzzy code here
-void PlaySoundBite(uint8_t *soundbite, unsigned long long length, uint16_t volumeoveride)
+void PlaySoundBite(uint8_t *soundbite, size_t length, uint16_t volumeoveride)
 {  uint16_t volume_to_use;
   
   //if((volumeoveride>0) && (volumeoveride>GlobeSettings.ee_volume))volume_to_use = volumeoveride; // huh ??? what was I thinking
@@ -1609,8 +1608,8 @@ void PlaySoundBite(uint8_t *soundbite, unsigned long long length, uint16_t volum
   SetVolumeMapped(volume_to_use); 
   Serial.printf("PlaySoundBite playing with volume -> %d\n", volume_to_use);
   
-  stream.playChunk(soundbite, length);
-  delay(250);
+  stream.playChunk(soundbite, length); // plays really entire soundbite
+  //delay(250);
   SetVolumeMapped(GlobeSettings.ee_volume); // will enable amplifiers (if speaker switch == on) if radio stream running, else amplifiers off
   // did this soundbite played during radio playing (like battery low warning)
   if(stream.isRunning())return; // leave speakers on, radio stream continues
@@ -1714,7 +1713,7 @@ uint32_t PlayWhile(uint8_t *soundbite, unsigned long long length, bool playwhile
      if(snippet < snippets_to_play) // full size snippets
      { Serial.printf("snippet = %ld\n", snippet);
        //snippetMs = millis();
-       stream.playChunk(&soundbite[(snippet * SNIPLENGHT)], SNIPLENGHT); 
+       stream.playChunk(&soundbite[(snippet * SNIPLENGHT)], (size_t)SNIPLENGHT, 0); // additional parameter 0 for early return
        //Serial.println(millis() - snippetMs);
        Speakers(SPEAKERS_DELAYED_OFF);
        snippet++;
@@ -1723,7 +1722,7 @@ uint32_t PlayWhile(uint8_t *soundbite, unsigned long long length, bool playwhile
      { Serial.printf("last partial snippet = %ld\n", snippet);
        if(bytes_to_play % SNIPLENGHT)
        { if(GlobeSettings.ee_internal_speakers)Speakers(SPEAKERS_ON);
-         stream.playChunk(&soundbite[(snippet * SNIPLENGHT)], (bytes_to_play % SNIPLENGHT)); 
+         stream.playChunk(&soundbite[(snippet * SNIPLENGHT)], (size_t)(bytes_to_play % SNIPLENGHT), 0); // additional parameter 0 for early return
          Speakers(SPEAKERS_DELAYED_OFF);
          snippet++;
        }

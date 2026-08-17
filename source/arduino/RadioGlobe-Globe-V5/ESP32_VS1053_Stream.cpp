@@ -865,6 +865,11 @@ void ESP32_VS1053_Stream::_feedDecoder(WiFiClient *stream)
 
 void ESP32_VS1053_Stream::loop()
 {
+    if(_playingChunk)
+    { _handlePlayChunk();
+      return;
+    }
+
     if (_playingFile)
     {
         _handleLocalFile();
@@ -931,17 +936,20 @@ void ESP32_VS1053_Stream::loop()
 
 bool ESP32_VS1053_Stream::isRunning()
 {
-    return _http != nullptr || _playingFile;
+    return _http != nullptr || _playingFile || _playingChunk;
 }
 
 void ESP32_VS1053_Stream::stopSong()
 {
-    if (!_http && !_playingFile)
+    if (!_http && !_playingFile && !_playingChunk) // frank
     {   //_vs1053->switchToMp3Mode(); // keep it!!! otherwise VS1053 does not seem to boot well always... (moved to own code now)
         return;
     }    
 
+    _playingChunk = false; // frank
+
     _vs1053->setVolume(0);
+        
     _remainingBytes = 0;
     _offset = 0;
     _bitrate = 0;
@@ -1102,12 +1110,11 @@ bool ESP32_VS1053_Stream::connectToFile(fs::FS &fs, const char *filename, const 
     else
         _remainingBytes = _file.size() - offset;
 
-    //_file.seek(offset);
+    _file.seek(offset);
     if (strcmp(filename, _url))
     {
         _vs1053->stopSong();
         snprintf(_url, sizeof(_url), "%s", filename);
-        _vs1053->startSong();
     }
     _playingFile = true;
     _bufferIndex = 0;
@@ -1478,30 +1485,61 @@ void ESP32_VS1053_Stream::clearErrorCB()
     _errorCallback = nullptr;
 }
 
-void ESP32_VS1053_Stream::_waitForEnd()
-{
-    uint16_t hdat1 = 0xFFFF;
-    while (hdat1)
-    {
-        hdat1 = _vs1053->readRegister(SCI_HDAT1);
-        yield();
-    }
-}
 
-bool ESP32_VS1053_Stream::playChunk(uint8_t *buffer, size_t bytes_to_play)
-{  if (!_vs1053)
+bool ESP32_VS1053_Stream::playChunk(uint8_t *data, size_t len, bool stopSong)
+{
+    if (!_vs1053)
         return false;
 
-   //if (isRunning())
-   // {
-   //     log_e("need to stop playback first");
-   //     return false;
-   // }        
-    
+    //if (isRunning())
+    //{
+    //    log_e("need to stop playback first");
+    //    return false;
+    //}
+
     _vs1053->setVolume(_volume);
-   _vs1053->playChunk(buffer, bytes_to_play);
-//    _waitForEnd();
-//_vs1053->stopSong();
-//   _vs1053->setVolume(0); // mutes too early, don't do it
+    _vs1053->playChunk(data, len);
+
+    if (stopSong)
+    {
+        _vs1053->stopSong();
+        _vs1053->setVolume(0);
+    }
+    return true;
 }
 
+// hand over a chunk to play, once or loop around until something else is started, or a stream.stopSong() is called
+bool ESP32_VS1053_Stream::playChunkNonBlocking(uint8_t *buffer, size_t bytes_to_play, bool looparound)
+{ 
+  stopSong();  // stop whatever was playing
+  _chunkbufferstart = buffer;
+  _playingChunk = true; // frank, for non blocking chunkplayer
+  _bytesinchunk = bytes_to_play;
+  _byteslefttoplay = _bytesinchunk;
+  _looparound = looparound;
+  return true;  
+}
+
+bool ESP32_VS1053_Stream::_handlePlayChunk(void)
+{ size_t bytestochunk;
+  Serial.printf("_byteslefttoplay = %d\n", _byteslefttoplay);
+  if(_byteslefttoplay)
+  { bytestochunk = min((size_t)1024 ,_byteslefttoplay);
+    _vs1053->setVolume(75);
+     Serial.printf("bytestochunk = %d\n", bytestochunk);
+
+    _vs1053->playChunk(_chunkbufferstart + (_bytesinchunk - _byteslefttoplay), bytestochunk);
+    _byteslefttoplay -= bytestochunk;
+    if(_byteslefttoplay<=0)
+    { if(!_looparound) // fully played, wait until completely played
+      { _vs1053->stopSong();
+        _playingChunk = false;
+        return false;
+      }
+      // restart
+      _byteslefttoplay = _bytesinchunk;
+
+    }
+  }
+  return true;
+}
