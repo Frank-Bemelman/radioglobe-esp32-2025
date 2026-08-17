@@ -712,7 +712,7 @@ void RadioGlobeClick(lv_event_t * e)
   
   if(clicktime==0) // normal click
   { if(!bMusicMode)
-    { //Serial.printf("!bMusicMode RadioGlobeClick() Stations.count = %d\n", Stations.count);
+    { Serial.printf("!bMusicMode RadioGlobeClick() Stations.count = %d\n", Stations.count);
       if(Stations.count == 0)
       { SetFlag("xxxx");
         lv_obj_add_flag(uic_Home_City, LV_OBJ_FLAG_HIDDEN); // hide city name until new country code is received
@@ -1010,6 +1010,7 @@ void AddStationToQueueForGlobe(int16_t station)
 
     World.gps_ns = (float)DataFromDisplay.ns_cal/10;
     World.gps_ew = (float)DataFromDisplay.ew_cal/10;
+    strcpy(World.CountryName, ""); // we don't know where we are
     
   }
   else if(station<MAX_STATIONS+MAX_FAVORITES)

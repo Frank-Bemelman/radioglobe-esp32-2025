@@ -219,7 +219,7 @@ static void radar_screen_event_cb(lv_event_t * e)
         //Serial.println("Radar verlaten: Timer gepauzeerd.");
         lv_timer_del(radar_refresh_timer);
         radar_refresh_timer = NULL;
-        Serial.println("Radar verlaten: Timer gedelete.");
+        Serial.println("Radar screen closed: Timer gedelete.");
       }
       return;
     }

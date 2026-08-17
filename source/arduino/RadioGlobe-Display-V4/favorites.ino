@@ -87,10 +87,8 @@ void station1234(lv_event_t * e, uint16_t station)
   { if(longpressed==0)
     { if(strlen(Stations.StationNUG[station+MAX_STATIONS].url)>0) // only respond to loaded buttons
       { beep(e);
-
-
+        if(bMusicMode)Stations.count = 0; // forces a new station search FindNewStation(); and ReloadScroll(); if RADIO GLOBE is tapped
         AddStationToQueueForGlobe(station+MAX_STATIONS); // presets come just after the regular list of stations
-        if(bMusicMode)Stations.count = 0; // forces a station search FindNewStation(); and ReloadScroll(); if RADIO GLOBE is tapped
         Serial.printf("Favorites Select station %s under Preset %d\n", Stations.StationNUG[station+MAX_STATIONS].name, station);
         lv_label_set_text(ui_Station_Name, Stations.StationNUG[station+MAX_STATIONS].name);
         // turn selected led on, red color, and turn off other leds

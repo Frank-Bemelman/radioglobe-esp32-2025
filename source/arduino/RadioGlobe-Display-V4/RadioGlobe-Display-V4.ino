@@ -195,7 +195,7 @@ uint16_t CalToIndexEW;
 bool bPowerStatus = false;
 #define AUTOPOWERDOWNAFTER (8 * 3600) // auto power after 8 hour
 //#define AUTOPOWERDOWNAFTER (3 * 60) // auto power after 3 minutes, for test
-uint32_t AutoSleepTimer = AUTOPOWERDOWNAFTER;
+uint32_t AutoSleepTimer = AUTOPOWERDOWNAFTER+1;
 
 #define DEFAULT_BACKLIGHT 75
 uint8_t BacklightValue = DEFAULT_BACKLIGHT;
@@ -841,6 +841,7 @@ void loop()
         case MESSAGE_NOP:
           break;
         case MESSAGE_STATION_NAME:
+          if(Stations.playing != Stations.requested)break; // maybe old message  
           // rename on screen and in scroller if it makes sense..
           if(!bMusicMode)
           { // skip very short station/long station names, skip names with underscores, better stick to one from database
@@ -894,8 +895,8 @@ void loop()
           
           //lv_img_set_src(ui_Jukebox, &ui_img_earth128x128_png);
           //lv_obj_clear_flag(ui_Jukebox, LV_OBJ_FLAG_HIDDEN);
-          
-          lv_label_set_text(ui_Clock_Country, "EXPLORING");
+          strcpy(World.CountryName, "EXPLORING");
+          lv_label_set_text(ui_Clock_Country, World.CountryName);
           lv_refr_now(NULL);
           // SetFlag("??");
           break;
@@ -1006,6 +1007,7 @@ void loop()
           break;
          case MESSAGE_FINDNEWSTATION:
           // station or file already killed by globe
+          Stations.playing = -1;
           bMusicMode = false;
           lv_obj_add_flag(ui_Jukebox, LV_OBJ_FLAG_HIDDEN);
           lv_obj_add_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN);
@@ -1020,8 +1022,15 @@ void loop()
             if((screen != ui_DatabaseScreen) || (bInfoScreen==true))
             { if(screen==ui_ClockScreen) // clock screen
               { Serial.printf("Clock screen, find new station for flag and time update \n");
-                FindNewStation();
-                ReloadScroll();
+                if(bPowerStatus == true)
+                { Serial.printf("On clock screen, find new station to play (also gets geolocation for flag and country name)\n");
+                  FindNewStation();
+                  ReloadScroll();
+                }
+                else // only get geoloaction for flag renewal
+                { Serial.printf("On clock screen, power off, only get geoloction for flag and country name)\n");
+                  AddStationToQueueForGlobe(-1);
+                }  
               }
               else if(bPowerStatus == true)
               { // hide all info stuff until new station is requested after search
@@ -1090,6 +1099,7 @@ void loop()
           break; 
 
         case MESSAGE_WANT_NEXT_STATION: // request from globe since it couldn't use the last url
+          Stations.playing = -1;
           if(Stations.requested<0)Stations.requested=0;
           if(Stations.count<=0) // not likely to happen, but can occur after a boot
           { FindNewStation();

@@ -78,7 +78,11 @@ void loop_testurl(void)
       Url_Test_State++;
       break;
     
-    case 1:  
+    case 1: 
+      if(DisplaySettings.testNS<-90)
+      { Url_Test_State = 10;
+        break;
+      }
       Serial.printf("Let's try NS%d - EW%d\n", DisplaySettings.testNS, DisplaySettings.testEW);
       // read map 
       if(Puck_SD_GB)
@@ -120,9 +124,11 @@ void loop_testurl(void)
         filenumber_actual = 0;
         if (root) 
         { file = root.openNextFile();
+          urlnumber_to_open = 0;
           while(file)
           { if(!file.isDirectory())
-            { if(filenumber_actual == filenumber_to_open)
+            { 
+              if(filenumber_actual == filenumber_to_open)
               { Serial.printf("Now read file %d with url %d to test\n", filenumber_to_open, urlnumber_to_open);
                 urlnumber_actual = 0;
                 while(file.available())

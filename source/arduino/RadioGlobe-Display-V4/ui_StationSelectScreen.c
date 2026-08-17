@@ -52,7 +52,7 @@ void ui_StationSelectScreen_screen_init(void)
     ui_StationRoller = lv_roller_create(ui_StationSelectScreen);
     lv_roller_set_options(ui_StationRoller, "NO STATIONS", LV_ROLLER_MODE_NORMAL);
     lv_roller_set_selected(ui_StationRoller, 1, LV_ANIM_OFF);
-    lv_obj_set_width(ui_StationRoller, 480);
+    lv_obj_set_width(ui_StationRoller, 470);
     lv_obj_set_height(ui_StationRoller, 240);
     lv_obj_set_align(ui_StationRoller, LV_ALIGN_CENTER);
     lv_obj_set_style_text_align(ui_StationRoller, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
