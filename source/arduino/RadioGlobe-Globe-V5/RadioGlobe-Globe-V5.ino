@@ -159,14 +159,18 @@ bool bUpAndRunning = false;
 bool bSetupCompleted = false;
 bool bEncoderNewPosition = false;
 bool bEncoderKillStation = false;
+bool bGlobeStable = false;
 uint16_t Timer100msSerialCanBeOpened = 0; // set to 5 seconds after 5 taps on touch
 uint16_t Timer100msSerialIsOpen = 0; // set to 30 seconds after speaker switch pressed
 uint16_t SpeakerOffAfter25mS = 0;
 
 char TargetUrl[QUEUEMESSAGELENGTH] = ""; // most recent url requested by display
 char ActiveUrl[QUEUEMESSAGELENGTH] = ""; // most recent url connected to
+char PrevUrl[QUEUEMESSAGELENGTH] = ""; // most recent url connected to
+
 
 bool Tuning = false;
+bool bSomethingPlays = false;
 
 #define SPEAKER_TOGGLE_PIN 21 // pushbutton behind globe support for speaker toggle and bleutooth connect
 #define BT_CONNECT_PIN 17 // output connected to BT module to force a BT connect
@@ -231,7 +235,7 @@ FtpServer ftp;
 
 extern uint16_t UpdateState;
 
-const char* VS1053_connectResult;
+char VS1053_CallBackLastError[QUEUEMESSAGELENGTH];
 
 extern void setupwebserver(void);
 
@@ -240,7 +244,8 @@ char PrevStreamType[64]="";
 char StreamType[64]="";
 char StreamCodec[16]="";
 char StreamBitrate[16]="";
-char StreamLastError[64];
+char StreamFilllevel[16]="";
+bool bStreamTypeNeedsUpdated = false;
 
 
 
@@ -283,16 +288,22 @@ bool bPortalOpened = false; // to freeze loop_esp_now(); during portal, so wifi 
 // as experiment, tried to increase it to see if it made any differences regarding instabilities I had at a certain moment. 
 // can't say it made much difference
 // so I took it out again
-SET_LOOP_TASK_STACK_SIZE(16*1024);
+// 20AUG26 tried back 8, Rad Suravi stutters
+// back 16
+//SET_LOOP_TASK_STACK_SIZE(16*1024);
+//SET_LOOP_TASK_STACK_SIZE(8*1024); // weer eens een tijdje op 8
 
 VS1053 *franks_vs1053;
 
 void setup()
 { char message[64];
   startMillis = millis();
-// 6AUG26  globe freezes wehen running a heavy testurl job,  after 2-12 hours of testing 1 station every 1-3 seconds
+  // 6AUG26  globe freezes wehen running a heavy testurl job,  after 2-12 hours of testing 1 station every 1-3 seconds
   // so I direct malloc to PSRAM for larger>1024, rather than ram. Also increase stacksize from 8K to 16K, see SET_LOOP_TASK_STACK_SIZE macro above
-  heap_caps_malloc_extmem_enable(1024); 
+  // heap_caps_malloc_extmem_enable(1024); // trying without, 27AUG, after crashes with AU station https://tcom-s1.tcom.net.au/2ten after Ringbuffer empty and reporting to puck in eof_stream()
+  // as per 28AUG 12:10 no new crashes seen sofar, after ringbuffer empty goes to next station in roller
+
+  Serial.begin(115200);
 
   extern size_t getArduinoLoopTaskStackSize(void);
   Serial.printf("Stack size = %d\n", getArduinoLoopTaskStackSize());
@@ -303,8 +314,7 @@ void setup()
   Serial.printf("Free Stack Size: %d bytes\n", uxTaskGetStackHighWaterMark(NULL));
   // 6AUG26  een kijken of de globe minder vastloopt (bij url test na 12 uur soms)
 
-  Serial.begin(115200);
-
+  
   SetupGlobalTimer100mS(); // give us a steady uint32_t GlobalTicker100mS upcounter and bFlag100mS going true always every 100mS
 
   // replace !!!! characters in fetched api key (from secrets.h, where it is stored slighly corrupted)
@@ -361,7 +371,7 @@ void setup()
 //  digitalWrite(VS1053_DCS, HIGH); 
   digitalWrite(VS1053_RESET, LOW); 
 
-  delay(50);   
+  delay(53);   
   //pinMode(SPI_CLK_PIN, OUTPUT);
   //pinMode(SPI_MOSI_PIN, OUTPUT);
   //digitalWrite(SPI_CLK_PIN, LOW);
@@ -372,7 +382,7 @@ void setup()
   delay(20);          
 
   // Start SPI bus, takes less than a mS
-  //SPI.setHwCs(true);
+  SPI.setHwCs(true);
   SPI.begin(SPI_CLK_PIN, SPI_MISO_PIN, SPI_MOSI_PIN);
   
 
@@ -394,10 +404,18 @@ void setup()
   stream.setEofCB(audio_eof_stream);    
   // Set the error callback
   stream.setErrorCB(VS1053error);    
-
-  //stream.stopSong(); // had a _vs1053->switchToMp3Mode(); inside that, otherwise my VS1053 doesn't always boot well
+  // Set the filllevel callback
+  stream.setFilllevelCB(filllevelCallback);   
+  
+  //stream.stopSong(); // had a _vs1053->switchToMp3Mode(); inside that first, otherwise my VS1053 doesn't always boot well
+  // original code doesn't have that, so I do it myself now, to keep code
   franks_vs1053 = stream.getVS1053pointer();
   franks_vs1053->switchToMp3Mode();
+  franks_vs1053->loadDefaultVs1053Patches(); 
+  #define SCI_CLOCKF 0x03
+  franks_vs1053->writeRegister(SCI_CLOCKF, 0x6000); 
+
+
 
   // maybe if we want to poll vu meter sound level
   //if (franks_vs1053->getChipVersion() == 4)
@@ -492,7 +510,7 @@ void setup()
   btStop(); // as recommended by Cellie
   WiFi.setSleep(false); // as recommended by Cellie
   Serial.print("Connecting to WiFi");
-  delay(1000);
+//  delay(1000);
   uint16_t timeout = 150; // 15 seconds max
   while (!WiFi.isConnected() && timeout--) 
   { Serial.print('.');
@@ -644,17 +662,16 @@ void loop()
   
   nowmillis = millis();
   lapmillis = nowmillis - prevmillis;
-  if(lapmillis>2)Serial.printf("main loop(); took = %dmS\n", lapmillis);
+  if(lapmillis>30)Serial.printf("main loop(); took = %dmS\n", lapmillis);
   prevmillis = nowmillis;
 
+  
   stream.loop(); // keeps the VS1053 going..
   
   nowmillis = millis();
   lapmillis = nowmillis - prevmillis;
-  //if(lapmillis>1)Serial.printf("stream.loop(); took = %dmS\n", lapmillis);
+  if(lapmillis>50)Serial.printf("stream.loop(); took = %dmS\n", lapmillis);
   prevmillis = nowmillis;
-
-
 
   if(bMqttActivated==1234)loopMQTT();
   
@@ -665,7 +682,26 @@ void loop()
   if(bFlag100mS)
   { bFlag100mS = false; 
     LoopTicker100mS = GlobalTicker100mS;
+    if(!bPortalOpened && lapmillis<40) // time just spent in stream.loop();
+    { //loop_esp_now();
+      nowmillis = millis();
+      lapmillis = nowmillis - prevmillis;
+      if(lapmillis>10)Serial.printf("loop_esp_now(); took = %dmS\n", lapmillis);
+      prevmillis = nowmillis;
+    }
+    if((LoopTicker100mS % 10)==0) // every seconds or so
+    { if(bStreamTypeNeedsUpdated) // update done once per second
+      { AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
+        bStreamTypeNeedsUpdated = false;
+      }
+    }
   }  
+  nowmillis = millis();
+  lapmillis = nowmillis - prevmillis;
+  if(lapmillis>10)Serial.printf("loop_esp_now(); took = %dmS\n", lapmillis);
+  prevmillis = nowmillis;
+
+
 
   if((LoopTicker100mS % 50)==0) // every 5 seconds or so
   { if(WiFi.status() != WL_CONNECTED) 
@@ -847,6 +883,7 @@ void loop()
 
        case MESSAGE_START_THIS_STATION:
          // format QueueMessage is "NL-http://stationurl"
+         if(!bGlobeStable)break; // ignore all (old) requests while globe is moving!
          extern char CountryCodeSelectorSD[3];
         
          if(QueueMessage[2]=='-')
@@ -862,17 +899,16 @@ void loop()
          }
 
          if((strcmp(PreviousUrl, TargetUrl) == 0) && stream.isRunning())
-         { // already connected PLAYING
+         { // already connected and playing this station
            Serial.printf("ALREADY CONNECTED TO STATION: %s\n", TargetUrl);  
            AddToQueueForDisplay(TargetUrl, MESSAGE_STATION_CONNECTED);
            break;
          }
              
          strcpy(PreviousUrl, TargetUrl);
-         //strcpy(TargetUrl, QueueMessage);
 
          // DataFromDisplay.D_QueueStationIndex range = 0-49 for found stations and 50-53 for presets, -1 if idle
-         Serial.printf("DataFromDisplay.D_QueueStationIndex = %d\n", DataFromDisplay.D_QueueStationIndex);
+         // Serial.printf("DataFromDisplay.D_QueueStationIndex = %d\n", DataFromDisplay.D_QueueStationIndex);
          
          
          if(DataFromDisplay.D_QueueStationIndex>=MAX_STATIONS) // it's a preset
@@ -900,14 +936,14 @@ void loop()
          else
          {  DataFromGlobe.D_QueueStationIndex = -1;
             //Serial.printf("FAILED: stream.connecttohost HTTP code %d\n", stream.connectResult()); 
-            Serial.printf("FAILED: stream.connecttohost ERROR code %s\n", VS1053_connectResult); 
+            Serial.printf("FAILED: stream.connecttohost ERROR code %s\n", VS1053_CallBackLastError); 
 
-            // if(strcmp(VS1053_connectResult, "Http create error")==0) // DNS fail??
-            { snprintf(message, sizeof(message), "%s -> %s", VS1053_connectResult, QueueMessage); 
+            if(strcmp(VS1053_CallBackLastError, "Http create error")==0) // DNS fail??l??
+            { snprintf(message, sizeof(message), "%s -> %s", VS1053_CallBackLastError, QueueMessage); 
               AddToQueueForDisplay(message, MESSAGE_CONNECTTOHOST_FAILURE); // let display store this number for log report
               AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);
             }
-            /* else
+            else
             { // try again, toggle https<>http, insert 's' to url
               if(TargetUrl[4]==':') // try again, with https, insert 's' to url
               { int16_t len = strlen(TargetUrl);
@@ -929,13 +965,13 @@ void loop()
                 AddToQueueForDisplay(message, MESSAGE_STATION_CONNECTED_IN_MS); 
               }
               else
-              { Serial.printf("FAILED: stream.connecttohost ERROR code %s\n", VS1053_connectResult); 
-                snprintf(message, sizeof(message), "%s -> %s", VS1053_connectResult, QueueMessage); 
+              { Serial.printf("FAILED: stream.connecttohost ERROR code %s\n", VS1053_CallBackLastError); 
+                snprintf(message, sizeof(message), "%s -> %s", VS1053_CallBackLastError, QueueMessage); 
                 AddToQueueForDisplay(message, MESSAGE_CONNECTTOHOST_FAILURE); // let display store this number for log report
                 AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);        //    audio_eof_stream("Retry from main message loop for HTTP errors < 0", 0);
               }
             }  
-            */
+            
          }
          Tuning = false;
 
@@ -1000,7 +1036,6 @@ void loop()
         DataFromGlobe.D_QueueStationIndex = -1; 
         strcpy(PreviousUrl, QueueMessage);
         stream.stopSong(); // stop whatever stream or file was playing
-         // delay(1000); check to see if click/
         Speakers(SPEAKERS_ON);
         SetVolumeMapped(DataFromDisplay.volumevalue); 
         stream.connectToFile(SD, QueueMessage); // play it 
@@ -1032,7 +1067,7 @@ void loop()
         // Serial.println(ESP.getFreeHeap());
         if(TestUrl(QueueMessage))AddToQueueForDisplay("1", MESSAGE_TEST_URL);
         else
-        { snprintf(message, sizeof(message), "%s -> %s", VS1053_connectResult, QueueMessage); 
+        { snprintf(message, sizeof(message), "%s -> %s", VS1053_CallBackLastError, QueueMessage); 
           AddToQueueForDisplay(message, MESSAGE_TEST_URL);
         } 
         break;  
@@ -1046,9 +1081,17 @@ void loop()
 
     FromDisplay.QueueIndexOut++;
     FromDisplay.QueueIndexOut %= QUEUESIZE;
-    FromDisplay.QueueCnt--;
+    //FromDisplay.QueueCnt--;
+    __atomic_fetch_sub(&FromDisplay.QueueCnt, 1, __ATOMIC_SEQ_CST);
 
   }
+
+  nowmillis = millis();
+  lapmillis = nowmillis - prevmillis;
+  if(lapmillis>1)Serial.printf("message handler took = %dmS\n", lapmillis);
+  prevmillis = nowmillis;
+
+
 
   if(bEncoderNewPosition && UpdateState==0)
   { bEncoderNewPosition = false;
@@ -1068,10 +1111,10 @@ void loop()
     AddToQueueForDisplay("", MESSAGE_EXPLORING); // remove 'song title'    
   }
   
-  if((LoopTicker100mS%10)==0)
-  {
-     //Serial.printf("Volume = %d\n", stream.getVuMeter());
-  }
+  //if((LoopTicker100mS%10)==0)
+  //{
+  //  Serial.printf("Volume = %d\n", stream.getVuMeter());
+  //}
 
 
   // volume and tone levels checking
@@ -1146,7 +1189,7 @@ void loop()
       bFirst = false;
     }
   }  
-  vTaskDelay(1); // makes me feel good
+   vTaskDelay(1); // makes me feel good but is nonsense
 }
 
 
@@ -1157,6 +1200,9 @@ bool StartNewStation(void)
 { bool return_result = false;
   char message[QUEUEMESSAGELENGTH];
 
+
+  bSomethingPlays = false;
+  
   bMusicMode = false;
   if(bMusicModePrev != bMusicMode)
   { bMusicModePrev = bMusicMode;
@@ -1171,10 +1217,17 @@ bool StartNewStation(void)
 
   Serial.printf("StartNewStation with %s\n", TargetUrl);
   SetVolumeMapped(0);
-  //if(stream.isRunning())
-  { Serial.printf("First stop this one: %s\n", ActiveUrl);
+
+  if(stream.isRunning())
+  { Serial.printf("First stop this one: %s\n", PrevUrl);
     stream.stopSong();
   }
+
+  strcpy(StreamType, "");
+  strcpy(StreamCodec, "");
+  strcpy(StreamBitrate, "");
+  strcpy(StreamFilllevel, "");
+  AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
   
   Speakers(SPEAKERS_DELAYED_OFF);
   DataFromGlobe.D_QueueStationIndex = -1;
@@ -1237,6 +1290,7 @@ bool StartNewStation(void)
     return_result = 1;
     strncpy(ActiveUrl, TargetUrl, sizeof(ActiveUrl));
     ActiveUrl[QUEUEMESSAGELENGTH-1]=0;
+    strcpy(PrevUrl, ActiveUrl);
     PixelUpdate(0, 0x000000, 0x000000, 5000); // all off
   }
   else
@@ -1276,8 +1330,8 @@ void SetVolumeMapped(uint16_t volume)
     else Speakers(SPEAKERS_DELAYED_OFF); // no sound from speakers wanted
   } 
 
-  Serial.printf("New Volume adjusted to %d\n", New_vs1053vol);
-  stream.forceVolume(New_vs1053vol);
+  Serial.printf("1333 Volume RadioGlobe-Globe-V5.ino->  %d adjusted to %d for VS1053\n", volume, New_vs1053vol);
+  stream.setVolume(New_vs1053vol);
     
 }
 
@@ -1379,30 +1433,29 @@ void audio_showstreamtitle(const char* info)
 
 // called from VS1053 driver
 void audio_eof_stream(const char* info) 
-{ char message[1024];
+{ static char message[QUEUEMESSAGELENGTH];
   uint32_t StationConnectedForMillis;
+
+  bSomethingPlays = false;
+  
 
   StationConnectedForMillis = millis() - StationConnectedAtMillis;
 
   Speakers(SPEAKERS_DELAYED_OFF);
-  //Serial.printf("End of stream  -> %s\n", info); // seems to corrupt things when info is extremely long  
-  // 20:09:45.909 -> End of stream  -> https://d111.rndfnk.com/ard/swr/swr3/live/mp3/128/stream.mp3?aggregator=web&cid=01FC1X5J7PN2N3YQPZYT8YDM9M&sid=3Gp8w297GomV7g9sAEawLnCJB9k&token=FNSXoxwNS_9I-WNWgpXWWrhIiz4RK-_rtZ8ohh83DQs&tvf=4E4euBR0xBhkMTExLnJuZGZuay5jb20
-  // 20:09:47.829 -> FromDisplay.QueueIndexIn = 33 FromDisplay.QueueIndexOut = 32
-  // 20:09:47.829 -> Messages from display pending 1
-  // 20:09:47.829 -> DISPLAY SAYS: UNSUPPORTED MESSAGE ><
-  // 20:09:47.829 -> Unsupported message type 0 from display: ><
-  // 20:09:47.829 -> AddToQueueForDisplay -> Message 72 not defined!
-
+  
   DataFromGlobe.D_QueueStationIndex = -1;
 
   // only next station or file if power is on
   if(bPowerStatus == true)
   { if(!bMusicMode)
-    { // VS1053_connectResult is a const char * to reason of failure? 
-
-      sprintf(message, "EOF -> (%s) url=%s stopped after %ldmS", StreamLastError, ActiveUrl, StationConnectedForMillis);
-      strcpy(StreamLastError, "No recent error");
-      AddToQueueForDisplay(message, MESSAGE_CONNECTTOHOST_FAILURE); // let display store this number for log report
+    { // VS1053_CallBackLastError is string
+      //uxTaskGetStackHighWaterMark(NULL); // alleen dit crashed
+      //Serial.printf("Free stack high water mark: %d bytes\n", uxTaskGetStackHighWaterMark(NULL)); // met dit crashed ook trouwens veel stack nog, 14K (van de 16K)
+      snprintf(message, sizeof(message), "EOF -> (%s) url=%s stopped after %dmS", VS1053_CallBackLastError, ActiveUrl, StationConnectedForMillis); // crashed af en toe ook
+      Serial.printf("snprintf made this string:%s\n", message); // crashed af en toe ook
+      strcpy(VS1053_CallBackLastError, "No recent error");
+      AddToQueueForDisplay(message, MESSAGE_CONNECTTOHOST_FAILURE); // let display store this number for log report // crashed ook - weer proberen vanaf 26AUG 11:16 goeie next 7x 12:53
+      //AddToQueueForDisplay("Ringbuffer Empty", MESSAGE_CONNECTTOHOST_FAILURE); // ook heap_caps_malloc_extmem_enable(1024); verwijderd in setup - rustig nu 26AUG 11:15
       AddToQueueForDisplay("Globe wants next station", MESSAGE_WANT_NEXT_STATION);
       strcpy(ActiveUrl, "");
     }
@@ -1596,6 +1649,8 @@ void checkSpeakerToggleButton(void)
 void PlaySoundBite(uint8_t *soundbite, size_t length, uint16_t volumeoveride)
 {  uint16_t volume_to_use;
   
+  bSomethingPlays = true;
+  
   //if((volumeoveride>0) && (volumeoveride>GlobeSettings.ee_volume))volume_to_use = volumeoveride; // huh ??? what was I thinking
   if((volumeoveride>0) && (volumeoveride>GlobeSettings.ee_volume))volume_to_use = volumeoveride;
   else volume_to_use = GlobeSettings.ee_volume;
@@ -1609,11 +1664,12 @@ void PlaySoundBite(uint8_t *soundbite, size_t length, uint16_t volumeoveride)
   Serial.printf("PlaySoundBite playing with volume -> %d\n", volume_to_use);
   
   stream.playChunk(soundbite, length); // plays really entire soundbite
-  //delay(250);
   SetVolumeMapped(GlobeSettings.ee_volume); // will enable amplifiers (if speaker switch == on) if radio stream running, else amplifiers off
   // did this soundbite played during radio playing (like battery low warning)
   if(stream.isRunning())return; // leave speakers on, radio stream continues
   // all done, nothing was streaming at this moment, speakers off 
+  bSomethingPlays = false;
+  
   Speakers(SPEAKERS_DELAYED_OFF);
 }
 
@@ -1689,6 +1745,7 @@ uint32_t PlayWhile(uint8_t *soundbite, unsigned long long length, bool playwhile
    static bool oldplaywhile = 0;
    unsigned long snippetMs;
 
+   
    Serial.printf("oldplaywhile =%d playwhile = %d\n", (int)oldplaywhile, (int)playwhile);
 
    if(oldplaywhile != playwhile)
@@ -1809,10 +1866,12 @@ void Speakers(uint8_t mode)
 void codecCallback(const char *codec)
 { Serial.printf("codec: %s\n", codec);
   // during url test, ignore this
+  Serial.printf("1861 codecCallback codec = %s\n", codec);
   if(bPowerStatus  && UpdateState == 0)
-  { SetVolumeMapped(DataFromDisplay.volumevalue); // will also enable amplifiers
+  { bSomethingPlays = true;
+    SetVolumeMapped(DataFromDisplay.volumevalue); // will also enable amplifiers
     strcpy(StreamCodec, codec);
-    sprintf(StreamType, "Streaming %s - %s", StreamCodec, StreamBitrate);
+    sprintf(StreamType, "Streaming %s - %s %s", StreamCodec, StreamBitrate, StreamFilllevel);
     if(strcmp(PrevStreamType, StreamType)!=0)
     { strcpy(PrevStreamType, StreamType);
       AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
@@ -1825,12 +1884,13 @@ void codecCallback(const char *codec)
 void bitrateCallback(uint32_t bitrate)
 {   // during url test, ignore this
   if(bPowerStatus  && UpdateState == 0) 
-  { //Serial.printf("bitrate: %lu kbps\n", bitrate);
+  { //Serial.printf("MAIN 1870 bitrate: %lu kbps\n", bitrate);
     sprintf(StreamBitrate, "%lu kbps", bitrate);
-    sprintf(StreamType, "Streaming %s - %s", StreamCodec, StreamBitrate);
+    sprintf(StreamType, "Streaming %s - %s %s", StreamCodec, StreamBitrate, StreamFilllevel);
     if(strcmp(PrevStreamType, StreamType)!=0)
     { strcpy(PrevStreamType, StreamType);
-      AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
+      bStreamTypeNeedsUpdated = true; // update to puck done in main loop, once per second
+      //AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
     }
   }
 }  
@@ -1841,11 +1901,28 @@ void audio_fail(void)
 }  
 
 // called from VS1053 driver
+
 void VS1053error(const char *error) 
-{ Serial.printf("Error from VS1053 -> %s\n", error);
-  VS1053_connectResult = error;
-  strcpy(StreamLastError, error);
+{ strcpy(VS1053_CallBackLastError, error);
+  Serial.printf("Error from VS1053 -> %s\n", VS1053_CallBackLastError);
+  AddToQueueForDisplay(VS1053_CallBackLastError, MESSAGE_STATUS_LINE);
 }
+
+// Called when bitrate is detected (cbr) and changes (vbr)
+void filllevelCallback(uint32_t filllevel)
+{   // during url test, ignore this
+  if(bPowerStatus  && UpdateState == 0) 
+  { //Serial.printf("MAIN 1879 filllevel: %lu kbps\n", filllevel);
+    sprintf(StreamFilllevel, "%lu%% buffered", filllevel);
+    sprintf(StreamType, "Streaming %s - %s %s", StreamCodec, StreamBitrate, StreamFilllevel);
+    if(strcmp(PrevStreamType, StreamType)!=0)
+    { strcpy(PrevStreamType, StreamType);
+      bStreamTypeNeedsUpdated = true; // update to puck done in main loop, once per second
+      //AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
+    }
+  }
+}  
+
 
 #include <stdio.h>
 #include <string.h>
@@ -1856,12 +1933,12 @@ int filter_string_v3(const char *source, char *destination) {
     int skipped_count = 0;
     int high_ascii_count = 0;
 
-    // EERSTE PAS: Tel hoeveel Extended ASCII-tekens er in de GEHELE string staan.
-    // Westerse zinnen hebben er zelden meer dan 2. Thaise mojibake heeft er tientallen.
+    // count Extended ASCII characters
+    // Westersn selodm have more than 5, Thai mojibake has tens or more
     while (source[i] != '\0') {
         unsigned char c = (unsigned char)source[i];
         
-        // Skip UTF-8 patronen eerst bij het tellen om valse positieven te voorkomen
+        // Skip UTF-8 patterns
         if ((c & 0xE0) == 0xC0) { i += 2; continue; }
         else if ((c & 0xF0) == 0xE0) { i += 3; continue; }
         else if ((c & 0xF8) == 0xF0) { i += 4; continue; }
@@ -1872,21 +1949,19 @@ int filter_string_v3(const char *source, char *destination) {
         i++;
     }
 
-    // TWEEDE PAS: Daadwerkelijk filteren en kopiëren
+    // filter and copy
     i = 0;
     while (source[i] != '\0') {
         unsigned char c = (unsigned char)source[i];
 
-        // 1. Skip geldige UTF-8 multi-byte (zoals Cyrillisch)
+        // 1. skip validd UTF-8 multi-byte (zoals Cyrillisch)
         if ((c & 0xE0) == 0xC0) { i += 2; skipped_count++; continue; }
         else if ((c & 0xF0) == 0xE0) { i += 3; skipped_count++; continue; }
         else if ((c & 0xF8) == 0xF0) { i += 4; skipped_count++; continue; }
 
-        // 2. Beordeel losse Extended ASCII bytes
         if (c > 127) {
-            // Als er in totaal te veel Extended ASCII bytes in de zin staan, 
-            // is het Thaise mojibake -> Altijd skippen!
-            if (high_ascii_count > 2) {
+            // if too many extended ascii, probably thai mojibake
+            if (high_ascii_count > 5) {
                 i++;
                 skipped_count++;
                 continue;
@@ -1901,27 +1976,6 @@ int filter_string_v3(const char *source, char *destination) {
     return skipped_count;
 }
 
-int xxxxtest() {
-    //  problematische string met de spaties ertussen
-    const char *thai_input = "SONG_TITLE 1 >ËÅÍ¡ (Fools) - àºÅ ÊØ¾Å<";
-    char thai_output[100];
-    int thai_skipped = filter_string_v3(thai_input, thai_output);
-
-    printf("[Thais Test met Spaties]\n");
-    printf("Resultaat:      \"%s\"\n", thai_output); // Verwacht: "SONG_TITLE 1 > (Fools) -  <"
-    printf("Letters geskipt: %d\n\n", thai_skipped);
-
-    // Controleer of westerse zinnen nog steeds onveranderd blijven
-    const char *western_input = "Café met Señor en Zürich";
-    char western_output[100];
-    int western_skipped = filter_string_v3(western_input, western_output);
-
-    printf("[Westers Extended ASCII Test]\n");
-    printf("Resultaat:      \"%s\"\n", western_output); // Verwacht: "Café met Señor en Zürich"
-    printf("Letters geskipt: %d\n", western_skipped);   // Verwacht: 0
-
-    return 0;
-}
 
 bool TestUrl(char *url)
 { bool return_result = false;
@@ -1956,7 +2010,6 @@ bool TestUrl(char *url)
  
   return return_result;
 }
-
 
 
 // EOF

@@ -15,19 +15,6 @@ esp_now_peer_info_t peerInfo;
 void OnDataSent(const esp_now_send_info_t *tx_info, esp_now_send_status_t status);
 void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData, int len);
 
-// Callback when data is sent
-volatile bool bWasTransmitted = false;
-void OnDataSent(const esp_now_send_info_t *tx_info, esp_now_send_status_t status)
-{ //Serial.print("\r\nLast Packet Send Status:\t");
-  //Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
-  bWasTransmitted = (status == ESP_NOW_SEND_SUCCESS);
-  if(!bWasTransmitted)
-  { Serial.print("\r\nLast Packet Send Status:\t");
-    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
-  }
-}
-
-
 // Callback when data is received
 void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData, int len) 
 { static uint16_t MessageSerialNumberApi = -1;
@@ -163,9 +150,10 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
       Serial.printf("ESPNOW: OnDataRecv() -> DataFromDisplay.D_QueueSerialNumberSend = %d  - %s %s\n", FromDisplay.QueueMessageSerialNumber[FromDisplay.QueueIndexIn], messagetexts[FromDisplay.QueueMessageType[FromDisplay.QueueIndexIn]], FromDisplay.QueueMessage[FromDisplay.QueueIndexIn]);
 
       // atomic update of FromDisplay.QueueIndexIn, probably overly cautious since we run on same core
-      uint16_t nextIndex = (FromDisplay.QueueIndexIn + 1) % QUEUESIZE;
-      FromDisplay.QueueIndexIn = nextIndex; 
-      FromDisplay.QueueCnt++;
+      FromDisplay.QueueIndexIn = (FromDisplay.QueueIndexIn + 1) % QUEUESIZE; 
+      //FromDisplay.QueueCnt++;
+      __atomic_fetch_add(&FromDisplay.QueueCnt, 1, __ATOMIC_SEQ_CST);
+      
     }
     firstskipped = true;
   }  
@@ -228,85 +216,75 @@ void setup_esp_now()
   
 }
 
-bool Q_filling = 0;
-bool Q_sending = 0;
 
-void loop_esp_now() // called from encoder task every 100mS
+// Callback when data is sent
+volatile bool bWasTransmitted = false;
+volatile bool bReadyToSendNext = true;
+
+void OnDataSent(const esp_now_send_info_t *tx_info, esp_now_send_status_t status)
+{ bWasTransmitted = (status == ESP_NOW_SEND_SUCCESS);
+  if(bWasTransmitted)
+  { if(ToDisplay.QueueCnt > 0 && DataFromGlobe.G_QueueMessageType != MESSAGE_NOP)
+    { ToDisplay.QueueIndexOut = (ToDisplay.QueueIndexOut + 1) % QUEUESIZE;
+      __atomic_fetch_sub(&ToDisplay.QueueCnt, 1, __ATOMIC_SEQ_CST);
+      //ToDisplay.QueueCnt--;
+      DataFromGlobe.G_QueueSerialNumberSend++;
+    }  
+  }
+  else
+  { Serial.print("\r\nLast Packet Send Status:\t");
+    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+  }
+  bReadyToSendNext = true; 
+}
+
+void loop_esp_now() // first called from encoder task every 100mS, moved to call from main loop, 28AUG26 moved to seperate task
 { static uint16_t wait = 10;
   static esp_err_t result; 
+
+  if (!bReadyToSendNext) 
+  { return; 
+  }
             
-  // we get called here from the encoder loop, every 100mS
-  
-  while(Q_filling); // wait until idle
-  Q_sending = true;
   // check and send all queued messages via ESP-NOW
   if(1) //bUpAndRunning)
   { if(ToDisplay.QueueCnt>0)
-    { int max_to_send_attempts = 0; 
-      while(ToDisplay.QueueCnt && (max_to_send_attempts++ < 11)) // don't let us hang in here forever, best effort here
-      { if(ToDisplay.QueueIndexOut != ToDisplay.QueueIndexIn)
-        { //DataFromGlobe.G_QueueSerialNumberSend++;
-          //Serial.printf("ESPNOW esp_now_send() ToDisplay.QueueCnt %d -> ToDisplay.QueueIndexOut %d != ToDisplay.QueueIndexIn %d\n", ToDisplay.QueueCnt, ToDisplay.QueueIndexOut, ToDisplay.QueueIndexIn);
+    { if(ToDisplay.QueueIndexOut != ToDisplay.QueueIndexIn)
+      {  //Serial.printf("ESPNOW esp_now_send() ToDisplay.QueueCnt %d -> ToDisplay.QueueIndexOut %d != ToDisplay.QueueIndexIn %d\n", ToDisplay.QueueCnt, ToDisplay.QueueIndexOut, ToDisplay.QueueIndexIn);
 
-          DataFromGlobe.D_QueueMessageCount = ToDisplay.QueueCnt;
-          // use memcpy, message can have embedded 0's - not always a traditional string 
-          memcpy(DataFromGlobe.G_QueueMessage, ToDisplay.QueueMessage[ToDisplay.QueueIndexOut], QUEUEMESSAGELENGTH);   
+        DataFromGlobe.D_QueueMessageCount = ToDisplay.QueueCnt;
+        // use memcpy, message can have embedded 0's - not always a traditional string 
+        memcpy(DataFromGlobe.G_QueueMessage, ToDisplay.QueueMessage[ToDisplay.QueueIndexOut], QUEUEMESSAGELENGTH);   
+        DataFromGlobe.G_QueueMessageType = ToDisplay.QueueMessageType[ToDisplay.QueueIndexOut];
 
-          DataFromGlobe.G_QueueMessageType = ToDisplay.QueueMessageType[ToDisplay.QueueIndexOut];
+        bReadyToSendNext = false;   
+        result = esp_now_send(PuckMac, (uint8_t *) &DataFromGlobe, sizeof(DataFromGlobe));
           
-          // if(!bWasTransmitted)delay(50); // give it some more time - will activate this if the increasing delay doesn't bring peace
-
-          // first attempt, send out only once, never twice
-          if(max_to_send_attempts==1)
-          { bWasTransmitted = false;
-            result = esp_now_send(PuckMac, (uint8_t *) &DataFromGlobe, sizeof(DataFromGlobe));
-            //Serial.printf("ESPNOW esp_now_send() SERIALNR %d -> %s sent to display = >%s<\n", DataFromGlobe.G_QueueSerialNumberSend, messagetexts[DataFromGlobe.G_QueueMessageType]  , DataFromGlobe.G_QueueMessage);
-          }  
-          
-          if(result==0) // && !bWasTransmitted) // all went ok
-          { //Serial.printf("ESPNOW esp_now_send() succesfully queued\n");
-            delay(2); // bWasTransmitted very likely true after this wait
-            int wait = 15;
-            while(wait-- && !bWasTransmitted ) // usually never happens, bWasTransitted already true;
-            { //Serial.printf("ESPNOW esp_now_send() wait for message actually send out\n");
-              delay(1);
-            }
-            if(bWasTransmitted)
-            { //Serial.printf("ESPNOW esp_now_send() package DataFromGlobe.G_QueueSerialNumber = %d -> delivered at puck\n", DataFromGlobe.G_QueueSerialNumberSend);
-              //Serial.printf("ESPNOW esp_now_send() DISPLAY CONFIRMED  %s -> delivered at puck\n", messagetexts[ToDisplay.QueueMessageType[ToDisplay.QueueIndexOut]]);
-              ToDisplay.QueueIndexOut++;
-              ToDisplay.QueueIndexOut %= QUEUESIZE;
-              ToDisplay.QueueCnt--;
-              DataFromGlobe.G_QueueSerialNumberSend++;
-              max_to_send_attempts = 0;
-              bWasTransmitted = false;
-            }
-            else
-            { Serial.printf("ESPNOW Failed after 25mS waiting, try again..\n");
-            }  
-          } 
-          else // still waiting
-          { // seen ESP_ERR_ESPNOW_NO_MEM (12391 or (0x3067) increased stacksize from 8K to 16K to see if this stays away - also an increasing delay if it still struggles
-            Serial.printf("ESPNOW esp_now_send() could not queue (result=%d) message, will try again after %d mS\n", result, (max_to_send_attempts*10) );
-            delay(max_to_send_attempts*10); // wait increasingly longer as it keeps failing
-          }
-          //delay(5);
+        if(result != ESP_OK) 
+        { bReadyToSendNext = true; 
         }
-        // keep last one send
-        memcpy(&PrevDataFromGlobe, &DataFromGlobe, sizeof(PrevDataFromGlobe));
-        //delay(5); // since we are in a wile loop, this seems to fix the odd lost packet of data
-      } // end while
+        else
+        { // keep last one send
+          memcpy(&PrevDataFromGlobe, &DataFromGlobe, sizeof(PrevDataFromGlobe));
+        }  
+      } 
     }
     else // keep sending last one, if changed with perhaps updated coordinates, rssi strength, whatever
-    { if(memcmp(&PrevDataFromGlobe, &DataFromGlobe,sizeof(PrevDataFromGlobe)) != 0)
+    { 
+
+      if(memcmp(&PrevDataFromGlobe, &DataFromGlobe,sizeof(PrevDataFromGlobe)) != 0)
       { DataFromGlobe.G_QueueMessageType = MESSAGE_NOP; // don't want this to be picked by puck up as message with real job to do
+        bReadyToSendNext = false;
         esp_err_t result = esp_now_send(PuckMac, (uint8_t *) &DataFromGlobe, sizeof(DataFromGlobe));
-        memcpy(&PrevDataFromGlobe, &DataFromGlobe, sizeof(PrevDataFromGlobe));
-      }  
+        if (result != ESP_OK) 
+        { bReadyToSendNext = true;
+        } 
+        else 
+        { memcpy(&PrevDataFromGlobe, &DataFromGlobe, sizeof(PrevDataFromGlobe));
+        }
+      }    
     }
   }
-  Q_sending = false;
-  
 }
 
 //typedef struct {               
@@ -317,32 +295,21 @@ void loop_esp_now() // called from encoder task every 100mS
 //} Queue;
 
 void AddToQueueForDisplay(const char* message, uint16_t queuemessagetype)
-{ 
-  while(Q_sending); // wait until idle
-  Q_filling = true;
-
-  if(queuemessagetype>=MESSAGE_MAX) // should never happen as this message is not defined yet
+{   if(queuemessagetype>=MESSAGE_MAX) // should never happen as this message is not defined yet
   { Serial.printf("AddToQueueForDisplay -> Message %d not defined!\n", queuemessagetype);
     return;
   }
 
-  //Serial.printf("ADD-TO-QUEUE-FOR-DISPLAY: ToDisplay.QueueCnt=%d (QueueIndexIn %d): %s -> %s\n", ToDisplay.QueueCnt, ToDisplay.QueueIndexIn, messagetexts[queuemessagetype], message);
-
-  if(ToDisplay.QueueCnt < (QUEUESIZE-2)) // at least one empty slot needed
+  if(ToDisplay.QueueCnt < (QUEUESIZE-2)) // keep at least one empty slot to prevent QueueIndexIn becoming accidently equal to QueueIndexOut
   { ToDisplay.QueueIndexIn %= QUEUESIZE; // just to be sure
-    //strncpy(ToDisplay.QueueMessage[ToDisplay.QueueIndexIn], message, QUEUEMESSAGELENGTH);
     memcpy(ToDisplay.QueueMessage[ToDisplay.QueueIndexIn], message, QUEUEMESSAGELENGTH);
-    
     ToDisplay.QueueMessage[ToDisplay.QueueIndexIn][QUEUEMESSAGELENGTH-1] = 0; // terminate just in case of idiotic long message that could upset the puck decoding this
     ToDisplay.QueueMessageType[ToDisplay.QueueIndexIn] = queuemessagetype;
-    
-    Serial.printf("TELL PUCK: ToDisplay.QueueCnt=%hu (QueueIndexIn %hu): %s -> %s\n", ToDisplay.QueueCnt, ToDisplay.QueueIndexIn, messagetexts[ToDisplay.QueueMessageType[ToDisplay.QueueIndexIn]], ToDisplay.QueueMessage[ToDisplay.QueueIndexIn]);
-
-    ToDisplay.QueueIndexIn++;
-    ToDisplay.QueueIndexIn %= QUEUESIZE;
-    ToDisplay.QueueCnt++;
+    //Serial.printf("TELL PUCK: ToDisplay.QueueCnt=%hu (QueueIndexIn %hu): %s -> %s\n", ToDisplay.QueueCnt, ToDisplay.QueueIndexIn, messagetexts[ToDisplay.QueueMessageType[ToDisplay.QueueIndexIn]], ToDisplay.QueueMessage[ToDisplay.QueueIndexIn]);
+    ToDisplay.QueueIndexIn = (ToDisplay.QueueIndexIn + 1) % QUEUESIZE;
+    __atomic_fetch_add(&ToDisplay.QueueCnt, 1, __ATOMIC_SEQ_CST);
+    //ToDisplay.QueueCnt++;
   }
-  else Serial.printf("Queue to display is full!!! ()%hu", ToDisplay.QueueCnt);
-  Q_filling = false;
+  else Serial.printf("Queue to display is full!!! (%hu)\n", ToDisplay.QueueCnt);
 }
 

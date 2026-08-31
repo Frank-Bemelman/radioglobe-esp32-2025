@@ -16,8 +16,30 @@ void setup_tasks(void)
                     NULL,        /* parameter of the task */
                     3,           /* was 1, changed to 3 29JUL26 priority of the task */
                     NULL,      /* Task handle to keep track of created task */
-                    1);          /* pin task to core 0 */      
+                    1);          /* pin task to core 0 */  
+   xTaskCreatePinnedToCore(
+    EspNowTask,     // Function name
+    "EspNowTask",   // Task name
+    3072,           // Stack size
+    NULL,           // Task input parameter
+    1,              // Priority
+    NULL,           // Task handle
+    0               // Pin to Core 0 (Wi-Fi hardware core)
+  );                        
 }
+
+void EspNowTask(void * pvParameters) 
+{
+  TickType_t xLastWakeTime = xTaskGetTickCount();
+  const TickType_t xFrequency = pdMS_TO_TICKS(100); // 100ms = 10 times a second
+
+  for(;;) 
+  { // Wait precisely 100ms without blocking Core 1
+    vTaskDelayUntil(&xLastWakeTime, xFrequency);
+    loop_esp_now();
+  }
+}
+
 
 // Task to read the globe encoders, roughly ten times a second
 void ReadAS5600Encoders(void * pvParameters)
@@ -94,7 +116,7 @@ void ReadAS5600Encoders(void * pvParameters)
     if((abs(NSFilteredRAW - AverageNS[(AverageIdx-1)%4])<8) && (abs(EWFilteredRAW - AverageEW[(AverageIdx-1)%4])<8))
     { // pretty stable
       if(stable100ms<10000)stable100ms++;
-      if(EncoderReliable && (stable100ms>4)) // if stable for 1 second
+      if(EncoderReliable && (stable100ms>4)) // if stable for 0.5 second
       { stable = true;
         if(LedAnimationBrightness)LedAnimationBrightness-=5; // brigthness dims down in roughly 2.5 seconds
       }
@@ -112,8 +134,7 @@ void ReadAS5600Encoders(void * pvParameters)
     
     // send new NS postion to puck if slightly changed
     if(OldCurrentNS4096 != CurrentNS4096)
-    { //if(abs(((OldCurrentNS4096 - CurrentNS4096))%4096)>1)
-      if(abs(OldCurrentNS4096 - CurrentNS4096)>1)
+    { if(abs(OldCurrentNS4096 - CurrentNS4096)>1)
       { OldCurrentNS4096 = CurrentNS4096;
         NSDegLive10 = (CurrentNS4096) * 3600 / 4096; // convert to degrees times 10
         if((NSDegLive10>=-900) && (NSDegLive10<=900)) 
@@ -124,8 +145,7 @@ void ReadAS5600Encoders(void * pvParameters)
 
     // send new EW postion to puck if slightly changed
     if(OldCurrentEW4096 != CurrentEW4096)
-    { //if(abs(((OldCurrentEW4096 - CurrentEW4096))%4096)>1)
-      if(abs(OldCurrentEW4096 - CurrentEW4096)>1)
+    { if(abs(OldCurrentEW4096 - CurrentEW4096)>1)
       { OldCurrentEW4096 = CurrentEW4096;
         EWDegLive10 = (CurrentEW4096) * 3600 / 4096; // convert to degrees times 10
         if((EWDegLive10>=-1800) && (EWDegLive10<=1800)) 
@@ -136,8 +156,8 @@ void ReadAS5600Encoders(void * pvParameters)
 
     if(EncoderReliable && (stable_changed != stable) && UpdateState==0)
     { stable_changed = stable;
-      stream.forceVolume(0); // whatever is playing - mute it
-
+      stream.setVolume(0); // whatever is playing - mute it
+      bGlobeStable = stable;
       if(stable)
       { if(bPowerStatus)Serial.println("Stable while bPowerStatus=true");
         else Serial.println("Stable while bPowerStatus=false");
@@ -150,7 +170,7 @@ void ReadAS5600Encoders(void * pvParameters)
     }
 
     //if(((EncoderTicker100mS % 1) == 0) && !Tuning)
-    if(!bPortalOpened)loop_esp_now();
+    //if(!bPortalOpened)loop_esp_now();
 
     checkSpeakerToggleButton();
     //Serial.println("EFree Heap B4 we continue " + String(ESP.getFreeHeap()));  

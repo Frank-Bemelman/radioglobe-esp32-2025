@@ -75,7 +75,7 @@ void StartPlayFromSD(void)
     AddToQueueForDisplay("1", MESSAGE_MUSIC_MODE);
     strcpy(ActiveStationTitle, "SD-Card Music Files");
     AddToQueueForDisplay(ActiveStationTitle, MESSAGE_STATION_NAME);
-    AddToQueueForDisplay("NOW PLAYING", MESSAGE_STATUS_LINE); // remove 'station name'
+    AddToQueueForDisplay("", MESSAGE_STATUS_LINE); // remove 'READING SD CARD'
 
     DataFromGlobe.D_QueueStationIndex = -1; // forget radiostation playing
     PlaylistTracks=0;
@@ -108,6 +108,8 @@ void PlayFromPlaylistByIndex(uint16_t idx)
 
     if(stream.isRunning())
     { stream.stopSong(); // stop whatever stream or file was playing
+      bSomethingPlays = false;
+  
     }  
 
     stream.connectToFile(SD, Playlist[idx]); // play this path/file
@@ -115,6 +117,7 @@ void PlayFromPlaylistByIndex(uint16_t idx)
     if(stream.isRunning())
     { char *p;
       char *q;
+      bSomethingPlays = true;
       strcpy(path_filename, Playlist[idx]+1); // copy without the leading '/' from path /GLOBEMUSIC/NL/....
       if((p=strrchr(Playlist[idx], '/'))!= NULL)
       { // path/file -> use file
