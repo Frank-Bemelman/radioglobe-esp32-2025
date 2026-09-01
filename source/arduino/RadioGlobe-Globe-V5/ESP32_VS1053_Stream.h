@@ -121,7 +121,7 @@ public:
         See https://www.vlsi.fi/fileadmin/datasheets/vs1053.pdf section 9.6.3 */
 
     bool playChunk(uint8_t *data, size_t len, bool stopSong = true);    
-    bool playChunkNonBlocking(uint8_t *buffer, size_t bytes_to_play, bool looparound);
+    bool playChunkNB(uint8_t *chunk, size_t len, bool looparound = false);
 
 
 private:
@@ -162,7 +162,7 @@ private:
     void _streamToRingBuffer(WiFiClient *stream);
     void _chunkedStreamToRingBuffer(WiFiClient *stream);
 
-    bool _handlePlayChunk();
+    bool _handleNonBlockingChunk();
 
     codec_callback_t _codecCallback = nullptr;
     bitrate_callback_t _bitrateCallback = nullptr;
@@ -228,10 +228,11 @@ private:
     uint8_t _chunkState = 0;
     uint8_t _chunkHeaderIndex = 0;
 
-    uint8_t *_chunkbufferstart;
-    bool _playingChunk = false; // frank, for non blocking chunkplayer
-    size_t _bytesinchunk = 0;
-    size_t _byteslefttoplay = 0;
+    uint8_t *_chunk = nullptr;
+    size_t _chunkLen = 0;
+    size_t _chunkRemaining = 0;
+    bool _playingChunk = false; 
+    uint8_t *_chunkLoop = nullptr;
     bool _looparound = false;
 
 

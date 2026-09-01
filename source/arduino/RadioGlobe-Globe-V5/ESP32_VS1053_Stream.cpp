@@ -1,6 +1,4 @@
 #include "ESP32_VS1053_Stream.h"
-#include <lwip/sockets.h>
-
 
 ESP32_VS1053_Stream::ESP32_VS1053_Stream() : _vs1053(nullptr), _http(nullptr), _vs1053Buffer{0}, _localbuffer{0}, _url{0},
                                              _ringbuffer_handle(nullptr), _buffer_struct(nullptr), _buffer_storage(nullptr) {}
@@ -82,6 +80,7 @@ int32_t ESP32_VS1053_Stream::_nextChunkSize(WiFiClient *stream)
     while (stream->available())
     {
         const int c = stream->read();
+
         switch (_chunkState)
         {
         case CHUNK_START:
@@ -95,10 +94,12 @@ int32_t ESP32_VS1053_Stream::_nextChunkSize(WiFiClient *stream)
             if (c == '\n')
             {
                 _chunkHeader[_chunkHeaderIndex] = '\0';
+
                 const int32_t result = strtol(_chunkHeader, nullptr, 16);
-                //Serial.printf(">98 NextChunkSize = %d available now %d\n", result, stream->available());
+
                 _chunkState = EXPECT_CR;
                 _chunkHeaderIndex = 0;
+
                 return result > 0 ? result : 0;
             }
 
@@ -160,7 +161,7 @@ void ESP32_VS1053_Stream::_eofStream()
 {
     if (_codec == CODEC_UNKNOWN && _errorCallback)
         _errorCallback(ERROR_NO_DECODER_SYNC);
-   
+
     stopSong();
 
     if (_eofCallback)
@@ -390,7 +391,7 @@ bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
 bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
                                         const char *pwd, size_t offset)
 {
-    if (!_vs1053 || _http || _playingFile || !WiFi.isConnected())
+    if (!_vs1053 || isRunning())
     {
         log_e("system error");
         if (_errorCallback)
@@ -446,10 +447,6 @@ bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
         stopSong();
         return false;
     }
-    else
-    { // if called with a new station url, maybe a snippet of audio is still in the playbuffer
-//      delay(2000);
-    } 
 
     if (offset)
     {
@@ -461,7 +458,7 @@ bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
     if (strlen(username) || strlen(pwd))
         _http->setAuthorization(username, pwd);
 
-    _http->addHeader("Icy-MetaData", VS1053_ICY_METADATA ? "1" : "0");    
+    _http->addHeader("Icy-MetaData", VS1053_ICY_METADATA ? "1" : "0");
     _http->collectHeaders(_header, sizeof(_header) / sizeof(_header[0]));
     _http->setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
 
@@ -536,8 +533,6 @@ bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
 
         _chunkedResponse = _http->header(ENCODING).equalsIgnoreCase("chunked") ? true : false;
         log_d("%s stream", _chunkedResponse ? "chunked" : "http");
-        Serial.printf("533 Stream is %s\n", _chunkedResponse ? "chunked" : "http");
-        Serial.printf("539 _remainingBytes = %d\n", _remainingBytes);
         _offset = (_remainingBytes == -1) ? 0 : offset;
         _metaDataStart = _http->header(ICY_METAINT).toInt();
         _musicDataPosition = _metaDataStart ? 0 : -1;
@@ -546,7 +541,6 @@ bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
         _streamStallStartMS = 0;
         log_i("redirected %i times to %s", _redirectCount, url);
         _redirectCount = 0;
-        Serial.printf("549 _remainingBytes = %d\n", _remainingBytes);
         return true;
     }
 
@@ -598,7 +592,6 @@ bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
         _redirectCount = 0;
         return false;
     }
-
 }
 
 void ESP32_VS1053_Stream::_playFromRingBuffer()
@@ -696,12 +689,11 @@ void ESP32_VS1053_Stream::_streamToRingBuffer(WiFiClient *stream)
             log_v("ringbuffer failed to receive %i bytes. Closing stream.", inBuffer);
             if (_errorCallback)
                 _errorCallback(ERROR_RINGBUFFER_FAIL);
-            //_remainingBytes = 0; heeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+            _remainingBytes = 0;
             return;
         }
 
         bytesToRingBuffer += inBuffer;
-        //_remainingBytes -= (_remainingBytes > 0) ? inBuffer : 0; // frank added
         _musicDataPosition += _metaDataStart ? inBuffer : 0;
     }
     log_d("%lu ms moving %i bytes stream->ringbuffer", millis() - startTimeMS, bytesToRingBuffer);
@@ -761,7 +753,7 @@ void ESP32_VS1053_Stream::_handleStream(WiFiClient *stream)
         [[maybe_unused]] const auto startTimeMS = millis();
         size_t bytesToDecoder = 0;
 
-        const size_t MAX_MOVE = size() ? 2048 : 512; // everything without a size is radio so low bitrate
+        const size_t MAX_MOVE = 2048; 
 
         while (_musicDataPosition < _metaDataStart && bytesToDecoder < MAX_MOVE &&
                stream->available() && _vs1053->data_request())
@@ -769,7 +761,6 @@ void ESP32_VS1053_Stream::_handleStream(WiFiClient *stream)
             const size_t inStream = _metaDataStart ? _metaDataStart - _musicDataPosition : stream->available();
             const size_t toRead = min(inStream, VS1053_PLAYBUFFER_SIZE);
             const size_t inBuffer = stream->read(_localbuffer, toRead);
-
             _vs1053->playChunk(_vs1053Buffer, inBuffer);
             _remainingBytes -= _remainingBytes > 0 ? inBuffer : 0;
             _musicDataPosition += _metaDataStart ? inBuffer : 0;
@@ -791,19 +782,13 @@ void ESP32_VS1053_Stream::_chunkedStreamToRingBuffer(WiFiClient *stream)
     //const size_t MAX_MOVE = size() ? 2048 : 512; // everything without a size is radio so low bitrate
     const size_t MAX_MOVE = VS1053_LOCALBUFFER_SIZE; // has to fit in _localbuffer// 
 
-    //Serial.printf("790 FRANK data, _chunkedStreamToRingBuffer with available bytes %d\n", stream->available());
-
     while(_bytesLeftInChunk>0 && _musicDataPosition < _metaDataStart  && 
     xRingbufferGetCurFreeSize(_ringbuffer_handle) && stream->available()) // original if
     {  _updateFillLevel();
         const size_t inStream = _metaDataStart ? _metaDataStart - _musicDataPosition : stream->available();
-        //Serial.printf("inStream = %lu\n", inStream);
         const size_t inChunk = min(static_cast<size_t>(_bytesLeftInChunk), inStream);
-        //Serial.printf("inChunk = %lu\n", inChunk);
         const size_t toMove = min(inChunk, MAX_MOVE);
-        //Serial.printf("toMove = %lu\n", toMove);
         const size_t toRead = min(toMove, xRingbufferGetCurFreeSize(_ringbuffer_handle));
-        //Serial.printf("toRead = %lu\n", toRead);
         const size_t inBuffer = stream->read(_localbuffer, toRead);
         const BaseType_t result = xRingbufferSend(_ringbuffer_handle, _localbuffer, inBuffer, 0); // was 0
         if (result == pdFALSE)
@@ -811,9 +796,7 @@ void ESP32_VS1053_Stream::_chunkedStreamToRingBuffer(WiFiClient *stream)
             log_v("ringbuffer failed to receive %i bytes. Closing stream.", inBuffer);
             if (_errorCallback)
                 _errorCallback(ERROR_RINGBUFFER_FAIL);
-           
-            //_remainingBytes = 0; heeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-
+            _remainingBytes = 0; 
             return;
         }
 
@@ -849,7 +832,7 @@ bool ESP32_VS1053_Stream::_handleChunkedMetadata(WiFiClient *stream)
     {
         if (_bytesLeftInChunk < 1)
         {
-            log_i("end of chunk in metadata handling, returning for chunk handling");
+            log_v("end of chunk in metadata handling, returning for chunk handling");
             return false;
         }
 
@@ -905,7 +888,7 @@ void ESP32_VS1053_Stream::_handleChunkedStream(WiFiClient *stream)
 
         if (!_bytesLeftInChunk)
         {
-            _remainingBytes = 0; 
+            _remainingBytes = 0;
             return;
         }
 
@@ -929,8 +912,7 @@ void ESP32_VS1053_Stream::_handleChunkedStream(WiFiClient *stream)
             const size_t inStream = _metaDataStart ? _metaDataStart - _musicDataPosition : stream->available();
             const size_t inChunk = min(static_cast<size_t>(_bytesLeftInChunk), inStream);
             const size_t toRead = min(inChunk, VS1053_PLAYBUFFER_SIZE);
-            const size_t toReadSafe = min(toRead, (size_t)stream->available());
-            const size_t inBuffer = stream->read(_vs1053Buffer, toReadSafe);
+            const size_t inBuffer = stream->read(_vs1053Buffer, toRead);
 
             _vs1053->playChunk(_vs1053Buffer, inBuffer);
             _bytesLeftInChunk -= inBuffer;
@@ -983,7 +965,13 @@ void ESP32_VS1053_Stream::_feedDecoder(WiFiClient *stream)
 
 void ESP32_VS1053_Stream::loop()
 { 
-    if(_playingChunk) { _handlePlayChunk();  return; } // frank
+    if (_playingChunk) 
+    { 
+        if (_handleNonBlockingChunk())
+            _playingChunk = false;
+        return; 
+    }
+    
     if (_playingFile)
     {
         _handleLocalFile();
@@ -1113,15 +1101,27 @@ void ESP32_VS1053_Stream::loop()
 
 bool ESP32_VS1053_Stream::isRunning()
 {
-    return _http != nullptr || _playingFile || _playingChunk;
+    return _http != nullptr ||
+           _playingFile || 
+           _playingChunk;
 }
 
 void ESP32_VS1053_Stream::stopSong()
-{
+{  
+    if (_playingChunk)
+    {   
+        _playingChunk = false; 
+        _chunk = nullptr;
+        _chunkRemaining = 0;
+
+        _vs1053->stopSong();
+        _vs1053->setVolume(0);
+        return;
+    }
+
     if (!_http && !_playingFile && !_playingChunk) // frank
         return;
 
-    _playingChunk = false; // frank
 
     _vs1053->setVolume(0);
         
@@ -1242,7 +1242,7 @@ bool ESP32_VS1053_Stream::connectToFile(fs::FS &fs, const char *filename)
 
 bool ESP32_VS1053_Stream::connectToFile(fs::FS &fs, const char *filename, const size_t offset)
 {
-    if (!_vs1053 || _playingFile || _http)
+    if (!_vs1053 || isRunning())
         return false;
 
     _file = fs.open(filename, FILE_READ, false);
@@ -1710,39 +1710,52 @@ bool ESP32_VS1053_Stream::playChunk(uint8_t *data, size_t len, bool stopSong)
 }
 
 // hand over a chunk to play, once or loop around until something else is started, or a stream.stopSong() is called
-bool ESP32_VS1053_Stream::playChunkNonBlocking(uint8_t *buffer, size_t bytes_to_play, bool looparound)
+bool ESP32_VS1053_Stream::playChunkNB(uint8_t *chunk, size_t len, bool looparound)
 { 
-  stopSong();  // stop whatever was playing
-  _chunkbufferstart = buffer;
-  _playingChunk = true; // frank, for non blocking chunkplayer
-  _bytesinchunk = bytes_to_play;
-  _byteslefttoplay = _bytesinchunk;
+  if (!_vs1053 || !chunk || !len || isRunning())
+        return false;
+
+  _chunk = chunk;
+  _chunkRemaining = len;
+  _playingChunk = true; 
+  
+  _chunkLen = len;
+  _chunkLoop = chunk;
   _looparound = looparound;
+  
+  _vs1053->setVolume(_volume);
   return true;  
 }
 
-bool ESP32_VS1053_Stream::_handlePlayChunk(void)
-{ size_t bytestochunk;
-  Serial.printf("_byteslefttoplay = %d\n", _byteslefttoplay);
-  if(_byteslefttoplay)
-  { bytestochunk = min((size_t)1024 ,_byteslefttoplay);
-    _vs1053->setVolume(75);
-     Serial.printf("bytestochunk = %d\n", bytestochunk);
+bool ESP32_VS1053_Stream::_handleNonBlockingChunk()
+{   if (!_chunkRemaining)
+        return true;
 
-    _vs1053->playChunk(_chunkbufferstart + (_bytesinchunk - _byteslefttoplay), bytestochunk);
-    _byteslefttoplay -= bytestochunk;
-    if(_byteslefttoplay<=0)
-    { if(!_looparound) // fully played, wait until completely played
-      { _vs1053->stopSong();
-        _playingChunk = false;
-        return false;
-      }
-      // restart
-      _byteslefttoplay = _bytesinchunk;
+    const size_t MAX_MOVE = 1024; 
+    size_t len = min((size_t)MAX_MOVE, _chunkRemaining);
 
+    while (len && _vs1053->data_request())
+    { const size_t toMove = min(len, VS1053_PLAYBUFFER_SIZE);
+      _vs1053->playChunk(_chunk, toMove);
+      _chunk += toMove;
+      len -= toMove;
+      _chunkRemaining -= toMove;
     }
-  }
-  return true;
+  
+    if(!_chunkRemaining)
+    { 
+        if(!_looparound) // fully played, wait until completely played
+        { 
+            _vs1053->stopSong();
+            _vs1053->setVolume(0);
+            return true;
+        }
+        // restart
+       _chunk = _chunkLoop;
+       _chunkRemaining = _chunkLen;
+    }
+  
+    return false;
 }
 
 VS1053 * ESP32_VS1053_Stream:: getVS1053pointer()

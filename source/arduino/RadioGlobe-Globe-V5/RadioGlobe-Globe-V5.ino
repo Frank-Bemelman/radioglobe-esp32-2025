@@ -371,7 +371,7 @@ void setup()
 //  digitalWrite(VS1053_DCS, HIGH); 
   digitalWrite(VS1053_RESET, LOW); 
 
-  delay(53);   
+  delay(54);   
   //pinMode(SPI_CLK_PIN, OUTPUT);
   //pinMode(SPI_MOSI_PIN, OUTPUT);
   //digitalWrite(SPI_CLK_PIN, LOW);
@@ -425,15 +425,16 @@ void setup()
   //      _vs1053->loadUserCode(PATCHES_FLAC, PATCHES_FLAC_SIZE);
   //  }
 
-  //Speakers(SPEAKERS_ON); 
-  //stream.forceVolume(75);
-  //stream.playChunkNonBlocking((uint8_t *)mp3_happy_ping, sizeof(mp3_happy_ping), false);
-  //stream.playChunkNonBlocking((uint8_t *)mp3_radio_tuning, sizeof(mp3_radio_tuning), true);
-  //while(stream.isRunning()) stream.loop();
-
-
+  
+  //  Speakers(SPEAKERS_ON); 
+  //  stream.setVolume(75);
+  //  stream.playChunkNB((uint8_t *)mp3_happy_ping, sizeof(mp3_happy_ping));
+  //  while(stream.isRunning()) stream.loop();
+  //  stream.playChunkNB((uint8_t *)mp3_radio_tuning, sizeof(mp3_radio_tuning), true);
+  //  while(stream.isRunning()) stream.loop();
 
   PlaySoundBite((uint8_t *)mp3_happy_ping, sizeof(mp3_happy_ping), 0); 
+
 
   // start SD card
   hspi = new SPIClass (HSPI);
