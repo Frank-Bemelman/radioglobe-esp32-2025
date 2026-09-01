@@ -1034,6 +1034,12 @@ void ESP32_VS1053_Stream::loop()
              Serial.println("1070 Reconnect with succes");
              return;
           }
+
+          if (_errorCallback)
+            _errorCallback(ERROR_STREAM_TIMEOUT);
+          Serial.printf("1040 FRANK _eofStream() called\n");
+          _eofStream();
+          return;
        }
     }
 

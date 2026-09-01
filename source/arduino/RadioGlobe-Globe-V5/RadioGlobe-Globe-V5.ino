@@ -371,7 +371,7 @@ void setup()
 //  digitalWrite(VS1053_DCS, HIGH); 
   digitalWrite(VS1053_RESET, LOW); 
 
-  delay(54);   
+  delay(55);   
   //pinMode(SPI_CLK_PIN, OUTPUT);
   //pinMode(SPI_MOSI_PIN, OUTPUT);
   //digitalWrite(SPI_CLK_PIN, LOW);
