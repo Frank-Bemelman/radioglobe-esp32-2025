@@ -158,11 +158,18 @@ private:
     void _feedDecoder(WiFiClient *stream);
     void _allocateRingbuffer();
     void _deallocateRingbuffer();
-//    void _playFromRingBuffer(); // naar public
+//    void _playFromRingBuffer(); // move to public, gets called from task
     void _streamToRingBuffer(WiFiClient *stream);
     void _chunkedStreamToRingBuffer(WiFiClient *stream);
 
-    bool _handleNonBlockingChunk();
+    bool _playChunkNB();
+    uint8_t *_chunk = nullptr;
+    size_t _chunkLen = 0;
+    size_t _chunkRemaining = 0;
+    bool _playingChunk = false; 
+    uint8_t *_chunkLoop = nullptr;
+    bool _looparound = false;
+
 
     codec_callback_t _codecCallback = nullptr;
     bitrate_callback_t _bitrateCallback = nullptr;
@@ -211,6 +218,9 @@ private:
     size_t _offset = 0;
     int32_t _remainingBytes = 0;
     int32_t _bytesLeftInChunk = 0;
+    char _chunkHeader[12] = {};
+    uint8_t _chunkState = 0;
+    uint8_t _chunkHeaderIndex = 0;
     uint16_t _metadataNeeded = 0;
     uint16_t _metaIndex = 0;
     int32_t _metaDataStart = 0;
@@ -223,18 +233,6 @@ private:
     unsigned long _bufferStallStartMS = 0;
     uint8_t _redirectCount = 0;
     bool _isHLS = false;
-    
-    char _chunkHeader[12] = {};
-    uint8_t _chunkState = 0;
-    uint8_t _chunkHeaderIndex = 0;
-
-    uint8_t *_chunk = nullptr;
-    size_t _chunkLen = 0;
-    size_t _chunkRemaining = 0;
-    bool _playingChunk = false; 
-    uint8_t *_chunkLoop = nullptr;
-    bool _looparound = false;
-
 
     const char *CONTENT_TYPE = "Content-Type";
     const char *ICY_NAME = "icy-name";
@@ -261,7 +259,7 @@ private:
     const char *ERROR_RINGBUFFER_EMPTY = "Ringbuffer empty";
     const char *ERROR_RINGBUFFER_FAIL = "Ringbuffer error";
     const char *ERROR_CONNECTION_LOST = "Connection lost";
-    const char *ERROR_STREAM_TIMEOUT = "Stream timeout";
+    const char *ERROR_STREAM_TIMEOUT = "Stream stalled %d ms";
     const char *ERROR_COULD_NOT_OPEN = "Could not open";
     const char *ERROR_NOT_PLAYABLE = "Not playable";
     const char *ERROR_HLS_UNSUPPORTED = "HLS streams not supported";
