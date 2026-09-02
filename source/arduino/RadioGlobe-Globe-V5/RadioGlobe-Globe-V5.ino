@@ -371,7 +371,7 @@ void setup()
 //  digitalWrite(VS1053_DCS, HIGH); 
   digitalWrite(VS1053_RESET, LOW); 
 
-  delay(55);   
+  delay(50);   
   //pinMode(SPI_CLK_PIN, OUTPUT);
   //pinMode(SPI_MOSI_PIN, OUTPUT);
   //digitalWrite(SPI_CLK_PIN, LOW);
@@ -690,7 +690,7 @@ void loop()
       if(lapmillis>10)Serial.printf("loop_esp_now(); took = %dmS\n", lapmillis);
       prevmillis = nowmillis;
     }
-    if((LoopTicker100mS % 10)==0) // every seconds or so
+    if((LoopTicker100mS % 5)==0) // every half seconds or so
     { if(bStreamTypeNeedsUpdated) // update done once per second
       { AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
         bStreamTypeNeedsUpdated = false;
@@ -1331,7 +1331,7 @@ void SetVolumeMapped(uint16_t volume)
     else Speakers(SPEAKERS_DELAYED_OFF); // no sound from speakers wanted
   } 
 
-  Serial.printf("1333 Volume RadioGlobe-Globe-V5.ino->  %d adjusted to %d for VS1053\n", volume, New_vs1053vol);
+  //Serial.printf("1334 Volume RadioGlobe-Globe-V5.ino->  %d scaled to %d for VS1053\n", volume, New_vs1053vol);
   stream.setVolume(New_vs1053vol);
     
 }
@@ -1865,9 +1865,8 @@ void Speakers(uint8_t mode)
   
 // Called when codec is detected
 void codecCallback(const char *codec)
-{ Serial.printf("codec: %s\n", codec);
+{ Serial.printf("1861 codecCallback codec = %s\n", codec);
   // during url test, ignore this
-  Serial.printf("1861 codecCallback codec = %s\n", codec);
   if(bPowerStatus  && UpdateState == 0)
   { bSomethingPlays = true;
     SetVolumeMapped(DataFromDisplay.volumevalue); // will also enable amplifiers
@@ -1914,7 +1913,8 @@ void filllevelCallback(uint32_t filllevel)
 {   // during url test, ignore this
   if(bPowerStatus  && UpdateState == 0) 
   { //Serial.printf("MAIN 1879 filllevel: %lu kbps\n", filllevel);
-    sprintf(StreamFilllevel, "%lu%% buffered", filllevel);
+    //sprintf(StreamFilllevel, "%lu%% buffered", filllevel);
+    sprintf(StreamFilllevel, "%luKB in buffer", filllevel);
     sprintf(StreamType, "Streaming %s - %s %s", StreamCodec, StreamBitrate, StreamFilllevel);
     if(strcmp(PrevStreamType, StreamType)!=0)
     { strcpy(PrevStreamType, StreamType);

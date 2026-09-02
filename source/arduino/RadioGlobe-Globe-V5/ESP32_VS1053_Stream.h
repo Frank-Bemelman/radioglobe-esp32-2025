@@ -123,6 +123,8 @@ public:
     bool playChunk(uint8_t *data, size_t len, bool stopSong = true);    
     bool playChunkNB(uint8_t *chunk, size_t len, bool looparound = false);
 
+    void setVs1053SpeedPPM(int32_t ppm);
+
 
 private:
     VS1053 *_vs1053;
@@ -178,6 +180,8 @@ private:
     eof_callback_t _eofCallback = nullptr;
     error_callback_t _errorCallback = nullptr;
     filllevel_callback_t _filllevelCallback = nullptr;
+
+    
 
     enum Codec
     {
