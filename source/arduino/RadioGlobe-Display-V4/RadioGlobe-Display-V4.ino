@@ -193,8 +193,8 @@ EXT_RAM_ATTR calibrations_arraybin def_cal;
 uint16_t CalToIndexNS;
 uint16_t CalToIndexEW;
 bool bPowerStatus = false;
-#define AUTOPOWERDOWNAFTER (8 * 3600) // auto power after 8 hour
-//#define AUTOPOWERDOWNAFTER (3 * 60) // auto power after 3 minutes, for test
+#define AUTOPOWERDOWNAFTER (24 * 3600) // auto power off after 8 hour
+//#define AUTOPOWERDOWNAFTER (3 * 60) // auto power off after 3 minutes, for test
 uint32_t AutoSleepTimer = AUTOPOWERDOWNAFTER+1;
 
 #define DEFAULT_BACKLIGHT 75
@@ -652,7 +652,6 @@ void loop()
   } 
 
   if(bTimer100ms)
-  //if(1)
   {  bTimer100ms = false;
   }
 
@@ -803,7 +802,7 @@ void loop()
       QueueMessage[sizeof(QueueMessage) - 1] = '\0'; // make sure it's 0 terminated
       
       if((QueueMessageType>=0) && (QueueMessageType<MESSAGE_MAX)) 
-      { Serial.printf(" AT switch(QueueMessageType) -> %d-%s-%d %02d:%02d:%02d\n", (int)datetime.day, monthnames[datetime.month],  (int)datetime.year%100, datetime.hour, (int)datetime.minute, (int)datetime.second);
+      { Serial.printf(" AT switch(QueueMessageType) -> %d-%s-%d %02d:%02d:%02d\n", (int)datetime.day, monthnames[datetime.month%12],  (int)datetime.year%100, datetime.hour, (int)datetime.minute, (int)datetime.second);
         Serial.printf("  PROCESS:%d %s >%s<\n", FromGlobe.QueueMessageSerialNumber[FromGlobe.QueueIndexOut], messagetexts[QueueMessageType], QueueMessage);  
       }
    
@@ -841,42 +840,48 @@ void loop()
         case MESSAGE_NOP:
           break;
         case MESSAGE_STATION_NAME:
-          if(Stations.playing != Stations.requested)break; // maybe old message  
+          //if(Stations.playing != Stations.requested)break; // maybe old message  
           // rename on screen and in scroller if it makes sense..
           if(!bMusicMode)
           { // skip very short station/long station names, skip names with underscores, better stick to one from database
             // otherwise accept and make a note to clean up database later, manually
-            if(strlen(QueueMessage)>=5 && strlen(QueueMessage)<=32 && strchr(QueueMessage, '_')==0)
-            { if(strlen(lv_label_get_text(ui_Station_Name)))
-              { if(strcmp(QueueMessage, lv_label_get_text(ui_Station_Name)) !=0)
-                { strcpy(logfile, "/ERR-database-stationname.log");
-                  AppendToLogFile(logfile, QueueMessage);
-                  sprintf(content, "Error in Database - stations150K.json stationname %s should be %s", Stations.StationNUG[Stations.requested].name, QueueMessage);
-                    AppendToLogFile(logfile, content);
-                    Serial.println(content);
-                    sprintf(content, "                  - gps_ns = %f gps_ew = %f", Stations.StationNUG[Stations.requested].gps_ns, Stations.StationNUG[Stations.requested].gps_ew);
-                    AppendToLogFile(logfile, content);
-                    Serial.println(content);
-                    sprintf(content, "                  - url = %s", Stations.StationNUG[Stations.requested].url);
-                    AppendToLogFile(logfile, content);
-                    Serial.println(content);
-                    sprintf(content, "                  - town = %s", Stations.StationNUG[Stations.requested].town);
-                    AppendToLogFile(logfile, content);
-                    Serial.println(content);
-                }
-              }    
+            if(strlen(QueueMessage)>=5 && strlen(QueueMessage)<=32 && strchr(QueueMessage, '_')==0) // don't even bother to take a note of silly names
+            { if(strcmp(QueueMessage, lv_label_get_text(ui_Station_Name)) !=0)
+              { strcpy(logfile, "/ERR-database-stationname.log");
+                AppendToLogFile(logfile, QueueMessage);
+                sprintf(content, "Error in Database - stations150K.json stationname %s should be %s", Stations.StationNUG[Stations.requested].name, QueueMessage);
+                AppendToLogFile(logfile, content);
+                Serial.println(content);
+                sprintf(content, "                  - gps_ns = %f gps_ew = %f", Stations.StationNUG[Stations.requested].gps_ns, Stations.StationNUG[Stations.requested].gps_ew);
+                AppendToLogFile(logfile, content);
+                Serial.println(content);
+                sprintf(content, "                  - url = %s", Stations.StationNUG[Stations.requested].url);
+                AppendToLogFile(logfile, content);
+                Serial.println(content);
+                sprintf(content, "                  - town = %s", Stations.StationNUG[Stations.requested].town);
+                AppendToLogFile(logfile, content);
+                Serial.println(content);
+              }
+            }  
 
-              if(strlen(QueueMessage)>=4 && strlen(QueueMessage)<=32)
-              { lv_label_set_text(ui_Station_Name, QueueMessage);
+            //if(strlen(QueueMessage)>=4 && strlen(QueueMessage)<=32)
+            if(strlen(QueueMessage)<=32)
+            { lv_label_set_text(ui_Station_Name, QueueMessage);
+              if(strlen(QueueMessage)>0)
+              { lv_point_t text_end_point;
+                lv_label_get_letter_pos(ui_Station_Name, strlen(QueueMessage), &text_end_point);
+                lv_obj_set_x(ui_ledconnect, (text_end_point.x -200) + 12);
                 if(Stations.requested<MAX_STATIONS)
                 { strcpy(Stations.StationNUG[Stations.requested].name, QueueMessage);
                   ScrollNeedsReload = 1;
                   ReloadScroll();
-                }  
+                }
               }
+              else lv_obj_add_flag(ui_ledconnect, LV_OBJ_FLAG_HIDDEN); 
+                
             }  
           }  
-          else
+          else // in SD music mode
           { lv_label_set_text(ui_Station_Name, QueueMessage);
           }
           break;
@@ -884,6 +889,7 @@ void loop()
         // globe statt moving
         case MESSAGE_EXPLORING:
           //if(screen != ui_ClockScreen)lv_scr_load(ui_Home);
+          lv_obj_add_flag(ui_ledconnect, LV_OBJ_FLAG_HIDDEN); 
           lv_label_set_text(ui_Station_Name, "");
           lv_label_set_text(ui_Status_Line, "EXPLORING THE EARTH");
           lv_label_set_text(ui_Station_Title, "");
@@ -909,8 +915,8 @@ void loop()
         case MESSAGE_GET_TIMEZONE_BY_GPS:
         case MESSAGE_TIMEZONE_NAME:
         case MESSAGE_HOME_TIMEZONE_NAME:
-          PrevHour--; // forces instant update of clock, names of places, flags
-          PrevSecond--;
+          PrevHour = 9999; // forces instant update of clock, names of places, flags
+          PrevSecond = 9999;
           if(strlen(QueueMessage))
           { GetAllUpperCase(QueueMessage, QueueMessage); // place in same string
 
@@ -1008,6 +1014,7 @@ void loop()
          case MESSAGE_FINDNEWSTATION:
           // station or file already killed by globe
           Stations.playing = -1;
+          lv_obj_add_flag(ui_ledconnect, LV_OBJ_FLAG_HIDDEN); 
           bMusicMode = false;
           lv_obj_add_flag(ui_Jukebox, LV_OBJ_FLAG_HIDDEN);
           lv_obj_add_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN);
@@ -1100,6 +1107,7 @@ void loop()
 
         case MESSAGE_WANT_NEXT_STATION: // request from globe since it couldn't use the last url
           Stations.playing = -1;
+          lv_obj_add_flag(ui_ledconnect, LV_OBJ_FLAG_HIDDEN); 
           if(Stations.requested<0)Stations.requested=0;
           if(Stations.count<=0) // not likely to happen, but can occur after a boot
           { FindNewStation();
@@ -1214,8 +1222,8 @@ void loop()
           uint16_t puckrequest;
           // example: "NL,Amsterdam,12345" which is country code, town, original puck api request serial number
 
-          PrevHour--; // forces instant update of clock, names of places, flags
-          PrevSecond--;
+          PrevHour = 9999; // forces instant update of clock, names of places, flags
+          PrevSecond = 9999;
 
           // check if the somewhat late arrived data is still applicable for the station most recently ordered
           //Serial.printf("DataFromGlobe.D_ApisFetchedForStation %d<> Stations.requested -> %d\n", DataFromGlobe.D_ApisFetchedForStation, Stations.requested);
@@ -1380,7 +1388,8 @@ void loop()
           // update leds on preset screen
           bMusicMode = false;
           if(Stations.requested<MAX_STATIONS+MAX_FAVORITES)
-          { lv_label_set_text(ui_Status_Line, "NOW PLAYING");
+          { lv_obj_clear_flag(ui_ledconnect, LV_OBJ_FLAG_HIDDEN); 
+            lv_label_set_text(ui_Status_Line, "NOW PLAYING");
             sprintf(content, "%s - Connected", Stations.StationNUG[Stations.requested].name);
             Stations.playing = Stations.requested;
             lv_label_set_text(ui_StationRollerComment, content); 
@@ -1531,6 +1540,7 @@ void loop()
 
           if(bMusicMode == true)
           { // empty roller
+            lv_obj_add_flag(ui_ledconnect, LV_OBJ_FLAG_HIDDEN); 
             Stations.count = 0;
             Stations.requested -1;
             ReloadScroll();
@@ -1691,9 +1701,24 @@ void loop()
       }
     }
 
+    //screen updates are too slow - without the grapics needle, we loop at 5x per second - not enough for snappy performance
+    //static uint16_t endlevel = 0;
+    //static uint16_t prevendlevel = 0;
+    //if((DataFromGlobe.vumeterlevel * 20) < endlevel)endlevel-=10;
+    //else endlevel = DataFromGlobe.vumeterlevel * 20;
+    //if(prevendlevel != endlevel)
+    //{ prevendlevel = endlevel;
+    //  uint16_t SecondAngle = endlevel;
+    //  if(SecondAngle>=1200)SecondAngle -= 1200;
+    //  else SecondAngle = 0;
+      //SecondAngle *= 20;
+    //  lv_img_set_angle(ui_SecondHand, SecondAngle); // wtih this, loops drop to 5x per second
+    //  Serial.printf("volume %4d\n", SecondAngle ); // printf only loops at 20x per second
+    //}
+
     // new uncalibrated encoder position arrived, remap to calibrated
     if(((PrevDataFromGlobe.ns !=  DataFromGlobe.ns) || (PrevDataFromGlobe.ew !=  DataFromGlobe.ew)) && DataFromGlobe.G_EncoderReliable)
-    { sprintf(content, "Sleeptimer =% d -> %d by globe movement", AutoSleepTimer, AUTOPOWERDOWNAFTER);
+    { sprintf(content, "Sleeptimer =%d -> %d by globe movement", AutoSleepTimer, AUTOPOWERDOWNAFTER);
       AppendToLogFile("/Sleeptimer.log", content);
 
       //Serial.println("Update coordinates on lcd!");
