@@ -27,6 +27,7 @@
 #define VS1053_PSRAM_BUFFER_SIZE (65536*1)
 //#define VS1053_PSRAM_BUFFER_SIZE (32768)
 //#define VS1053_PSRAM_BUFFER_SIZE (2048)
+#define VS1053_INTERNAL_RAM_BUFFER_SIZE 2048 // used when no PSRAM
 
 constexpr size_t VS1053_LOCALBUFFER_SIZE = 4096; // need at least 4kB to safely receive ICY metadata // was 4096
 constexpr uint8_t VS1053_MAXVOLUME = 100;
@@ -138,6 +139,7 @@ private:
     RingbufHandle_t _ringbuffer_handle;
     StaticRingbuffer_t *_buffer_struct;
     uint8_t *_buffer_storage;
+    StaticRingbuffer_t buffer_struct; // 216 bytes structure
 
     std::mutex _classMutex;      
 

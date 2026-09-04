@@ -10,9 +10,6 @@ ESP32_VS1053_Stream::~ESP32_VS1053_Stream()
     delete _vs1053;
 }
 
-#define VS1053_INTERNAL_RAM_BUFFER_SIZE 2048
-StaticRingbuffer_t buffer_struct; // 216 bytes structure
-
 void ESP32_VS1053_Stream::_allocateRingbuffer()
 {   bool usePSRam = true;
 
@@ -51,13 +48,6 @@ void ESP32_VS1053_Stream::_allocateRingbuffer()
       else  
         log_d("Allocated %i bytes ringbuffer in internal RAM", VS1053_INTERNAL_RAM_BUFFER_SIZE);
     }    
-
-    if(usePSRam) Serial.printf("Allocated %i bytes ringbuffer in PSRAM\n", VS1053_PSRAM_BUFFER_SIZE);
-    else Serial.printf("Allocated %i bytes ringbuffer in internal RAM\n", VS1053_INTERNAL_RAM_BUFFER_SIZE);
-
-    size_t largest_block = heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
-    Serial.printf("61 largest_block internal ram %d bytes\n", largest_block);
-    Serial.printf("61 sizeof(buffer_struct) = %d", sizeof(buffer_struct));
 }
 
 void ESP32_VS1053_Stream::_deallocateRingbuffer()
@@ -632,9 +622,6 @@ void ESP32_VS1053_Stream::_playFromRingBuffer()
     UBaseType_t  _ringbufferBytes = 0;
     vRingbufferGetInfo(_ringbuffer_handle, NULL, NULL, NULL, NULL, &_ringbufferBytes);
 
-//    if(_filllevel<40)setVs1053SpeedPPM(-200000);
-//    else if(_filllevel>80)setVs1053SpeedPPM(0);
-
     while (_ringbufferBytes && bytesToDecoder < MAX_MOVE && _vs1053->data_request())
     {   
         size_t size = 0;
@@ -1009,10 +996,7 @@ void ESP32_VS1053_Stream::stopSong()
         size_t size;
         void *item;
         while ((item = xRingbufferReceive(_ringbuffer_handle, &size, 0)) != nullptr)
-        { 
             vRingbufferReturnItem(_ringbuffer_handle, item);
-            
-        }
                
         _ringbuffer_filled = false;
     }
@@ -1026,13 +1010,6 @@ void ESP32_VS1053_Stream::stopSong()
         return;
     }
 
-
-    WiFiClient* client = _http->getStreamPtr();
-    if (client) 
-    { client->flush(); // dismiss network buffer
-      client->stop();  // close socket
-    }
-        
     _http->end();
     delete _http;
     _http = nullptr;
@@ -1054,30 +1031,6 @@ void ESP32_VS1053_Stream::setVolume(const uint8_t newVolume)
     if (_vs1053 && isRunning())
         _vs1053->setVolume(_volume);
 }
-
-uint8_t ESP32_VS1053_Stream::getVuMeter()
-{ // read  VU-meter registers
-  // turn off/on Vu meter as required
-  uint16_t regvalue;
-  if(!_http && !_playingFile)
-  { // turn off vu meter since it consumes some processing power
-    regvalue = _vs1053->readRegister(SCI_STATUS); 
-    if((regvalue & 0x0200)!=0) _vs1053->writeRegister(SCI_STATUS, (regvalue ^ 0x200)); 
-    return 0;
-  }
-
-  regvalue = _vs1053->readRegister(SCI_STATUS); 
-  if((regvalue & 0x0200)==0) _vs1053->writeRegister(SCI_STATUS, (regvalue | 0x200)); 
-    
-  uint16_t vu_values = _vs1053->readRegister(SCI_AICTRL3); 
-  uint8_t left_channel = highByte(vu_values);
-  uint8_t right_channel = lowByte(vu_values);
-
-  return max(left_channel, right_channel);
-}
-
-
-
 
 void ESP32_VS1053_Stream::setTone(uint8_t *rtone)
 {
@@ -1134,6 +1087,7 @@ bool ESP32_VS1053_Stream::connectToFile(fs::FS &fs, const char *filename, const 
     {
         if (_errorCallback)
            _errorCallback(ERROR_NOT_PLAYABLE);
+
         _file.close();
         return false;
     }
@@ -1197,32 +1151,6 @@ size_t ESP32_VS1053_Stream::_fileLastWAVByte()
     // fallback if not found
     return _file.size();
 }
-
-size_t ESP32_VS1053_Stream::_fileLastMP3Byte()
-{ uint8_t ID3v2_header[10];
-  size_t  ID3v2_size = 0;
-
-   if (_file.read(ID3v2_header, 10) == 10)
-   { if(memcmp(ID3v2_header, "ID3", 3 )==0)
-     { Serial.printf("ID3v2_header[9] -> %02X\n", ID3v2_header[9]);
-       ID3v2_size |= (size_t)ID3v2_header[9];
-       Serial.printf("ID3v2_header[8] -> %02X\n", ID3v2_header[8]);
-       ID3v2_size |= (size_t)ID3v2_header[8] << 7;
-       Serial.printf("ID3v2_header[7] -> %02X\n", ID3v2_header[7]);
-       ID3v2_size |= (size_t)ID3v2_header[7] << 14;
-       Serial.printf("ID3v2_header[6] -> %02X\n", ID3v2_header[6]);
-       ID3v2_size |= (size_t)ID3v2_header[6] << 21;
-
-       _file.seek(ID3v2_size + 10);
-       Serial.printf("_file.position() -> %08X\n", _file.position());
-     }  
-     
-     return _file.size() - _file.position();   
-   }
-   // fallback if not found
-   _file.seek(0);
-   return _file.size();
- }
 
 void ESP32_VS1053_Stream::_handleLocalFile()
 {
@@ -1410,26 +1338,6 @@ void ESP32_VS1053_Stream::_readBitRate()
     }
 }
 
-void ESP32_VS1053_Stream::_updateFillLevel()
-{ 
-    uint32_t filllevel;
-    uint32_t fillKB;    
-    // protected with mutex, as this also gets called from AudioPlayTask -> _playRingBuffer() 
-    {  
-       std::lock_guard<std::mutex> lock(_classMutex);
-
-       filllevel = (xRingbufferGetMaxItemSize(_ringbuffer_handle) - xRingbufferGetCurFreeSize(_ringbuffer_handle)) * 100 / xRingbufferGetMaxItemSize(_ringbuffer_handle); 
-       _filllevel = filllevel;
-       
-       if (!_filllevelCallback)return;
-
-       // report in KB       
-       fillKB = (xRingbufferGetMaxItemSize(_ringbuffer_handle) - xRingbufferGetCurFreeSize(_ringbuffer_handle)) / 1024;  
-         
-    }   
-    _filllevelCallback(fillKB);
-}
-
 const char *ESP32_VS1053_Stream::_codecName(uint8_t codec)
 {
     const char *name[] = {"UNKNOWN", "ADTS", "ADIF", "M4A", "WAV", "WMA", "MIDI", "MP3", "OGG", "FLAC"};
@@ -1496,18 +1404,6 @@ void ESP32_VS1053_Stream::clearErrorCB()
 {
     _errorCallback = nullptr;
 }
-
-void ESP32_VS1053_Stream::setFilllevelCB(bitrate_callback_t cb)
-{
-    _filllevelCallback = cb;
-}
-
-void ESP32_VS1053_Stream::clearFilllevelCB()
-{
-    _filllevelCallback = nullptr;
-}
-
-
 
 bool ESP32_VS1053_Stream::playChunk(uint8_t *data, size_t len, bool stopSong)
 {
@@ -1576,42 +1472,88 @@ bool ESP32_VS1053_Stream::_playChunkNB()
        _chunk = _chunkLoop;
        _chunkRemaining = _chunkLen;
     }
-  
+
     return false;
+}
+
+size_t ESP32_VS1053_Stream::_fileLastMP3Byte()
+{ uint8_t ID3v2_header[10];
+  size_t  ID3v2_size = 0;
+
+   if (_file.read(ID3v2_header, 10) == 10)
+   { if(memcmp(ID3v2_header, "ID3", 3 )==0)
+     { Serial.printf("ID3v2_header[9] -> %02X\n", ID3v2_header[9]);
+       ID3v2_size |= (size_t)ID3v2_header[9];
+       Serial.printf("ID3v2_header[8] -> %02X\n", ID3v2_header[8]);
+       ID3v2_size |= (size_t)ID3v2_header[8] << 7;
+       Serial.printf("ID3v2_header[7] -> %02X\n", ID3v2_header[7]);
+       ID3v2_size |= (size_t)ID3v2_header[7] << 14;
+       Serial.printf("ID3v2_header[6] -> %02X\n", ID3v2_header[6]);
+       ID3v2_size |= (size_t)ID3v2_header[6] << 21;
+
+       _file.seek(ID3v2_size + 10);
+       Serial.printf("_file.position() -> %08X\n", _file.position());
+     }  
+     
+     return _file.size() - _file.position();   
+   }
+   // fallback if not found
+   _file.seek(0);
+   return _file.size();
 }
 
 VS1053 * ESP32_VS1053_Stream:: getVS1053pointer()
 { return _vs1053;
 }
 
-void ESP32_VS1053_Stream:: setVs1053SpeedPPM(int32_t ppm) {
-    // 1. Hardware-beveiliging: begrenzen op -10% (-100.000) tot +10% (+100.000) PPM
-    //if (ppm > 100000)  ppm = 100000;
-    //if (ppm < -100000) ppm = -100000;
+uint8_t ESP32_VS1053_Stream::getVuMeter()
+{ // read  VU-meter registers
+  // turn off/on Vu meter as required
+  uint16_t regvalue;
+  if(!_http && !_playingFile)
+  { // turn off vu meter since it consumes some processing power
+    regvalue = _vs1053->readRegister(SCI_STATUS); 
+    if((regvalue & 0x0200)!=0) _vs1053->writeRegister(SCI_STATUS, (regvalue ^ 0x200)); 
+    return 0;
+  }
 
-    // 2. Lees de huidige basissnelheid van de stream (bijv. 44100 of 48000 Hz)
-    uint16_t currentAuData = _vs1053->readRegister(0x05); // SCI_AUDATA
-    uint16_t baseSampleRate = currentAuData & 0xFFFE;   // Haal de mono/stereo bit weg
-    uint16_t monoBit = currentAuData & 0x0001;          // Bewaar de mono/stereo status
+  regvalue = _vs1053->readRegister(SCI_STATUS); 
+  if((regvalue & 0x0200)==0) _vs1053->writeRegister(SCI_STATUS, (regvalue | 0x200)); 
+    
+  uint16_t vu_values = _vs1053->readRegister(SCI_AICTRL3); 
+  uint8_t left_channel = highByte(vu_values);
+  uint8_t right_channel = lowByte(vu_values);
 
-    // Veiligheidsklep: als de stream nog niet gestart is, ga uit van 44.1 kHz
-    if (baseSampleRate < 8000) {
-        baseSampleRate = 44100;
-    }
+  return max(left_channel, right_channel);
+}
 
-baseSampleRate = 44100;
+void ESP32_VS1053_Stream::setFilllevelCB(bitrate_callback_t cb)
+{
+    _filllevelCallback = cb;
+}
 
-    // 3. Bereken de nieuwe sample rate met 64-bit precisie om overflow te voorkomen
-    // Formule: Nieuwe_Rate = Basis_Rate * (1 + PPM / 1.000.000)
-    int64_t offsetHz = ((int64_t)baseSampleRate * ppm) / 1000000;
-    int32_t targetSampleRate = (int32_t)baseSampleRate + offsetHz;
+void ESP32_VS1053_Stream::clearFilllevelCB()
+{
+    _filllevelCallback = nullptr;
+}
 
-    // 4. Extra beveiliging voor de hardware klokgrenzen van de VS1053 DAC
-    if (targetSampleRate < 8000)  targetSampleRate = 8000;
-    if (targetSampleRate > 50000) targetSampleRate = 50000;
+void ESP32_VS1053_Stream::_updateFillLevel()
+{ 
+    uint32_t filllevel;
+    uint32_t fillKB;    
+    // protected with mutex, as this also gets called from AudioPlayTask -> _playRingBuffer() 
+    {  
+       std::lock_guard<std::mutex> lock(_classMutex);
 
-    // 5. Voeg de mono/stereo bit weer toe en schrijf direct naar de klok
-    uint16_t finalAuData = (uint16_t)targetSampleRate | monoBit;
-   _vs1053->writeRegister(0x05, finalAuData); // Overschrijf SCI_AUDATA
+       filllevel = (xRingbufferGetMaxItemSize(_ringbuffer_handle) - xRingbufferGetCurFreeSize(_ringbuffer_handle)) * 100 / xRingbufferGetMaxItemSize(_ringbuffer_handle); 
+       _filllevel = filllevel;
+       
+       if (!_filllevelCallback)return;
+
+       // report in KB       
+       fillKB = (xRingbufferGetMaxItemSize(_ringbuffer_handle) - xRingbufferGetCurFreeSize(_ringbuffer_handle)) / 1024;  
+         
+    }   
+    _filllevelCallback(fillKB);
 }
 
