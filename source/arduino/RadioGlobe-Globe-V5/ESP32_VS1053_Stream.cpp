@@ -672,6 +672,7 @@ void ESP32_VS1053_Stream::_chunkedStreamToRingBuffer(WiFiClient *stream)
         _musicDataPosition += _metaDataStart ? inBuffer : 0;
     }
     log_d("%lu ms moving %i bytes chunked->ringbuffer", millis() - startTimeMS, bytesToRingBuffer);
+    if(bytesToRingBuffer)_updateFillLevel(); 
     //Serial.printf("823 %lu ms moving %i bytes chunked->ringbuffer\n", millis() - startTimeMS, bytesToRingBuffer);
 }
 
@@ -931,12 +932,14 @@ void ESP32_VS1053_Stream::loop()
     }
 
     if(data)
-    {   _feedDecoder(stream);
-      
-        if (!_bytesLeftInChunk)
-        {  Serial.printf("958 filllevel is %d\n", _filllevel);
-          //_eofStream();
-        }
+    { _updateBitRate();
+       if (!_chunkedResponse) _bytesLeftInChunk = INT_MAX; 
+      _handleChunkedStream(stream); 
+       
+      if (!_bytesLeftInChunk)
+      {  Serial.printf("958 filllevel is %d\n", _filllevel);
+         //_eofStream();
+      }
     }
 }
 
@@ -1170,6 +1173,7 @@ void ESP32_VS1053_Stream::_handleLocalFile()
             }
             _remainingBytes -= (_remainingBytes > 0) ? bytes : 0; // not handled anymore by _playFromRingBuffer
         }
+        _updateFillLevel();
     }
 
     if (!_remainingBytes && _filllevel==0) // file transferred fully to ringbuffer, now wait until all is played

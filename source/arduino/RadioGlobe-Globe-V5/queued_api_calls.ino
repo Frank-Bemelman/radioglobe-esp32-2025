@@ -31,6 +31,7 @@ const char* ntpServer = "pool.ntp.org"; // seems faster overall
 const char gps_to_time_url[] = "https://maps.googleapis.com/maps/api/timezone/json?location=";
 const char gps_to_geocoding[] = "https://maps.googleapis.com/maps/api/geocode/json?latlng=";
 
+
 // as defined in ..\secrets.h
 // const char google_api_key[] = "YOUR-GOOGLE-API-KEY";
 
@@ -57,7 +58,8 @@ void Queued_Api_Calls(void * pvParameters)
       { case MESSAGE_GET_TIMEZONE_BY_GPS:
         case MESSAGE_TIMEZONE_NAME:
         case MESSAGE_HOME_TIMEZONE_NAME:
-          GetTimeZone(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiPuckRequest[ApiCallsToDo.ApiQueueIndexOut]);
+          //GetTimeZone(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiPuckRequest[ApiCallsToDo.ApiQueueIndexOut]);
+          GetTimeZoneFromGeoNames(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiPuckRequest[ApiCallsToDo.ApiQueueIndexOut]);
           GetOpenWeatherData(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiPuckRequest[ApiCallsToDo.ApiQueueIndexOut]);
           break;
 
@@ -132,8 +134,6 @@ void GetTimeZone(float StationGpsNS, float StationGpsEW, uint16_t ApiType, uint1
   https.end();
   client.stop(); // stop insecure client
 
-  Serial.printf("GetTimeZone http response elapsed -> %ld mSec\n", millis() - lapMillis);
-
   if (httpResponseCode>0)
   { // typical response content
     //{
@@ -149,8 +149,6 @@ void GetTimeZone(float StationGpsNS, float StationGpsEW, uint16_t ApiType, uint1
       rawOffset = doc["rawOffset"];
 
       // use these offsets 
-      Serial.printf("GetTimeZone1 retrieving time elapsed -> %ld mSec\n", millis() - lapMillis);
-
       char posix[32];
       int32_t total_offset = -(rawOffset+dstOffset);
       snprintf(posix, sizeof(posix), "CUSTOM%ld:%02ld:%02ld", (total_offset/3600), labs((total_offset%3600)/60), labs(total_offset%60));
@@ -171,7 +169,6 @@ void GetTimeZone(float StationGpsNS, float StationGpsEW, uint16_t ApiType, uint1
       //Serial.printf("TEST -> hour = %d\n", DataFromGlobe.timeinfo.tm_hour);
       //Serial.printf("TEST -> min = %d\n", DataFromGlobe.timeinfo.tm_min);
   
-      Serial.printf("GetTimeZone3 retrieving time elapsed -> %ld mSec\n", millis() - lapMillis);
       //sprintf(content, "TZN - %s", (const char*)doc["timeZoneName"]); 
       sprintf(content, "TZ - %s", (const char*)doc["timeZoneId"]); 
       AddToQueueForDisplay(content, ApiType);
@@ -206,13 +203,12 @@ void GetTimeZone(float StationGpsNS, float StationGpsEW, uint16_t ApiType, uint1
   
   if(print)Serial.print("Done Google query timezone\n");
   // Serial.println("MFree Heap at End GetTimeZone()" + String(ESP.getFreeHeap()));   
-  Serial.printf("GetTimeZone time elapsed -> %ld mSec\n", millis() - lapMillis);
-  
+  Serial.printf("GetTimeZone http response (%d) took %ld mSec\n", httpResponseCode, millis() - lapMillis);
 }
 
 // fetch country and town
 void GetGeolocationData(float StationGpsNS, float StationGpsEW, int16_t AskingForStation, uint16_t PuckRequest)
-{ WiFiClientSecure client;
+{ static WiFiClientSecure client;
   char   payload[512]; // 256->512
   char   shortname[128]; // 64->128
   // char   longname[128]; // 64->128
@@ -234,6 +230,8 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW, int16_t AskingFo
   // https://maps.googleapis.com/maps/api/geocode/json?latlng=42.464699,21.466900&key=YOUR-API-KEY-FROM-GOOGLE
   // https://maps.googleapis.com/maps/api/geocode/json?latlng=19.286900,-81.367401&key=YOUR-API-KEY-FROM-GOOGLE
 
+  //size_t largest_block = heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+  //Serial.printf("235 Geodata - largest_block internal ram %d bytes\n", largest_block);
 
   sprintf(api_url, "%s%.6f%%2C%.6f&key=%s", gps_to_geocoding, StationGpsNS, StationGpsEW, GlobeSettings.google_api_key);
 
@@ -253,7 +251,7 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW, int16_t AskingFo
   startMs = millis();
   client.setInsecure();
 
-  HTTPClient https;
+  static HTTPClient https;
   //if(print)Serial.println("HTTP Client starten");
   https.begin(client, api_url);
   //if(print)Serial.println("HTTP Client gestart");
@@ -319,8 +317,11 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW, int16_t AskingFo
   client.stop(); // stop insecure client
   Serial.printf("GetGeolocationData fetch took %ldmS found=%d\n", (millis()-startMs), found);
 
+  if (httpResponseCode<=0) return;
+
   // if no countrycode was decoded, we are presumably at sea, which we treat as country XX
   // that will be used to load music files from GLOBEMUSE/XX folder for sea sound
+  
   if(strcmp(countrycode, "XX")==0)strcpy(CountryCodeSelectorSD, countrycode);
 
   if(AskingForStation>=0)AddToQueueForDisplay(payload, MESSAGE_GET_GEOLOCATION_BY_GPS);
@@ -673,6 +674,125 @@ float CalculateDistanceInKm(float lat1, float lon1, float lat2, float lon2) {
     // total distance in km
     return R * c; 
 }
+
+
+void GetTimeZoneFromGeoNames(float StationGpsNS, float StationGpsEW, uint16_t ApiType, uint16_t PuckRequest)
+{ 
+  WiFiClient client; 
+  time_t now;
+  char   payload[512]; 
+  char   content[256]; 
+  int32_t dstOffset = 0;
+  int32_t rawOffset = 0;
+  bool print = 0;
+  
+  lapMillis = millis(); 
+  
+  if(print) Serial.printf("GetTimeZone Requested By Display -> Position NS = %f, EW = %f\n", StationGpsNS, StationGpsEW);
+
+  time(&now); // UTC epoch time
+  
+  // geoNames URL for http
+  // http://api.geonames.org/timezoneJSON?lat=47.01&lng=10.2&username=demo
+  sprintf(api_url, "http://api.geonames.org/timezoneJSON?lat=%f&lng=%f&username=%s", StationGpsNS, StationGpsEW, geonames_username);
+  
+  if(print) Serial.println(api_url);
+
+  HTTPClient http;
+  http.begin(client, api_url);
+  int httpResponseCode = http.GET();
+  
+  if (httpResponseCode > 0) 
+  { 
+    if(print) Serial.printf("HTTP Response code: %d\n", httpResponseCode);
+    strcpy(payload, http.getString().c_str());
+    if(print) Serial.println(payload);
+  }  
+  else 
+  {
+    if(print) Serial.printf("Error code: %d\n", httpResponseCode);
+  }
+  http.end();
+  
+  if (httpResponseCode > 0)
+  {
+    StaticJsonDocument<512> doc;
+    DeserializationError error = deserializeJson(doc, payload);
+
+    if (error) 
+    { Serial.printf("JSON parsing error: %s\n", error.c_str());
+      Serial.printf("GetTimeZone http response (%d) took %ld mSec\n", httpResponseCode, millis() - lapMillis);
+      return;
+    } 
+    
+    Serial.println(payload);
+    // if all goes well. geonames gives no doc["status"] 
+    // at sea, it does not give a meaningful timezone 
+    if (!doc.containsKey("status") && doc.containsKey("timezoneId"))
+    { 
+      float rawOffsetFloat = doc["rawOffset"]; // geogames uses 'rawOffset'
+      float dstOffsetFloat = doc["dstOffset"]; // geogames uses 'dstOffset'
+      
+      // geonames gives offsets in hours, like 1.0 or 5.5 so multiply with 3600 to get it in seconds
+      rawOffset = (int32_t)(rawOffsetFloat * 3600.0f);
+      dstOffset = (int32_t)((dstOffsetFloat - rawOffsetFloat) * 3600.0f); // GeoNames dstOffset bevat vaak al de rawOffset, we isoleren hier het verschil
+
+      // use offsets for POSIX string
+      char posix[32];
+      int32_t total_offset = -(rawOffset + dstOffset);
+      snprintf(posix, sizeof(posix), "CUSTOM%ld:%02ld:%02ld", (total_offset/3600), labs((total_offset%3600)/60), labs(total_offset%60));
+      
+      Serial.printf("TZ posix = %s\n", posix);
+      setenv("TZ", posix, 1);
+      tzset();
+      
+      if(ApiType == MESSAGE_HOME_TIMEZONE_NAME) AddToQueueForDisplay(posix, MESSAGE_HOME_TIMEZONE_POSIX);
+      AddToQueueForDisplay(posix, MESSAGE_TIMEZONE_POSIX);
+
+      uint16_t retrys = 0;
+      while(!getLocalTime(&DataFromGlobe.timeinfo) && retrys < 50) 
+      { 
+        delay(100);
+        retrys++;
+      }
+      DataFromGlobe.G_now = time(NULL); // UTC voor puck
+  
+      sprintf(content, "TZ - %s", (const char*)doc["timezoneId"]); 
+      AddToQueueForDisplay(content, ApiType);
+      if(print) Serial.println(content);
+      if(print) printLocalTime();      
+    }
+    else 
+    { // at sea, typical respons is {"lng":-31.1,"gmtOffset":-2,"rawOffset":-2,"dstOffset":0,"lat":44.299999}
+      // but we use nautical time instead
+      dstOffset = 0;
+      rawOffset = 0;
+      
+      setenv("TZ", "CUSTOM0:00:00", 1);
+      tzset(); 
+      AddToQueueForDisplay("CUSTOM0:00:00", MESSAGE_TIMEZONE_POSIX);
+      
+      uint16_t retrys = 0;
+      while(!getLocalTime(&DataFromGlobe.timeinfo) && retrys < 50) 
+      { 
+        delay(100);
+        retrys++;
+      }
+      DataFromGlobe.G_now = time(NULL); // UTC for puck
+      AddToQueueForDisplay("TZ - Nautical", MESSAGE_TIMEZONE_NAME);
+      
+      CancelApiType(MESSAGE_GET_GEOLOCATION); // // does not make sense anymore, TZ nautical means we are at sea
+      strcpy(CountryCodeSelectorSD, "XX");
+      DataFromGlobe.D_ApisFetchedForStation = -1;
+      sprintf(content, "XX,???,%d", PuckRequest); 
+      AddToQueueForDisplay(content, MESSAGE_GET_GEOLOCATION);
+    }
+  }
+  if(print) Serial.print("Done GeoNames query timezone\n");
+  Serial.printf("GetTimeZone http response (%d) took %ld mSec\n", httpResponseCode, millis() - lapMillis);
+}
+
+
 
 /*
 // exchange rates
