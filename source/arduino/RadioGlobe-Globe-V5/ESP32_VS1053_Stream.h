@@ -23,13 +23,10 @@
 #define VS1053_MAX_REDIRECT_COUNT 3
 
 #define VS1053_PSRAM_BUFFER_ENABLED true
-#define VS1053_PSRAM_BUFFER_TIMEOUT_MS 100 // see the occassional ringbuffer empty, gave it a bit more time, 100, this value was 10
-#define VS1053_PSRAM_BUFFER_SIZE (65536*1)
-//#define VS1053_PSRAM_BUFFER_SIZE (32768)
-//#define VS1053_PSRAM_BUFFER_SIZE (2048)
+#define VS1053_PSRAM_BUFFER_SIZE 65536
 #define VS1053_INTERNAL_RAM_BUFFER_SIZE 2048 // used when no PSRAM
 
-constexpr size_t VS1053_LOCALBUFFER_SIZE = 4096; // need at least 4kB to safely receive ICY metadata // was 4096
+constexpr size_t VS1053_LOCALBUFFER_SIZE = 4096; // need at least 4kB to safely receive ICY metadata
 constexpr uint8_t VS1053_MAXVOLUME = 100;
 constexpr size_t VS1053_PLAYBUFFER_SIZE = 32; 
 
@@ -66,10 +63,6 @@ public:
     bool connectToFile(fs::FS &fs, const char *filename, const size_t offset);
 
     void _playFromRingBuffer();
-
-    
-    
-    
 
     void setCodecCB(codec_callback_t cb);
     void clearCodecCB();
@@ -153,17 +146,12 @@ private:
     bool _isPlaylistContentType();
     const char *_parsePlaylist();
     void _setupStream();
-    void _handleStream(WiFiClient *stream);
-    void _handleMetaData(WiFiClient *stream);
     void _handleChunkedStream(WiFiClient *stream);
     bool _handleChunkedMetadata(WiFiClient *stream);
     void _handleLocalFile();
-    void _handleLocalFileNoPSRAM();
-    void _feedDecoder(WiFiClient *stream);
     void _allocateRingbuffer();
     void _deallocateRingbuffer();
-//    void _playFromRingBuffer(); // move to public, gets called from task
-    void _streamToRingBuffer(WiFiClient *stream);
+    // void _playFromRingBuffer(); // moved to public, gets called from AudioPlayTask now
     void _chunkedStreamToRingBuffer(WiFiClient *stream);
 
     bool _playChunkNB();
@@ -174,7 +162,6 @@ private:
     uint8_t *_chunkLoop = nullptr;
     bool _looparound = false;
 
-
     codec_callback_t _codecCallback = nullptr;
     bitrate_callback_t _bitrateCallback = nullptr;
     station_callback_t _stationCallback = nullptr;
@@ -182,8 +169,6 @@ private:
     eof_callback_t _eofCallback = nullptr;
     error_callback_t _errorCallback = nullptr;
     filllevel_callback_t _filllevelCallback = nullptr;
-
-    
 
     enum Codec
     {

@@ -733,7 +733,11 @@ bool ESP32_VS1053_Stream::_handleChunkedMetadata(WiFiClient *stream)
 }
 
 void ESP32_VS1053_Stream::_handleChunkedStream(WiFiClient *stream)
-{
+{   
+    _updateBitRate();
+
+    if (!_chunkedResponse) _bytesLeftInChunk = INT_MAX; // non chunked streams never need a _nextChunkSize()
+
     if (!_dataSeen)
         _setupStream();
 
@@ -785,18 +789,6 @@ void ESP32_VS1053_Stream::_handleChunkedStream(WiFiClient *stream)
         log_v("next chunk size: %d", _bytesLeftInChunk);
     }
 
-}
-
-void ESP32_VS1053_Stream::_feedDecoder(WiFiClient *stream)
-{   
-    _updateBitRate();
-    if (!_chunkedResponse) _bytesLeftInChunk = INT_MAX; // frank did this
-
-    _handleChunkedStream(stream); 
-
-    _updateFillLevel();
-    if(_remainingBytes>=0)Serial.printf("937 _remainingBytes now = %d\n", _remainingBytes);
-    
 }
 
 void ESP32_VS1053_Stream::loop()
@@ -932,8 +924,7 @@ void ESP32_VS1053_Stream::loop()
     }
 
     if(data)
-    { _updateBitRate();
-       if (!_chunkedResponse) _bytesLeftInChunk = INT_MAX; 
+    { 
       _handleChunkedStream(stream); 
        
       if (!_bytesLeftInChunk)
