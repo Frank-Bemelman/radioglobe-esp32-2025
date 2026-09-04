@@ -1,0 +1,261 @@
+#ifndef __ESP32_VS1053_Stream__
+#define __ESP32_VS1053_Stream__
+
+#include <Arduino.h>
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <HTTPClient.h>
+
+
+#include <FS.h>
+#include <freertos/ringbuf.h>
+#include <esp_heap_caps.h>
+#include <VS1053.h> /* https://github.com/baldram/ESP_VS1053_Library */
+
+#include <mutex>
+
+#define VS1053_INITIALVOLUME 95
+#define VS1053_ICY_METADATA true
+#define VS1053_CONNECT_TIMEOUT_MS 500
+#define VS1053_CONNECT_TIMEOUT_MS_SSL 1000
+#define VS1053_STREAM_TIMEOUT_MS 1900
+#define VS1053_MAX_URL_LENGTH 2048
+#define VS1053_MAX_REDIRECT_COUNT 3
+
+#define VS1053_PSRAM_BUFFER_ENABLED true
+#define VS1053_PSRAM_BUFFER_SIZE 65536
+#define VS1053_INTERNAL_RAM_BUFFER_SIZE 2048 // used when no PSRAM
+
+constexpr size_t VS1053_LOCALBUFFER_SIZE = 4096; // need at least 4kB to safely receive ICY metadata
+constexpr uint8_t VS1053_MAXVOLUME = 100;
+constexpr size_t VS1053_PLAYBUFFER_SIZE = 32; 
+
+static_assert(VS1053_LOCALBUFFER_SIZE >= 4096,
+              "VS1053_LOCALBUFFER_SIZE must be equal or greater than 4096");
+
+static_assert(VS1053_MAX_URL_LENGTH <= VS1053_LOCALBUFFER_SIZE,
+              "VS1053_MAX_URL_LENGTH must be smaller than or equal to VS1053_LOCALBUFFER_SIZE");
+
+typedef void (*station_callback_t)(const char *name);
+typedef void (*codec_callback_t)(const char *codec);
+typedef void (*bitrate_callback_t)(uint32_t bitrate);
+typedef void (*streaminfo_callback_t)(const char *info);
+typedef void (*eof_callback_t)(const char *url);
+typedef void (*error_callback_t)(const char *error);
+typedef void (*filllevel_callback_t)(uint32_t filllevel);
+
+class ESP32_VS1053_Stream
+{
+
+public:
+    ESP32_VS1053_Stream();
+    ~ESP32_VS1053_Stream();
+
+    bool startDecoder(const uint8_t CS, const uint8_t DCS, const uint8_t DREQ);
+    bool isChipConnected();
+
+    bool connectToHost(const char *url);
+    bool connectToHost(const char *url, const size_t offset);
+    bool connectToHost(const char *url, const char *username, const char *pwd);
+    bool connectToHost(const char *url, const char *username, const char *pwd, const size_t offset);
+
+    bool connectToFile(fs::FS &fs, const char *filename);
+    bool connectToFile(fs::FS &fs, const char *filename, const size_t offset);
+
+    void _playFromRingBuffer();
+
+    void setCodecCB(codec_callback_t cb);
+    void clearCodecCB();
+
+    void setBitrateCB(bitrate_callback_t cb);
+    void clearBitrateCB();
+
+    void setStationCB(station_callback_t cb);
+    void clearStationCB();
+
+    void setInfoCB(streaminfo_callback_t cb);
+    void clearInfoCB();
+
+    void setEofCB(eof_callback_t cb);
+    void clearEofCB();
+
+    void setErrorCB(error_callback_t cb);
+    void clearErrorCB();
+
+    void setFilllevelCB(bitrate_callback_t cb);
+    void clearFilllevelCB();
+
+    void loop();
+
+    bool isRunning();
+
+    void stopSong();
+
+    uint8_t getVolume();
+
+    void setVolume(const uint8_t newVolume); /* 0-100 */
+    
+    uint8_t getVuMeter(); /* 0-31 */
+
+    const char *lastUrl();
+
+    VS1053 *getVS1053pointer();
+
+    size_t size();
+
+    size_t position();
+
+    void bufferStatus(size_t &used, size_t &capacity);
+
+    void setTone(uint8_t *rtone);
+    /*  Bass/Treble: void setTone(uint8_t *rtone);
+        toneha       = <0..15>        // Setting treble gain (0 off, 1.5dB steps)
+        tonehf       = <0..15>        // Setting treble frequency lower limit x 1000 Hz
+        tonela       = <0..15>        // Setting bass gain (0 = off, 1dB steps)
+        tonelf       = <0..15>        // Setting bass frequency lower limit x 10 Hz
+        e.g. uint8_t rtone[4]  = {12, 15, 15, 15}; // initialize bass & treble
+        See https://www.vlsi.fi/fileadmin/datasheets/vs1053.pdf section 9.6.3 */
+
+    bool playChunk(uint8_t *data, size_t len, bool stopSong = true);    
+    bool playChunkNB(uint8_t *chunk, size_t len, bool looparound = false);
+
+
+private:
+    VS1053 *_vs1053;
+    HTTPClient *_http;
+    uint8_t _vs1053Buffer[VS1053_PLAYBUFFER_SIZE];
+    uint8_t _localbuffer[VS1053_LOCALBUFFER_SIZE];
+    char _url[VS1053_MAX_URL_LENGTH];
+
+    RingbufHandle_t _ringbuffer_handle;
+    StaticRingbuffer_t *_buffer_struct;
+    uint8_t *_buffer_storage;
+    StaticRingbuffer_t buffer_struct; // 216 bytes structure
+
+    std::mutex _classMutex;      
+
+    File _file;
+    bool _playingFile = false;
+
+    int32_t _nextChunkSize(WiFiClient *stream);
+    void _parseMetadata(char *data, const size_t len);
+    void _eofStream();
+    bool _canRedirect();
+    void _resolveRedirect(const char *location, const char *base, char *result);
+    bool _escapeUrl(const char *url, const size_t len);
+    bool _isPlaylistContentType();
+    const char *_parsePlaylist();
+    void _setupStream();
+    void _handleChunkedStream(WiFiClient *stream);
+    bool _handleChunkedMetadata(WiFiClient *stream);
+    void _handleLocalFile();
+    void _allocateRingbuffer();
+    void _deallocateRingbuffer();
+    // void _playFromRingBuffer(); // moved to public, gets called from AudioPlayTask now
+    void _chunkedStreamToRingBuffer(WiFiClient *stream);
+
+    bool _playChunkNB();
+    uint8_t *_chunk = nullptr;
+    size_t _chunkLen = 0;
+    size_t _chunkRemaining = 0;
+    bool _playingChunk = false; 
+    uint8_t *_chunkLoop = nullptr;
+    bool _looparound = false;
+
+    codec_callback_t _codecCallback = nullptr;
+    bitrate_callback_t _bitrateCallback = nullptr;
+    station_callback_t _stationCallback = nullptr;
+    streaminfo_callback_t _infoCallback = nullptr;
+    eof_callback_t _eofCallback = nullptr;
+    error_callback_t _errorCallback = nullptr;
+    filllevel_callback_t _filllevelCallback = nullptr;
+
+    enum Codec
+    {
+        CODEC_UNKNOWN,
+        CODEC_AAC_ADTS,
+        CODEC_AAC_ADIF,
+        CODEC_AAC_MP4,
+        CODEC_WAV,
+        CODEC_WMA,
+        CODEC_MIDI,
+        CODEC_MP3,
+        CODEC_OGG,
+        CODEC_FLAC
+    };
+
+    const uint8_t SCI_HDAT0 = 0x08;
+    const uint8_t SCI_HDAT1 = 0x09;
+    const uint8_t SCI_AICTRL3 = 0x0F;
+    const uint8_t SCI_STATUS = 0x01;
+
+    uint8_t _codec = CODEC_UNKNOWN;
+    void _updateBitRate();
+    void _updateFillLevel();
+    bool _isAudioFile(File &f);
+    void _readBitRate();
+    const char *_codecName(uint8_t codec);
+    unsigned long _bitrateTimer = 0;
+    uint8_t _decoderSyncAttempts = 0;
+    uint32_t _bitrate = 0;
+    uint32_t _filllevel = 0;
+
+    size_t _fileLastWAVByte();
+    size_t _fileLastMP3Byte();
+
+    size_t _bufferIndex = 0;
+    size_t _bufferFill = 0;
+
+    size_t _offset = 0;
+    int32_t _remainingBytes = 0;
+    int32_t _bytesLeftInChunk = 0;
+    char _chunkHeader[12] = {};
+    uint8_t _chunkState = 0;
+    uint8_t _chunkHeaderIndex = 0;
+    uint16_t _metadataNeeded = 0;
+    uint16_t _metaIndex = 0;
+    int32_t _metaDataStart = 0;
+    int32_t _musicDataPosition = 0;
+    uint8_t _volume = VS1053_INITIALVOLUME;
+    bool _chunkedResponse = false;
+    bool _dataSeen = false;
+    bool _ringbuffer_filled = false;
+    unsigned long _streamStallStartMS = 0;
+    unsigned long _bufferStallStartMS = 0;
+    uint8_t _redirectCount = 0;
+    bool _isHLS = false;
+
+    const char *CONTENT_TYPE = "Content-Type";
+    const char *ICY_NAME = "icy-name";
+    const char *ICY_METAINT = "icy-metaint";
+    const char *ENCODING = "Transfer-Encoding";
+    const char *LOCATION = "Location";
+
+    const char *_header[5] =
+        {CONTENT_TYPE,
+         ICY_NAME,
+         ICY_METAINT,
+         ENCODING,
+         LOCATION};
+
+    const char *ERROR_HTTP_ERROR = "Http create error";
+    const char *ERROR_SYSTEM_ERROR = "System error";
+    const char *ERROR_INVALID_URL = "Invalid URL";
+    const char *ERROR_STREAM_SYNC_LOST = "Stream sync lost";
+    const char *ERROR_NO_DECODER_SYNC = "No decoder sync";
+    const char *ERROR_NO_CONNECTION = "Could not connect";
+    const char *ERROR_MAX_REDIRECT = "Too much redirection";
+    const char *ERROR_REDIRECTING = "Redirection error";
+    const char *ERROR_PLAYLIST_EMPTY = "No url found";
+    const char *ERROR_RINGBUFFER_EMPTY = "Ringbuffer empty";
+    const char *ERROR_RINGBUFFER_FAIL = "Ringbuffer error";
+    const char *ERROR_CONNECTION_LOST = "Connection lost";
+    const char *ERROR_STREAM_TIMEOUT = "Stream stalled %d ms";
+    const char *ERROR_COULD_NOT_OPEN = "Could not open";
+    const char *ERROR_NOT_PLAYABLE = "Not playable";
+    const char *ERROR_HLS_UNSUPPORTED = "HLS streams not supported";
+    const char *ERROR_OUT_OF_RANGE = "Out of range offset";
+    const char *ERROR_FILE_IO = "File i/o error";
+};
+
+#endif
