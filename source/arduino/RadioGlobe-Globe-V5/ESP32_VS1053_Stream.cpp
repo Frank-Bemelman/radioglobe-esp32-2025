@@ -60,8 +60,6 @@ void ESP32_VS1053_Stream::_deallocateRingbuffer()
         free(_buffer_storage);
         _buffer_storage = nullptr;
 
-        free(_buffer_struct);
-        _buffer_struct = nullptr;
     }
 }
 
@@ -204,9 +202,6 @@ bool ESP32_VS1053_Stream::startDecoder(const uint8_t CS, const uint8_t DCS, cons
         _vs1053->loadUserCode(PATCHES_FLAC, PATCHES_FLAC_SIZE);
     }
 
-    size_t largest_block = heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
-    Serial.printf("210 largest_block internal ram %d bytes\n", largest_block);
-
     _allocateRingbuffer();
 
     xTaskCreatePinnedToCore(
@@ -254,7 +249,6 @@ bool ESP32_VS1053_Stream::_isPlaylistContentType()
 {
     const String contentType = _http->header(CONTENT_TYPE);
     const char *ct = contentType.c_str();
-    Serial.printf("253 CONTENT_TYPE = <%s>\n", ct);
 
     return strcasestr(ct, "audio/x-scpls") ||
            strcasestr(ct, "audio/scpls") ||
@@ -393,7 +387,7 @@ bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
 
 bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
                                         const char *pwd, size_t offset)
-{  
+{
     if (!_vs1053 || isRunning())
     {
         log_e("system error");
@@ -458,18 +452,9 @@ bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
     if (strlen(username) || strlen(pwd))
         _http->setAuthorization(username, pwd);
 
-//    _http->addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
-//    _http->addHeader("Accept", "*/*");
-//    _http->addHeader("Accept-Encoding", "identity;q=1, *;q=0");
-//    _http->addHeader("Connection", "keep-alive");
-//    _http->addHeader("Range", "bytes=0-");
-    
-    
-    
     _http->addHeader("Icy-MetaData", VS1053_ICY_METADATA ? "1" : "0");
     _http->collectHeaders(_header, sizeof(_header) / sizeof(_header[0]));
     _http->setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
-//    _http->setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
 
     const int HTTPresult = _http->GET();
 
@@ -663,8 +648,8 @@ void ESP32_VS1053_Stream::_chunkedStreamToRingBuffer(WiFiClient *stream)
 
     const size_t MAX_MOVE = VS1053_LOCALBUFFER_SIZE; // has to fit in _localbuffer// 
 
-    while(_bytesLeftInChunk>0 && _musicDataPosition < _metaDataStart  && 
-    xRingbufferGetCurFreeSize(_ringbuffer_handle) && stream->available()) // original if
+    while(_bytesLeftInChunk > 0 && _musicDataPosition != _metaDataStart  && 
+          xRingbufferGetCurFreeSize(_ringbuffer_handle) && stream->available()) // original if
     {
         const size_t inStream = _metaDataStart ? _metaDataStart - _musicDataPosition : stream->available();
         const size_t inChunk = min(static_cast<size_t>(_bytesLeftInChunk), inStream);
@@ -814,12 +799,12 @@ void ESP32_VS1053_Stream::_feedDecoder(WiFiClient *stream)
 }
 
 void ESP32_VS1053_Stream::loop()
-{ 
-    if (_playingChunk) 
-    { 
+{
+    if (_playingChunk)
+    {
         if (_playChunkNB())
             _playingChunk = false;
-        return; 
+        return;
     }
 
     if (_playingFile)
@@ -837,7 +822,6 @@ void ESP32_VS1053_Stream::loop()
     }
 
     WiFiClient *stream = _http->getStreamPtr();
-
     if (!stream)
     {
         log_v("Stream connection lost");
@@ -847,8 +831,6 @@ void ESP32_VS1053_Stream::loop()
         _eofStream();
         return;
     }
-
-    //if(_filllevel>90)return;
 
     const bool data = stream->available();
     const auto now = millis();
@@ -982,7 +964,6 @@ void ESP32_VS1053_Stream::stopSong()
         return;
 
     _vs1053->setVolume(0);
-        
     _remainingBytes = 0;
     _offset = 0;
     _bitrate = 0;
@@ -997,7 +978,6 @@ void ESP32_VS1053_Stream::stopSong()
         void *item;
         while ((item = xRingbufferReceive(_ringbuffer_handle, &size, 0)) != nullptr)
             vRingbufferReturnItem(_ringbuffer_handle, item);
-               
         _ringbuffer_filled = false;
     }
     
@@ -1016,6 +996,7 @@ void ESP32_VS1053_Stream::stopSong()
     _bytesLeftInChunk = 0;
     _chunkState = 0;
     _chunkHeaderIndex = 0;
+    _metadataNeeded = 0;
     _metaIndex = 0;
     _dataSeen = false;
 }
@@ -1086,7 +1067,7 @@ bool ESP32_VS1053_Stream::connectToFile(fs::FS &fs, const char *filename, const 
     if (!_isAudioFile(_file))
     {
         if (_errorCallback)
-           _errorCallback(ERROR_NOT_PLAYABLE);
+            _errorCallback(ERROR_NOT_PLAYABLE);
 
         _file.close();
         return false;
