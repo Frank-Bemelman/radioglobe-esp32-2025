@@ -10,10 +10,14 @@ ESP32_VS1053_Stream::~ESP32_VS1053_Stream()
     delete _vs1053;
 }
 
+#define VS1053_INTERNAL_RAM_BUFFER_SIZE 2048
+StaticRingbuffer_t buffer_struct; // 216 bytes structure
+
 void ESP32_VS1053_Stream::_allocateRingbuffer()
-{
+{   bool usePSRam = true;
+
     if (!psramFound() || !VS1053_PSRAM_BUFFER_ENABLED)
-        return;
+        usePSRam = false;
 
     if (_buffer_struct || _buffer_storage || _ringbuffer_handle)
     {
@@ -21,35 +25,39 @@ void ESP32_VS1053_Stream::_allocateRingbuffer()
         return;
     }
 
-    _buffer_struct = (StaticRingbuffer_t *)heap_caps_malloc(sizeof(StaticRingbuffer_t), MALLOC_CAP_SPIRAM);
-    if (!_buffer_struct)
-    {
-        log_e("Could not allocate ringbuffer struct");
-        return;
-    }
-
-    _buffer_storage = (uint8_t *)heap_caps_malloc(sizeof(uint8_t) * VS1053_PSRAM_BUFFER_SIZE, MALLOC_CAP_SPIRAM);
+    if(usePSRam)_buffer_storage = (uint8_t *)heap_caps_malloc(sizeof(uint8_t) * VS1053_PSRAM_BUFFER_SIZE, MALLOC_CAP_SPIRAM);
+    else _buffer_storage = (uint8_t *)heap_caps_malloc(sizeof(uint8_t) * VS1053_INTERNAL_RAM_BUFFER_SIZE, MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA);
     if (!_buffer_storage)
     {
-        log_e("Could not allocate ringbuffer storage");
-        free(_buffer_struct);
-        _buffer_struct = nullptr;
-        return;
+       log_e("Could not allocate ringbuffer storage");
+       free(_buffer_struct);
+       _buffer_struct = nullptr;
+       return;
     }
 
-    _ringbuffer_handle = xRingbufferCreateStatic(VS1053_PSRAM_BUFFER_SIZE, RINGBUF_TYPE_BYTEBUF, _buffer_storage, _buffer_struct);
+    _buffer_struct = &buffer_struct;
+    if(usePSRam) _ringbuffer_handle = xRingbufferCreateStatic(VS1053_PSRAM_BUFFER_SIZE, RINGBUF_TYPE_BYTEBUF, _buffer_storage, _buffer_struct);
+    else _ringbuffer_handle = xRingbufferCreateStatic(VS1053_INTERNAL_RAM_BUFFER_SIZE, RINGBUF_TYPE_BYTEBUF, _buffer_storage, _buffer_struct);
     if (!_ringbuffer_handle)
     {
         log_e("Could not create ringbuffer handle");
         free(_buffer_storage);
         _buffer_storage = nullptr;
 
-        free(_buffer_struct);
-        _buffer_struct = nullptr;
-        return;
     }
     else
+    { if(usePSRam)
         log_d("Allocated %i bytes ringbuffer in PSRAM", VS1053_PSRAM_BUFFER_SIZE);
+      else  
+        log_d("Allocated %i bytes ringbuffer in internal RAM", VS1053_INTERNAL_RAM_BUFFER_SIZE);
+    }    
+
+    if(usePSRam) Serial.printf("Allocated %i bytes ringbuffer in PSRAM\n", VS1053_PSRAM_BUFFER_SIZE);
+    else Serial.printf("Allocated %i bytes ringbuffer in internal RAM\n", VS1053_INTERNAL_RAM_BUFFER_SIZE);
+
+    size_t largest_block = heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+    Serial.printf("61 largest_block internal ram %d bytes\n", largest_block);
+    Serial.printf("61 sizeof(buffer_struct) = %d", sizeof(buffer_struct));
 }
 
 void ESP32_VS1053_Stream::_deallocateRingbuffer()
@@ -205,6 +213,10 @@ bool ESP32_VS1053_Stream::startDecoder(const uint8_t CS, const uint8_t DCS, cons
         log_d("Patching vs1053 firmware");
         _vs1053->loadUserCode(PATCHES_FLAC, PATCHES_FLAC_SIZE);
     }
+
+    size_t largest_block = heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+    Serial.printf("210 largest_block internal ram %d bytes\n", largest_block);
+
     _allocateRingbuffer();
 
     xTaskCreatePinnedToCore(
@@ -391,7 +403,7 @@ bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
 
 bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
                                         const char *pwd, size_t offset)
-{
+{  
     if (!_vs1053 || isRunning())
     {
         log_e("system error");
@@ -531,6 +543,7 @@ bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
             _stationCallback(_http->header(ICY_NAME).c_str());
 
         _remainingBytes = _http->getSize(); // -1 when Server sends no Content-Length header (chunked streams)
+        Serial.printf("534 _remainingBytes at start = %d\n", _remainingBytes);
 
         const bool suspiciousLength = _remainingBytes >= 0x7FFFFFF0;
         if (suspiciousLength)
@@ -646,36 +659,6 @@ void ESP32_VS1053_Stream::_playFromRingBuffer()
     //Serial.printf("%lu ms moving %i bytes ringbuffer->decoder\n", millis() - startTimeMS, bytesToDecoder);
 }
 
-void ESP32_VS1053_Stream::_streamToRingBuffer(WiFiClient *stream)
-{
-    size_t bytesToRingBuffer = 0;
-    [[maybe_unused]] const auto startTimeMS = millis();
-
-    const size_t MAX_MOVE = size() ? 2048 : 512; // everything without a size is radio so low bitrate
-
-    if (_musicDataPosition < _metaDataStart &&
-        xRingbufferGetCurFreeSize(_ringbuffer_handle) && stream->available())
-    {
-        const size_t inStream = _metaDataStart ? _metaDataStart - _musicDataPosition : stream->available();
-        const size_t toMove = min(inStream, xRingbufferGetCurFreeSize(_ringbuffer_handle));
-        const size_t toRead = min(MAX_MOVE, toMove);
-        const size_t inBuffer = stream->read(_localbuffer, toRead);
-
-        const BaseType_t result = xRingbufferSend(_ringbuffer_handle, _localbuffer, inBuffer, 0);
-        if (result == pdFALSE)
-        {
-            log_v("ringbuffer failed to receive %i bytes. Closing stream.", inBuffer);
-            if (_errorCallback)
-                _errorCallback(ERROR_RINGBUFFER_FAIL);
-            _remainingBytes = 0;
-            return;
-        }
-
-        bytesToRingBuffer += inBuffer;
-        _musicDataPosition += _metaDataStart ? inBuffer : 0;
-    }
-    log_d("%lu ms moving %i bytes stream->ringbuffer", millis() - startTimeMS, bytesToRingBuffer);
-}
 
 void ESP32_VS1053_Stream::_setupStream()
 {
@@ -685,70 +668,6 @@ void ESP32_VS1053_Stream::_setupStream()
     _dataSeen = true;
 }
 
-void ESP32_VS1053_Stream::_handleMetaData(WiFiClient *stream)
-{
-    if (!_metadataNeeded)
-    {
-        _metadataNeeded = stream->read() * 16;
-        _metaIndex = 0;
-        log_d("found %d bytes of metadata", _metadataNeeded);
-    }
-
-    uint16_t available = stream->available();
-    while (available-- && _metadataNeeded > 0)
-    {
-        _localbuffer[_metaIndex++] = stream->read();
-        _metadataNeeded--;
-    }
-
-    if (_metadataNeeded == 0) // all metadata collected or none found
-    {
-        if (_infoCallback && _metaIndex)
-        {
-            _parseMetadata(reinterpret_cast<char *>(_localbuffer), _metaIndex);
-            log_d("processed %d bytes metadata", _metaIndex);
-        }
-        _musicDataPosition = 0;
-        _metadataNeeded = 0;
-        return;
-    }
-
-    log_d("collected %d bytes sofar", _metaIndex);
-}
-
-void ESP32_VS1053_Stream::_handleStream(WiFiClient *stream)
-{
-    if (!_dataSeen)
-        _setupStream();
-
-    if (_ringbuffer_handle)
-    {
-        _streamToRingBuffer(stream);
-    }
-    else
-    {
-        [[maybe_unused]] const auto startTimeMS = millis();
-        size_t bytesToDecoder = 0;
-
-        const size_t MAX_MOVE = 2048;
-
-        while (_musicDataPosition < _metaDataStart && bytesToDecoder < MAX_MOVE &&
-               stream->available() && _vs1053->data_request())
-        {
-            const size_t inStream = _metaDataStart ? _metaDataStart - _musicDataPosition : stream->available();
-            const size_t toRead = min(inStream, VS1053_PLAYBUFFER_SIZE);
-            const size_t inBuffer = stream->read(_vs1053Buffer, toRead);
-            _vs1053->playChunk(_vs1053Buffer, inBuffer);
-            _remainingBytes -= _remainingBytes > 0 ? inBuffer : 0;
-            _musicDataPosition += _metaDataStart ? inBuffer : 0;
-            bytesToDecoder += inBuffer;
-        }
-        log_d("%lu ms moving %i bytes stream->decoder", millis() - startTimeMS, bytesToDecoder);
-    }
-
-    if (_metaDataStart && _musicDataPosition == _metaDataStart && stream->available())
-        _handleMetaData(stream);
-}
 
 void ESP32_VS1053_Stream::_chunkedStreamToRingBuffer(WiFiClient *stream)
 {
@@ -765,7 +684,7 @@ void ESP32_VS1053_Stream::_chunkedStreamToRingBuffer(WiFiClient *stream)
         const size_t toMove = min(inChunk, MAX_MOVE);
         const size_t toRead = min(toMove, xRingbufferGetCurFreeSize(_ringbuffer_handle));
         const size_t inBuffer = stream->read(_localbuffer, toRead);
-        const BaseType_t result = xRingbufferSend(_ringbuffer_handle, _localbuffer, inBuffer, 10);
+        const BaseType_t result = xRingbufferSend(_ringbuffer_handle, _localbuffer, inBuffer, 0);
         if (result == pdFALSE)
         {
             log_v("ringbuffer failed to receive %i bytes. Closing stream.", inBuffer);
@@ -777,6 +696,7 @@ void ESP32_VS1053_Stream::_chunkedStreamToRingBuffer(WiFiClient *stream)
 
         _bytesLeftInChunk -= inBuffer;
         bytesToRingBuffer += inBuffer;
+        _remainingBytes -= _remainingBytes > 0 ? inBuffer : 0;
         _musicDataPosition += _metaDataStart ? inBuffer : 0;
     }
     log_d("%lu ms moving %i bytes chunked->ringbuffer", millis() - startTimeMS, bytesToRingBuffer);
@@ -863,40 +783,18 @@ void ESP32_VS1053_Stream::_handleChunkedStream(WiFiClient *stream)
 
         if (!_bytesLeftInChunk)
         {
-            _remainingBytes = 0;
             return;
         }
 
         log_v("next chunk size: %d", _bytesLeftInChunk);
     }
 
-    if (_ringbuffer_handle)
-    {
-        _chunkedStreamToRingBuffer(stream);
-    }
-    else
-    {
-        [[maybe_unused]] const auto startTimeMS = millis();
-        size_t bytesToDecoder = 0;
+    _chunkedStreamToRingBuffer(stream);
+    
 
-        const size_t MAX_MOVE = 2048;
-
-        while (_bytesLeftInChunk>0 && _musicDataPosition < _metaDataStart && bytesToDecoder < MAX_MOVE &&
-               stream->available() && _vs1053->data_request())
-        {
-            const size_t inStream = _metaDataStart ? _metaDataStart - _musicDataPosition : stream->available();
-            const size_t inChunk = min(static_cast<size_t>(_bytesLeftInChunk), inStream);
-            const size_t toRead = min(inChunk, VS1053_PLAYBUFFER_SIZE);
-            const size_t inBuffer = stream->read(_vs1053Buffer, toRead);
-            _vs1053->playChunk(_vs1053Buffer, inBuffer);
-            _bytesLeftInChunk -= inBuffer;
-            _musicDataPosition += _metaDataStart ? inBuffer : 0;
-            bytesToDecoder += inBuffer;
-        }
-        log_d("%lu ms moving %i bytes chunked->decoder", millis() - startTimeMS, bytesToDecoder);
-    }
-
-    // frank added 
+    // check it again, don't want to return to loop with a 0 _bytesLeftInChunk if it isn't from a true end of stream.
+    // -1 means the chunk-size line/framing is incomplete;
+    // _nextChunkSize() will resume reading/parsing on the next call.
     if (_bytesLeftInChunk < 1)
     {
         _bytesLeftInChunk = _nextChunkSize(stream);
@@ -908,33 +806,24 @@ void ESP32_VS1053_Stream::_handleChunkedStream(WiFiClient *stream)
 
         if (!_bytesLeftInChunk)
         {
-            _remainingBytes = 0; 
             return;
         }
 
         log_v("next chunk size: %d", _bytesLeftInChunk);
     }
-    //Serial.printf("965 _remainingBytes = %d\n", _remainingBytes);
 
 }
 
 void ESP32_VS1053_Stream::_feedDecoder(WiFiClient *stream)
-{   //Serial.printf("970 _remainingBytes = %d\n", _remainingBytes);
-    _updateBitRate();  _updateFillLevel();
+{   
+    _updateBitRate();
+    if (!_chunkedResponse) _bytesLeftInChunk = INT_MAX; // frank did this
 
-    if (_chunkedResponse)
-        _handleChunkedStream(stream); 
-    else
-    {
-        //_handleStream(stream);
-        _bytesLeftInChunk = INT_MAX; // frank did this
-        _handleChunkedStream(stream);
-    }    
+    _handleChunkedStream(stream); 
+
+    _updateFillLevel();
+    if(_remainingBytes>=0)Serial.printf("937 _remainingBytes now = %d\n", _remainingBytes);
     
-    if (!_remainingBytes)
-    {  Serial.printf("958 filllevel is %d\n", _filllevel);
-      //_eofStream();
-    }
 }
 
 void ESP32_VS1053_Stream::loop()
@@ -956,10 +845,8 @@ void ESP32_VS1053_Stream::loop()
         return;
 
     if (_ringbuffer_handle && !_http->connected())
-    { 
-        if (!_remainingBytes)
-        { Serial.printf("933 FRANK _eofStream() called\n");  _eofStream(); }
-        return;
+    { Serial.printf("959 http->connected() false - _filllevel = %d%%\n", _filllevel);
+      return;
     }
 
     WiFiClient *stream = _http->getStreamPtr();
@@ -969,7 +856,6 @@ void ESP32_VS1053_Stream::loop()
         log_v("Stream connection lost");
         if (_errorCallback)
             _errorCallback(ERROR_CONNECTION_LOST);
-         //Serial.printf("898 _remainingBytes = %d\n", _remainingBytes);
         Serial.printf("947 FRANK _eofStream() called\n");
         _eofStream();
         return;
@@ -994,14 +880,19 @@ void ESP32_VS1053_Stream::loop()
       return;
     }
 
-    if (!data && _streamStallStartMS) 
+    if(!data && _remainingBytes==0 && _filllevel==0) // playing a web stream with a size that has run out nicely and officially 
+    {  Serial.printf("Legit end of a stream\n");
+        _eofStream();
+       return; 
+    }
+
+    if (!data && _remainingBytes && _streamStallStartMS) // _remainingBytes being -1 usually, chunked 24/7 stream loosing it, maybe try a reconnect
     {  const auto currentStallTimeMS = now - _streamStallStartMS;
 
-       // if for whatever reason, no fresh data is received, we try to reconnect
+       // if for whatever reason, no fresh data is received for long time, we try to reconnect
        if (currentStallTimeMS > 1500 && _filllevel<35) 
-       {  Serial.printf("1058 Server stalled after 1500ms with _filllevel =%d\n", _filllevel);
+       {  Serial.printf("1058 Server stalled for %d with _filllevel = %d%%\n", currentStallTimeMS, _filllevel);
         
-          // close http 
           _bytesLeftInChunk = 0;
           _chunkState = 0;
           _chunkHeaderIndex = 0;
@@ -1009,7 +900,12 @@ void ESP32_VS1053_Stream::loop()
           _dataSeen = false;
 
           // close http 
-          _http->setReuse(false); // really throw it away 
+          WiFiClient* client = _http->getStreamPtr();
+          if (client) 
+          { client->flush(); // dismiss network buffer
+            client->stop();  // close socket
+          }
+
           _http->end(); 
           delete _http;
           _http = nullptr;
@@ -1018,7 +914,7 @@ void ESP32_VS1053_Stream::loop()
           // reconnect
           if (connectToHost(_url)) 
           {
-             Serial.printf("1024 Server reconnected while playing music, current _filllevel = %d\n", _filllevel);
+             Serial.printf("1024 Server reconnected while playing music, current _filllevel = %d%%\n", _filllevel);
              return;
           }
 
@@ -1066,18 +962,13 @@ void ESP32_VS1053_Stream::loop()
     }
 
     if(data)
-    { // Serial.printf("1065 FRANK data, feedDecoder with stream available bytes %d _remainingBytes = %d\n", stream->available(), _remainingBytes);
-        _feedDecoder(stream);
+    {   _feedDecoder(stream);
+      
+        if (!_bytesLeftInChunk)
+        {  Serial.printf("958 filllevel is %d\n", _filllevel);
+          //_eofStream();
+        }
     }
-
-    if (!data && _ringbuffer_handle)
-    {   if (!_remainingBytes)
-        { Serial.printf("1105 FRANK _eofStream(), _nextChunkSize of 0 detected\n");
-          //_eofStream(); // ignore it, let the show play until the end from the buffer - it will stop after that
-        }    
-    }  
-    //Serial.printf("1075 FRANK data, end of loop with stream available bytes %d _remainingBytes = %d\n", stream->available(), _remainingBytes);
-         
 }
 
 bool ESP32_VS1053_Stream::isRunning()
@@ -1135,6 +1026,13 @@ void ESP32_VS1053_Stream::stopSong()
         return;
     }
 
+
+    WiFiClient* client = _http->getStreamPtr();
+    if (client) 
+    { client->flush(); // dismiss network buffer
+      client->stop();  // close socket
+    }
+        
     _http->end();
     delete _http;
     _http = nullptr;
@@ -1339,13 +1237,7 @@ void ESP32_VS1053_Stream::_handleLocalFile()
         return;
     }
 
-    if (!_ringbuffer_handle)
-    {
-        _handleLocalFileNoPSRAM();
-        return;
-    }
-
-    [[maybe_unused]] const auto startTimeMS = millis();
+     [[maybe_unused]] const auto startTimeMS = millis();
 
     if (_remainingBytes && _file.position() < _file.size())
     {
@@ -1375,45 +1267,6 @@ void ESP32_VS1053_Stream::_handleLocalFile()
         _eofStream();
 }
 
-void ESP32_VS1053_Stream::_handleLocalFileNoPSRAM()
-{
-    if (_bufferIndex >= _bufferFill)
-    {
-        if (_remainingBytes)
-        {
-            constexpr int32_t MAX_MOVE = 1024;
-
-            static_assert(MAX_MOVE <= sizeof(_localbuffer), "MAX_MOVE must be smaller than sizeof(_localbuffer)");
-
-            size_t toRead = min(MAX_MOVE, _remainingBytes);
-            _bufferFill = _file.read(_localbuffer, toRead);
-            _bufferIndex = 0;
-
-            if (_bufferFill == 0)
-            {
-                if (_errorCallback)
-                    _errorCallback(ERROR_FILE_IO);
-                _eofStream();
-                return;
-            }
-
-            _remainingBytes -= _bufferFill;
-        }
-        else
-        {
-            // Nothing left to read AND buffer empty
-            _eofStream();
-            return;
-        }
-    }
-
-    while (_bufferIndex < _bufferFill && _vs1053->data_request())
-    {
-        size_t chunk = min(VS1053_PLAYBUFFER_SIZE, _bufferFill - _bufferIndex);
-        _vs1053->playChunk(&_localbuffer[_bufferIndex], chunk);
-        _bufferIndex += chunk;
-    }
-}
 
 bool ESP32_VS1053_Stream::_isAudioFile(File &f)
 {
@@ -1565,13 +1418,13 @@ void ESP32_VS1053_Stream::_updateFillLevel()
     {  
        std::lock_guard<std::mutex> lock(_classMutex);
 
-       filllevel = (VS1053_PSRAM_BUFFER_SIZE - xRingbufferGetCurFreeSize(_ringbuffer_handle)) * 100 / VS1053_PSRAM_BUFFER_SIZE; 
+       filllevel = (xRingbufferGetMaxItemSize(_ringbuffer_handle) - xRingbufferGetCurFreeSize(_ringbuffer_handle)) * 100 / xRingbufferGetMaxItemSize(_ringbuffer_handle); 
        _filllevel = filllevel;
        
        if (!_filllevelCallback)return;
 
        // report in KB       
-       fillKB = (VS1053_PSRAM_BUFFER_SIZE - xRingbufferGetCurFreeSize(_ringbuffer_handle)) / 1024;  
+       fillKB = (xRingbufferGetMaxItemSize(_ringbuffer_handle) - xRingbufferGetCurFreeSize(_ringbuffer_handle)) / 1024;  
          
     }   
     _filllevelCallback(fillKB);
