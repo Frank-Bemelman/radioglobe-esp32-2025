@@ -604,23 +604,23 @@ void ESP32_VS1053_Stream::_playFromRingBuffer()
 
     const size_t MAX_MOVE = 256;
 
-    UBaseType_t  _ringbufferBytes = 0;
-    vRingbufferGetInfo(_ringbuffer_handle, NULL, NULL, NULL, NULL, &_ringbufferBytes);
+    UBaseType_t  ringbufferBytes = 0;
+    vRingbufferGetInfo(_ringbuffer_handle, NULL, NULL, NULL, NULL, &ringbufferBytes);
 
-    while (_ringbufferBytes && bytesToDecoder < MAX_MOVE && _vs1053->data_request())
+    while (ringbufferBytes && bytesToDecoder < MAX_MOVE && _vs1053->data_request())
     {   
         size_t size = 0;
-        const size_t avail = min(VS1053_PLAYBUFFER_SIZE, (size_t)_ringbufferBytes);
+        const size_t avail = min(VS1053_PLAYBUFFER_SIZE, (size_t)ringbufferBytes);
         uint8_t *data = (uint8_t *)xRingbufferReceiveUpTo(_ringbuffer_handle, &size, pdMS_TO_TICKS(0), avail); 
-        //if (!data) // can never happen, since we entered the while loop with verified _ringbufferBytes available
+        //if (!data) // can never happen, since we entered the while loop with verified ringbufferBytes available
 
         _vs1053->playChunk(data, size);
         vRingbufferReturnItem(_ringbuffer_handle, data);
 
         bytesToDecoder += size;
-        _ringbufferBytes -= (_ringbufferBytes > 0) ? size : 0;
+        ringbufferBytes -= (ringbufferBytes > 0) ? size : 0;
 
-        if (!_ringbufferBytes)
+        if (!ringbufferBytes)
         {  log_v("ringbuffer empty");
            if (_errorCallback && _codec != CODEC_UNKNOWN)
                _errorCallback(ERROR_RINGBUFFER_EMPTY); // not really an error, buffer is simply empty, can trigger an _eofStream() in loop()
@@ -1083,15 +1083,15 @@ bool ESP32_VS1053_Stream::connectToFile(fs::FS &fs, const char *filename, const 
     else
         _remainingBytes = _file.size() - offset;
 
-    _file.seek(offset);
+    
+    if(offset) _file.seek(offset + _file.position()); // offset parameter given, re-skip mp3 header/metadata/artwork 
+    
     if (strcmp(filename, _url))
     {
         _vs1053->stopSong();
         snprintf(_url, sizeof(_url), "%s", filename);
     }
     _playingFile = true;
-    _bufferIndex = 0;
-    _bufferFill = 0;
     _bitrateTimer = millis();
 
     return true;
@@ -1134,12 +1134,6 @@ void ESP32_VS1053_Stream::_handleLocalFile()
 
     _updateBitRate();
 
-    if (!_remainingBytes && _filllevel==0)
-    {
-        _eofStream();
-        return;
-    }
-
      [[maybe_unused]] const auto startTimeMS = millis();
 
     if (_remainingBytes && _file.position() < _file.size())
@@ -1167,8 +1161,12 @@ void ESP32_VS1053_Stream::_handleLocalFile()
         _updateFillLevel();
     }
 
-    if (!_remainingBytes && _filllevel==0) // file transferred fully to ringbuffer, now wait until all is played
+    if (!_remainingBytes && _ringbufferBytes==0) // file read completely and played completely
+    {  //Serial.printf("1142 END _remainingBytes = %d _ringbufferBytes =%d\n", _remainingBytes, _ringbufferBytes);
         _eofStream();
+        return;
+    }
+
 }
 
 
@@ -1468,7 +1466,7 @@ size_t ESP32_VS1053_Stream::_fileLastMP3Byte()
        ID3v2_size |= (size_t)ID3v2_header[6] << 21;
 
        _file.seek(ID3v2_size + 10);
-       Serial.printf("_file.position() -> %08X\n", _file.position());
+       Serial.printf("1472 _file.position() -> %08X = %d\n", _file.position(), _file.position());
      }  
      
      return _file.size() - _file.position();   
@@ -1530,6 +1528,7 @@ void ESP32_VS1053_Stream::_updateFillLevel()
        fillKB = (xRingbufferGetMaxItemSize(_ringbuffer_handle) - xRingbufferGetCurFreeSize(_ringbuffer_handle)) / 1024;  
          
     }   
+    vRingbufferGetInfo(_ringbuffer_handle, NULL, NULL, NULL, NULL, &_ringbufferBytes);
     _filllevelCallback(fillKB);
 }
 
