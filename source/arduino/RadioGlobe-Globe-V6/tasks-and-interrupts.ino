@@ -126,10 +126,6 @@ void ReadAS5600Encoders(void * pvParameters)
       stable100ms = 0;
       PixelUpdate(0, 0xFFFFFF, 0x000000, 2000); // solid white to light up globe                    
       LedAnimationBrightness=255;
-
-      if(bPowerStatus && !stable && !bEncoderKillStation && bSetupCompleted && !Tuning && UpdateState==0)
-      {  PlayWhile((uint8_t *)mp3_radio_tuning, sizeof(mp3_radio_tuning), true); // play one snippet and loop around if need be
-      }
     }
     
     // send new NS postion to puck if slightly changed
@@ -168,6 +164,11 @@ void ReadAS5600Encoders(void * pvParameters)
       { bEncoderKillStation = true;
       }  
     }
+
+      if(bPowerStatus && !stable && !bEncoderKillStation && bSetupCompleted && !Tuning && UpdateState==0)
+      {  PlayWhile((uint8_t *)mp3_radio_tuning, sizeof(mp3_radio_tuning), true); // play one snippet and loop around if need be
+      }
+
 
     //if(((EncoderTicker100mS % 1) == 0) && !Tuning)
     //if(!bPortalOpened)loop_esp_now();

@@ -595,14 +595,16 @@ void ESP32_VS1053_Stream::_playFromRingBuffer()
 {
     if (!_ringbuffer_filled)
     {
-       //if(_filllevel<30)return;
+        //if(_filllevel<30)return;
         _ringbuffer_filled = true;
+        //_bitrateTimer = millis();
     }
 
+    
     [[maybe_unused]] const auto startTimeMS = millis();
     size_t bytesToDecoder = 0;
 
-    const size_t MAX_MOVE = 256;
+    const size_t MAX_MOVE = 2048;
 
     UBaseType_t  ringbufferBytes = 0;
     vRingbufferGetInfo(_ringbuffer_handle, NULL, NULL, NULL, NULL, &ringbufferBytes);
@@ -626,7 +628,10 @@ void ESP32_VS1053_Stream::_playFromRingBuffer()
                _errorCallback(ERROR_RINGBUFFER_EMPTY); // not really an error, buffer is simply empty, can trigger an _eofStream() in loop()
         }
     }
-    if(bytesToDecoder)_updateFillLevel();
+    if(bytesToDecoder)
+    { _updateFillLevel();
+      _updateBitRate();
+    }
     log_d("%lu ms moving %i bytes ringbuffer->decoder", millis() - startTimeMS, bytesToDecoder);
     //Serial.printf("%lu ms moving %i bytes ringbuffer->decoder\n", millis() - startTimeMS, bytesToDecoder);
 }
@@ -973,9 +978,10 @@ void ESP32_VS1053_Stream::stopSong()
         while ((item = xRingbufferReceive(_ringbuffer_handle, &size, 0)) != nullptr)
             vRingbufferReturnItem(_ringbuffer_handle, item);
         _ringbuffer_filled = false;
+        _updateFillLevel();
+        Serial.printf("980 _ringbufferBytes = %d\n", _ringbufferBytes);
+        _vs1053->stopSong(); // send 0 filler bytes to clear out vs1053
     }
-    
-    _vs1053->stopSong();
 
     if (_playingFile)
     {
@@ -1044,7 +1050,7 @@ bool ESP32_VS1053_Stream::connectToFile(fs::FS &fs, const char *filename)
 }
 
 bool ESP32_VS1053_Stream::connectToFile(fs::FS &fs, const char *filename, const size_t offset)
-{
+{   Serial.printf("1052 File Offset =%d\n", offset);
     if (!_vs1053 || isRunning())
         return false;
 
@@ -1075,17 +1081,28 @@ bool ESP32_VS1053_Stream::connectToFile(fs::FS &fs, const char *filename, const 
         return false;
     }
 
+    Serial.printf("1083 File size =%d\n", _file.size());
+
+    _wavoffset = 0;
     const char *ext = strrchr(filename, '.');
     if (ext && strcasecmp(ext, ".wav") == 0)
+    {
         _remainingBytes = _fileLastWAVByte() - offset;
+        _file.seek(0);
+        _wavoffset = offset; // _wavoffset to be used later in _handleLocalFile to force read of RIFF header and file.seek(_wavoffset)
+    }    
     else if (ext && strcasecmp(ext, ".mp3") == 0)
+    {
         _remainingBytes = _fileLastMP3Byte() - offset;    
-    else
-        _remainingBytes = _file.size() - offset;
+        if(offset) _file.seek(offset + _file.position());
+    }    
+    else // ???
+    {  _remainingBytes = _file.size() - offset;
+       _file.seek(offset);
+    }
 
-    
-    if(offset) _file.seek(offset + _file.position()); // offset parameter given, re-skip mp3 header/metadata/artwork 
-    
+    Serial.printf("1097 File position =%d\n", _file.position());
+
     if (strcmp(filename, _url))
     {
         _vs1053->stopSong();
@@ -1132,30 +1149,44 @@ void ESP32_VS1053_Stream::_handleLocalFile()
     log_d("file pos: %lu", _file.position());
     log_d("remaining bytes: %lu", _remainingBytes);
 
+    if(_wavoffset) // wav file, read and send riff header 44 bytes and move to desired offset
+    { _file.read(_localbuffer, 44); // riff header
+      xRingbufferSend(_ringbuffer_handle, _localbuffer, 44, 0);
+      Serial.printf("1154 Wav skipped to %d\n", _wavoffset);
+     _file.seek(_wavoffset);
+     _wavoffset = 0;
+    }
+
     _updateBitRate();
 
      [[maybe_unused]] const auto startTimeMS = millis();
 
+     //Serial.printf("1139 _remainingBytes = %d _ringbufferBytes =%d\n", _remainingBytes, _ringbufferBytes);
+
     if (_remainingBytes && _file.position() < _file.size())
-    {
+    {   
+        constexpr size_t MAX_MOVE = 2048;
+
+        static_assert(MAX_MOVE <= sizeof(_localbuffer), "MAX_MOVE must be smaller than sizeof(_localbuffer)");
+
         const size_t free = xRingbufferGetCurFreeSize(_ringbuffer_handle);
-        if (free > 1024)
+        if (free >= MAX_MOVE) // if enough space is available, try to read in 2kB blocks which measures as optimal on SPI SD
         {
-            const size_t toRead = min(sizeof(_localbuffer), free);
+            const size_t toRead = min(MAX_MOVE, free);
             const size_t avail = min(toRead, (size_t)_remainingBytes);
             const size_t bytes = _file.read(_localbuffer, avail);
-            if (bytes)
-            {
-                if (xRingbufferSend(_ringbuffer_handle, _localbuffer, bytes, 0) == pdFALSE)
-                {
-                    log_v("ringbuffer failed to receive %i bytes. Closing stream.", bytes);
-                    if (_errorCallback)
-                        _errorCallback(ERROR_RINGBUFFER_FAIL);
-                    _remainingBytes = 0;
-                }
+            if (!bytes)
+                log_w("could not read from file with %i bytes left", _remainingBytes);
 
-                log_d("%lu ms moving %i bytes localfile->ringbuffer", millis() - startTimeMS, bytes);
+            if (bytes && xRingbufferSend(_ringbuffer_handle, _localbuffer, bytes, 0) == pdFALSE)
+            {
+                log_v("ringbuffer failed to receive %i bytes. Closing stream.", bytes);
+                if (_errorCallback)
+                    _errorCallback(ERROR_RINGBUFFER_FAIL);
+                    _remainingBytes = 0;
             }
+
+            log_d("%lu ms moving %i bytes localfile->ringbuffer", millis() - startTimeMS, bytes);
             _remainingBytes -= (_remainingBytes > 0) ? bytes : 0; // not handled anymore by _playFromRingBuffer
         }
         _updateFillLevel();
@@ -1164,9 +1195,7 @@ void ESP32_VS1053_Stream::_handleLocalFile()
     if (!_remainingBytes && _ringbufferBytes==0) // file read completely and played completely
     {  //Serial.printf("1142 END _remainingBytes = %d _ringbufferBytes =%d\n", _remainingBytes, _ringbufferBytes);
         _eofStream();
-        return;
     }
-
 }
 
 
@@ -1221,14 +1250,15 @@ void ESP32_VS1053_Stream::_updateBitRate()
 void ESP32_VS1053_Stream::_readBitRate()
 {
     const uint16_t hdat1 = _vs1053->readRegister(SCI_HDAT1);
-
+    //Serial.printf("1241 codec=%d\n", _codec);
     if (hdat1 == 0) // decoder not locked yet
     {  // _codec = CODEC_UNKNOWN;
         if (++_decoderSyncAttempts > 50)
         {
             log_w("decoder failed to sync");
-            // _remainingBytes = 0;
+            _remainingBytes = 0;
         }
+        Serial.printf("1239 _remainingBytes = %d _ringbufferBytes =%d\n", _remainingBytes, _ringbufferBytes);
         return;
     }
 
@@ -1384,11 +1414,11 @@ bool ESP32_VS1053_Stream::playChunk(uint8_t *data, size_t len, bool stopSong)
     if (!_vs1053)
         return false;
 
-    //if (isRunning())
-    //{
-    //    log_e("need to stop playback first");
-    //    return false;
-    //}
+    if (isRunning())
+    {
+        log_e("need to stop playback first");
+        return false;
+    }
 
     _vs1053->setVolume(_volume);
     _vs1053->playChunk(data, len);

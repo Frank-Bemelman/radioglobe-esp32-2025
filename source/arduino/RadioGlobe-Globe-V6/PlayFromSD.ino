@@ -61,8 +61,8 @@ void StartPlayFromSD(void)
   // force a reload from SD
   if(strcmp(PrevCountryCodeSelectorSD, CountryCodeSelectorSD) != 0)
   { strcpy(PrevCountryCodeSelectorSD, CountryCodeSelectorSD); 
-    bMusicMode = false;
-    bMusicModePrev = false;
+  //  bMusicMode = false;
+     bMusicModePrev = false;
   }
 
   if(bMusicMode)Serial.printf("MusicMode true\n");
@@ -80,8 +80,13 @@ void StartPlayFromSD(void)
     DataFromGlobe.D_QueueStationIndex = -1; // forget radiostation playing
     PlaylistTracks=0;
     CollectFilePathsForCountry(CountryCodeSelectorSD);
-  }
+    if(PlaylistTracks>0)PlaySomethingFromSD();  
+    SendTracksToPuck();  
 
+  }
+  else
+  { if(PlaylistTracks>0)PlaySomethingFromSD();  
+  }
  
   if(PlaylistTracks>0)PlaySomethingFromSD();
 }
@@ -112,6 +117,7 @@ void PlayFromPlaylistByIndex(uint16_t idx)
   
     }  
 
+    // stream.connectToFile(SD, Playlist[idx], 3500000); // play this path/file with offset for test
     stream.connectToFile(SD, Playlist[idx]); // play this path/file
 
     if(stream.isRunning())
@@ -161,7 +167,7 @@ void CollectFilePathsForCountry(char *countrycode)
   DirNested = 0;
   CollectTracksPaths(StartPathSD); // collect MAXSONGTRACKS (or possibly less) tracks
   ShuffleTracks();
-  SendTracksToPuck();
+
   
 }
 

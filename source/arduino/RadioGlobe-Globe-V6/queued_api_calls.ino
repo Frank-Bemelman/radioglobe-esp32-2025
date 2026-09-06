@@ -58,8 +58,8 @@ void Queued_Api_Calls(void * pvParameters)
       { case MESSAGE_GET_TIMEZONE_BY_GPS:
         case MESSAGE_TIMEZONE_NAME:
         case MESSAGE_HOME_TIMEZONE_NAME:
-          //GetTimeZone(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiPuckRequest[ApiCallsToDo.ApiQueueIndexOut]);
-          GetTimeZoneFromGeoNames(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiPuckRequest[ApiCallsToDo.ApiQueueIndexOut]);
+          GetTimeZone(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiPuckRequest[ApiCallsToDo.ApiQueueIndexOut]);
+          //GetTimeZoneFromGeoNames(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiType[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiPuckRequest[ApiCallsToDo.ApiQueueIndexOut]);
           GetOpenWeatherData(ApiCallsToDo.ApiParameterNS[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiParameterEW[ApiCallsToDo.ApiQueueIndexOut], ApiCallsToDo.ApiPuckRequest[ApiCallsToDo.ApiQueueIndexOut]);
           break;
 

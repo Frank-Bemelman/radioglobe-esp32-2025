@@ -414,7 +414,8 @@ void setup()
   // original code doesn't have that, so I do it myself now, to keep code
   franks_vs1053 = stream.getVS1053pointer();
   franks_vs1053->switchToMp3Mode();
-  franks_vs1053->loadDefaultVs1053Patches(); 
+  //franks_vs1053->loadDefaultVs1053Patches(); 
+  franks_vs1053->loadUserCode(PATCHES_FLAC, PATCHES_FLAC_SIZE);
   #define SCI_CLOCKF 0x03
   franks_vs1053->writeRegister(SCI_CLOCKF, 0x6000); 
 
@@ -1092,7 +1093,7 @@ void loop()
 
   nowmillis = millis();
   lapmillis = nowmillis - prevmillis;
-  if(lapmillis>1)Serial.printf("message handler took = %dmS\n", lapmillis);
+  if(lapmillis>5)Serial.printf("message handler took = %dmS\n", lapmillis);
   prevmillis = nowmillis;
 
 

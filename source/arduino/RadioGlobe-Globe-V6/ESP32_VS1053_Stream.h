@@ -200,6 +200,7 @@ private:
     uint32_t _bitrate = 0;
     uint32_t _filllevel = 0;
     UBaseType_t  _ringbufferBytes = 0;
+    size_t _wavoffset = 0;
 
     size_t _fileLastWAVByte();
     size_t _fileLastMP3Byte();
