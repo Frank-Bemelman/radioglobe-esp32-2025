@@ -310,6 +310,10 @@ void AddToQueueForDisplay(const char* message, uint16_t queuemessagetype)
     __atomic_fetch_add(&ToDisplay.QueueCnt, 1, __ATOMIC_SEQ_CST);
     //ToDisplay.QueueCnt++;
   }
-  else Serial.printf("Queue to display is full!!! (%hu)\n", ToDisplay.QueueCnt);
+  else 
+  { // can occur when puck is offline, booting, re-flashed, or some weird dead lock
+    Serial.printf("Queue to display is full!!! (%hu)\n", ToDisplay.QueueCnt);
+    bReadyToSendNext = true; // desperate try to restart locked transmission
+  }
 }
 

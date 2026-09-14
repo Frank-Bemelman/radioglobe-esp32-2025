@@ -23,12 +23,12 @@
 #define VS1053_MAX_REDIRECT_COUNT 3
 
 #define VS1053_PSRAM_BUFFER_ENABLED true
-#define VS1053_PSRAM_BUFFER_SIZE 65536
+#define VS1053_PSRAM_BUFFER_SIZE (65536*1)
 #define VS1053_INTERNAL_RAM_BUFFER_SIZE 2048 // used when no PSRAM
 
 constexpr size_t VS1053_LOCALBUFFER_SIZE = 4096; // need at least 4kB to safely receive ICY metadata
 constexpr uint8_t VS1053_MAXVOLUME = 100;
-constexpr size_t VS1053_PLAYBUFFER_SIZE = 32; 
+constexpr size_t VS1053_PLAYBUFFER_SIZE = 32;
 
 static_assert(VS1053_LOCALBUFFER_SIZE >= 4096,
               "VS1053_LOCALBUFFER_SIZE must be equal or greater than 4096");
@@ -116,7 +116,7 @@ public:
         e.g. uint8_t rtone[4]  = {12, 15, 15, 15}; // initialize bass & treble
         See https://www.vlsi.fi/fileadmin/datasheets/vs1053.pdf section 9.6.3 */
 
-    bool playChunk(uint8_t *data, size_t len, bool stopSong = true);    
+    bool playChunk(uint8_t *data, size_t len, bool stopSong = true);
     bool playChunkNB(uint8_t *chunk, size_t len, bool looparound = false);
 
 
@@ -249,6 +249,7 @@ private:
     const char *ERROR_RINGBUFFER_EMPTY = "Ringbuffer empty";
     const char *ERROR_RINGBUFFER_FAIL = "Ringbuffer error";
     const char *ERROR_CONNECTION_LOST = "Connection lost";
+    const char *ERROR_HTTP_CONNECTION_LOST = "HTTP Connection lost";
     const char *ERROR_STREAM_TIMEOUT = "Stream stalled %d ms";
     const char *ERROR_COULD_NOT_OPEN = "Could not open";
     const char *ERROR_NOT_PLAYABLE = "Not playable";

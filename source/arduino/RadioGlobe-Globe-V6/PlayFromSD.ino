@@ -87,8 +87,7 @@ void StartPlayFromSD(void)
   else
   { if(PlaylistTracks>0)PlaySomethingFromSD();  
   }
- 
-  if(PlaylistTracks>0)PlaySomethingFromSD();
+  
 }
 
 

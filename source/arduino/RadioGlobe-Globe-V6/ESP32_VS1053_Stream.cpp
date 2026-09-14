@@ -155,7 +155,7 @@ void ESP32_VS1053_Stream::_parseMetadata(char *data, const size_t len)
 }
 
 void ESP32_VS1053_Stream::_eofStream()
-{
+{   Serial.printf("158 _eofStream() called with _remainingBytes = %d _filllevel = %d\n", _remainingBytes, _filllevel);
     if (_codec == CODEC_UNKNOWN && _errorCallback)
         _errorCallback(ERROR_NO_DECODER_SYNC);
 
@@ -459,11 +459,6 @@ bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
     const int HTTPresult = _http->GET();
 
     WiFiClient *stream = _http->getStreamPtr();
-    // frank added
-    if (stream)
-    {  stream->setTimeout(50);
-       //stream->setRxBufferSize(8192); 
-    }  
 
     switch (HTTPresult)
     {
@@ -623,17 +618,19 @@ void ESP32_VS1053_Stream::_playFromRingBuffer()
         ringbufferBytes -= (ringbufferBytes > 0) ? size : 0;
 
         if (!ringbufferBytes)
-        {  log_v("ringbuffer empty");
-           if (_errorCallback && _codec != CODEC_UNKNOWN)
-               _errorCallback(ERROR_RINGBUFFER_EMPTY); // not really an error, buffer is simply empty, can trigger an _eofStream() in loop()
+        {  //log_v("ringbuffer hit empty");
+           //if (_errorCallback && _codec != CODEC_UNKNOWN)
+           //    _errorCallback(ERROR_RINGBUFFER_EMPTY); // not really an error, buffer is simply empty
         }
     }
     if(bytesToDecoder)
-    { _updateFillLevel();
+    { // Serial.printf("%lu ms moving %i bytes ringbuffer->decoder\n", millis() - startTimeMS, bytesToDecoder);
+      _updateFillLevel();
       _updateBitRate();
+
     }
     log_d("%lu ms moving %i bytes ringbuffer->decoder", millis() - startTimeMS, bytesToDecoder);
-    //Serial.printf("%lu ms moving %i bytes ringbuffer->decoder\n", millis() - startTimeMS, bytesToDecoder);
+    
 }
 
 
@@ -797,7 +794,7 @@ void ESP32_VS1053_Stream::_handleChunkedStream(WiFiClient *stream)
 }
 
 void ESP32_VS1053_Stream::loop()
-{
+{   
     if (_playingChunk)
     {
         if (_playChunkNB())
@@ -816,6 +813,11 @@ void ESP32_VS1053_Stream::loop()
 
     if (_ringbuffer_handle && !_http->connected())
     { Serial.printf("959 http->connected() false - _filllevel = %d%%\n", _filllevel);
+        log_v("HTTP connection lost"); // frank
+        if (_errorCallback)
+            _errorCallback(ERROR_HTTP_CONNECTION_LOST);
+        Serial.printf("947 FRANK _eofStream() called\n");
+        _eofStream();
       return;
     }
 
@@ -847,7 +849,7 @@ void ESP32_VS1053_Stream::loop()
       return;
     }
 
-    if(!data && _remainingBytes==0 && _filllevel==0) // playing a web stream with a size that has run out nicely and officially 
+    if(!data && _remainingBytes==0 && _filllevel==0) // playing a web stream with a size that has run out nicely and officially, and played out as well 
     {  Serial.printf("Legit end of a stream\n");
         _eofStream();
        return; 
@@ -898,7 +900,7 @@ void ESP32_VS1053_Stream::loop()
        }
     }
 
-    if (!data && _streamStallStartMS && currentStallTimeMS > VS1053_STREAM_TIMEOUT_MS && _ringbuffer_handle && _filllevel==0)
+    if (!data && _streamStallStartMS && currentStallTimeMS > VS1053_STREAM_TIMEOUT_MS && _filllevel==0)
     { // ringbuffer empty, game over
       log_e("Stream timeout with ringbuffer empty %lu ms", currentStallTimeMS);
       _eofStream();
@@ -906,12 +908,9 @@ void ESP32_VS1053_Stream::loop()
     }
 
     if (!data && !_streamStallStartMS) // mark start of a possible stall
-    {
+    { 
         _streamStallStartMS = now ?: 1;
-        if (!_ringbuffer_handle)
-        { 
-            return;
-        }    
+        return;
     }
 
     if (data && _streamStallStartMS)
@@ -1542,9 +1541,12 @@ void ESP32_VS1053_Stream::clearFilllevelCB()
 }
 
 void ESP32_VS1053_Stream::_updateFillLevel()
-{ 
-    uint32_t filllevel;
+{   static uint32_t prevfillKB;    
     uint32_t fillKB;    
+    uint32_t fillKBTimer = 0;    
+    
+    uint32_t filllevel;
+
     // protected with mutex, as this also gets called from AudioPlayTask -> _playRingBuffer() 
     {  
        std::lock_guard<std::mutex> lock(_classMutex);
@@ -1559,6 +1561,14 @@ void ESP32_VS1053_Stream::_updateFillLevel()
          
     }   
     vRingbufferGetInfo(_ringbuffer_handle, NULL, NULL, NULL, NULL, &_ringbufferBytes);
-    _filllevelCallback(fillKB);
+
+    if (millis() - fillKBTimer > 500)
+    {  
+       if(prevfillKB != fillKB)
+       {  prevfillKB = fillKB;
+          fillKBTimer = millis();
+         _filllevelCallback(fillKB);
+       }
+    }
 }
 

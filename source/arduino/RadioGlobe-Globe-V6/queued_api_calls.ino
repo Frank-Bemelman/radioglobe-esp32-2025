@@ -300,6 +300,7 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW, int16_t AskingFo
       if(townfound && countryfound)found=true;
 
     }
+    if(countryfound && !townfound)strcpy(town,"Rural"); // i.e. Iran does not report a town very often, don't want ??? or at sea marker
     sprintf(payload, "%s,%s,%d", countrycode, town, PuckRequest);
     //sprintf(payload, "%s,%s,%d", countrycode, town, D_RequestedStation); // don't like it yet
     DataFromGlobe.D_ApisFetchedForStation = AskingForStation; 
@@ -358,10 +359,7 @@ void GetOpenWeatherData(float StationGpsNS, float StationGpsEW, uint16_t PuckReq
   client.setInsecure();
 
   HTTPClient https;
-  //if(print)Serial.println("HTTP Client starten");
   https.begin(client, api_url);
-  //if(print)Serial.println("HTTP Client gestart");
-  Serial.printf("GetOpenWeatherData https.begin took %ldms\n", (millis()-startMs));  
   int httpResponseCode = https.GET();
   if (httpResponseCode>0) 
   { if(print)Serial.printf("HTTP Response code: %d\n", httpResponseCode);
@@ -371,14 +369,8 @@ void GetOpenWeatherData(float StationGpsNS, float StationGpsEW, uint16_t PuckReq
     StaticJsonDocument<1024> doc;
     DeserializationError error = deserializeJson(doc, payload);
 
-    //WiFiClient* stream = https.getStreamPtr();
-    //DynamicJsonDocument doc(1024); 
-    //DeserializationError error = deserializeJson(doc, *stream); // Stream parsing
-
-
-
     if(!error)
-    { serializeJsonPretty(doc, Serial); // print to serial port
+    { //serializeJsonPretty(doc, Serial); // print to serial port
       float temperature = doc["main"]["temp"];
 		  int humidity = doc["main"]["humidity"];
 			String icon = doc["weather"][0]["icon"];

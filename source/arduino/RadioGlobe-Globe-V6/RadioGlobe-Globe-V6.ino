@@ -247,7 +247,6 @@ char StreamType[64]="";
 char StreamCodec[16]="";
 char StreamBitrate[16]="";
 char StreamFilllevel[16]="";
-bool bStreamTypeNeedsUpdated = false;
 
 
 
@@ -369,12 +368,11 @@ void setup()
 //  pinMode(VS1053_CS, OUTPUT);
 //  pinMode(VS1053_DCS, OUTPUT);
   pinMode(VS1053_RESET, OUTPUT);
-
 //  digitalWrite(VS1053_CS, HIGH); 
 //  digitalWrite(VS1053_DCS, HIGH); 
   digitalWrite(VS1053_RESET, LOW); 
 
-  delay(50);   
+  delay(51);   
   //pinMode(SPI_CLK_PIN, OUTPUT);
   //pinMode(SPI_MOSI_PIN, OUTPUT);
   //digitalWrite(SPI_CLK_PIN, LOW);
@@ -419,17 +417,7 @@ void setup()
   #define SCI_CLOCKF 0x03
   franks_vs1053->writeRegister(SCI_CLOCKF, 0x6000); 
 
-
-
-  // maybe if we want to poll vu meter sound level
-  //if (franks_vs1053->getChipVersion() == 4)
-  //  {
-  //      log_d("Patching vs1053 firmware");
-        //_vs1053->loadDefaultVs1053Patches(); 
-  //      _vs1053->loadUserCode(PATCHES_FLAC, PATCHES_FLAC_SIZE);
-  //  }
-
-  
+ 
   //  Speakers(SPEAKERS_ON); 
   //  stream.setVolume(75);
   //  stream.playChunkNB((uint8_t *)mp3_happy_ping, sizeof(mp3_happy_ping));
@@ -660,23 +648,22 @@ void loop()
   static uint32_t nowmillis;
   static uint32_t prevmillis;
   static uint32_t lapmillis;
+  static uint32_t lastmillis;
 
   if(GlobeSettings.globe_sd_gb != 0)ftp.handleFTP();
    
   loop2(); // checks portal button in advanced.ino
   
-  nowmillis = millis();
-  lapmillis = nowmillis - prevmillis;
+  lapmillis = millis() - lastmillis;
   if(lapmillis>30)Serial.printf("main loop(); took = %dmS\n", lapmillis);
-  prevmillis = nowmillis;
+  prevmillis =  millis();
 
   
   stream.loop(); // keeps the VS1053 going..
   
-  nowmillis = millis();
-  lapmillis = nowmillis - prevmillis;
-  if(lapmillis>50)Serial.printf("stream.loop(); took = %dmS\n", lapmillis);
-  prevmillis = nowmillis;
+  lapmillis = millis() - prevmillis;
+  if(lapmillis>100)Serial.printf("stream.loop(); took = %dmS\n", lapmillis);
+  prevmillis = millis();
 
   if(bMqttActivated==1234)loopMQTT();
   
@@ -694,19 +681,13 @@ void loop()
       if(lapmillis>10)Serial.printf("loop_esp_now(); took = %dmS\n", lapmillis);
       prevmillis = nowmillis;
     }
-    if((LoopTicker100mS % 5)==0) // every half seconds or so
-    { if(bStreamTypeNeedsUpdated) // update done once per second
-      { AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
-        bStreamTypeNeedsUpdated = false;
+    if((LoopTicker100mS % 5)==0 && bGlobeStable) // every half seconds or so
+    { if(strcmp(PrevStreamType, StreamType)!=0)
+      { strcpy(PrevStreamType, StreamType);
+        AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
       }
     }
   }  
-  nowmillis = millis();
-  lapmillis = nowmillis - prevmillis;
-  if(lapmillis>10)Serial.printf("loop_esp_now(); took = %dmS\n", lapmillis);
-  prevmillis = nowmillis;
-
-
 
   if((LoopTicker100mS % 50)==0) // every 5 seconds or so
   { if(WiFi.status() != WL_CONNECTED) 
@@ -1091,10 +1072,9 @@ void loop()
 
   }
 
-  nowmillis = millis();
-  lapmillis = nowmillis - prevmillis;
-  if(lapmillis>5)Serial.printf("message handler took = %dmS\n", lapmillis);
-  prevmillis = nowmillis;
+  lapmillis = millis() - prevmillis;
+  if(lapmillis>10)Serial.printf("message handler took = %dmS\n", lapmillis);
+  prevmillis = millis();
 
 
 
@@ -1110,22 +1090,20 @@ void loop()
     Speakers(SPEAKERS_DELAYED_OFF);
     DataFromGlobe.D_QueueStationIndex = -1;
     strcpy(ActiveUrl, "");
-    AddToQueueForDisplay("", MESSAGE_STATION_NAME); // remove 'station name'
-    AddToQueueForDisplay("EXPLORING", MESSAGE_STATUS_LINE); // remove 'station name'
-    AddToQueueForDisplay("", MESSAGE_SONG_TITLE); // remove 'song title'    
-    AddToQueueForDisplay("", MESSAGE_EXPLORING); // remove 'song title'    
+    AddToQueueForDisplay("", MESSAGE_EXPLORING); // removes station name, sets status line to 'exploring earth', removes 'song title'    
   }
   
-  //if((LoopTicker100mS%10)==0)
-  //{
-  //  Serial.printf("Volume = %d\n", stream.getVuMeter());
-  //}
-
-
   // volume and tone levels checking
   //if(bVolumeToneControlsActive == true)
   { if(PrevTick != LoopTicker100mS)
     { PrevTick = LoopTicker100mS;
+
+      //if((LoopTicker100mS%10)==0) 
+      //{
+      //  Serial.printf("Volume = %d\n", stream.getVuMeter());
+      //}
+
+
       if((PrevDataFromDisplay.volumevalue != DataFromDisplay.volumevalue) || bFirst)
       { PrevDataFromDisplay.volumevalue = DataFromDisplay.volumevalue;
         SetVolumeMapped(DataFromDisplay.volumevalue);
@@ -1194,6 +1172,9 @@ void loop()
       bFirst = false;
     }
   }  
+
+  lastmillis = millis();
+
    vTaskDelay(1); // makes me feel good but is nonsense
 }
 
@@ -1214,8 +1195,12 @@ bool StartNewStation(void)
     AddToQueueForDisplay("0", MESSAGE_MUSIC_MODE);
   }  
 
-  strcpy(PrevStreamType, ""); // assures that new received stream info gets send to puck
-  AddToQueueForDisplay("", MESSAGE_STATUS_LINE);
+  strcpy(PrevStreamType, ""); 
+  strcpy(StreamType, "");
+  strcpy(StreamCodec, "");
+  strcpy(StreamBitrate, "");
+  strcpy(StreamFilllevel, "");
+  AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
   
 
   PixelUpdate(0, 0xFF00FF, 0x000000, 10000); // solid purple
@@ -1228,12 +1213,7 @@ bool StartNewStation(void)
     stream.stopSong();
   }
 
-  strcpy(StreamType, "");
-  strcpy(StreamCodec, "");
-  strcpy(StreamBitrate, "");
-  strcpy(StreamFilllevel, "");
-  AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
-  
+ 
   Speakers(SPEAKERS_DELAYED_OFF);
   DataFromGlobe.D_QueueStationIndex = -1;
   strcpy(ActiveUrl, "");
@@ -1322,9 +1302,9 @@ void SetVolumeMapped(uint16_t volume)
   prevvol = volume;
 
   // VS1053 volume range is -128dB to 0dB which is way too large for practical human use
-  // a more practical useable volume range is 60-100, input 100 gives max volume -0dB and 60 being very quiet at -51.2db
+  // a more practical useable volume range is 60-100, input 100 gives max volume -0dB and 60 being very quiet at -51.2db (1.28 db per step)
   // such ranges suites better with daily usages, so we remap the 0-100 to this range
-  if(volume)New_vs1053vol = map(volume, 0, 100, 60, 100); 
+  if(volume)New_vs1053vol = map(volume, 0, 100, 55, 100); 
   else New_vs1053vol = 0;
 
   if(volume==0)Speakers(SPEAKERS_DELAYED_OFF);
@@ -1876,10 +1856,9 @@ void codecCallback(const char *codec)
     SetVolumeMapped(DataFromDisplay.volumevalue); // will also enable amplifiers
     strcpy(StreamCodec, codec);
     sprintf(StreamType, "Streaming %s - %s %s", StreamCodec, StreamBitrate, StreamFilllevel);
-    if(strcmp(PrevStreamType, StreamType)!=0)
-    { strcpy(PrevStreamType, StreamType);
-      AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
-    }
+    // update to puck done in main loop, once per second
+    //AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
+    //Serial.printf("1883 StreamType = %s\n", StreamType);
   }  
 }
 
@@ -1891,11 +1870,8 @@ void bitrateCallback(uint32_t bitrate)
   { //Serial.printf("MAIN 1870 bitrate: %lu kbps\n", bitrate);
     sprintf(StreamBitrate, "%lu kbps", bitrate);
     sprintf(StreamType, "Streaming %s - %s %s", StreamCodec, StreamBitrate, StreamFilllevel);
-    if(strcmp(PrevStreamType, StreamType)!=0)
-    { strcpy(PrevStreamType, StreamType);
-      bStreamTypeNeedsUpdated = true; // update to puck done in main loop, once per second
-      //AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
-    }
+    //AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
+    //Serial.printf("1900 StreamType = %s\n", StreamType);
   }
 }  
 
@@ -1920,11 +1896,8 @@ void filllevelCallback(uint32_t filllevel)
     //sprintf(StreamFilllevel, "%lu%% buffered", filllevel);
     sprintf(StreamFilllevel, "%luKB in buffer", filllevel);
     sprintf(StreamType, "Streaming %s - %s %s", StreamCodec, StreamBitrate, StreamFilllevel);
-    if(strcmp(PrevStreamType, StreamType)!=0)
-    { strcpy(PrevStreamType, StreamType);
-      bStreamTypeNeedsUpdated = true; // update to puck done in main loop, once per second
-      //AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
-    }
+    //AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
+    //Serial.printf("1931 StreamType = %s\n", StreamType);
   }
 }  
 
