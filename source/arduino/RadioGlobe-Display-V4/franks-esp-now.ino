@@ -40,9 +40,8 @@ void OnDataSent(const esp_now_send_info_t *tx_info, esp_now_send_status_t status
 void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData, int len);
 
 // Callback when data is sent
-bool bWasTransmitted = false;
-bool bWasReceived = false;
-
+volatile bool bWasTransmitted = false;
+volatile bool bWasReceived = false;
 
 // inspired by https://esp32.com/viewtopic.php?f=19&t=12992#p51338
 bool setup_esp_now(void) 
@@ -216,100 +215,94 @@ bool setup_esp_add_peer(void)
 }
 
 
+// Callback when data is sent
+//bool bWasTransmitted = false;
+volatile bool bReadyToSendNext = true;
+void OnDataSent(const esp_now_send_info_t *tx_info, esp_now_send_status_t status)
+{ bWasTransmitted = (status == ESP_NOW_SEND_SUCCESS);
+  if(bWasTransmitted)
+  { if(ToGlobe.QueueCnt > 0 && DataFromDisplay.D_QueueMessageType != MESSAGE_NOP)
+    { 
+      ToGlobe.QueueIndexOut = (ToGlobe.QueueIndexOut + 1) % QUEUESIZE;
+      __atomic_fetch_sub(&ToGlobe.QueueCnt, 1, __ATOMIC_SEQ_CST);
+      //ToGlobe.QueueCnt--;
+    }  
+  }
+  else
+  { Serial.print("\r\nLast Packet Send Status:\t");
+    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+  }
+  bReadyToSendNext = true;
+}
 
-bool Q_filling = 0;
-bool Q_sending = 0;
 
 // check if stuff to send
 void loop_esp_now() {
   // we get called here from the main loop every 100mS
-
   if(DisplaySettings.globemac[0]==0)return; 
 
-  while(Q_filling); // wait until idle, never takes long
-  Q_sending = true;
-
+  if (!bReadyToSendNext) 
+  { return; 
+  }
+  
   // check for queued messages to send
   // Send message via ESP-NOW
 
   if(bUpAndRunning) 
   { //Serial.printf("ToGlobe.QueueCnt = %d\n", ToGlobe.QueueCnt);
     if(ToGlobe.QueueCnt>0)
-    { int max_to_send_attempts = 10; 
-      //while(ToGlobe.QueueCnt && max_to_send_attempts--) // don't let us hang in here forever, best effort here
-      { if(ToGlobe.QueueIndexOut != ToGlobe.QueueIndexIn)
-        { //DataFromDisplay.D_QueueSerialNumberSend++;
-          strcpy(DataFromDisplay.D_QueueMessage, ToGlobe.QueueMessage[ToGlobe.QueueIndexOut]);
-          DataFromDisplay.D_QueueMessageType = ToGlobe.QueueMessageType[ToGlobe.QueueIndexOut];
+    { if(ToGlobe.QueueIndexOut != ToGlobe.QueueIndexIn)
+      { //DataFromDisplay.D_QueueSerialNumberSend++;
+        strcpy(DataFromDisplay.D_QueueMessage, ToGlobe.QueueMessage[ToGlobe.QueueIndexOut]);
+        DataFromDisplay.D_QueueMessageType = ToGlobe.QueueMessageType[ToGlobe.QueueIndexOut];
+        DataFromDisplay.D_QueueSerialNumberSend = ToGlobe.QueueMessageSerialNumber[ToGlobe.QueueIndexOut];
 
-          bWasTransmitted = false;
-          esp_err_t result = esp_now_send(DisplaySettings.globemac, (uint8_t *) &DataFromDisplay, sizeof(DataFromDisplay)); 
-          Serial.printf("ESPNOW esp_now_send() SERIALNR %d -> %s sent to globe = >%s<\n", DataFromDisplay.D_QueueSerialNumberSend, messagetexts[DataFromDisplay.D_QueueMessageType]  , DataFromDisplay.D_QueueMessage);
+        bReadyToSendNext = false;  
+        esp_err_t result = esp_now_send(DisplaySettings.globemac, (uint8_t *) &DataFromDisplay, sizeof(DataFromDisplay)); 
+        Serial.printf("ESPNOW esp_now_send() SERIALNR %d -> %s sent to globe = >%s<\n", DataFromDisplay.D_QueueSerialNumberSend, messagetexts[DataFromDisplay.D_QueueMessageType]  , DataFromDisplay.D_QueueMessage);
 
-          if(result==0)
-          { //Serial.printf("ESPNOW esp_now_send() succesfully queued\n");
-            delay(2); // bWasTransmitted very likely true after this wait
-            int wait = 15;
-            while(wait-- && !bWasTransmitted )
-            { Serial.printf("ESPNOW wait for message actually send out\n");
-              delay(1);
-            }
-            if(bWasTransmitted)
-            { Serial.printf("ESPNOW esp_now_send() package DataFromDisplay.D_QueueSerialNumber = %d -> delivered at globe\n", DataFromDisplay.D_QueueSerialNumberSend);
-              Serial.printf("ESPNOW esp_now_send() DISPLAY CONFIRMED  %s -> delivered at globe\n", messagetexts[ToGlobe.QueueMessageType[ToGlobe.QueueIndexOut]]);
-              ToGlobe.QueueIndexOut++;
-              ToGlobe.QueueIndexOut %= QUEUESIZE;
-              ToGlobe.QueueCnt--;
-              DataFromDisplay.D_QueueSerialNumberSend++;
-            }
-            else
-            { Serial.printf("Failed after 25mS waiting, try again..\n");
-            }  
-          }
-          else
-          { Serial.printf("Espnow esp_now_send() could not queue (result=%d) message, will try again after 10 mS\n", result);
-            delay(10);
-          }
-          delay(5); // since we are in a wile loop, this seems to fix the odd lost packet of data
+        if(result != ESP_OK)
+        { Serial.printf("ESPNOW esp_now_send() error!!\n");
+          bReadyToSendNext = true; //??????
         }
-        // keep last one send
-        memcpy(&PrevDataFromDisplay, &DataFromDisplay, sizeof(PrevDataFromDisplay));
-        delay(5);
+        else
+        { // keep last one send
+          memcpy(&PrevDataFromDisplay, &DataFromDisplay, sizeof(PrevDataFromDisplay));
+        }  
       }
     }
     else // keep sending if changed with perhaps volume setting
     { if(memcmp(&PrevDataFromDisplay, &DataFromDisplay,sizeof(PrevDataFromDisplay)) != 0)
       { DataFromDisplay.D_QueueMessageType = MESSAGE_NOP; // don't want this to be picked up by globe as message with real job to do
+        bReadyToSendNext = false;
         esp_err_t result = esp_now_send(DisplaySettings.globemac, (uint8_t *) &DataFromDisplay, sizeof(DataFromDisplay)); 
-        // Serial.printf("Stuff (usually volume or battery voltage) send\n");
-        memcpy(&PrevDataFromDisplay, &DataFromDisplay, sizeof(PrevDataFromDisplay));
+        //Serial.printf("Stuff (usually volume or battery voltage) send\n");
+        if (result != ESP_OK) 
+        { bReadyToSendNext = true;
+        } 
+        else 
+        { memcpy(&PrevDataFromDisplay, &DataFromDisplay, sizeof(PrevDataFromDisplay));
+        } 
       }  
     }
     //Serial.printf("Send To peer %02X:%02X:%02X:%02X:%02X:%02X\n", (uint16_t)DisplaySettings.globemac[0],(uint16_t)DisplaySettings.globemac[1],(uint16_t)DisplaySettings.globemac[2],(uint16_t)DisplaySettings.globemac[3],(uint16_t)DisplaySettings.globemac[4],(uint16_t)DisplaySettings.globemac[5]);
-  
   } 
-  Q_sending = false;
 }
 
 void AddToQueueForGlobe(const char* message, uint16_t queuemessagetype) // one empty slot to avoid IndexIn becomes equal to IndexOut
-{ 
-  while(Q_sending); // wait until idle
-  Q_filling = true;
-  
-  if(ToGlobe.QueueCnt < QUEUESIZE-1) // at least one empty slot needed
+{ static uint16_t serialnumber = 1;
+  if(ToGlobe.QueueCnt < QUEUESIZE) // at least one empty slot needed
   { ToGlobe.QueueIndexIn %= QUEUESIZE; // just to be sure
-    strncpy(ToGlobe.QueueMessage[ToGlobe.QueueIndexIn], message, QUEUEMESSAGELENGTH);
+    memcpy(ToGlobe.QueueMessage[ToGlobe.QueueIndexIn], message, QUEUEMESSAGELENGTH);
     ToGlobe.QueueMessage[ToGlobe.QueueIndexIn][QUEUEMESSAGELENGTH-1] = 0; // terminate just in case of idiotic long message causing unterminated string data here
     ToGlobe.QueueMessageType[ToGlobe.QueueIndexIn] = queuemessagetype;
-
-    Serial.printf("TELL GLOBE: %s -> %s\n", messagetexts[ToGlobe.QueueMessageType[ToGlobe.QueueIndexIn]], ToGlobe.QueueMessage[ToGlobe.QueueIndexIn]);
-
-    ToGlobe.QueueIndexIn++;
-    ToGlobe.QueueIndexIn %= QUEUESIZE;
-    ToGlobe.QueueCnt++;
+    ToGlobe.QueueMessageSerialNumber[ToGlobe.QueueIndexIn] = serialnumber++;
+    Serial.printf("TELL GLOBE: SERIAL %hu <%s> -> %s\n", ToGlobe.QueueMessageSerialNumber[ToGlobe.QueueIndexIn], messagetexts[ToGlobe.QueueMessageType[ToGlobe.QueueIndexIn]], ToGlobe.QueueMessage[ToGlobe.QueueIndexIn]);
+    ToGlobe.QueueIndexIn = (ToGlobe.QueueIndexIn + 1) % QUEUESIZE;
+    __atomic_fetch_add(&ToGlobe.QueueCnt, 1, __ATOMIC_SEQ_CST);
+    //ToGlobe.QueueCnt++;
   }
   else Serial.println("Queue to globe is full!!!");
-  Q_filling = false;
 }
 
 int TestSend(void) 
@@ -341,14 +334,6 @@ int TestSend(void)
 
 
 
-// Callback when data is sent
-//bool bWasTransmitted = false;
-void OnDataSent(const esp_now_send_info_t *tx_info, esp_now_send_status_t status)
-{ //Serial.print("\r\nLast Packet Send Status:\t");
-  //Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
-  //dataSent = (status == ESP_NOW_SEND_SUCCESS ? 1 : -1);
-  bWasTransmitted = (status == ESP_NOW_SEND_SUCCESS);
-}
 
 // Callback when data is received
 void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData, int len) 
@@ -387,7 +372,7 @@ void OnDataRecv(const esp_now_recv_info_t *rx_info, const uint8_t *incomingData,
     FromGlobe.QueueMessageType[FromGlobe.QueueIndexIn] =  DataFromGlobe.G_QueueMessageType;
     FromGlobe.QueueMessageSerialNumber[FromGlobe.QueueIndexIn] =  DataFromGlobe.G_QueueSerialNumberSend;
 
-    Serial.printf("ESPNOW: OnDataRecv() -> DataFromGlobe.G_QueueSerialNumberSend = %d  - %s %s\n", FromGlobe.QueueMessageSerialNumber[FromGlobe.QueueIndexIn], messagetexts[FromGlobe.QueueMessageType[FromGlobe.QueueIndexIn]], FromGlobe.QueueMessage[FromGlobe.QueueIndexIn]);
+    //Serial.printf("ESPNOW: OnDataRecv() -> DataFromGlobe.G_QueueSerialNumberSend = %d  - %s %s\n", FromGlobe.QueueMessageSerialNumber[FromGlobe.QueueIndexIn], messagetexts[FromGlobe.QueueMessageType[FromGlobe.QueueIndexIn]], FromGlobe.QueueMessage[FromGlobe.QueueIndexIn]);
 
     // atomic update of FromGlobe.QueueIndexIn, probably overly cautious since we run on same core
     uint16_t nextIndex = (FromGlobe.QueueIndexIn + 1) % QUEUESIZE;

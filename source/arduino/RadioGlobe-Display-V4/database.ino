@@ -442,7 +442,7 @@ void FindNewStation(void)
   Stations.requested -1;
   char firstcountrycode[3] = ""; // near borders, different countries can be in the directory, decided to stick with the country first found, to avoid a mixed list
 
-  lv_label_set_text(ui_Station_Name, "SEARCHING");
+  lv_label_set_text(ui_Station_Name, "");
   lv_label_set_text(ui_Home_City, "");
   lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); 
   lv_label_set_text(ui_Home_Country, "");
@@ -720,6 +720,7 @@ void RadioGlobeClick(lv_event_t * e)
 
         //lv_label_set_text(ui_Station_Name, "Searching..."); // pointless, searching goes so fast you won't see this
         lv_label_set_text(ui_Station_Title, "");
+        lv_obj_add_flag(ui_ledconnect, LV_OBJ_FLAG_HIDDEN); 
         lv_refr_now(NULL); 
         FindNewStation();
         ReloadScroll();
@@ -741,12 +742,23 @@ void RadioGlobeClick(lv_event_t * e)
     { //Serial.printf("Radio -> Music Mode LV_EVENT_LONG_PRESSED_REPEAT \n");
       beepforMs(50);
       SetLed(0,0); SetLed(1,0); SetLed(2,0); SetLed(3,0);
+      lv_label_set_text(ui_Station_Name, "");
+      lv_label_set_text(ui_Status_Line, "READING SD CARD");
+      lv_label_set_text(ui_Station_Title, "");
+      lv_obj_add_flag(ui_ledconnect, LV_OBJ_FLAG_HIDDEN); 
       AddToQueueForGlobe("", MESSAGE_GLOBE_PLAY_SD); // instructs the globe to prepare a list of songs from the SD card
+      lv_obj_clear_flag(ui_Jukebox, LV_OBJ_FLAG_HIDDEN);
+      lv_obj_add_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN); 
+      lv_obj_add_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN); 
+      lv_obj_add_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN);
+
+
       bMusicMode = true;
     } 
     else
     { // back to radio
       //Serial.printf("Music -> Radio Mode LV_EVENT_LONG_PRESSED_REPEAT \n");
+      lv_obj_add_flag(ui_Jukebox, LV_OBJ_FLAG_HIDDEN);
       beepforMs(50);
       bMusicMode = false;
       FindNewStation();
@@ -1024,9 +1036,16 @@ void AddStationToQueueForGlobe(int16_t station)
       AddToQueueForGlobe(message, MESSAGE_START_THIS_STATION);
     }
 
-
     lv_label_set_text(ui_Station_Name, Stations.StationNUG[station].name);
-    lv_label_set_text(ui_Status_Line, "CONNECTING");
+    // easy peasy to postion that led at the end of the station name
+    lv_obj_add_flag(ui_ledconnect, LV_OBJ_FLAG_HIDDEN); 
+    lv_point_t text_end_point;
+    lv_label_get_letter_pos(ui_Station_Name, strlen(Stations.StationNUG[station].name), &text_end_point);
+    lv_obj_set_x(ui_ledconnect, (text_end_point.x -200) + 12);
+    
+//    Serial.printf("x=%d\n",text_end_point );                            
+
+    lv_label_set_text(ui_Status_Line, "");
     lv_label_set_text(ui_Station_Title, "");
 
     if(station<MAX_STATIONS)Stations.connect_attempts++;
@@ -1133,6 +1152,7 @@ void AddFileToQueueForGlobe(uint16_t station)
       AddToQueueForGlobe(message, MESSAGE_START_FILE_BY_INDEX);
     }
     //lv_label_set_text(ui_Station_Title, Stations.StationNUG[station].name); // rebuild songname from url
+    lv_obj_add_flag(ui_ledconnect, LV_OBJ_FLAG_HIDDEN); 
     lv_label_set_text(ui_Station_Title, ""); // for now
   }
 }
@@ -1209,7 +1229,7 @@ void AppendToLogFile(char *filename, char *url)
 
   if(strcmp(filename, "/Sleeptimer.log") == 0)return; // turn those off for now
 
-  snprintf(logtext, 256, "%d-%s-%d %02d:%02d:%02d ->%s",    (int)datetime.day, monthnames[datetime.month],  (int)datetime.year%100, datetime.hour, (int)datetime.minute, (int)datetime.second, url);
+  snprintf(logtext, 256, "%d-%s-%d %02d:%02d:%02d ->%s",    (int)datetime.day, monthnames[datetime.month%12],  (int)datetime.year%100, datetime.hour, (int)datetime.minute, (int)datetime.second, url);
 
   // file creation dates seem to reflect a double TZ correction
   // use UTC to make it a bit more predictable

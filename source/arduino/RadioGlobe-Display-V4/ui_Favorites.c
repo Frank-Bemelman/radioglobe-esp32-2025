@@ -8,11 +8,7 @@
 lv_obj_t * uic_IconBattery;
 lv_obj_t * uic_IconSdCard;
 lv_obj_t * uic_MemoryUsage;
-lv_obj_t * uic_GlobeRSSI;
-lv_obj_t * uic_led4;
-lv_obj_t * uic_led3;
-lv_obj_t * uic_led2;
-lv_obj_t * uic_led1;
+lv_obj_t * uic_PresetLed;
 lv_obj_t * uic_FavoritesStoreHint;
 lv_obj_t * uic_ScreenTitle;
 lv_obj_t * uic_StationPresetName4;
@@ -37,12 +33,8 @@ lv_obj_t * ui_StationPresetName3 = NULL;
 lv_obj_t * ui_StationPresetName4 = NULL;
 lv_obj_t * ui_ScreenTitle = NULL;
 lv_obj_t * ui_FavoritesStoreHint = NULL;
-lv_obj_t * ui_led1 = NULL;
-lv_obj_t * ui_led2 = NULL;
-lv_obj_t * ui_led3 = NULL;
-lv_obj_t * ui_led4 = NULL;
+lv_obj_t * ui_PresetLed = NULL;
 lv_obj_t * ui_IconWifi = NULL;
-lv_obj_t * ui_GlobeRSSI = NULL;
 lv_obj_t * ui_MemoryText = NULL;
 lv_obj_t * ui_IconMemory = NULL;
 lv_obj_t * ui_MemoryUsage = NULL;
@@ -275,64 +267,19 @@ void ui_Favorites_screen_init(void)
     lv_label_set_text(ui_FavoritesStoreHint, "Long Press To Store Current Station As Favorite   ---");
     lv_obj_set_style_text_font(ui_FavoritesStoreHint, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_led1 = lv_img_create(ui_Favorites);
-    lv_img_set_src(ui_led1, &ui_img_circle16x16_png);
-    lv_obj_set_width(ui_led1, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_led1, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_led1, -120);
-    lv_obj_set_y(ui_led1, -105);
-    lv_obj_set_align(ui_led1, LV_ALIGN_CENTER);
-    lv_obj_clear_flag(ui_led1, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
+    ui_PresetLed = lv_img_create(ui_Favorites);
+    lv_img_set_src(ui_PresetLed, &ui_img_circle16x16_png);
+    lv_obj_set_width(ui_PresetLed, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_PresetLed, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_PresetLed, -120);
+    lv_obj_set_y(ui_PresetLed, -105);
+    lv_obj_set_align(ui_PresetLed, LV_ALIGN_CENTER);
+    lv_obj_clear_flag(ui_PresetLed, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
                       LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE);     /// Flags
-    ui_object_set_themeable_style_property(ui_led1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
+    ui_object_set_themeable_style_property(ui_PresetLed, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
                                            _ui_theme_color_red);
-    ui_object_set_themeable_style_property(ui_led1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
+    ui_object_set_themeable_style_property(ui_PresetLed, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
                                            _ui_theme_alpha_red);
-
-    ui_led2 = lv_img_create(ui_Favorites);
-    lv_img_set_src(ui_led2, &ui_img_circle16x16_png);
-    lv_obj_set_width(ui_led2, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_led2, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_led2, -120);
-    lv_obj_set_y(ui_led2, -35);
-    lv_obj_set_align(ui_led2, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_led2, LV_OBJ_FLAG_HIDDEN);     /// Flags
-    lv_obj_clear_flag(ui_led2, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
-                      LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE);     /// Flags
-    ui_object_set_themeable_style_property(ui_led2, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
-                                           _ui_theme_color_green);
-    ui_object_set_themeable_style_property(ui_led2, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
-                                           _ui_theme_alpha_green);
-
-    ui_led3 = lv_img_create(ui_Favorites);
-    lv_img_set_src(ui_led3, &ui_img_circle16x16_png);
-    lv_obj_set_width(ui_led3, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_led3, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_led3, -120);
-    lv_obj_set_y(ui_led3, 35);
-    lv_obj_set_align(ui_led3, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_led3, LV_OBJ_FLAG_HIDDEN);     /// Flags
-    lv_obj_clear_flag(ui_led3, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
-                      LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE);     /// Flags
-    ui_object_set_themeable_style_property(ui_led3, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
-                                           _ui_theme_color_red);
-    ui_object_set_themeable_style_property(ui_led3, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
-                                           _ui_theme_alpha_red);
-
-    ui_led4 = lv_img_create(ui_Favorites);
-    lv_img_set_src(ui_led4, &ui_img_circle16x16_png);
-    lv_obj_set_width(ui_led4, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_led4, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_led4, -120);
-    lv_obj_set_y(ui_led4, 105);
-    lv_obj_set_align(ui_led4, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_led4, LV_OBJ_FLAG_HIDDEN);     /// Flags
-    lv_obj_clear_flag(ui_led4, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
-                      LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE);     /// Flags
-    ui_object_set_themeable_style_property(ui_led4, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
-                                           _ui_theme_color_green);
-    ui_object_set_themeable_style_property(ui_led4, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
-                                           _ui_theme_alpha_green);
 
     ui_IconWifi = lv_img_create(ui_Favorites);
     lv_img_set_src(ui_IconWifi, &ui_img_wifi32x32_png);
@@ -345,16 +292,6 @@ void ui_Favorites_screen_init(void)
     lv_obj_clear_flag(ui_IconWifi, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_img_recolor(ui_IconWifi, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_img_recolor_opa(ui_IconWifi, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    ui_GlobeRSSI = lv_label_create(ui_Favorites);
-    lv_obj_set_width(ui_GlobeRSSI, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_GlobeRSSI, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_GlobeRSSI, -165);
-    lv_obj_set_y(ui_GlobeRSSI, -85);
-    lv_obj_set_align(ui_GlobeRSSI, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_GlobeRSSI, "-99dB");
-    lv_obj_set_style_text_color(ui_GlobeRSSI, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_GlobeRSSI, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_MemoryText = lv_label_create(ui_Favorites);
     lv_obj_set_width(ui_MemoryText, LV_SIZE_CONTENT);   /// 1
@@ -429,11 +366,7 @@ void ui_Favorites_screen_init(void)
     uic_StationPresetName4 = ui_StationPresetName4;
     uic_ScreenTitle = ui_ScreenTitle;
     uic_FavoritesStoreHint = ui_FavoritesStoreHint;
-    uic_led1 = ui_led1;
-    uic_led2 = ui_led2;
-    uic_led3 = ui_led3;
-    uic_led4 = ui_led4;
-    uic_GlobeRSSI = ui_GlobeRSSI;
+    uic_PresetLed = ui_PresetLed;
     uic_MemoryUsage = ui_MemoryUsage;
     uic_IconSdCard = ui_IconSdCard;
     uic_IconBattery = ui_IconBattery;
@@ -469,17 +402,9 @@ void ui_Favorites_screen_destroy(void)
     ui_ScreenTitle = NULL;
     uic_FavoritesStoreHint = NULL;
     ui_FavoritesStoreHint = NULL;
-    uic_led1 = NULL;
-    ui_led1 = NULL;
-    uic_led2 = NULL;
-    ui_led2 = NULL;
-    uic_led3 = NULL;
-    ui_led3 = NULL;
-    uic_led4 = NULL;
-    ui_led4 = NULL;
+    uic_PresetLed = NULL;
+    ui_PresetLed = NULL;
     ui_IconWifi = NULL;
-    uic_GlobeRSSI = NULL;
-    ui_GlobeRSSI = NULL;
     ui_MemoryText = NULL;
     ui_IconMemory = NULL;
     uic_MemoryUsage = NULL;

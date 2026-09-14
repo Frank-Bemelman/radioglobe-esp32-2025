@@ -11,28 +11,9 @@
 void playpreset(uint32_t station)
 { if(station<0 || station>=MAX_FAVORITES)return;
   if(strlen(Stations.StationNUG[station+MAX_STATIONS].url)>0) // only respond to loaded buttons
-  { Serial.printf("Favorites Select station %s under Preset %d\n", Stations.StationNUG[station+MAX_STATIONS].name, station);
+  { Serial.printf("Globe request Favorites Preset station %s under Preset %d\n", Stations.StationNUG[station+MAX_STATIONS].name, station);
     AddStationToQueueForGlobe(station+MAX_STATIONS); // presets come just after the regular list of stations
-    lv_label_set_text(ui_Station_Name, Stations.StationNUG[station+MAX_STATIONS].name);
-    if(station==0)
-    { lv_label_set_text(ui_StationPresetName1, Stations.StationNUG[0+MAX_STATIONS].name); 
-      SetLed(station, UI_THEME_COLOR_RED);
-    }
-    if(station==1)
-    { lv_label_set_text(ui_StationPresetName2, Stations.StationNUG[1+MAX_STATIONS].name); 
-      SetLed(station, UI_THEME_COLOR_RED);
-    }
-    if(station==2)
-    { lv_label_set_text(ui_StationPresetName3, Stations.StationNUG[2+MAX_STATIONS].name); 
-      SetLed(station, UI_THEME_COLOR_RED);
-    }
-    if(station==3)
-    { lv_label_set_text(ui_StationPresetName4, Stations.StationNUG[3+MAX_STATIONS].name); 
-      SetLed(station, UI_THEME_COLOR_RED);
-    }
-    for(int16_t n=0; n<MAX_FAVORITES; n++)
-    { if(n!=station)SetLed(n, 0);
-    }          
+    SetLed(station, UI_THEME_COLOR_RED);
     beepforMs(50);
   }  
 }
@@ -54,27 +35,21 @@ void station1234(lv_event_t * e, uint16_t station)
         strcpy(Stations.StationNUG[station+MAX_STATIONS].town, Stations.StationNUG[Stations.playing].town);
         strcpy(Stations.StationNUG[station+MAX_STATIONS].countrycode, Stations.StationNUG[Stations.playing].countrycode);
         strcpy(Stations.StationNUG[station+MAX_STATIONS].countryname, Stations.StationNUG[Stations.playing].countryname);
+        SetLed(station, UI_THEME_COLOR_GREEN); // station is already playing, so set led to green
         
         if(station==0)
         { lv_label_set_text(ui_StationPresetName1, Stations.StationNUG[station+MAX_STATIONS].name); 
-          SetLed(station, UI_THEME_COLOR_GREEN);
         }  
         if(station==1)
         { lv_label_set_text(ui_StationPresetName2, Stations.StationNUG[station+MAX_STATIONS].name); 
-          SetLed(station, UI_THEME_COLOR_GREEN);
         }  
         if(station==2)
         { lv_label_set_text(ui_StationPresetName3, Stations.StationNUG[station+MAX_STATIONS].name); 
-          SetLed(station, UI_THEME_COLOR_GREEN);
         }  
         if(station==3)
         { lv_label_set_text(ui_StationPresetName4, Stations.StationNUG[station+MAX_STATIONS].name); 
-          SetLed(station, UI_THEME_COLOR_GREEN);
         }  
 
-        for(int16_t n=0; n<4; n++)
-        { if(n!=station)SetLed(n, 0);
-        }          
         Serial.printf("Favorites STORE station %s under Preset %d\n", Stations.StationNUG[station+MAX_STATIONS].name, station);
         SaveFavorites();
         //SaveFavoritesToEEprom(); // makes display go funny
@@ -86,23 +61,16 @@ void station1234(lv_event_t * e, uint16_t station)
   if(event_code == LV_EVENT_CLICKED) 
   { if(longpressed==0)
     { if(strlen(Stations.StationNUG[station+MAX_STATIONS].url)>0) // only respond to loaded buttons
-      { beep(e);
-        if(bMusicMode)Stations.count = 0; // forces a new station search FindNewStation(); and ReloadScroll(); if RADIO GLOBE is tapped
+      { Serial.printf("64 favorites.ino - Favorites Select station %s under Preset %d\n", Stations.StationNUG[station+MAX_STATIONS].name, station);
         AddStationToQueueForGlobe(station+MAX_STATIONS); // presets come just after the regular list of stations
-        Serial.printf("Favorites Select station %s under Preset %d\n", Stations.StationNUG[station+MAX_STATIONS].name, station);
-        lv_label_set_text(ui_Station_Name, Stations.StationNUG[station+MAX_STATIONS].name);
-        // turn selected led on, red color, and turn off other leds
-        for(int16_t n=0; n<MAX_FAVORITES; n++)
-        { if(n!=station)SetLed(n, 0);
-          else SetLed(station, UI_THEME_COLOR_RED);
-        }          
-       
+        SetLed(station, UI_THEME_COLOR_RED);
+      
         // place flag icon in vertical position
         int16_t yc = (station * 70) - 104;
-        //Serial.printf("station=%d yc = %d\n", station, yc);
         lv_obj_set_y(ui_PresetFlag, yc);  // -104 -34 34 104 
-        //lv_obj_clear_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN); // as it was hidden by a new search start
-        //lv_event_send(ui_PresetFlag, LV_EVENT_REFRESH, NULL);
+
+        lv_label_set_text(ui_Station_Name, Stations.StationNUG[station+MAX_STATIONS].name);
+        beepforMs(50);
       }  
     }
     longpressed = 0;
@@ -286,33 +254,35 @@ void LoadFavoritesFromEEprom(void)
 
 
 void SetLed(int16_t preset, int16_t themecolor)
-{ lv_obj_t *led;
+{ static int16_t ledColor[4];
   
-  //Serial.printf("preset = %d themecolor = %d\n", preset, themecolor);
-  if(preset == 0)led = uic_led1; 
-  else if(preset == 1)led = uic_led2; 
-  else if(preset == 2)led = uic_led3; 
-  else if(preset == 3)led = uic_led4; 
-  else return;
+  if(preset>3) return;
 
-  if(themecolor == 0)
-  { lv_obj_add_flag(led, LV_OBJ_FLAG_HIDDEN);
+  ledColor[preset] = themecolor;
+
+  if(!ledColor[0] && !ledColor[1] && !ledColor[2] && !ledColor[3]) // all leds off
+  { lv_obj_add_flag(uic_PresetLed, LV_OBJ_FLAG_HIDDEN);
     return;
   }
-  lv_obj_clear_flag(led, LV_OBJ_FLAG_HIDDEN);
-  
 
-  //Serial.printf("do preset = %d themecolor = %d\n", preset, themecolor);
-  
-  if(themecolor == UI_THEME_COLOR_RED)
-  { ui_object_set_themeable_style_property(led, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_red);
-    ui_object_set_themeable_style_property(led, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_red);
-  }
-  if(themecolor == UI_THEME_COLOR_GREEN)
-  { ui_object_set_themeable_style_property(led, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_green);
-    ui_object_set_themeable_style_property(led, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_green);
+  if(ledColor[preset]) 
+  { lv_obj_set_y(uic_PresetLed, (preset * 70) - 105);  // -105 -35 35 105 
+   
+    if(themecolor == UI_THEME_COLOR_RED)
+    { ui_object_set_themeable_style_property(uic_PresetLed, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_red);
+      ui_object_set_themeable_style_property(uic_PresetLed, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_red);
+    }
+    if(themecolor == UI_THEME_COLOR_GREEN)
+    { ui_object_set_themeable_style_property(uic_PresetLed, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR, _ui_theme_color_green);
+      ui_object_set_themeable_style_property(uic_PresetLed, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA, _ui_theme_alpha_green);
+    }  
+    lv_obj_clear_flag(uic_PresetLed, LV_OBJ_FLAG_HIDDEN);
+
+    // turn all other virtual leds off
+    for(int16_t n=0; n<4; n++)
+    { if(n!=preset)ledColor[n]=0;
+    }   
   }  
-
 }
 
 

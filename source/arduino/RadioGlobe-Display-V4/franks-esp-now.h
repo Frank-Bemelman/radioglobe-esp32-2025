@@ -85,8 +85,8 @@ const char * messagetexts[] = {
    { "HOME_TIMEZONE_NAME 69"},
    { "HOME_TIMEZONE_POSIX 70"},
    { "TEST_URL 71"},
-   { "MESSAGE_MAX 72"}
-   
+   { "CANCELLED API TYPE 72"},
+   { "MESSAGE_MAX 73"}
 };
 
 #define MESSAGE_SONG_TITLE 1
@@ -170,7 +170,8 @@ const char * messagetexts[] = {
 #define MESSAGE_HOME_TIMEZONE_NAME 69
 #define MESSAGE_HOME_TIMEZONE_POSIX 70
 #define MESSAGE_TEST_URL 71
-#define MESSAGE_MAX 72
+#define MESSAGE_CANCELLED_APITYPE 72
+#define MESSAGE_MAX 73
 
 typedef struct struct_message1 {
     int16_t  ns_cal;
@@ -197,10 +198,11 @@ typedef struct struct_message2 {
     int16_t  ns;
     int16_t  ew;
     struct   tm timeinfo;
-    int16_t  FindTimeZone; // tells display that Globe is occupied finding timezone
-    int16_t  FindGeoLocationData; // tells display that Globe is occupied finding geolocation data
-    int16_t  Unraveling; // tells display that Globe is occupied unraveling .m3u or .pls url to get the actual streaming url
-    int16_t  UnravelingResult; // tells display that Globe is occupied unraveling .m3u or .pls url to get the actual streaming url
+    uint8_t  vumeterlevel; // actual volume level of stream
+    uint8_t  spare0;
+    int16_t  spare1; 
+    int16_t  spare2; 
+    int16_t  spare3; 
     uint16_t G_QueueSerialNumberSend;
     uint16_t G_QueueMessageType;
     uint16_t D_QueueStationIndex; // station connected -1 if idle

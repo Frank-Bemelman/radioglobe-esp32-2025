@@ -193,7 +193,7 @@ EXT_RAM_ATTR calibrations_arraybin def_cal;
 uint16_t CalToIndexNS;
 uint16_t CalToIndexEW;
 bool bPowerStatus = false;
-#define AUTOPOWERDOWNAFTER (24 * 3600) // auto power off after 8 hour
+#define AUTOPOWERDOWNAFTER (24 * 3601) // auto power off after 8 hour
 //#define AUTOPOWERDOWNAFTER (3 * 60) // auto power off after 3 minutes, for test
 uint32_t AutoSleepTimer = AUTOPOWERDOWNAFTER+1;
 
@@ -801,10 +801,10 @@ void loop()
       memcpy(QueueMessage, FromGlobe.QueueMessage[FromGlobe.QueueIndexOut], sizeof(QueueMessage));
       QueueMessage[sizeof(QueueMessage) - 1] = '\0'; // make sure it's 0 terminated
       
-      if((QueueMessageType>=0) && (QueueMessageType<MESSAGE_MAX)) 
-      { Serial.printf(" AT switch(QueueMessageType) -> %d-%s-%d %02d:%02d:%02d\n", (int)datetime.day, monthnames[datetime.month%12],  (int)datetime.year%100, datetime.hour, (int)datetime.minute, (int)datetime.second);
-        Serial.printf("  PROCESS:%d %s >%s<\n", FromGlobe.QueueMessageSerialNumber[FromGlobe.QueueIndexOut], messagetexts[QueueMessageType], QueueMessage);  
-      }
+      //if((QueueMessageType>=0) && (QueueMessageType<MESSAGE_MAX)) 
+      //{ Serial.printf(" AT switch(QueueMessageType) -> %d-%s-%d %02d:%02d:%02d\n", (int)datetime.day, monthnames[datetime.month%12],  (int)datetime.year%100, datetime.hour, (int)datetime.minute, (int)datetime.second);
+      //  Serial.printf("  PROCESS:%d %s >%s<\n", FromGlobe.QueueMessageSerialNumber[FromGlobe.QueueIndexOut], messagetexts[QueueMessageType], QueueMessage);  
+      //}
    
       // and now take care of it
       switch(QueueMessageType)
@@ -1116,12 +1116,15 @@ void loop()
           if(Stations.requested >= MAX_STATIONS) // a problematic preset was ordered
           { // now what, what is a next station in this context?
             SetLed(Stations.requested-MAX_STATIONS,0); // just turn off the led
+            lv_obj_add_flag(ui_ledconnect, LV_OBJ_FLAG_HIDDEN); // turn off green led
             lv_label_set_text(ui_Station_Name, ""); 
+            lv_label_set_text(ui_Status_Line, "");
             lv_label_set_text(ui_Station_Title, "");
             lv_label_set_text(ui_Home_City, "");
           }
           else
           { lv_label_set_text(ui_Status_Line, "SKIPPED");
+            lv_obj_add_flag(ui_ledconnect, LV_OBJ_FLAG_HIDDEN); // turn off green led
             sprintf(content, "%s - Skipped", Stations.StationNUG[Stations.requested].name);
             lv_label_set_text(ui_StationRollerComment, content); 
             Lvgl_Loop(); // update screen
@@ -1143,6 +1146,7 @@ void loop()
             { // no 'next' station
               lv_label_set_text(ui_Station_Name, ""); 
               lv_label_set_text(ui_Status_Line, "NO MORE STATIONS");
+              lv_label_set_text(ui_Station_Title, "");
               lv_label_set_text(ui_StationRollerComment, content); 
             }  
           }
@@ -1236,6 +1240,8 @@ void loop()
           if(puckrequest != PuckApiRequest)break; // this result was arriving late and meant for an older request
 
           RemoveUTF8Unprintables(town); // arabic town names are not printable with extended ascii fonts
+
+          
 
           if(Stations.requested>=0)
           { if((strcmp(town, "???")!=0) && (strcmp(countrycode, "XX")==0)) // google does not give country code for disputed areas like NS = 42.061100, EW = 20.651199 which is Dragsh in Kosovo
@@ -1552,10 +1558,12 @@ void loop()
             lv_obj_add_flag(ui_PresetFlag, LV_OBJ_FLAG_HIDDEN); 
           }
           else
-          { lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN);
+          { Serial.printf("1561 RadioGlobe-Display-V4.ino -> Back to Radio Mode\n");
+            lv_obj_clear_flag(ui_Home_Flag, LV_OBJ_FLAG_HIDDEN);
             lv_obj_add_flag(ui_Jukebox, LV_OBJ_FLAG_HIDDEN);
             lv_obj_clear_flag(ui_Home_City, LV_OBJ_FLAG_HIDDEN);
             lv_obj_clear_flag(ui_Home_Country, LV_OBJ_FLAG_HIDDEN);
+            Stations.count = 0; // forces a new station search FindNewStation(); and ReloadScroll(); later in RadioGlobeClick();
           }
           break;
 
@@ -1627,7 +1635,7 @@ void loop()
           break;
       }
 
-      Serial.printf(" AT switch(QueueMessageType) break; -> %d-%s-%d %02d:%02d:%02d\n", (int)datetime.day, monthnames[datetime.month%12],  (int)datetime.year%100, datetime.hour, (int)datetime.minute, (int)datetime.second);
+      //Serial.printf(" AT switch(QueueMessageType) break; -> %d-%s-%d %02d:%02d:%02d\n", (int)datetime.day, monthnames[datetime.month%12],  (int)datetime.year%100, datetime.hour, (int)datetime.minute, (int)datetime.second);
      
 
       FromGlobe.QueueIndexOut++;
@@ -1804,7 +1812,7 @@ void loop()
             Serial.printf("Powerdown volume -> %hu\n", DataFromDisplay.volumevalue);
           }
         }
-        else if(DataFromDisplay.volumevalue <2)
+        else if(DataFromDisplay.volumevalue <1)
         { // faster shutdown when user set the volume low already, 5 minutes
           if(AutoSleepTimer>300)
           { AutoSleepTimer=300;

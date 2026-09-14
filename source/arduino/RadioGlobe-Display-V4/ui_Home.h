@@ -51,6 +51,7 @@ extern void ui_event_arrowright(lv_event_t * e);
 extern lv_obj_t * ui_arrowright;
 extern void ui_event_Jukebox(lv_event_t * e);
 extern lv_obj_t * ui_Jukebox;
+extern lv_obj_t * ui_ledconnect;
 // CUSTOM VARIABLES
 extern lv_obj_t * uic_Home;
 extern lv_obj_t * uic_HomeGps;
@@ -75,6 +76,7 @@ extern lv_obj_t * uic_Weather_Humidity;
 extern lv_obj_t * uic_arrowleft;
 extern lv_obj_t * uic_arrowright;
 extern lv_obj_t * uic_Jukebox;
+extern lv_obj_t * uic_ledconnect;
 
 #ifdef __cplusplus
 } /*extern "C"*/
