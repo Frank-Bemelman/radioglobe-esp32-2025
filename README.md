@@ -2,6 +2,7 @@
 
 # radioglobe-esp32-2025
 Radio Globe using ESP32S3 and Waveshare round touch LCD 2.1 inch<br><br>
+UPDATE 19-SEP-2026<br>Added a progress bar for playing files from SD card.<br><br>
 UPDATE 5-SEP-2026<br>Several bug fixes and many improvements behind the scenes.<br><br>
 UPDATE 2-AUG-2026<br>Improvements regarding fetching timezone(s) and updating the country flags. Should all be a little snappier now.<br><br>
 UPDATE 1-AUG-2026<br>Added a new fun feature. When you touch the weather icon, a flight radar screen is shown, with airplanes in that area. Not much particulary usful, but just for fun.<br><br>
