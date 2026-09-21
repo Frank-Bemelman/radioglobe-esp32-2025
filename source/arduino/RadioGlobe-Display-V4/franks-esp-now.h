@@ -200,7 +200,7 @@ typedef struct struct_message2 {
     struct   tm timeinfo;
     uint8_t  vumeterlevel; // actual volume level of stream
     uint8_t  spare0;
-    int16_t  spare1; 
+    int16_t  progressbar; 
     int16_t  spare2; 
     int16_t  spare3; 
     uint16_t G_QueueSerialNumberSend;

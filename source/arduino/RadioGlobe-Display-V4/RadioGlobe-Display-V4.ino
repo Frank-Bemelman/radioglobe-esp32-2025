@@ -922,15 +922,12 @@ void loop()
 
             
             if(QueueMessageType == MESSAGE_HOME_TIMEZONE_NAME)
-            { //bClockHomeTime = true;
-              strcpy(Home.TZname, QueueMessage);
+            { strcpy(Home.TZname, QueueMessage);
             }  
             else
-            { //bClockHomeTime = false;
-              strcpy(World.TZname, QueueMessage);
+            { strcpy(World.TZname, QueueMessage);
             }
 
-            Serial.printf("Hour is %d\n", datetime.hour);
             datetime.year = DataFromGlobe.timeinfo.tm_year; // years since 1900
             datetime.month = DataFromGlobe.timeinfo.tm_mon; 
             datetime.day = DataFromGlobe.timeinfo.tm_mday;
@@ -939,11 +936,6 @@ void loop()
             datetime.minute = DataFromGlobe.timeinfo.tm_min;
             datetime.second = DataFromGlobe.timeinfo.tm_sec;
             PCF85063_Set_All(datetime); // this time is already TZ corrected
-
-            Serial.printf("AFTER MESSAGE_GET_TIMEZONE_BY_GPS -> Hour is %d\n", datetime.hour);
-
-            //if(bClockHomeTime)lv_label_set_text(ui_Time_Zone, Home.TZname); // on home screen - clock screen does it's own updates every second
-            //if(!bClockHomeTime)lv_label_set_text(ui_Time_Zone, World.TZname); // on home screen - clock screen does it's own updates every second
 
             struct timeval tv;
             tv.tv_sec = DataFromGlobe.G_now; // set our system clock to UTC received from globe
@@ -1079,6 +1071,8 @@ void loop()
         case MESSAGE_CONNECTTOHOST_FAILURE:
           DataFromDisplay.D_QueueStationIndex = -1;
           Stations.playing = -1;
+          lv_obj_add_flag(ui_ledconnect, LV_OBJ_FLAG_HIDDEN); 
+          lv_label_set_text(ui_Status_Line, "No Connection");
           if(DataFromGlobe.D_QueueMessageCount<10) // don't waste time logging when behind schedule
           { // response format is like "error -> url"
             // reported error message will be used as filename
@@ -1395,6 +1389,8 @@ void loop()
           bMusicMode = false;
           if(Stations.requested<MAX_STATIONS+MAX_FAVORITES)
           { lv_obj_clear_flag(ui_ledconnect, LV_OBJ_FLAG_HIDDEN); 
+            lv_obj_clear_flag(ui_Status_Line, LV_OBJ_FLAG_HIDDEN); 
+            lv_obj_add_flag(ui_FilePlayProgressBar, LV_OBJ_FLAG_HIDDEN); 
             lv_label_set_text(ui_Status_Line, "NOW PLAYING");
             sprintf(content, "%s - Connected", Stations.StationNUG[Stations.requested].name);
             Stations.playing = Stations.requested;
@@ -1547,6 +1543,8 @@ void loop()
           if(bMusicMode == true)
           { // empty roller
             lv_obj_add_flag(ui_ledconnect, LV_OBJ_FLAG_HIDDEN); 
+            lv_obj_add_flag(ui_Status_Line, LV_OBJ_FLAG_HIDDEN); 
+            lv_obj_clear_flag(ui_FilePlayProgressBar, LV_OBJ_FLAG_HIDDEN); 
             Stations.count = 0;
             Stations.requested -1;
             ReloadScroll();
@@ -1905,6 +1903,11 @@ void loop()
  //       }
   //    }
     }  
+
+    if(PrevDataFromGlobe.progressbar !=  DataFromGlobe.progressbar)
+    { PrevDataFromGlobe.progressbar =  DataFromGlobe.progressbar;
+      lv_bar_set_value(ui_FilePlayProgressBar, DataFromGlobe.progressbar, LV_ANIM_OFF);
+    }
      
     // let's do a flashing semicolon between hours an minutes of clock HH:MM
     if(screen == ui_Home) 

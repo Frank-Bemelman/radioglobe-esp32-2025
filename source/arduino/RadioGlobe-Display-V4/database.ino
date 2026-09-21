@@ -1045,8 +1045,11 @@ void AddStationToQueueForGlobe(int16_t station)
     
 //    Serial.printf("x=%d\n",text_end_point );                            
 
+    lv_obj_add_flag(ui_FilePlayProgressBar, LV_OBJ_FLAG_HIDDEN); 
+    lv_obj_clear_flag(ui_Status_Line, LV_OBJ_FLAG_HIDDEN); 
     lv_label_set_text(ui_Status_Line, "");
     lv_label_set_text(ui_Station_Title, "");
+    lv_refr_now(NULL); 
 
     if(station<MAX_STATIONS)Stations.connect_attempts++;
     DataFromDisplay.D_StationGpsNS = Stations.StationNUG[station].gps_ns;
@@ -1150,6 +1153,8 @@ void AddFileToQueueForGlobe(uint16_t station)
     { //AddToQueueForGlobe(Stations.StationNUG[station].url, MESSAGE_START_THIS_FILE);
       sprintf(message, "%d", station);
       AddToQueueForGlobe(message, MESSAGE_START_FILE_BY_INDEX);
+      lv_bar_set_value(ui_FilePlayProgressBar, 0, LV_ANIM_OFF);
+      lv_refr_now(NULL); 
     }
     //lv_label_set_text(ui_Station_Title, Stations.StationNUG[station].name); // rebuild songname from url
     lv_obj_add_flag(ui_ledconnect, LV_OBJ_FLAG_HIDDEN); 

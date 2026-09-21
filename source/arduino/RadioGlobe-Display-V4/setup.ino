@@ -12,7 +12,8 @@ void JukeboxClicked(lv_event_t * e)
     return;
   }
   else if(longpressed==0)
-  { AddToQueueForGlobe("", MESSAGE_GLOBE_PLAY_SD); // next song in list
+  { 
+    AddToQueueForGlobe("", MESSAGE_GLOBE_PLAY_SD); // next song in list
     beepforMs(50);
   }
 }
