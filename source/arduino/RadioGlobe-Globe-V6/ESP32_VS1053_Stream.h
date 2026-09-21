@@ -205,6 +205,9 @@ private:
     size_t _fileLastWAVByte();
     size_t _fileLastMP3Byte();
 
+    int32_t _filemusicstart = 0; // exact start of music part in file, compensating for art metadata
+    size_t _filemusicsize = 0; // // exact size of music part of file,compensating for art metadata
+
     size_t _offset = 0;
     int32_t _remainingBytes = 0;
     int32_t _bytesLeftInChunk = 0;

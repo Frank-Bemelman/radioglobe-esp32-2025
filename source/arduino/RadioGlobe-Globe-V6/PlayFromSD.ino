@@ -109,7 +109,8 @@ void PlayFromPlaylistByIndex(uint16_t idx)
   if(idx < PlaylistTracks)
   {
     SetVolumeMapped(0);
-
+    DataFromGlobe.progressbar = 0;
+    
     if(stream.isRunning())
     { stream.stopSong(); // stop whatever stream or file was playing
       bSomethingPlays = false;

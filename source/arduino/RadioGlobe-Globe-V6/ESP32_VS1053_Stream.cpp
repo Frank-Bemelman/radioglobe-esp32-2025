@@ -513,7 +513,7 @@ bool ESP32_VS1053_Stream::connectToHost(const char *url, const char *username,
             _stationCallback(_http->header(ICY_NAME).c_str());
 
         _remainingBytes = _http->getSize(); // -1 when Server sends no Content-Length header (chunked streams)
-        Serial.printf("534 _remainingBytes at start = %d\n", _remainingBytes);
+        //Serial.printf("534 _remainingBytes at start = %d\n", _remainingBytes);
 
         const bool suspiciousLength = _remainingBytes >= 0x7FFFFFF0;
         if (suspiciousLength)
@@ -1026,14 +1026,21 @@ const char *ESP32_VS1053_Stream::lastUrl()
 size_t ESP32_VS1053_Stream::size()
 {
     if (_playingFile)
-        return _file.size();
+    {
+      //return _file.size();
+      return _filemusicsize;
+    }    
     return _offset + (_http ? _remainingBytes != -1 ? _http->getSize() : 0 : 0);
 }
 
 size_t ESP32_VS1053_Stream::position()
 {
     if (_playingFile)
-        return _file.position();
+    {
+        //return _file.position();
+        //Serial.printf("_file.position() = %d _filemusicstart = %d _filemusicsize = %d\n", _file.position(), _filemusicstart, _filemusicsize);
+        return _file.position() - _filemusicstart;
+    }    
     return size() ? (size() - _remainingBytes) : 0;
 }
 
@@ -1088,12 +1095,20 @@ bool ESP32_VS1053_Stream::connectToFile(fs::FS &fs, const char *filename, const 
     {
         _remainingBytes = _fileLastWAVByte() - offset;
         _file.seek(0);
+
+        _filemusicstart = 44; // beyond the riff header
+        _filemusicsize = _remainingBytes - 44;
+
         _wavoffset = offset; // _wavoffset to be used later in _handleLocalFile to force read of RIFF header and file.seek(_wavoffset)
     }    
     else if (ext && strcasecmp(ext, ".mp3") == 0)
     {
         _remainingBytes = _fileLastMP3Byte() - offset;    
         if(offset) _file.seek(offset + _file.position());
+
+        _filemusicstart = _file.position(); // already moved beyond art and metadata
+        _filemusicsize = _remainingBytes;
+
     }    
     else // ???
     {  _remainingBytes = _file.size() - offset;

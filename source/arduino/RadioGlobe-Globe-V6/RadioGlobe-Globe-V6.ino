@@ -681,7 +681,7 @@ void loop()
       if(lapmillis>10)Serial.printf("loop_esp_now(); took = %dmS\n", lapmillis);
       prevmillis = nowmillis;
     }
-    if((LoopTicker100mS % 5)==0 && bGlobeStable) // every half seconds or so
+    if((LoopTicker100mS % 5)==0 && bGlobeStable && !bMusicMode) // every half seconds or so
     { if(strcmp(PrevStreamType, StreamType)!=0)
       { strcpy(PrevStreamType, StreamType);
         AddToQueueForDisplay(StreamType, MESSAGE_STATUS_LINE);
@@ -1097,6 +1097,21 @@ void loop()
   //if(bVolumeToneControlsActive == true)
   { if(PrevTick != LoopTicker100mS)
     { PrevTick = LoopTicker100mS;
+
+      static uint32_t FilePlayProgressBarTick = 0;
+      static size_t prevPos = -1;
+      if((LoopTicker100mS - FilePlayProgressBarTick)>=10)
+      { FilePlayProgressBarTick = LoopTicker100mS;
+        const size_t streamSize = stream.size();
+        if(streamSize)
+        { const size_t curPos = stream.position();
+          prevPos = curPos;
+          //Serial.printf("size = %d pos = %d\n", streamSize, curPos);
+          DataFromGlobe.progressbar = (uint16_t)((curPos * 300) / streamSize);
+          //Serial.printf("bar = %hu\n", DataFromGlobe.progressbar);
+        }
+        else DataFromGlobe.progressbar = 0;
+      }
 
       //if((LoopTicker100mS%10)==0) 
       //{
