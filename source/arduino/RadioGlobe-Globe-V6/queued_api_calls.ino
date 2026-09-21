@@ -315,14 +315,14 @@ void GetGeolocationData(float StationGpsNS, float StationGpsEW, int16_t AskingFo
 
   https.end();
   client.stop(); // stop insecure client
-  Serial.printf("GetGeolocationData fetch took %ldmS found=%d\n", (millis()-startMs), found);
+  Serial.printf("318 GetGeolocationData fetch took %ldmS found=%d\n", (millis()-startMs), found);
 
   if (httpResponseCode<=0) return;
 
   // if no countrycode was decoded, we are presumably at sea, which we treat as country XX
   // that will be used to load music files from GLOBEMUSE/XX folder for sea sound
   
-  if(strcmp(countrycode, "XX")==0)strcpy(CountryCodeSelectorSD, countrycode);
+  if(countryfound)strcpy(CountryCodeSelectorSD, countrycode);
 
   if(AskingForStation>=0)AddToQueueForDisplay(payload, MESSAGE_GET_GEOLOCATION_BY_GPS);
   else AddToQueueForDisplay(payload, MESSAGE_GET_GEOLOCATION);
