@@ -2,6 +2,7 @@
 
 # radioglobe-esp32-2025
 Radio Globe using ESP32S3 and Waveshare round touch LCD 2.1 inch<br><br>
+UPDATE 29-SEP-2026<br>Changed the file playing progress bar into a slider bar. With this you can move backward/forward through the file playing.<br><br>
 UPDATE 21-SEP-2026<br>Improved accuracy of progress bar, compensating for embedded artwork and metadata in music files.<br><br>
 UPDATE 19-SEP-2026<br>Added a progress bar for playing files from SD card.<br><br>
 UPDATE 5-SEP-2026<br>Several bug fixes and many improvements behind the scenes.<br><br>
