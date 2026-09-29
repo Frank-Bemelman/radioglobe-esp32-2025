@@ -210,6 +210,7 @@ typedef struct struct_message1 {
     uint16_t D_BatteryVoltage;
     uint16_t btmodule_power_on; // bluetooth on or off
     int16_t  D_RequestedStation;   
+    int16_t  D_RequestedFilePosition; // as set by manipulating the file position slider
 } struct_from_display;
 
 typedef struct struct_message2 {

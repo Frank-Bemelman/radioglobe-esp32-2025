@@ -1092,6 +1092,13 @@ void loop()
     strcpy(ActiveUrl, "");
     AddToQueueForDisplay("", MESSAGE_EXPLORING); // removes station name, sets status line to 'exploring earth', removes 'song title'    
   }
+
+  // user manipulated the file position slider on puck!
+  if(PrevDataFromDisplay.D_RequestedFilePosition != DataFromDisplay.D_RequestedFilePosition)
+  { PrevDataFromDisplay.D_RequestedFilePosition = DataFromDisplay.D_RequestedFilePosition;
+    Serial.printf("DataFromDisplay.D_RequestedFilePosition = %hu\n", DataFromDisplay.D_RequestedFilePosition); 
+    stream.moveToFilePosition(DataFromDisplay.D_RequestedFilePosition);
+  }
   
   // volume and tone levels checking
   //if(bVolumeToneControlsActive == true)

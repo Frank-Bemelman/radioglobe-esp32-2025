@@ -119,6 +119,8 @@ public:
     bool playChunk(uint8_t *data, size_t len, bool stopSong = true);
     bool playChunkNB(uint8_t *chunk, size_t len, bool looparound = false);
 
+    bool moveToFilePosition(int16_t position);
+
 
 private:
     VS1053 *_vs1053;

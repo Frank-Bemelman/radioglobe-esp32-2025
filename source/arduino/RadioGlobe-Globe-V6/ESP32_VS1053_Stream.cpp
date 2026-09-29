@@ -1175,7 +1175,7 @@ void ESP32_VS1053_Stream::_handleLocalFile()
 
      [[maybe_unused]] const auto startTimeMS = millis();
 
-     //Serial.printf("1139 _remainingBytes = %d _ringbufferBytes =%d\n", _remainingBytes, _ringbufferBytes);
+     // Serial.printf("1178 _remainingBytes = %d _ringbufferBytes =%d\n", _remainingBytes, _ringbufferBytes);
 
     if (_remainingBytes && _file.position() < _file.size())
     {   
@@ -1207,9 +1207,30 @@ void ESP32_VS1053_Stream::_handleLocalFile()
     }
 
     if (!_remainingBytes && _ringbufferBytes==0) // file read completely and played completely
-    {  //Serial.printf("1142 END _remainingBytes = %d _ringbufferBytes =%d\n", _remainingBytes, _ringbufferBytes);
+    {  // Serial.printf("1210 END _remainingBytes = %d _ringbufferBytes =%d\n", _remainingBytes, _ringbufferBytes);
         _eofStream();
     }
+}
+
+bool ESP32_VS1053_Stream::moveToFilePosition(int16_t position) // 0-100
+{ uint32_t newposition;
+
+  if(!_playingFile)return false;
+
+  newposition = _filemusicstart + ((_filemusicsize * position) / 100);
+  _remainingBytes = _filemusicstart + _filemusicsize - newposition;
+
+  Serial.printf("_remainingBytes = %d\n", _remainingBytes);
+  _file.seek(newposition);
+
+  size_t size;
+  void *item;
+  while ((item = xRingbufferReceive(_ringbuffer_handle, &size, 0)) != nullptr)
+            vRingbufferReturnItem(_ringbuffer_handle, item);
+  vRingbufferGetInfo(_ringbuffer_handle, NULL, NULL, NULL, NULL, &_ringbufferBytes);
+
+  return true;
+
 }
 
 
