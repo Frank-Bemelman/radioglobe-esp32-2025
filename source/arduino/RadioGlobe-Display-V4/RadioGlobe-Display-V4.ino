@@ -216,6 +216,8 @@ char OldClockFlagCountryCode[] = "??"; // actual flag on clock before change
 bool bClockHomeTime = true; 
 bool bPrevClockHomeTime = false; 
 bool ClockBackLight = true; // keep the clock lit up
+uint16_t muteSliderUpdates = 0; // file postion slider not to be updated by globe when user fiddles with it
+
 
 SemaphoreHandle_t lvgl_mutex;
 void Driver_Loop(void *parameter) // runs on core 0
@@ -1904,9 +1906,14 @@ void loop()
   //    }
     }  
 
-    if(PrevDataFromGlobe.progressbar !=  DataFromGlobe.progressbar)
-    { PrevDataFromGlobe.progressbar =  DataFromGlobe.progressbar;
-      lv_bar_set_value(ui_FilePlayProgressBar, DataFromGlobe.progressbar, LV_ANIM_OFF);
+    { if(PrevDataFromGlobe.progressbar !=  DataFromGlobe.progressbar)
+      { PrevDataFromGlobe.progressbar =  DataFromGlobe.progressbar;
+        if(!muteSliderUpdates) lv_bar_set_value(ui_FilePlayProgressBar, DataFromGlobe.progressbar, LV_ANIM_OFF);
+        else
+        { muteSliderUpdates--;
+          Serial.printf("muteSliderUpdates = %hu\n", muteSliderUpdates);  
+        }
+      }
     }
      
     // let's do a flashing semicolon between hours an minutes of clock HH:MM

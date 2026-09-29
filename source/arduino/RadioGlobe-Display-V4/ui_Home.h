@@ -52,6 +52,8 @@ extern lv_obj_t * ui_arrowright;
 extern void ui_event_Jukebox(lv_event_t * e);
 extern lv_obj_t * ui_Jukebox;
 extern lv_obj_t * ui_ledconnect;
+extern lv_obj_t * ui_FilePlayProgressBarX;
+extern void ui_event_FilePlayProgressBar(lv_event_t * e);
 extern lv_obj_t * ui_FilePlayProgressBar;
 // CUSTOM VARIABLES
 extern lv_obj_t * uic_Home;
@@ -78,6 +80,7 @@ extern lv_obj_t * uic_arrowleft;
 extern lv_obj_t * uic_arrowright;
 extern lv_obj_t * uic_Jukebox;
 extern lv_obj_t * uic_ledconnect;
+extern lv_obj_t * uic_FilePlayProgressBarX;
 extern lv_obj_t * uic_FilePlayProgressBar;
 
 #ifdef __cplusplus

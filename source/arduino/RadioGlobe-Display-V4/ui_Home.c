@@ -6,6 +6,7 @@
 #include "ui.h"
 
 lv_obj_t * uic_FilePlayProgressBar;
+lv_obj_t * uic_FilePlayProgressBarX;
 lv_obj_t * uic_ledconnect;
 lv_obj_t * uic_Jukebox;
 lv_obj_t * uic_arrowright;
@@ -56,6 +57,7 @@ lv_obj_t * ui_arrowleft = NULL;
 lv_obj_t * ui_arrowright = NULL;
 lv_obj_t * ui_Jukebox = NULL;
 lv_obj_t * ui_ledconnect = NULL;
+lv_obj_t * ui_FilePlayProgressBarX = NULL;
 lv_obj_t * ui_FilePlayProgressBar = NULL;
 // event funtions
 void ui_event_Home(lv_event_t * e)
@@ -191,6 +193,22 @@ void ui_event_Jukebox(lv_event_t * e)
     }
     if(event_code == LV_EVENT_LONG_PRESSED_REPEAT) {
         JukeboxClicked(e);
+    }
+}
+
+void ui_event_FilePlayProgressBar(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_RELEASED) {
+        FilePlayProgressBarChanged(e);
+        (e);
+    }
+    if(event_code == LV_EVENT_VALUE_CHANGED) {
+        FilePlayProgressBarChanged(e);
+    }
+    if(event_code == LV_EVENT_PRESSED) {
+        FilePlayProgressBarChanged(e);
     }
 }
 
@@ -545,17 +563,35 @@ void ui_Home_screen_init(void)
     ui_object_set_themeable_style_property(ui_ledconnect, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
                                            _ui_theme_alpha_green);
 
-    ui_FilePlayProgressBar = lv_bar_create(ui_Home);
-    lv_bar_set_range(ui_FilePlayProgressBar, 0, 300);
+    ui_FilePlayProgressBarX = lv_bar_create(ui_Home);
+    lv_bar_set_range(ui_FilePlayProgressBarX, 0, 300);
+    lv_obj_set_width(ui_FilePlayProgressBarX, 300);
+    lv_obj_set_height(ui_FilePlayProgressBarX, 10);
+    lv_obj_set_x(ui_FilePlayProgressBarX, 0);
+    lv_obj_set_y(ui_FilePlayProgressBarX, -49);
+    lv_obj_set_align(ui_FilePlayProgressBarX, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_FilePlayProgressBarX, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_CLICKABLE);     /// Flags
+
+    lv_obj_set_style_bg_color(ui_FilePlayProgressBarX, lv_color_hex(0x8080FF), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_FilePlayProgressBarX, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+
+    ui_FilePlayProgressBar = lv_slider_create(ui_Home);
+    lv_slider_set_range(ui_FilePlayProgressBar, 0, 300);
+    lv_slider_set_value(ui_FilePlayProgressBar, 0, LV_ANIM_OFF);
+    if(lv_slider_get_mode(ui_FilePlayProgressBar) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_FilePlayProgressBar,
+                                                                                                        0, LV_ANIM_OFF);
     lv_obj_set_width(ui_FilePlayProgressBar, 300);
     lv_obj_set_height(ui_FilePlayProgressBar, 10);
     lv_obj_set_x(ui_FilePlayProgressBar, 0);
     lv_obj_set_y(ui_FilePlayProgressBar, -49);
     lv_obj_set_align(ui_FilePlayProgressBar, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_FilePlayProgressBar, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_CLICKABLE);     /// Flags
+    lv_obj_add_flag(ui_FilePlayProgressBar, LV_OBJ_FLAG_HIDDEN);     /// Flags
 
     lv_obj_set_style_bg_color(ui_FilePlayProgressBar, lv_color_hex(0x8080FF), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_FilePlayProgressBar, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_bg_color(ui_FilePlayProgressBar, lv_color_hex(0x6060FF), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_FilePlayProgressBar, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_HomeGps, ui_event_HomeGps, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_Local_Time, ui_event_Local_Time, LV_EVENT_ALL, NULL);
@@ -569,6 +605,7 @@ void ui_Home_screen_init(void)
     lv_obj_add_event_cb(ui_arrowleft, ui_event_arrowleft, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_arrowright, ui_event_arrowright, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_Jukebox, ui_event_Jukebox, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_FilePlayProgressBar, ui_event_FilePlayProgressBar, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_Home, ui_event_Home, LV_EVENT_ALL, NULL);
     uic_Home = ui_Home;
     uic_HomeGps = ui_HomeGps;
@@ -594,6 +631,7 @@ void ui_Home_screen_init(void)
     uic_arrowright = ui_arrowright;
     uic_Jukebox = ui_Jukebox;
     uic_ledconnect = ui_ledconnect;
+    uic_FilePlayProgressBarX = ui_FilePlayProgressBarX;
     uic_FilePlayProgressBar = ui_FilePlayProgressBar;
 
 }
@@ -653,6 +691,8 @@ void ui_Home_screen_destroy(void)
     ui_Jukebox = NULL;
     uic_ledconnect = NULL;
     ui_ledconnect = NULL;
+    uic_FilePlayProgressBarX = NULL;
+    ui_FilePlayProgressBarX = NULL;
     uic_FilePlayProgressBar = NULL;
     ui_FilePlayProgressBar = NULL;
 

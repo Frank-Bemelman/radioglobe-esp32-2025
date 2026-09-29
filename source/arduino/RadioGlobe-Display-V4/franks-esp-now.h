@@ -191,6 +191,7 @@ typedef struct struct_message1 {
     uint16_t D_BatteryVoltage;
     uint16_t btmodule_power_on;
     int16_t  D_RequestedStation;
+    int16_t  D_RequestedFilePosition;
 
 } struct_from_display;
 

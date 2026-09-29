@@ -1,5 +1,31 @@
 // handling of events on various screens, beeps and long button presses
 
+void FilePlayProgressBarChanged(lv_event_t * e)
+{ typedef enum {
+        SLIDER_STATE_IDLE,
+        SLIDER_STATE_TRACKING
+    } slider_state_t;
+  
+  static slider_state_t state = SLIDER_STATE_IDLE;
+
+  lv_event_code_t code = lv_event_get_code(e);
+
+  if(code == LV_EVENT_PRESSED) 
+  { state = SLIDER_STATE_TRACKING;
+    muteSliderUpdates = 65535;
+  }
+
+  if(code == LV_EVENT_RELEASED) 
+  { if(state == SLIDER_STATE_TRACKING) 
+    {  int32_t final_value = lv_slider_get_value(ui_FilePlayProgressBar) / 3; // convert to percentage value 0-100
+       DataFromDisplay.D_RequestedFilePosition = final_value;
+       Serial.printf("FilePlayProgressBarMoved to percent is %d\n", final_value);
+       muteSliderUpdates = 2;
+    }
+    state = SLIDER_STATE_IDLE; // Clean reset
+  }
+}
+
 void JukeboxClicked(lv_event_t * e)
 { static uint16_t longpressed=0;
   lv_event_code_t code = lv_event_get_code(e);
