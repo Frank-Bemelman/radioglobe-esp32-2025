@@ -58,12 +58,15 @@ Lithium battery -> https://www.aliexpress.com/item/1005008575678945.html<br/>
 Pogo 3 pin connector -> https://www.aliexpress.com/item/1005007457425590.html<br/> 
 MicroSD card -> I used a 32GB one<br/>
 
-1) Install Fusion 360 and load the designs provided here. Print all the individual bodies and assemble the lot.
-2) Prepare the SD card and fill it with the files provided in SDCARD. This is for the database with 150K stations and two folders with images for the flags of all countries in the world. Insert the card in the Waveshare display. Once you have loaded the software into the Waveshare, you can create a presorted database arrangement in a folder structure on the SD card. This takes perhaps 45 minutes, but then you're good to go.
-3) Prepare the ESP32 module with the software for the globe itself. Compile in Arduino IDE, don't forget to fill the secrets.h file with your wifi SSID and password.
-4) Get an API key at Google Developer platform, for the TimeZone API and Geo Geocoding API, both use the same API key. It is used to find the right timezone for the clock, and also to get the right two-letter country code to be able to display the right country flag. It is a bit of hassle, but very worthwhile. And it is free.
+1) The 3D files can be send to jlcpcb.com. Best choices for base and puck are black nylon. For the main globe support, transparent resin is nice, but you need to spray them with a UV blocking varnish, as they tend yellow very quickly when placed near a window. The counterweight to be printed in metal, and if you want to use the truss as a touch sensor, also in metal.
+   
+3) Prepare the SD card and fill it with the files provided in SDCARD. This is for the database with 150K stations and two folders with images for the flags of all countries in the world. Insert the card in the Waveshare display. Once you have loaded the software into the Waveshare, you can create a presorted database arrangement in a folder structure on the SD card. This takes perhaps 45 minutes, but then you're good to go.
 
-I don't plan to give a step-by-step instruction here. That is too much effort and I don't know if there is a lot of interrest in this project. But if you start with it, just ask. In which case I may elaborate a bit more.
+4) Prepare the ESP32 module with the software for the globe itself. Compile in Arduino IDE, don't forget to fill the secrets.h file with your wifi SSID and password.
+
+5) Get an API key at Google Developer platform, for the TimeZone API and Geo Geocoding API, both use the same API key. It is used to find the right timezone for the clock, and also to get the right two-letter country code to be able to display the right country flag. It is a bit of hassle, but very worthwhile. And it is free.
+
+I don't plan to give a step-by-step instruction here. That is too much effort and I don't know if there is a lot of interrest in this project. But if you start with it, just ask, simply raise as an issue. In which case I may elaborate a bit more.
 
 
 Cheers,
